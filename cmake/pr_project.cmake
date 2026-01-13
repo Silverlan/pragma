@@ -23,8 +23,8 @@ function(pr_setup_default_project_settings TARGET_NAME)
 
         if(NOT WIN32)
             # Required for "import std;" with clang
-            target_compile_options(${TARGET_NAME} PUBLIC -stdlib=libstdc++)
-            target_link_options(${TARGET_NAME} PUBLIC -stdlib=libstdc++)
+            target_compile_options(${TARGET_NAME} PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libstdc++>)
+            target_link_options   (${TARGET_NAME} PUBLIC $<$<LINK_LANGUAGE:CXX>:-stdlib=libstdc++>)
         endif()
 
         if(PRAGMA_DEBUG)

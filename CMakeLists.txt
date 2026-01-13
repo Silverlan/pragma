@@ -2,20 +2,14 @@ cmake_minimum_required(VERSION 3.3)
 
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 
-if(CMAKE_GENERATOR MATCHES "Visual Studio.*2026")
-    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio 2026 is not supported).")
-endif()
-if(CMAKE_GENERATOR MATCHES "Visual Studio.*2022")
-    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio 2022 is not supported).")
-endif()
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
-    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (clang-cl is not supported).")
-endif()
-
 # Required for "import std;" as long as its experimental in CMake
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_MODULE_STD 1)
+
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 
 # Use response files to avoid "The command line is too long." errors
 set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_INCLUDES 1)
@@ -30,23 +24,202 @@ set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 set(CMAKE_C_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 
+if(CMAKE_GENERATOR MATCHES "Visual Studio.*2026")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio 2026 is not supported).")
+endif()
+if(CMAKE_GENERATOR MATCHES "Visual Studio.*2022")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio 2022 is not supported).")
+endif()
 if ("${CMAKE_GENERATOR}" MATCHES "Ninja")
     set(CMAKE_NINJA_FORCE_RESPONSE_FILE TRUE CACHE BOOL "Force Ninja to use response files for long command lines")
 endif()
+
+function(check_content_version BASE_PATH CONTENTS FILENAME RESULT_VAR)
+    set(TARGET_FILE "${BASE_PATH}/${FILENAME}")
+    set(${RESULT_VAR} FALSE PARENT_SCOPE)
+
+    if(NOT EXISTS "${TARGET_FILE}")
+        return()
+    endif()
+
+    file(READ "${TARGET_FILE}" RAW_JSON)
+
+    # Extract version
+    string(JSON CURRENT_VERSION GET "${RAW_JSON}" version)
+
+    if(NOT "${CURRENT_VERSION}" STREQUAL "${CONTENTS}")      
+        set(${RESULT_VAR} FALSE PARENT_SCOPE)
+    else()
+        set(${RESULT_VAR} TRUE PARENT_SCOPE)
+    endif()
+endfunction()
+
+function(clear_content)
+    if(EXISTS "${BASE_PATH}")
+        message(STATUS "Removing directory '${BASE_PATH}'...")
+        file(REMOVE_RECURSE "${BASE_PATH}")
+    endif()
+endfunction()
+
+function(update_content_version BASE_PATH COMMIT_ID FILENAME)
+    message(STATUS "Creating directory '${BASE_PATH}'...")
+    file(MAKE_DIRECTORY "${BASE_PATH}")
+
+    set(TARGET_FILE "${BASE_PATH}/${FILENAME}")
+    message(STATUS "Writing content version to '${TARGET_FILE}'...")
+
+    # Construct minimal JSON string
+    set(JSON_PAYLOAD "{\n  \"version\": \"${COMMIT_ID}\"\n}")
+    file(WRITE "${TARGET_FILE}" "${JSON_PAYLOAD}")
+endfunction()
+
+function(pr_http_extract url dest_subdir)
+    get_filename_component(fname "${url}" NAME)
+    set(zip_path "${CMAKE_BINARY_DIR}/_downloads/${fname}")
+    set(dest_dir "${dest_subdir}")
+
+    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/_downloads")
+    file(MAKE_DIRECTORY "${dest_dir}")
+
+    file(DOWNLOAD
+        "${url}"
+        "${zip_path}"
+        SHOW_PROGRESS
+        STATUS dl_status
+    )
+    list(GET dl_status 0 dl_code)
+    if(NOT dl_code EQUAL 0)
+        message(FATAL_ERROR "Failed to download ${url} (status ${dl_status})")
+    endif()
+
+    file(ARCHIVE_EXTRACT INPUT "${zip_path}" DESTINATION "${dest_dir}")
+endfunction()
+
+# TODO: If no compiler set, assume clang
+set(toolset "clang")
+#if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+#    set(toolset "clang")
+#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+#    set(toolset "msvc")
+#elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+#    set(toolset "gcc")
+#endif()
+
+# TODO
+set(PRAGMA_DEPS_DIR "${CMAKE_SOURCE_DIR}/deps/staging/")
+
+function(pr_fetch_prebuilt_binaries base_path base_url version)
+    check_content_version("${base_path}" "${version}" "version.json" IS_VALID)
+    if(NOT IS_VALID)
+        clear_content("${base_path}")
+        update_content_version("${base_path}" "${version}" "version.json")
+        if(UNIX)
+            set(platform_name "linux")
+            set(prebuilt_archive_format "tar.gz")
+        else()
+            set(platform_name "windows")
+            set(prebuilt_archive_format "zip")
+        endif()
+
+        set(prebuilt_archive_name "binaries-${platform_name}-x64-${toolset}.${prebuilt_archive_format}")
+        pr_http_extract(
+            "${base_url}/${version}/${prebuilt_archive_name}"
+            "${base_path}"
+        )
+    endif()
+endfunction()
+
+function(pr_get_deps version)    
+    check_content_version("${PRAGMA_DEPS_DIR}" "${version}" "version.json" IS_VALID)
+    if(NOT IS_VALID)
+        clear_content("${PRAGMA_DEPS_DIR}")
+        update_content_version("${PRAGMA_DEPS_DIR}" "${version}" "version.json")
+        if(UNIX)
+            set(platform_name "linux")
+            set(prebuilt_archive_format "tar.gz")
+        else()
+            set(platform_name "windows")
+            set(prebuilt_archive_format "zip")
+        endif()
+
+        set(prebuilt_archive_name "lib-${platform_name}-x64-${toolset}.${prebuilt_archive_format}")
+        pr_http_extract(
+            "https://github.com/Silverlan/pragma-deps-lib/releases/download/${version}/${prebuilt_archive_name}"
+            "${PRAGMA_DEPS_DIR}"
+        )
+    endif()
+endfunction()
+# TODO: Check if dir built?
+pr_get_deps("2026-01-10")
+
+# We need the very latest version of clang available, so for the time being, we're downloading the prebuilt version.
+function(pr_fetch_compiler)
+    if(WIN32)
+        set(version "21.1.8")
+        set(url "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/clang+llvm-21.1.8-x86_64-pc-windows-msvc.tar.xz")
+    else()
+        set(version "2025-12-19")
+        set(url "https://github.com/Silverlan/clang_prebuilt/releases/download/2025-12-19/linux_x64.tar.xz")
+    endif()
+    check_content_version("${CMAKE_SOURCE_DIR}/deps/staging/clang" "${version}" "version.json" IS_VALID)
+    if(NOT IS_VALID)
+        clear_content("${CMAKE_SOURCE_DIR}/deps/staging/clang")
+        pr_http_extract(
+            "${url}"
+            "${PRAGMA_DEPS_DIR}"
+        )
+        if(WIN32)
+            file(RENAME "${CMAKE_SOURCE_DIR}/deps/staging/clang+llvm-21.1.8-x86_64-pc-windows-msvc" "${CMAKE_SOURCE_DIR}/deps/staging/clang")
+        else()
+            file(RENAME "${CMAKE_SOURCE_DIR}/deps/staging/LLVM-22.git-Linux-X64" "${CMAKE_SOURCE_DIR}/deps/staging/clang")
+        endif()
+        update_content_version("${CMAKE_SOURCE_DIR}/deps/staging/clang" "${version}" "version.json")
+    endif()
+endfunction()
+pr_fetch_compiler()
+if(WIN32)
+    set(CMAKE_C_COMPILER   "${CMAKE_SOURCE_DIR}/deps/staging/clang/bin/clang.exe"   CACHE FILEPATH "C compiler")
+    set(CMAKE_CXX_COMPILER "${CMAKE_SOURCE_DIR}/deps/staging/clang/bin/clang++.exe" CACHE FILEPATH "C++ compiler")
+else()
+    set(CMAKE_C_COMPILER   "${CMAKE_SOURCE_DIR}/deps/staging/clang/bin/clang"   CACHE FILEPATH "C compiler")
+    set(CMAKE_CXX_COMPILER "${CMAKE_SOURCE_DIR}/deps/staging/clang/bin/clang++" CACHE FILEPATH "C++ compiler")
+endif()
+set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install/" CACHE FILEPATH "Install location")
 
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/pr_legacy.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/pr_install.cmake)
 
+include(FetchContent)
+
+function(pr_fetch_repository IDENTIFIER GIT_URL GIT_SHA CHECKOUT_PATH)
+    FetchContent_Declare(
+        ${IDENTIFIER}
+        GIT_REPOSITORY ${GIT_URL}
+        GIT_TAG        ${GIT_SHA}
+        SOURCE_DIR     "${CMAKE_SOURCE_DIR}/${CHECKOUT_PATH}"
+    )
+    FetchContent_MakeAvailable(${IDENTIFIER})
+endfunction()
+
 project(pragma)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (clang-cl is not supported).")
+endif()
 
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
 option(PRAGMA_DEBUG "Build in debug mode?" OFF)
-option(WITH_PFM "Build with Pragma Filmmaker?" OFF)
 option(WITH_VR "Build with VR support?" OFF)
+option(WITH_NETWORKING "Build with networking support?" OFF)
 option(WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
 option(WITH_COMMON_MODULES "Build with common modules?" ON)
+option(WITH_ESSENTIAL_CLIENT_MODULES "Build with essential client modules?" ON)
+
+option(WITH_PFM "Build with Pragma Filmmaker?" OFF)
+option(WITH_CORE_PFM_MODULES "Include essential PFM modules." ON)
+option(WITH_ALL_PFM_MODULES "Include non-essential PFM modules (e.g. chromium and cycles)." ON)
 
 # Global settings
 set(CMAKE_COLOR_DIAGNOSTICS ON)
@@ -163,7 +336,6 @@ else()
 endif()
 
 message("Processing third-party libaries...")
-
 set(LIBRARY_OUTPUT_PATH
     ""
     CACHE PATH "" FORCE)
@@ -196,12 +368,20 @@ add_custom_target(pragma-install-full
 add_custom_target(pragma-core)
 set_target_properties(pragma-core PROPERTIES FOLDER "Hidden")
 
-include(${CMAKE_SOURCE_DIR}/ThirdPartyLibs.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/third_party_libs.cmake)
 
 message("Processing external libraries...")
-add_subdirectory(external_libs)
+include(${CMAKE_SOURCE_DIR}/cmake/external_libs.cmake)
 pr_set_target_folder(wgui external_libs/wgui)
 pr_set_target_folder(sample_application external_libs/wgui)
+
+set_target_properties(networkmanager PROPERTIES FOLDER external_libs/networkmanager)
+set_target_properties(clientmanager PROPERTIES FOLDER external_libs/networkmanager)
+set_target_properties(servermanager PROPERTIES FOLDER external_libs/networkmanager)
+
+set_target_properties(materialsystem PROPERTIES FOLDER external_libs/materialsystem)
+set_target_properties(cmaterialsystem PROPERTIES FOLDER external_libs/materialsystem)
+
 target_include_directories(util_image PUBLIC ${DEPENDENCY_ZLIB_INCLUDE})
 target_include_directories(cmaterialsystem PUBLIC ${DEPENDENCY_ZLIB_INCLUDE})
 
@@ -212,7 +392,7 @@ message("Processing tools...")
 add_subdirectory(tools)
 
 message("Processing modules...")
-add_subdirectory(modules)
+include(${CMAKE_SOURCE_DIR}/cmake/modules.cmake)
 
 target_include_directories(materialsystem PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
 
@@ -289,32 +469,32 @@ message("Installing core components...")
 pr_include_install(".")
 
 # Modules
-file(GLOB PR_MODULES "modules/pr_*")
-foreach(MODULE_PATH ${PR_MODULES})
-    get_filename_component(MODULE_NAME "${MODULE_PATH}" NAME)
-    if(NOT DEFINED PRAGMA_DISABLE_MODULE_${MODULE_NAME} OR NOT PRAGMA_DISABLE_MODULE_${MODULE_NAME})
-        if(WIN32)
-            set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.dll")
-        else()
-            set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_NAME}.so")
-        endif()
-        if(EXISTS "${MODULE_PATH}/Install.cmake")
-            message("Running install script for module '${MODULE_PATH}'...")
-	        pr_install_component(${MODULE_NAME})
-            pr_include_install("${MODULE_PATH}")
-        else()
-            # Default behavior
-            message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
-            add_custom_command(
-                TARGET pragma-install
-                POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -DInstallSrc=${PR_MODULE_PATH_WITH_EXT} -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\" -P
-                        ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
-                COMMENT "Copying ${PR_MODULE_PATH_WITH_EXT} to ${CMAKE_INSTALL_PREFIX}/modules/...")
-            pr_include_cmake_modules("${MODULE_PATH}")
-        endif()
-    endif()
-endforeach()
+#file(GLOB PR_MODULES "modules/pr_*")
+#foreach(MODULE_PATH ${PR_MODULES})
+#    get_filename_component(MODULE_NAME "${MODULE_PATH}" NAME)
+#    if(NOT DEFINED PRAGMA_DISABLE_MODULE_${MODULE_NAME} OR NOT PRAGMA_DISABLE_MODULE_${MODULE_NAME})
+#        if(WIN32)
+#            set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.dll")
+#        else()
+#            set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_NAME}.so")
+#        endif()
+#        if(EXISTS "${MODULE_PATH}/Install.cmake")
+#            message("Running install script for module '${MODULE_PATH}'...")
+#	        pr_install_component(${MODULE_NAME})
+#            pr_include_install("${MODULE_PATH}")
+#        else()
+#            # Default behavior
+#            message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
+#            add_custom_command(
+#                TARGET pragma-install
+#                POST_BUILD
+#                COMMAND ${CMAKE_COMMAND} -DInstallSrc=${PR_MODULE_PATH_WITH_EXT} -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\" -P
+#                        ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
+#                COMMENT "Copying ${PR_MODULE_PATH_WITH_EXT} to ${CMAKE_INSTALL_PREFIX}/modules/...")
+#            pr_include_cmake_modules("${MODULE_PATH}")
+#        endif()
+#    endif()
+#endforeach()
 
 # Tools
 file(GLOB PR_MODULES "tools/*")

@@ -494,18 +494,8 @@ module_list = []
 cmake_args = config.cmake_args
 additional_build_targets = []
 
-########## submodules ##########
-os.chdir(root)
-print_msg("Updating external libraries...")
-execscript(scripts_dir +"/scripts/external_libs.py")
-
-print_msg("Updating third-party libraries...")
-execscript(scripts_dir +"/scripts/third_party_libs.py")
-
-print_msg("Updating modules...")
-execscript(scripts_dir +"/scripts/modules.py")
-
 ########## Third-Party Libraries ##########
+os.chdir(root)
 print_msg("Building third-party libraries...")
 if build_all:
 	import build_third_party_libs
@@ -515,12 +505,13 @@ if build_all:
 os.chdir(deps_dir)
 gcc_root = normalize_path(os.getcwd() +"/gcc")
 if platform == "linux":
+	# We need the very latest gcc version for libstdc++.modules.json
 	if not Path(gcc_root).is_dir():
 		print_msg("gcc not found. Downloading...")
-		mkdir("gcc",cd=True)
-		http_extract("https://github.com/Silverlan/test_gcc15/releases/download/2025-11-17/gcc-15.2.0.tar.xz",format="tar.xz")
+		http_extract("https://github.com/Silverlan/gcc_prebuilt/releases/download/2025-12-15/gcc-16-opt.tar.xz",format="tar.xz")
+		mv("gcc-16", "gcc")
 	os.chdir(gcc_root)
-	modules_json_path = gcc_root +"/lib64/libstdc++.modules.json"
+	modules_json_path = str(Path(gcc_root) / "lib64/libstdc++.modules.json")
 
 ########## Modules ##########
 print_msg("Downloading modules...")
@@ -709,97 +700,6 @@ l = {
 }
 # Register user modules
 execfile(scripts_dir +"/user_modules.py",g,l)
-
-# Register argument-dependent modules
-if with_essential_client_modules:
-	add_pragma_module(
-		name="pr_prosper_vulkan",
-		commitSha="f39e9cf202d69626101bb07d6294bf455799b7c3",
-		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
-	)
-
-if with_common_modules:
-	add_pragma_module(
-		name="pr_bullet",
-		commitSha="094fe87b217a9985fdc3cdce29f614b2d469f293",
-		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
-	)
-	add_pragma_module(
-		name="pr_audio_soloud",
-		commitSha="a7c91941de48d63e4ec06444f714240f46c0ced8",
-		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
-	)
-	add_pragma_module(
-		name="pr_audio_dummy",
-		commitSha="c95ca9ecdd7a33397a5253343117f4e242c45928",
-		repositoryUrl="https://github.com/Silverlan/pr_audio_dummy.git"
-	)
-	add_pragma_module(
-		name="pr_prosper_opengl",
-		commitSha="ecfcaad223adeae285b7eea0ca3e70ea46af50db",
-		repositoryUrl="https://github.com/Silverlan/pr_prosper_opengl.git"
-	)
-
-if with_pfm:
-	if with_core_pfm_modules or with_all_pfm_modules:
-		add_pragma_module(
-			name="pr_curl",
-			commitSha="41d4f9d39d18cfca5ff0af1a310c0bf4f01d5adc",
-			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
-		)
-		add_pragma_module(
-			name="pr_dmx",
-			commitSha="d4ae5defaf03cf3d1b8337818be1ccedbdbaebcd",
-			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
-		)
-	if with_all_pfm_modules:
-		add_pragma_module(
-			name="pr_chromium",
-			commitSha="1477b93859c9ae5058c66a6b436ac24dd03ebff7",
-			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
-		)
-		add_pragma_module(
-			name="pr_unirender",
-			commitSha="60d97df3bed19ae00f471fa6630c97b530b71fb3",
-			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
-		)
-		add_pragma_module(
-			name="pr_xatlas",
-			commitSha="5d7ff7f4728ed5bf1290757b161df4bb3ef58b69",
-			repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
-		)
-		add_pragma_module(
-			name="pr_davinci",
-			commitSha="c09482375a0ff1098283513b6d7e06a67b30b9f9",
-			repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
-		)
-		add_pragma_module(
-			name="pr_opencv",
-			commitSha="6899a8504225e232db73a4f9be514fcb889a14f9",
-			repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
-		)
-
-if with_pfm:
-	add_pragma_module(
-		name="pr_git",
-		commitSha="5af153f8d5c3d969f3df2cdd05f2929e680845aa",
-		repositoryUrl="https://github.com/Silverlan/pr_git.git"
-	)
-
-if with_vr:
-	add_pragma_module(
-		name="pr_openvr",
-		commitSha="91c3d5175bb229c9afc0b02a91256d3673dfc221",
-		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
-	)
-
-if with_networking:
-	add_pragma_module(
-		name="pr_steam_networking_sockets",
-		commitSha="a1a3fda9bbe6987aba23559f8bc58301c17b7a15",
-		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
-		skipBuildTarget=True
-	)
 
 # These modules are shipped with the Pragma repository and will have to be excluded from the
 # CMake configuration explicitly if they should be disabled.

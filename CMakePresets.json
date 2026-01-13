@@ -1,0 +1,35 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 4,
+    "minor": 2,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "RelWithDebInfo",
+      "displayName": "Default (Ninja, RelWithDebInfo)",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_POLICY_VERSION_MINIMUM": "4.0",
+        "CMAKE_CXX_SCAN_FOR_MODULES": "1",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "1",
+
+        "WITH_PFM": "1",
+        "WITH_VR": "1",
+        "WITH_NETWORKING": "1",
+        "WITH_COMMON_ENTITIES": "1",
+        "WITH_COMMON_MODULES": "1",
+        "WITH_ESSENTIAL_CLIENT_MODULES": "1"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "RelWithDebInfo",
+      "configurePreset": "RelWithDebInfo"
+    }
+  ]
+}

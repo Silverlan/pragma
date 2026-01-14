@@ -306,8 +306,8 @@ elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++
 	# Due to a compiler bug with C++20 Modules in clang, we need the
 	# very latest version of clang, which is not available in package managers yet.
 	# We'll use our own prebuilt version for now.
-	from third_party import clang
-	clang.main()
+	# from third_party import clang
+	# clang.main()
 	clang_staging_path = Path(get_library_root_dir("clang"))
 	if c_compiler == "clang-22":
 		c_compiler = str(clang_staging_path / "bin/clang")

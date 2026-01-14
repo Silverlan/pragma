@@ -178,12 +178,12 @@ function(pr_fetch_compiler)
     check_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json" IS_VALID)
     if(NOT IS_VALID)
         clear_content("${PRAGMA_DEPS_DIR}/clang")
-        update_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json")
         pr_http_extract(
             "${url}"
             "${PRAGMA_DEPS_DIR}/clang"
             STRIP_TOP_DIR
         )
+        update_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json")
     endif()
 endfunction()
 pr_fetch_compiler()

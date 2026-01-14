@@ -7,8 +7,8 @@
   },
   "configurePresets": [
     {
-      "name": "RelWithDebInfo",
-      "displayName": "Default (Ninja, RelWithDebInfo)",
+      "name": "base",
+      "hidden": true,
       "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
@@ -16,6 +16,7 @@
         "CMAKE_POLICY_VERSION_MINIMUM": "4.0",
         "CMAKE_CXX_SCAN_FOR_MODULES": "1",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "1",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/install",
 
         "WITH_PFM": "1",
         "WITH_VR": "1",
@@ -24,12 +25,36 @@
         "WITH_COMMON_MODULES": "1",
         "WITH_ESSENTIAL_CLIENT_MODULES": "1"
       }
-    }
-  ],
-  "buildPresets": [
+    },
     {
-      "name": "RelWithDebInfo",
-      "configurePreset": "RelWithDebInfo"
+      "name": "linux-clang",
+      "displayName": "Clang (Linux)",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "${sourceDir}/deps/staging/clang/bin/clang",
+        "CMAKE_CXX_COMPILER": "${sourceDir}/deps/staging/clang/bin/clang++"
+      }
+    },
+    {
+      "name": "windows-clang",
+      "displayName": "Clang (Windows)",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "${sourceDir}/deps/staging/clang/bin/clang.exe",
+        "CMAKE_CXX_COMPILER": "${sourceDir}/deps/staging/clang/bin/clang++.exe"
+      }
+    },
+    {
+      "name": "windows-msvc22",
+      "displayName": "Visual Studio 2022",
+      "inherits": "base",
+      "generator": "Visual Studio 17 2022"
+    },
+    {
+      "name": "windows-msvc26",
+      "displayName": "Visual Studio 2026",
+      "inherits": "base",
+      "generator": "Visual Studio 18 2026"
     }
   ]
 }

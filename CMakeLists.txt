@@ -24,11 +24,8 @@ set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 set(CMAKE_C_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 
-if(CMAKE_GENERATOR MATCHES "Visual Studio.*2026")
-    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio 2026 is not supported).")
-endif()
-if(CMAKE_GENERATOR MATCHES "Visual Studio.*2022")
-    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio 2022 is not supported).")
+if(CMAKE_GENERATOR MATCHES "Visual Studio.*")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio generator is currently not supported. Please use Ninja generator for the time being).")
 endif()
 if ("${CMAKE_GENERATOR}" MATCHES "Ninja")
     set(CMAKE_NINJA_FORCE_RESPONSE_FILE TRUE CACHE BOOL "Force Ninja to use response files for long command lines")
@@ -109,19 +106,62 @@ function(pr_http_extract url dest_dir)
     endif()
 endfunction()
 
-# TODO: If no compiler set, assume clang
+
+set(PRAGMA_DEPS_DIR "${CMAKE_SOURCE_DIR}/deps/staging/" CACHE PATH "Directory where dependencies will be extracted to.")
+
+# We need the very latest version of clang available, so for the time being, we're downloading the prebuilt version.
+# Since we can't actually detect which compiler is being used at this point in time, we'll always download clang, even if it's not needed.
+function(pr_fetch_clang)
+    if(WIN32)
+        set(version "21.1.8")
+        set(url "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/clang+llvm-21.1.8-x86_64-pc-windows-msvc.tar.xz")
+    else()
+        set(version "2025-12-19")
+        set(url "https://github.com/Silverlan/clang_prebuilt/releases/download/2025-12-19/linux_x64.tar.xz")
+    endif()
+    check_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json" IS_VALID)
+    if(NOT IS_VALID)
+        clear_content("${PRAGMA_DEPS_DIR}/clang")
+        pr_http_extract(
+            "${url}"
+            "${PRAGMA_DEPS_DIR}/clang"
+            STRIP_TOP_DIR
+        )
+        update_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json")
+    endif()
+endfunction()
+pr_fetch_clang()
+
+include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/pr_legacy.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/pr_install.cmake)
+
+include(FetchContent)
+
+function(pr_fetch_repository IDENTIFIER GIT_URL GIT_SHA CHECKOUT_PATH)
+    FetchContent_Declare(
+        ${IDENTIFIER}
+        GIT_REPOSITORY ${GIT_URL}
+        GIT_TAG        ${GIT_SHA}
+        SOURCE_DIR     "${CMAKE_SOURCE_DIR}/${CHECKOUT_PATH}"
+    )
+    FetchContent_MakeAvailable(${IDENTIFIER})
+endfunction()
+
+project(pragma)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (clang-cl is currently not supported. Please use clang instead.).")
+endif()
+
 set(toolset "clang")
-#if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-#    set(toolset "clang")
-#elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-#    set(toolset "msvc")
-#elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-#    set(toolset "gcc")
-#endif()
-
-# TODO
-set(PRAGMA_DEPS_DIR "${CMAKE_SOURCE_DIR}/deps/staging/")
-
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(toolset "clang")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(toolset "msvc")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(toolset "gcc")
+endif()
 function(pr_fetch_prebuilt_binaries base_path base_url version)
     check_content_version("${base_path}" "${version}" "version.json" IS_VALID)
     if(NOT IS_VALID)
@@ -165,58 +205,6 @@ function(pr_get_deps version)
 endfunction()
 # TODO: Check if dir built?
 pr_get_deps("2026-01-10")
-
-# We need the very latest version of clang available, so for the time being, we're downloading the prebuilt version.
-function(pr_fetch_compiler)
-    if(WIN32)
-        set(version "21.1.8")
-        set(url "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/clang+llvm-21.1.8-x86_64-pc-windows-msvc.tar.xz")
-    else()
-        set(version "2025-12-19")
-        set(url "https://github.com/Silverlan/clang_prebuilt/releases/download/2025-12-19/linux_x64.tar.xz")
-    endif()
-    check_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json" IS_VALID)
-    if(NOT IS_VALID)
-        clear_content("${PRAGMA_DEPS_DIR}/clang")
-        pr_http_extract(
-            "${url}"
-            "${PRAGMA_DEPS_DIR}/clang"
-            STRIP_TOP_DIR
-        )
-        update_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json")
-    endif()
-endfunction()
-pr_fetch_compiler()
-if(WIN32)
-    set(CMAKE_C_COMPILER   "${PRAGMA_DEPS_DIR}/clang/bin/clang.exe"   CACHE FILEPATH "C compiler")
-    set(CMAKE_CXX_COMPILER "${PRAGMA_DEPS_DIR}/clang/bin/clang++.exe" CACHE FILEPATH "C++ compiler")
-else()
-    set(CMAKE_C_COMPILER   "${PRAGMA_DEPS_DIR}/clang/bin/clang"   CACHE FILEPATH "C compiler")
-    set(CMAKE_CXX_COMPILER "${PRAGMA_DEPS_DIR}/clang/bin/clang++" CACHE FILEPATH "C++ compiler")
-endif()
-set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install/" CACHE FILEPATH "Install location")
-
-include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/pr_legacy.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/pr_install.cmake)
-
-include(FetchContent)
-
-function(pr_fetch_repository IDENTIFIER GIT_URL GIT_SHA CHECKOUT_PATH)
-    FetchContent_Declare(
-        ${IDENTIFIER}
-        GIT_REPOSITORY ${GIT_URL}
-        GIT_TAG        ${GIT_SHA}
-        SOURCE_DIR     "${CMAKE_SOURCE_DIR}/${CHECKOUT_PATH}"
-    )
-    FetchContent_MakeAvailable(${IDENTIFIER})
-endfunction()
-
-project(pragma)
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
-    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (clang-cl is not supported).")
-endif()
 
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 

@@ -73,26 +73,40 @@ function(update_content_version BASE_PATH COMMIT_ID FILENAME)
     file(WRITE "${TARGET_FILE}" "${JSON_PAYLOAD}")
 endfunction()
 
-function(pr_http_extract url dest_subdir)
+function(pr_http_extract url dest_dir)
+    set(options STRIP_TOP_DIR)
+    cmake_parse_arguments(ARG "${options}" "" "" ${ARGN})
+
     get_filename_component(fname "${url}" NAME)
     set(zip_path "${CMAKE_BINARY_DIR}/_downloads/${fname}")
-    set(dest_dir "${dest_subdir}")
-
+    
     file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/_downloads")
-    file(MAKE_DIRECTORY "${dest_dir}")
-
-    file(DOWNLOAD
-        "${url}"
-        "${zip_path}"
-        SHOW_PROGRESS
-        STATUS dl_status
-    )
+    file(DOWNLOAD "${url}" "${zip_path}" SHOW_PROGRESS STATUS dl_status)
+    
     list(GET dl_status 0 dl_code)
     if(NOT dl_code EQUAL 0)
-        message(FATAL_ERROR "Failed to download ${url} (status ${dl_status})")
+        message(FATAL_ERROR "Failed to download ${url}: ${dl_status}")
     endif()
 
-    file(ARCHIVE_EXTRACT INPUT "${zip_path}" DESTINATION "${dest_dir}")
+    if(ARG_STRIP_TOP_DIR)
+        set(tmp_dir "${dest_dir}_tmp")
+        file(REMOVE_RECURSE "${tmp_dir}")
+        file(ARCHIVE_EXTRACT INPUT "${zip_path}" DESTINATION "${tmp_dir}")
+        
+        # Find the single top-level directory
+        file(GLOB subdirs RELATIVE "${tmp_dir}" "${tmp_dir}/*")
+        list(LENGTH subdirs count)
+        
+        if(NOT count EQUAL 1)
+            message(FATAL_ERROR "STRIP_TOP_DIR failed: archive contains ${count} items at root instead of 1.")
+        endif()
+
+        file(RENAME "${tmp_dir}/${subdirs}" "${dest_dir}")
+        file(REMOVE_RECURSE "${tmp_dir}")
+    else()
+        file(MAKE_DIRECTORY "${dest_dir}")
+        file(ARCHIVE_EXTRACT INPUT "${zip_path}" DESTINATION "${dest_dir}")
+    endif()
 endfunction()
 
 # TODO: If no compiler set, assume clang
@@ -161,28 +175,24 @@ function(pr_fetch_compiler)
         set(version "2025-12-19")
         set(url "https://github.com/Silverlan/clang_prebuilt/releases/download/2025-12-19/linux_x64.tar.xz")
     endif()
-    check_content_version("${CMAKE_SOURCE_DIR}/deps/staging/clang" "${version}" "version.json" IS_VALID)
+    check_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json" IS_VALID)
     if(NOT IS_VALID)
-        clear_content("${CMAKE_SOURCE_DIR}/deps/staging/clang")
+        clear_content("${PRAGMA_DEPS_DIR}/clang")
+        update_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json")
         pr_http_extract(
             "${url}"
-            "${PRAGMA_DEPS_DIR}"
+            "${PRAGMA_DEPS_DIR}/clang"
+            STRIP_TOP_DIR
         )
-        if(WIN32)
-            file(RENAME "${CMAKE_SOURCE_DIR}/deps/staging/clang+llvm-21.1.8-x86_64-pc-windows-msvc" "${CMAKE_SOURCE_DIR}/deps/staging/clang")
-        else()
-            file(RENAME "${CMAKE_SOURCE_DIR}/deps/staging/LLVM-22.git-Linux-X64" "${CMAKE_SOURCE_DIR}/deps/staging/clang")
-        endif()
-        update_content_version("${CMAKE_SOURCE_DIR}/deps/staging/clang" "${version}" "version.json")
     endif()
 endfunction()
 pr_fetch_compiler()
 if(WIN32)
-    set(CMAKE_C_COMPILER   "${CMAKE_SOURCE_DIR}/deps/staging/clang/bin/clang.exe"   CACHE FILEPATH "C compiler")
-    set(CMAKE_CXX_COMPILER "${CMAKE_SOURCE_DIR}/deps/staging/clang/bin/clang++.exe" CACHE FILEPATH "C++ compiler")
+    set(CMAKE_C_COMPILER   "${PRAGMA_DEPS_DIR}/clang/bin/clang.exe"   CACHE FILEPATH "C compiler")
+    set(CMAKE_CXX_COMPILER "${PRAGMA_DEPS_DIR}/clang/bin/clang++.exe" CACHE FILEPATH "C++ compiler")
 else()
-    set(CMAKE_C_COMPILER   "${CMAKE_SOURCE_DIR}/deps/staging/clang/bin/clang"   CACHE FILEPATH "C compiler")
-    set(CMAKE_CXX_COMPILER "${CMAKE_SOURCE_DIR}/deps/staging/clang/bin/clang++" CACHE FILEPATH "C++ compiler")
+    set(CMAKE_C_COMPILER   "${PRAGMA_DEPS_DIR}/clang/bin/clang"   CACHE FILEPATH "C compiler")
+    set(CMAKE_CXX_COMPILER "${PRAGMA_DEPS_DIR}/clang/bin/clang++" CACHE FILEPATH "C++ compiler")
 endif()
 set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install/" CACHE FILEPATH "Install location")
 

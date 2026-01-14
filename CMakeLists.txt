@@ -9,7 +9,7 @@ set(CMAKE_CXX_MODULE_STD 1)
 
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_C_EXTENSIONS ON)
 
 # Use response files to avoid "The command line is too long." errors
 set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_INCLUDES 1)

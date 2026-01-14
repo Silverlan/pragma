@@ -1,19 +1,42 @@
+set(MODULE_PATHS "") 
+set(MODULE_TARGETS "")
 function(pr_fetch_module IDENTIFIER GIT_URL GIT_SHA)
     set(MODULE_PATH "modules/${IDENTIFIER}")
     get_filename_component(MODULE_NAME ${MODULE_PATH} NAME)
+
+    set(MODULE_PATHS ${MODULE_PATHS} ${IDENTIFIER} PARENT_SCOPE)
+
+    set_property(GLOBAL PROPERTY PRAGMA_MODULE_TARGETS "")
     set_property(GLOBAL PROPERTY PRAGMA_MODULE_SKIP_TARGET_PROPERTY_FOLDER 0)
+    set_property(GLOBAL PROPERTY PRAGMA_MODULE_SKIP_INSTALL 0)
     
     pr_fetch_repository(${IDENTIFIER} ${GIT_URL} ${GIT_SHA} "${MODULE_PATH}")
-
+    
     get_property(PRAGMA_MODULE_SKIP_TARGET_PROPERTY_FOLDER GLOBAL PROPERTY PRAGMA_MODULE_SKIP_TARGET_PROPERTY_FOLDER)
+    get_property(_targets GLOBAL PROPERTY PRAGMA_MODULE_TARGETS)
+
+    get_property(PRAGMA_MODULE_SKIP_INSTALL GLOBAL PROPERTY PRAGMA_MODULE_SKIP_INSTALL)
+    if(PRAGMA_MODULE_SKIP_INSTALL)
+        set_property(GLOBAL PROPERTY PRAGMA_MODULE_${IDENTIFIER}_SKIP_INSTALL 1)
+    endif()
+
+    if (NOT _targets)
+        set(_targets ${IDENTIFIER})
+    endif()
+
+    set(MODULE_TARGETS ${MODULE_TARGETS} ${_targets} PARENT_SCOPE)
+    set_property(GLOBAL PROPERTY PRAGMA_MODULE_${IDENTIFIER}_TARGETS ${_targets})
+
     if (PRAGMA_MODULE_SKIP_TARGET_PROPERTY_FOLDER EQUAL 0)
         if(NOT "${MODULE_NAME}" STREQUAL "interfaces")
-            set_target_properties(${MODULE_NAME} PROPERTIES FOLDER modules)
+            if(TARGET ${MODULE_NAME})
+                set_target_properties(${MODULE_NAME} PROPERTIES FOLDER modules)
+            endif()
         endif()
     endif()
 endfunction()
 
-pr_fetch_module("interfaces"                      "https://github.com/Silverlan/pragma_interfaces.git"      "26b10cc3d9200944b1458cc35e53cb2e59e178b4")
+pr_fetch_module("interfaces"                      "https://github.com/Silverlan/pragma_interfaces.git"      "4b950bf7f1e84b30407b03af174005a58704b891")
 
 if(WITH_ESSENTIAL_CLIENT_MODULES)
     pr_fetch_module("pr_prosper_vulkan"           "https://github.com/Silverlan/pr_prosper_vulkan.git"      "f39e9cf202d69626101bb07d6294bf455799b7c3")
@@ -49,5 +72,5 @@ if(WITH_VR)
 endif()
 
 if(WITH_NETWORKING)
-    pr_fetch_module("pr_steam_networking_sockets" "https://github.com/Silverlan/pr_steam_networking_sockets.git" "ac504184c9cdf1f437738364320bb78c0e93efc7")
+    pr_fetch_module("pr_steam_networking_sockets" "https://github.com/Silverlan/pr_steam_networking_sockets.git" "cfac832dcdb8d682f467f33392bef7675088c6af")
 endif()

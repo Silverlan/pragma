@@ -479,32 +479,41 @@ message("Installing core components...")
 pr_include_install(".")
 
 # Modules
-#file(GLOB PR_MODULES "modules/pr_*")
-#foreach(MODULE_PATH ${PR_MODULES})
-#    get_filename_component(MODULE_NAME "${MODULE_PATH}" NAME)
-#    if(NOT DEFINED PRAGMA_DISABLE_MODULE_${MODULE_NAME} OR NOT PRAGMA_DISABLE_MODULE_${MODULE_NAME})
-#        if(WIN32)
-#            set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.dll")
-#        else()
-#            set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_NAME}.so")
-#        endif()
-#        if(EXISTS "${MODULE_PATH}/Install.cmake")
-#            message("Running install script for module '${MODULE_PATH}'...")
-#	        pr_install_component(${MODULE_NAME})
-#            pr_include_install("${MODULE_PATH}")
-#        else()
-#            # Default behavior
-#            message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
-#            add_custom_command(
-#                TARGET pragma-install
-#                POST_BUILD
-#                COMMAND ${CMAKE_COMMAND} -DInstallSrc=${PR_MODULE_PATH_WITH_EXT} -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\" -P
-#                        ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
-#                COMMENT "Copying ${PR_MODULE_PATH_WITH_EXT} to ${CMAKE_INSTALL_PREFIX}/modules/...")
-#            pr_include_cmake_modules("${MODULE_PATH}")
-#        endif()
-#    endif()
-#endforeach()
+foreach(MODULE_NAME ${MODULE_PATHS})
+    set(MODULE_PATH "${CMAKE_SOURCE_DIR}/modules/${MODULE_NAME}")
+    if(EXISTS "${MODULE_PATH}/Install.cmake")
+        message("Running install script for module '${MODULE_PATH}'...")
+        pr_install_component(${MODULE_NAME})
+        pr_include_install("${MODULE_PATH}")
+    else()
+        # Default behavior
+        get_property(skip_install GLOBAL PROPERTY PRAGMA_MODULE_${MODULE_NAME}_SKIP_INSTALL)
+        if(NOT skip_install)
+            get_property(_targets GLOBAL PROPERTY PRAGMA_MODULE_${MODULE_NAME}_TARGETS)
+            foreach(MODULE_TARGET IN LISTS _targets)
+                get_target_property(MODULE_BIN_PATH ${MODULE_TARGET} BINARY_DIR)
+                if(WIN32)
+                    set(PR_MODULE_PATH_WITH_EXT "${MODULE_BIN_PATH}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_TARGET}.dll")
+                else()
+                    set(PR_MODULE_PATH_WITH_EXT "${MODULE_BIN_PATH}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_TARGET}.so")
+                endif()
+
+                message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
+                add_custom_command(
+                    TARGET pragma-install
+                    POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -DInstallSrc=${PR_MODULE_PATH_WITH_EXT} -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\" -P
+                            ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
+                    COMMENT "Copying ${PR_MODULE_PATH_WITH_EXT} to ${CMAKE_INSTALL_PREFIX}/modules/...")
+                pr_include_cmake_modules("${MODULE_PATH}")
+            endforeach()
+        endif()
+    endif()
+endforeach()
+
+foreach(MODULE_TARGET ${MODULE_TARGETS})
+    add_dependencies(pragma-core ${MODULE_TARGET})
+endforeach()
 
 # Tools
 file(GLOB PR_MODULES "tools/*")

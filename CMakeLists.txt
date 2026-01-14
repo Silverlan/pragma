@@ -479,7 +479,8 @@ message("Installing core components...")
 pr_include_install(".")
 
 # Modules
-foreach(MODULE_NAME ${MODULE_PATHS})
+get_property(MODULE_NAMES GLOBAL PROPERTY PRAGMA_MODULE_NAMES)
+foreach(MODULE_NAME ${MODULE_NAMES})
     set(MODULE_PATH "${CMAKE_SOURCE_DIR}/modules/${MODULE_NAME}")
     if(EXISTS "${MODULE_PATH}/Install.cmake")
         message("Running install script for module '${MODULE_PATH}'...")
@@ -511,6 +512,7 @@ foreach(MODULE_NAME ${MODULE_PATHS})
     endif()
 endforeach()
 
+get_property(MODULE_TARGETS GLOBAL PROPERTY PRAGMA_MODULE_TARGETS)
 foreach(MODULE_TARGET ${MODULE_TARGETS})
     add_dependencies(pragma-core ${MODULE_TARGET})
 endforeach()

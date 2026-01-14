@@ -225,7 +225,6 @@ function(pr_finalize TARGET_NAME)
 
     if(DEFINED PA_FOLDER)
         set_target_properties(${TARGET_NAME} PROPERTIES FOLDER "${PA_FOLDER}")
-        set_property(GLOBAL PROPERTY PRAGMA_MODULE_SKIP_TARGET_PROPERTY_FOLDER 1)
     endif()
 
     message("[PR] ---------------------- End Of Project \"${TARGET_NAME}\" ----------------------")

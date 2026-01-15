@@ -27,8 +27,8 @@
       }
     },
     {
-      "name": "linux-clang",
-      "displayName": "Clang (Linux)",
+      "name": "linux-ninja-clang",
+      "displayName": "Ninja with Clang (Linux)",
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "${sourceDir}/deps/staging/clang/bin/clang",
@@ -36,8 +36,8 @@
       }
     },
     {
-      "name": "windows-clang",
-      "displayName": "Clang (Windows)",
+      "name": "windows-ninja-clang",
+      "displayName": "Ninja with Clang (Windows)",
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "${sourceDir}/deps/staging/clang/bin/clang.exe",
@@ -45,16 +45,13 @@
       }
     },
     {
-      "name": "windows-msvc22",
-      "displayName": "Visual Studio 2022",
+      "name": "windows-ninja-msvc",
+      "displayName": "Ninja with MSVC (Windows)",
       "inherits": "base",
-      "generator": "Visual Studio 17 2022"
-    },
-    {
-      "name": "windows-msvc26",
-      "displayName": "Visual Studio 2026",
-      "inherits": "base",
-      "generator": "Visual Studio 18 2026"
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe"
+      }
     }
   ]
 }

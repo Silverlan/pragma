@@ -10,7 +10,6 @@
       "name": "base",
       "hidden": true,
       "generator": "Ninja Multi-Config",
-      "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "CMAKE_POLICY_VERSION_MINIMUM": "4.0",

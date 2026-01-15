@@ -31,106 +31,14 @@ if ("${CMAKE_GENERATOR}" MATCHES "Ninja")
     set(CMAKE_NINJA_FORCE_RESPONSE_FILE TRUE CACHE BOOL "Force Ninja to use response files for long command lines")
 endif()
 
-function(check_content_version BASE_PATH CONTENTS FILENAME RESULT_VAR)
-    set(TARGET_FILE "${BASE_PATH}/${FILENAME}")
-    set(${RESULT_VAR} FALSE PARENT_SCOPE)
-
-    if(NOT EXISTS "${TARGET_FILE}")
-        return()
-    endif()
-
-    file(READ "${TARGET_FILE}" RAW_JSON)
-
-    # Extract version
-    string(JSON CURRENT_VERSION GET "${RAW_JSON}" version)
-
-    if(NOT "${CURRENT_VERSION}" STREQUAL "${CONTENTS}")      
-        set(${RESULT_VAR} FALSE PARENT_SCOPE)
-    else()
-        set(${RESULT_VAR} TRUE PARENT_SCOPE)
-    endif()
-endfunction()
-
-function(clear_content)
-    if(EXISTS "${BASE_PATH}")
-        message(STATUS "Removing directory '${BASE_PATH}'...")
-        file(REMOVE_RECURSE "${BASE_PATH}")
-    endif()
-endfunction()
-
-function(update_content_version BASE_PATH COMMIT_ID FILENAME)
-    message(STATUS "Creating directory '${BASE_PATH}'...")
-    file(MAKE_DIRECTORY "${BASE_PATH}")
-
-    set(TARGET_FILE "${BASE_PATH}/${FILENAME}")
-    message(STATUS "Writing content version to '${TARGET_FILE}'...")
-
-    # Construct minimal JSON string
-    set(JSON_PAYLOAD "{\n  \"version\": \"${COMMIT_ID}\"\n}")
-    file(WRITE "${TARGET_FILE}" "${JSON_PAYLOAD}")
-endfunction()
-
-function(pr_http_extract url dest_dir)
-    set(options STRIP_TOP_DIR)
-    cmake_parse_arguments(ARG "${options}" "" "" ${ARGN})
-
-    get_filename_component(fname "${url}" NAME)
-    set(zip_path "${CMAKE_BINARY_DIR}/_downloads/${fname}")
-    
-    file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/_downloads")
-    file(DOWNLOAD "${url}" "${zip_path}" SHOW_PROGRESS STATUS dl_status)
-    
-    list(GET dl_status 0 dl_code)
-    if(NOT dl_code EQUAL 0)
-        message(FATAL_ERROR "Failed to download ${url}: ${dl_status}")
-    endif()
-
-    if(ARG_STRIP_TOP_DIR)
-        set(tmp_dir "${dest_dir}_tmp")
-        file(REMOVE_RECURSE "${tmp_dir}")
-        file(ARCHIVE_EXTRACT INPUT "${zip_path}" DESTINATION "${tmp_dir}")
-        
-        # Find the single top-level directory
-        file(GLOB subdirs RELATIVE "${tmp_dir}" "${tmp_dir}/*")
-        list(LENGTH subdirs count)
-        
-        if(NOT count EQUAL 1)
-            message(FATAL_ERROR "STRIP_TOP_DIR failed: archive contains ${count} items at root instead of 1.")
-        endif()
-
-        file(RENAME "${tmp_dir}/${subdirs}" "${dest_dir}")
-        file(REMOVE_RECURSE "${tmp_dir}")
-    else()
-        file(MAKE_DIRECTORY "${dest_dir}")
-        file(ARCHIVE_EXTRACT INPUT "${zip_path}" DESTINATION "${dest_dir}")
-    endif()
-endfunction()
-
-
 set(PRAGMA_DEPS_DIR "${CMAKE_SOURCE_DIR}/deps/staging/" CACHE PATH "Directory where dependencies will be extracted to.")
 
-# We need the very latest version of clang available, so for the time being, we're downloading the prebuilt version.
-# Since we can't actually detect which compiler is being used at this point in time, we'll always download clang, even if it's not needed.
-function(pr_fetch_clang)
-    if(WIN32)
-        set(version "21.1.8")
-        set(url "https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/clang+llvm-21.1.8-x86_64-pc-windows-msvc.tar.xz")
-    else()
-        set(version "2025-12-19")
-        set(url "https://github.com/Silverlan/clang_prebuilt/releases/download/2025-12-19/linux_x64.tar.xz")
-    endif()
-    check_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json" IS_VALID)
-    if(NOT IS_VALID)
-        clear_content("${PRAGMA_DEPS_DIR}/clang")
-        pr_http_extract(
-            "${url}"
-            "${PRAGMA_DEPS_DIR}/clang"
-            STRIP_TOP_DIR
-        )
-        update_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json")
-    endif()
-endfunction()
-pr_fetch_clang()
+include("cmake/fetch_clang.cmake")
+
+if(UNIX)
+    include("cmake/fetch_gcc.cmake")
+    set(CMAKE_CXX_STDLIB_MODULES_JSON "${PRAGMA_DEPS_DIR}/gcc/lib64/libstdc++.modules.json")
+endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/pr_legacy.cmake)
@@ -163,10 +71,17 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(toolset "gcc")
 endif()
 function(pr_fetch_prebuilt_binaries base_path base_url version)
+    if(ARGC GREATER 3)
+        set(effective_toolset "${ARGV3}")
+    else()
+        set(effective_toolset "${toolset}")
+    endif()
+
     check_content_version("${base_path}" "${version}" "version.json" IS_VALID)
     if(NOT IS_VALID)
         clear_content("${base_path}")
         update_content_version("${base_path}" "${version}" "version.json")
+        
         if(UNIX)
             set(platform_name "linux")
             set(prebuilt_archive_format "tar.gz")
@@ -175,7 +90,8 @@ function(pr_fetch_prebuilt_binaries base_path base_url version)
             set(prebuilt_archive_format "zip")
         endif()
 
-        set(prebuilt_archive_name "binaries-${platform_name}-x64-${toolset}.${prebuilt_archive_format}")
+        set(prebuilt_archive_name "binaries-${platform_name}-x64-${effective_toolset}.${prebuilt_archive_format}")
+        
         pr_http_extract(
             "${base_url}/${version}/${prebuilt_archive_name}"
             "${base_path}"
@@ -183,28 +99,7 @@ function(pr_fetch_prebuilt_binaries base_path base_url version)
     endif()
 endfunction()
 
-function(pr_get_deps version)    
-    check_content_version("${PRAGMA_DEPS_DIR}" "${version}" "version.json" IS_VALID)
-    if(NOT IS_VALID)
-        clear_content("${PRAGMA_DEPS_DIR}")
-        update_content_version("${PRAGMA_DEPS_DIR}" "${version}" "version.json")
-        if(UNIX)
-            set(platform_name "linux")
-            set(prebuilt_archive_format "tar.gz")
-        else()
-            set(platform_name "windows")
-            set(prebuilt_archive_format "zip")
-        endif()
-
-        set(prebuilt_archive_name "lib-${platform_name}-x64-${toolset}.${prebuilt_archive_format}")
-        pr_http_extract(
-            "https://github.com/Silverlan/pragma-deps-lib/releases/download/${version}/${prebuilt_archive_name}"
-            "${PRAGMA_DEPS_DIR}"
-        )
-    endif()
-endfunction()
-# TODO: Check if dir built?
-pr_get_deps("2026-01-10")
+include("cmake/fetch_deps.cmake")
 
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 

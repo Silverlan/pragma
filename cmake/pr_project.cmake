@@ -13,6 +13,10 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_compile_options(${TARGET_NAME} PRIVATE /bigobj)
     endif()
 
+    if(UNIX AND PRAGMA_DEBUG)
+        target_compile_definitions(${TARGET_NAME} PRIVATE _GLIBCXX_ASSERTIONS)
+    endif()
+
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         target_compile_options(${TARGET_NAME} PRIVATE -Wno-c++11-narrowing)
         target_compile_options(${TARGET_NAME} PUBLIC -Wno-missing-template-arg-list-after-template-kw)

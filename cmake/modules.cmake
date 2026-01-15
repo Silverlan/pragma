@@ -74,5 +74,5 @@ if(WITH_VR)
 endif()
 
 if(WITH_NETWORKING)
-    pr_fetch_module("pr_steam_networking_sockets" "https://github.com/Silverlan/pr_steam_networking_sockets.git" "a98cbb8c8a9166e63176d0dfe89f39fef1bf2181")
+    pr_fetch_module("pr_steam_networking_sockets" "https://github.com/Silverlan/pr_steam_networking_sockets.git" "6775da3dc7d3cda4fbd46ef7c35c220ab5426fd0")
 endif()

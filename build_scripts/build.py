@@ -231,37 +231,15 @@ print("cmake_flags: " +', '.join(additional_cmake_flags))
 print("modules: " +', '.join(modules))
 
 mkpath(build_dir)
-mkpath(deps_dir)
 mkpath(install_dir)
 mkpath(tools)
 
+config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
+
 # Use prebuilt binaries if --build-all is not set
 if build_all == False:
-	def is_commit_current(base_path: str, commit_id: str, filename: str = "commit_id.json") -> bool:
-		return check_content_version(base_path, commit_id, filename)
-
-	def update_commit_directory(base_path: str, commit_id: str, filename: str = "commit_id.json") -> None:
-		update_content_version(base_path, commit_id, filename)
-
-	base_path = get_staging_dir()
-	if not is_commit_current(base_path, prebuilt_tag, "tag_id.json"):
-		update_commit_directory(base_path, prebuilt_tag, "tag_id.json")
-		os.chdir(base_path)
-
-		print_msg("Downloading prebuilt third-party binaries...")
-
-		if platform == "linux":
-			platform_name = platform
-			prebuilt_archive_format = "tar.gz"
-		else:
-			platform_name = "windows"
-			prebuilt_archive_format = "zip"
-		prebuilt_archive_name = "lib-" +platform_name +"-x64-" +toolset
-		prebuilt_archive_name += "." +prebuilt_archive_format
-
-		http_extract("https://github.com/Silverlan/pragma-deps-lib/releases/download/" +prebuilt_tag +"/" +prebuilt_archive_name,format=prebuilt_archive_format)
-	else:
-		print(f"Directory '{base_path}' is already up-to-date.")
+	subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-Dtoolset=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
+subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-P", "cmake/fetch_clang.cmake"],check=True)
 
 if platform == "win32":
 	if toolset == "msvc":
@@ -269,8 +247,8 @@ if platform == "win32":
 		print_warning(f"Visual Studio toolset is currently not recommended and may not work. If you run into issues, try using the clang toolset instead.")
 	elif toolset == "clang":
 		# We need an up-to-date version of clang, so we'll use our shipped version for now.
-		from third_party import clang
-		clang.main()
+		#from third_party import clang
+		#clang.main()
 
 		clang_dir = str(Path(get_library_root_dir("clang")) / "bin/")
 		config.toolsetArgs = [
@@ -316,9 +294,6 @@ elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
 
-if platform == "linux" and with_debug:
-	config.toolsetCFlags = ["-D_GLIBCXX_ASSERTIONS"]
-
 if update:
 	os.chdir(root)
 
@@ -332,8 +307,6 @@ if update:
 	print("argv: ",argv)
 	os.execv(sys.executable, ['python'] +argv)
 	sys.exit(0)
-
-config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 
 if platform == "linux":
 	os.environ["CC"] = c_compiler
@@ -500,18 +473,6 @@ print_msg("Building third-party libraries...")
 if build_all:
 	import build_third_party_libs
 	build_third_party_libs.main()
-
-# gcc
-os.chdir(deps_dir)
-gcc_root = normalize_path(os.getcwd() +"/gcc")
-if platform == "linux":
-	# We need the very latest gcc version for libstdc++.modules.json
-	if not Path(gcc_root).is_dir():
-		print_msg("gcc not found. Downloading...")
-		http_extract("https://github.com/Silverlan/gcc_prebuilt/releases/download/2025-12-15/gcc-16-opt.tar.xz",format="tar.xz")
-		mv("gcc-16", "gcc")
-	os.chdir(gcc_root)
-	modules_json_path = str(Path(gcc_root) / "lib64/libstdc++.modules.json")
 
 ########## Modules ##########
 print_msg("Downloading modules...")
@@ -771,9 +732,6 @@ if not deps_only:
 		"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +""
 	]
 
-	if platform == "linux":
-		cmake_args += ["-DCMAKE_CXX_STDLIB_MODULES_JSON=" +modules_json_path]
-
 	vtune_enabled = False
 	if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 		if len(vtune_include_path) > 0 and len(vtune_library_path) > 0:
@@ -794,10 +752,19 @@ if not deps_only:
 		cmake_args += [f"-DPRAGMA_DEBUG={1 if with_debug else 0}"]
 
 	cmake_args += additional_cmake_args
-	cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
-	cmake_args.append("-DCMAKE_CXX_SCAN_FOR_MODULES=1")
-	cmake_args.append("-DCMAKE_EXPORT_COMPILE_COMMANDS=1")
 	cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_staging_dir)
+
+	if platform == "win32":
+		if toolset == "msvc":
+			preset = "windows-ninja-msvc"
+		elif toolset == "clang":
+			preset = "windows-ninja-clang"
+	else:
+		preset = "linux-ninja-clang"
+
+	cmake_args.append("--preset")
+	cmake_args.append(preset)
+
 	cmake_configure_def_toolset(root,generator,cmake_args,additional_cmake_flags)
 
 	print_msg("Build files have been written to \"" +build_dir +"\".")

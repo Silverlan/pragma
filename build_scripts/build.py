@@ -1,4 +1,3 @@
-# import os
 from pathlib import Path
 from sys import platform
 from urllib.error import URLError, HTTPError
@@ -6,18 +5,11 @@ import tarfile
 import argparse
 import re
 import config
-# import logging
 
 from scripts.shared import *
 
 parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev=False, formatter_class=argparse.ArgumentDefaultsHelpFormatter, epilog="")
 
-###### Config section
-# When using prebuilt binaries this tag will be used for the download from https://github.com/Silverlan/pragma-deps-lib
-prebuilt_tag = "2026-01-10"
-######
-
-# See https://stackoverflow.com/a/43357954/1879228 for boolean args
 if platform == "linux":
 	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-22')
 	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-22')
@@ -82,19 +74,6 @@ else:
 		else:
 			args["generator"] = "Ninja Multi-Config"
 
-#log_file = args.log_file
-#if log_file != "":
-#	if not os.path.isabs(log_file):
-#		log_file = os.getcwd() +"/" +log_file
-#
-#		logging.basicConfig(filename=log_file,
-#			filemode='a',
-#			format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-#			datefmt='%H:%M:%S',
-#			level=logging.DEBUG)
-#
-#		logging.info("Running Pragma Build Script")
-
 if args["update"]:
 	args["rerun"] = True
 	args["update"] = True
@@ -150,7 +129,6 @@ modules = args["module"]
 rerun = args["rerun"]
 prefer_git_https = args["prefer_git_https"]
 update = args["update"]
-modules_prebuilt = []
 
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
@@ -237,6 +215,7 @@ mkpath(tools)
 config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 
 # Use prebuilt binaries if --build-all is not set
+os.chdir(root)
 if build_all == False:
 	subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-Dtoolset=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
 subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-P", "cmake/fetch_clang.cmake"],check=True)
@@ -662,10 +641,19 @@ l = {
 # Register user modules
 execfile(scripts_dir +"/user_modules.py",g,l)
 
-# These modules are shipped with the Pragma repository and will have to be excluded from the
-# CMake configuration explicitly if they should be disabled.
-shippedModules = []
+cmake_with_args = []
+cmake_with_args.append(f"-DPRAGMA_WITH_PFM={1 if with_pfm else 0}")
+cmake_with_args.append(f"-DPRAGMA_WITH_VR={1 if with_vr else 0}")
+cmake_with_args.append(f"-DPRAGMA_WITH_NETWORKING={1 if with_networking else 0}")
+cmake_with_args.append(f"-DPRAGMA_WITH_COMMON_ENTITIES={1 if with_common_entities else 0}")
+cmake_with_args.append(f"-DPRAGMA_WITH_COMMON_MODULES={1 if with_common_modules else 0}")
+cmake_with_args.append(f"-DPRAGMA_WITH_ESSENTIAL_CLIENT_MODULES={1 if with_essential_client_modules else 0}")
 
+# Fetch base modules
+os.chdir(root)
+subprocess.run(["cmake"] +cmake_with_args +["-P", "cmake/fetch_modules.cmake"],check=True)
+
+# Fetch additional modules
 index = 0
 # The module list can be modified during iteration, so we have to use a while loop here.
 while index < len(module_info):
@@ -691,33 +679,20 @@ while index < len(module_info):
 		if not moduleName in shippedModules:
 			if moduleUrl:
 				get_submodule(moduleName,moduleUrl,commitId,branch)
-
-	os.chdir(moduleDir)
-	scriptPath = moduleDir +"build_scripts/setup.py"
-	if Path(scriptPath).is_file():
-		print_msg("Executing module setup script...")
-		execbuildscript(scriptPath)
-
-	if not skipBuildTarget:
-		module_list.append(moduleName)
+				
+	module_list.append(moduleName)
 	index += 1
 
-for module in shippedModules:
-	if module != "pr_curl": # Curl is currently required
-		if not module in module_list:
-			cmake_args.append("-DPRAGMA_DISABLE_MODULE_" +module +"=ON")
-		else:
-			cmake_args.append("-DPRAGMA_DISABLE_MODULE_" +module +"=OFF")
-
-os.chdir(install_dir)
-for url in modules_prebuilt:
-	print_msg("Downloading prebuilt binaries for module '" +url +"'...")
-	install_prebuilt_binaries(url)
-
-if with_pfm:
-	additional_build_targets.append("pfm")
-
-cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list +additional_build_targets))
+# Run module build scripts
+modules_dir = Path(root) / "modules"
+for item in modules_dir.iterdir():
+	if item.is_dir():
+		moduleDir = str(item)
+		os.chdir(moduleDir)
+		scriptPath = moduleDir +"build_scripts/setup.py"
+		if Path(scriptPath).is_file():
+			print_msg("Executing module setup script...")
+			execbuildscript(scriptPath)
 
 print("Modules:" +', '.join(module_list))
 print("Additional CMake Arguments:" +', '.join(cmake_args))
@@ -728,9 +703,8 @@ if not deps_only:
 	print_msg("Configuring Pragma...")
 	os.chdir(build_dir)
 
-	cmake_args += [
-		"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +""
-	]
+	cmake_args.append("-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +"")
+	cmake_args.append("-DPRAGMA_ADDITIONAL_MODULES=" + ";".join(module_list))
 
 	vtune_enabled = False
 	if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
@@ -742,14 +716,12 @@ if not deps_only:
 		else:
 			raise argparse.ArgumentError(None,"Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
 
-	cmake_args += [f"-DCONFIG_BUILD_WITH_VTUNE_SUPPORT={1 if vtune_enabled else 0}"]
+	cmake_args.append(f"-DCONFIG_BUILD_WITH_VTUNE_SUPPORT={1 if vtune_enabled else 0}")
 
-	cmake_args += [f"-DWITH_PFM={1 if with_pfm else 0}"]
-	cmake_args += [f"-DWITH_VR={1 if with_vr else 0}"]
-	cmake_args += [f"-DWITH_COMMON_ENTITIES={1 if with_common_entities else 0}"]
-	cmake_args += [f"-DWITH_COMMON_MODULES={1 if with_common_modules else 0}"]
+	cmake_args += cmake_with_args
+	cmake_args.append(f"-DCMAKE_CXX_STDLIB_MODULES_JSON=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/modules/modules.json")
 	if platform == "linux":
-		cmake_args += [f"-DPRAGMA_DEBUG={1 if with_debug else 0}"]
+		cmake_args.append(f"-DPRAGMA_DEBUG={1 if with_debug else 0}")
 
 	cmake_args += additional_cmake_args
 	cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_staging_dir)

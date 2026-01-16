@@ -7,8 +7,8 @@ set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_MODULE_STD 1)
 
-set(CMAKE_C_STANDARD 23)
-set(CMAKE_C_STANDARD_REQUIRED ON)
+# set(CMAKE_C_STANDARD 23)
+# set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS ON)
 
 # Use response files to avoid "The command line is too long." errors
@@ -104,15 +104,15 @@ include("cmake/fetch_deps.cmake")
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
 option(PRAGMA_DEBUG "Build in debug mode?" OFF)
-option(WITH_VR "Build with VR support?" OFF)
-option(WITH_NETWORKING "Build with networking support?" OFF)
-option(WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
-option(WITH_COMMON_MODULES "Build with common modules?" ON)
-option(WITH_ESSENTIAL_CLIENT_MODULES "Build with essential client modules?" ON)
+option(PRAGMA_WITH_VR "Build with VR support?" OFF)
+option(PRAGMA_WITH_NETWORKING "Build with networking support?" OFF)
+option(PRAGMA_WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
+option(PRAGMA_WITH_COMMON_MODULES "Build with common modules?" ON)
+option(PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES "Build with essential client modules?" ON)
 
-option(WITH_PFM "Build with Pragma Filmmaker?" OFF)
-option(WITH_CORE_PFM_MODULES "Include essential PFM modules." ON)
-option(WITH_ALL_PFM_MODULES "Include non-essential PFM modules (e.g. chromium and cycles)." ON)
+option(PRAGMA_WITH_PFM "Build with Pragma Filmmaker?" OFF)
+option(PRAGMA_WITH_CORE_PFM_MODULES "Include essential PFM modules." ON)
+option(PRAGMA_WITH_ALL_PFM_MODULES "Include non-essential PFM modules (e.g. chromium and cycles)." ON)
 
 # Global settings
 set(CMAKE_COLOR_DIAGNOSTICS ON)

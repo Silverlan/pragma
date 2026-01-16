@@ -17,12 +17,12 @@
         "CMAKE_EXPORT_COMPILE_COMMANDS": "1",
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/install",
 
-        "WITH_PFM": "1",
-        "WITH_VR": "1",
-        "WITH_NETWORKING": "1",
-        "WITH_COMMON_ENTITIES": "1",
-        "WITH_COMMON_MODULES": "1",
-        "WITH_ESSENTIAL_CLIENT_MODULES": "1"
+        "PRAGMA_WITH_PFM": "1",
+        "PRAGMA_WITH_VR": "1",
+        "PRAGMA_WITH_NETWORKING": "1",
+        "PRAGMA_WITH_COMMON_ENTITIES": "1",
+        "PRAGMA_WITH_COMMON_MODULES": "1",
+        "PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES": "1"
       }
     },
     {

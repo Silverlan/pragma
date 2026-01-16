@@ -281,11 +281,11 @@ target_include_directories(cmaterialsystem PUBLIC ${DEPENDENCY_ZLIB_INCLUDE})
 message("Processing core libraries...")
 add_subdirectory(core)
 
-message("Processing tools...")
-add_subdirectory(tools)
-
 message("Processing modules...")
 include(${CMAKE_SOURCE_DIR}/cmake/modules.cmake)
+
+message("Processing tools...")
+add_subdirectory(tools)
 
 target_include_directories(materialsystem PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
 

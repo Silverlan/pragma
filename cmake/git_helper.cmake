@@ -1,4 +1,4 @@
-function(pr_fetch_git directory url)
+function(pr_git_checkout directory url)
     # optional arguments: commitId, branch
     if(ARGC GREATER 2)
         set(commitId "${ARGV2}")
@@ -86,6 +86,6 @@ function(pr_fetch_git directory url)
     endif()
 endfunction()
 
-function(pr_fetch_repository IDENTIFIER GIT_URL GIT_SHA CHECKOUT_PATH)
-    pr_fetch_git("${CMAKE_SOURCE_DIR}/${CHECKOUT_PATH}" "${GIT_URL}" "${GIT_SHA}")
+function(pr_checkout_submodule IDENTIFIER GIT_URL GIT_SHA CHECKOUT_PATH)
+    pr_git_checkout("${CMAKE_SOURCE_DIR}/${CHECKOUT_PATH}" "${GIT_URL}" "${GIT_SHA}")
 endfunction()

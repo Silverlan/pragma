@@ -354,6 +354,7 @@ def execscript(filepath):
 		"check_repository_commit": check_repository_commit,
 		"check_content_version": check_content_version,
 		"update_content_version": update_content_version,
+		"run_cmake_script": run_cmake_script,
 		
 		"cmake_args": cmake_args,
 
@@ -592,6 +593,7 @@ def execbuildscript(filepath):
 		"check_repository_commit": check_repository_commit,
 		"check_content_version": check_content_version,
 		"update_content_version": update_content_version,
+		"run_cmake_script": run_cmake_script,
 		"add_pragma_module": add_pragma_module
 	}
 	if platform == "linux":
@@ -689,9 +691,16 @@ for item in modules_dir.iterdir():
 	if item.is_dir():
 		moduleDir = str(item)
 		os.chdir(moduleDir)
-		scriptPath = moduleDir +"build_scripts/setup.py"
+		scriptPath = str(Path(moduleDir) / "build_scripts/setup.py")
 		if Path(scriptPath).is_file():
 			print_msg("Executing module setup script...")
+			
+			moduleName = item.name
+			moduleUrl = ""
+			commitId = ""
+			branch = ""
+			skipBuildTarget = False
+
 			execbuildscript(scriptPath)
 
 print("Modules:" +', '.join(module_list))

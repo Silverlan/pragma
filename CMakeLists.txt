@@ -70,34 +70,6 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(toolset "gcc")
 endif()
-function(pr_fetch_prebuilt_binaries base_path base_url version)
-    if(ARGC GREATER 3)
-        set(effective_toolset "${ARGV3}")
-    else()
-        set(effective_toolset "${toolset}")
-    endif()
-
-    check_content_version("${base_path}" "${version}" "version.json" IS_VALID)
-    if(NOT IS_VALID)
-        clear_content("${base_path}")
-        update_content_version("${base_path}" "${version}" "version.json")
-        
-        if(UNIX)
-            set(platform_name "linux")
-            set(prebuilt_archive_format "tar.gz")
-        else()
-            set(platform_name "windows")
-            set(prebuilt_archive_format "zip")
-        endif()
-
-        set(prebuilt_archive_name "binaries-${platform_name}-x64-${effective_toolset}.${prebuilt_archive_format}")
-        
-        pr_http_extract(
-            "${base_url}/${version}/${prebuilt_archive_name}"
-            "${base_path}"
-        )
-    endif()
-endfunction()
 
 include("cmake/fetch_deps.cmake")
 

@@ -1,5 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run PFM" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="-console -log 2 2 -luaext -user_data_dir ~/.config/pfm" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="true" WORKING_DIR="file://$PROJECT_DIR$/build/install" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pragma" TARGET_NAME="pragma-install" CONFIG_NAME="Default" RUN_PATH="$PROJECT_DIR$/build/install/pfm">
-    <method v="2" />
-  </configuration>
-</component>

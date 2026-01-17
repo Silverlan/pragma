@@ -2,20 +2,14 @@ cmake_minimum_required(VERSION 3.3)
 
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 
-if(CMAKE_GENERATOR MATCHES "Visual Studio.*2026")
-    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio 2026 is not supported).")
-endif()
-if(CMAKE_GENERATOR MATCHES "Visual Studio.*2022")
-    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio 2022 is not supported).")
-endif()
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
-    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (clang-cl is not supported).")
-endif()
-
 # Required for "import std;" as long as its experimental in CMake
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_MODULE_STD 1)
+
+# set(CMAKE_C_STANDARD 23)
+# set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS ON)
 
 # Use response files to avoid "The command line is too long." errors
 set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_INCLUDES 1)
@@ -30,23 +24,67 @@ set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 set(CMAKE_C_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 
+if(CMAKE_GENERATOR MATCHES "Visual Studio.*")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio generator is currently not supported. Please use Ninja generator for the time being).")
+endif()
 if ("${CMAKE_GENERATOR}" MATCHES "Ninja")
     set(CMAKE_NINJA_FORCE_RESPONSE_FILE TRUE CACHE BOOL "Force Ninja to use response files for long command lines")
+endif()
+
+set(PRAGMA_DEPS_DIR "${CMAKE_SOURCE_DIR}/deps/staging/" CACHE PATH "Directory where dependencies will be extracted to.")
+
+include("cmake/fetch_clang.cmake")
+
+if(UNIX)
+    include("cmake/fetch_gcc.cmake")
+    set(CMAKE_CXX_STDLIB_MODULES_JSON "${PRAGMA_DEPS_DIR}/gcc/lib64/libstdc++.modules.json")
 endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/pr_legacy.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/pr_install.cmake)
 
+include(FetchContent)
+
+function(pr_fetch_repository IDENTIFIER GIT_URL GIT_SHA CHECKOUT_PATH)
+    FetchContent_Declare(
+        ${IDENTIFIER}
+        GIT_REPOSITORY ${GIT_URL}
+        GIT_TAG        ${GIT_SHA}
+        SOURCE_DIR     "${CMAKE_SOURCE_DIR}/${CHECKOUT_PATH}"
+    )
+    FetchContent_MakeAvailable(${IDENTIFIER})
+endfunction()
+
 project(pragma)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (clang-cl is currently not supported. Please use clang instead.).")
+endif()
+
+set(TOOLSET "clang")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(TOOLSET "clang")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(TOOLSET "msvc")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(TOOLSET "gcc")
+endif()
+
+include("cmake/fetch_deps.cmake")
 
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
 option(PRAGMA_DEBUG "Build in debug mode?" OFF)
-option(WITH_PFM "Build with Pragma Filmmaker?" OFF)
-option(WITH_VR "Build with VR support?" OFF)
-option(WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
-option(WITH_COMMON_MODULES "Build with common modules?" ON)
+option(PRAGMA_WITH_VR "Build with VR support?" OFF)
+option(PRAGMA_WITH_NETWORKING "Build with networking support?" OFF)
+option(PRAGMA_WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
+option(PRAGMA_WITH_COMMON_MODULES "Build with common modules?" ON)
+option(PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES "Build with essential client modules?" ON)
+
+option(PRAGMA_WITH_PFM "Build with Pragma Filmmaker?" OFF)
+option(PRAGMA_WITH_CORE_PFM_MODULES "Include essential PFM modules." ON)
+option(PRAGMA_WITH_ALL_PFM_MODULES "Include non-essential PFM modules (e.g. chromium and cycles)." ON)
 
 # Global settings
 set(CMAKE_COLOR_DIAGNOSTICS ON)
@@ -163,7 +201,6 @@ else()
 endif()
 
 message("Processing third-party libaries...")
-
 set(LIBRARY_OUTPUT_PATH
     ""
     CACHE PATH "" FORCE)
@@ -196,23 +233,31 @@ add_custom_target(pragma-install-full
 add_custom_target(pragma-core)
 set_target_properties(pragma-core PROPERTIES FOLDER "Hidden")
 
-include(${CMAKE_SOURCE_DIR}/ThirdPartyLibs.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/third_party_libs.cmake)
 
 message("Processing external libraries...")
-add_subdirectory(external_libs)
+include(${CMAKE_SOURCE_DIR}/cmake/external_libs.cmake)
 pr_set_target_folder(wgui external_libs/wgui)
 pr_set_target_folder(sample_application external_libs/wgui)
+
+set_target_properties(networkmanager PROPERTIES FOLDER external_libs/networkmanager)
+set_target_properties(clientmanager PROPERTIES FOLDER external_libs/networkmanager)
+set_target_properties(servermanager PROPERTIES FOLDER external_libs/networkmanager)
+
+set_target_properties(materialsystem PROPERTIES FOLDER external_libs/materialsystem)
+set_target_properties(cmaterialsystem PROPERTIES FOLDER external_libs/materialsystem)
+
 target_include_directories(util_image PUBLIC ${DEPENDENCY_ZLIB_INCLUDE})
 target_include_directories(cmaterialsystem PUBLIC ${DEPENDENCY_ZLIB_INCLUDE})
 
 message("Processing core libraries...")
 add_subdirectory(core)
 
+message("Processing modules...")
+include(${CMAKE_SOURCE_DIR}/cmake/modules.cmake)
+
 message("Processing tools...")
 add_subdirectory(tools)
-
-message("Processing modules...")
-add_subdirectory(modules)
 
 target_include_directories(materialsystem PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
 
@@ -289,31 +334,42 @@ message("Installing core components...")
 pr_include_install(".")
 
 # Modules
-file(GLOB PR_MODULES "modules/pr_*")
-foreach(MODULE_PATH ${PR_MODULES})
-    get_filename_component(MODULE_NAME "${MODULE_PATH}" NAME)
-    if(NOT DEFINED PRAGMA_DISABLE_MODULE_${MODULE_NAME} OR NOT PRAGMA_DISABLE_MODULE_${MODULE_NAME})
-        if(WIN32)
-            set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.dll")
-        else()
-            set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_NAME}.so")
-        endif()
-        if(EXISTS "${MODULE_PATH}/Install.cmake")
-            message("Running install script for module '${MODULE_PATH}'...")
-	        pr_install_component(${MODULE_NAME})
-            pr_include_install("${MODULE_PATH}")
-        else()
-            # Default behavior
-            message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
-            add_custom_command(
-                TARGET pragma-install
-                POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -DInstallSrc=${PR_MODULE_PATH_WITH_EXT} -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\" -P
-                        ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
-                COMMENT "Copying ${PR_MODULE_PATH_WITH_EXT} to ${CMAKE_INSTALL_PREFIX}/modules/...")
-            pr_include_cmake_modules("${MODULE_PATH}")
+get_property(MODULE_NAMES GLOBAL PROPERTY PRAGMA_MODULE_NAMES)
+foreach(MODULE_NAME ${MODULE_NAMES})
+    set(MODULE_PATH "${CMAKE_SOURCE_DIR}/modules/${MODULE_NAME}")
+    if(EXISTS "${MODULE_PATH}/Install.cmake")
+        message("Running install script for module '${MODULE_PATH}'...")
+        pr_install_component(${MODULE_NAME})
+        pr_include_install("${MODULE_PATH}")
+    else()
+        # Default behavior
+        get_property(skip_install GLOBAL PROPERTY PRAGMA_MODULE_${MODULE_NAME}_SKIP_INSTALL)
+        if(NOT skip_install)
+            get_property(_targets GLOBAL PROPERTY PRAGMA_MODULE_${MODULE_NAME}_TARGETS)
+            foreach(MODULE_TARGET IN LISTS _targets)
+                get_target_property(MODULE_BIN_PATH ${MODULE_TARGET} BINARY_DIR)
+                if(WIN32)
+                    set(PR_MODULE_PATH_WITH_EXT "${MODULE_BIN_PATH}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_TARGET}.dll")
+                else()
+                    set(PR_MODULE_PATH_WITH_EXT "${MODULE_BIN_PATH}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_TARGET}.so")
+                endif()
+
+                message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
+                add_custom_command(
+                    TARGET pragma-install
+                    POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -DInstallSrc=${PR_MODULE_PATH_WITH_EXT} -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\" -P
+                            ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
+                    COMMENT "Copying ${PR_MODULE_PATH_WITH_EXT} to ${CMAKE_INSTALL_PREFIX}/modules/...")
+                pr_include_cmake_modules("${MODULE_PATH}")
+            endforeach()
         endif()
     endif()
+endforeach()
+
+get_property(MODULE_TARGETS GLOBAL PROPERTY PRAGMA_MODULE_TARGETS)
+foreach(MODULE_TARGET ${MODULE_TARGETS})
+    add_dependencies(pragma-core ${MODULE_TARGET})
 endforeach()
 
 # Tools

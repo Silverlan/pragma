@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="CMakeSharedSettings">
-    <configurations>
-      <configuration PROFILE_NAME="Default" ENABLED="true" GENERATION_DIR="build" CONFIG_NAME="RelWithDebInfo" GENERATION_OPTIONS="-G &quot;Ninja Multi-Config&quot; -DPME_EXTERNAL_LIB_LOCATION=&quot;$CMakeProjectDir$/external_libs&quot; -DPME_EXTERNAL_LIB_BIN_LOCATION=&quot;$CMakeProjectDir$/build/external_libs&quot; -DPME_THIRD_PARTY_LIB_LOCATION=&quot;$CMakeProjectDir$/third_party_libs&quot; -DPRAGMA_DISABLE_MODULE_pr_audio_dummy=OFF -DPRAGMA_DISABLE_MODULE_pr_prosper_opengl=OFF -DPRAGMA_DISABLE_MODULE_pr_prosper_vulkan=OFF -DPRAGMA_INSTALL_CUSTOM_TARGETS=pr_prosper_vulkan;pr_bullet;pr_audio_soloud;pr_audio_dummy;pr_prosper_opengl;pr_curl;pr_dmx;pr_chromium;pr_unirender;pr_xatlas;pr_davinci;pr_opencv;pr_git;pr_openvr;pr_nsight_aftermath;pr_dmx;UniRender_cycles;pfm -DCMAKE_INSTALL_PREFIX:PATH=&quot;$CMakeProjectDir$/build/install&quot; -DCMAKE_POLICY_VERSION_MINIMUM=4.0 -DPRAGMA_DEPS_DIR=&quot;$CMakeProjectDir$/deps/staging&quot;" BUILD_OPTIONS="-- -v" />
-    </configurations>
-  </component>
-</project>

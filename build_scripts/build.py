@@ -1,4 +1,3 @@
-# import os
 from pathlib import Path
 from sys import platform
 from urllib.error import URLError, HTTPError
@@ -6,18 +5,11 @@ import tarfile
 import argparse
 import re
 import config
-# import logging
 
 from scripts.shared import *
 
 parser = argparse.ArgumentParser(description='Pragma build script', allow_abbrev=False, formatter_class=argparse.ArgumentDefaultsHelpFormatter, epilog="")
 
-###### Config section
-# When using prebuilt binaries this tag will be used for the download from https://github.com/Silverlan/pragma-deps-lib
-prebuilt_tag = "2026-01-10"
-######
-
-# See https://stackoverflow.com/a/43357954/1879228 for boolean args
 if platform == "linux":
 	parser.add_argument('--c-compiler', help='The C-compiler to use.', default='clang-22')
 	parser.add_argument('--cxx-compiler', help='The C++-compiler to use.', default='clang++-22')
@@ -82,19 +74,6 @@ else:
 		else:
 			args["generator"] = "Ninja Multi-Config"
 
-#log_file = args.log_file
-#if log_file != "":
-#	if not os.path.isabs(log_file):
-#		log_file = os.getcwd() +"/" +log_file
-#
-#		logging.basicConfig(filename=log_file,
-#			filemode='a',
-#			format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-#			datefmt='%H:%M:%S',
-#			level=logging.DEBUG)
-#
-#		logging.info("Running Pragma Build Script")
-
 if args["update"]:
 	args["rerun"] = True
 	args["update"] = True
@@ -150,7 +129,6 @@ modules = args["module"]
 rerun = args["rerun"]
 prefer_git_https = args["prefer_git_https"]
 update = args["update"]
-modules_prebuilt = []
 
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
@@ -231,37 +209,16 @@ print("cmake_flags: " +', '.join(additional_cmake_flags))
 print("modules: " +', '.join(modules))
 
 mkpath(build_dir)
-mkpath(deps_dir)
 mkpath(install_dir)
 mkpath(tools)
 
+config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
+
 # Use prebuilt binaries if --build-all is not set
+os.chdir(root)
 if build_all == False:
-	def is_commit_current(base_path: str, commit_id: str, filename: str = "commit_id.json") -> bool:
-		return check_content_version(base_path, commit_id, filename)
-
-	def update_commit_directory(base_path: str, commit_id: str, filename: str = "commit_id.json") -> None:
-		update_content_version(base_path, commit_id, filename)
-
-	base_path = get_staging_dir()
-	if not is_commit_current(base_path, prebuilt_tag, "tag_id.json"):
-		update_commit_directory(base_path, prebuilt_tag, "tag_id.json")
-		os.chdir(base_path)
-
-		print_msg("Downloading prebuilt third-party binaries...")
-
-		if platform == "linux":
-			platform_name = platform
-			prebuilt_archive_format = "tar.gz"
-		else:
-			platform_name = "windows"
-			prebuilt_archive_format = "zip"
-		prebuilt_archive_name = "lib-" +platform_name +"-x64-" +toolset
-		prebuilt_archive_name += "." +prebuilt_archive_format
-
-		http_extract("https://github.com/Silverlan/pragma-deps-lib/releases/download/" +prebuilt_tag +"/" +prebuilt_archive_name,format=prebuilt_archive_format)
-	else:
-		print(f"Directory '{base_path}' is already up-to-date.")
+	subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-DTOOLSET=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
+subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-P", "cmake/fetch_clang.cmake"],check=True)
 
 if platform == "win32":
 	if toolset == "msvc":
@@ -269,8 +226,8 @@ if platform == "win32":
 		print_warning(f"Visual Studio toolset is currently not recommended and may not work. If you run into issues, try using the clang toolset instead.")
 	elif toolset == "clang":
 		# We need an up-to-date version of clang, so we'll use our shipped version for now.
-		from third_party import clang
-		clang.main()
+		#from third_party import clang
+		#clang.main()
 
 		clang_dir = str(Path(get_library_root_dir("clang")) / "bin/")
 		config.toolsetArgs = [
@@ -306,8 +263,8 @@ elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++
 	# Due to a compiler bug with C++20 Modules in clang, we need the
 	# very latest version of clang, which is not available in package managers yet.
 	# We'll use our own prebuilt version for now.
-	from third_party import clang
-	clang.main()
+	# from third_party import clang
+	# clang.main()
 	clang_staging_path = Path(get_library_root_dir("clang"))
 	if c_compiler == "clang-22":
 		c_compiler = str(clang_staging_path / "bin/clang")
@@ -315,9 +272,6 @@ elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++
 		cxx_compiler = str(clang_staging_path / "bin/clang++")
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
-
-if platform == "linux" and with_debug:
-	config.toolsetCFlags = ["-D_GLIBCXX_ASSERTIONS"]
 
 if update:
 	os.chdir(root)
@@ -332,8 +286,6 @@ if update:
 	print("argv: ",argv)
 	os.execv(sys.executable, ['python'] +argv)
 	sys.exit(0)
-
-config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 
 if platform == "linux":
 	os.environ["CC"] = c_compiler
@@ -402,6 +354,7 @@ def execscript(filepath):
 		"check_repository_commit": check_repository_commit,
 		"check_content_version": check_content_version,
 		"update_content_version": update_content_version,
+		"run_cmake_script": run_cmake_script,
 		
 		"cmake_args": cmake_args,
 
@@ -494,33 +447,12 @@ module_list = []
 cmake_args = config.cmake_args
 additional_build_targets = []
 
-########## submodules ##########
-os.chdir(root)
-print_msg("Updating external libraries...")
-execscript(scripts_dir +"/scripts/external_libs.py")
-
-print_msg("Updating third-party libraries...")
-execscript(scripts_dir +"/scripts/third_party_libs.py")
-
-print_msg("Updating modules...")
-execscript(scripts_dir +"/scripts/modules.py")
-
 ########## Third-Party Libraries ##########
+os.chdir(root)
 print_msg("Building third-party libraries...")
 if build_all:
 	import build_third_party_libs
 	build_third_party_libs.main()
-
-# gcc
-os.chdir(deps_dir)
-gcc_root = normalize_path(os.getcwd() +"/gcc")
-if platform == "linux":
-	if not Path(gcc_root).is_dir():
-		print_msg("gcc not found. Downloading...")
-		mkdir("gcc",cd=True)
-		http_extract("https://github.com/Silverlan/test_gcc15/releases/download/2025-11-17/gcc-15.2.0.tar.xz",format="tar.xz")
-	os.chdir(gcc_root)
-	modules_json_path = gcc_root +"/lib64/libstdc++.modules.json"
 
 ########## Modules ##########
 print_msg("Downloading modules...")
@@ -661,6 +593,7 @@ def execbuildscript(filepath):
 		"check_repository_commit": check_repository_commit,
 		"check_content_version": check_content_version,
 		"update_content_version": update_content_version,
+		"run_cmake_script": run_cmake_script,
 		"add_pragma_module": add_pragma_module
 	}
 	if platform == "linux":
@@ -710,101 +643,19 @@ l = {
 # Register user modules
 execfile(scripts_dir +"/user_modules.py",g,l)
 
-# Register argument-dependent modules
-if with_essential_client_modules:
-	add_pragma_module(
-		name="pr_prosper_vulkan",
-		commitSha="f39e9cf202d69626101bb07d6294bf455799b7c3",
-		repositoryUrl="https://github.com/Silverlan/pr_prosper_vulkan.git"
-	)
+cmake_with_args = []
+cmake_with_args.append(f"-DPRAGMA_WITH_PFM={1 if with_pfm else 0}")
+cmake_with_args.append(f"-DPRAGMA_WITH_VR={1 if with_vr else 0}")
+cmake_with_args.append(f"-DPRAGMA_WITH_NETWORKING={1 if with_networking else 0}")
+cmake_with_args.append(f"-DPRAGMA_WITH_COMMON_ENTITIES={1 if with_common_entities else 0}")
+cmake_with_args.append(f"-DPRAGMA_WITH_COMMON_MODULES={1 if with_common_modules else 0}")
+cmake_with_args.append(f"-DPRAGMA_WITH_ESSENTIAL_CLIENT_MODULES={1 if with_essential_client_modules else 0}")
 
-if with_common_modules:
-	add_pragma_module(
-		name="pr_bullet",
-		commitSha="094fe87b217a9985fdc3cdce29f614b2d469f293",
-		repositoryUrl="https://github.com/Silverlan/pr_bullet.git"
-	)
-	add_pragma_module(
-		name="pr_audio_soloud",
-		commitSha="a7c91941de48d63e4ec06444f714240f46c0ced8",
-		repositoryUrl="https://github.com/Silverlan/pr_soloud.git"
-	)
-	add_pragma_module(
-		name="pr_audio_dummy",
-		commitSha="c95ca9ecdd7a33397a5253343117f4e242c45928",
-		repositoryUrl="https://github.com/Silverlan/pr_audio_dummy.git"
-	)
-	add_pragma_module(
-		name="pr_prosper_opengl",
-		commitSha="ecfcaad223adeae285b7eea0ca3e70ea46af50db",
-		repositoryUrl="https://github.com/Silverlan/pr_prosper_opengl.git"
-	)
+# Fetch base modules
+os.chdir(root)
+subprocess.run(["cmake"] +cmake_with_args +["-P", "cmake/fetch_modules.cmake"],check=True)
 
-if with_pfm:
-	if with_core_pfm_modules or with_all_pfm_modules:
-		add_pragma_module(
-			name="pr_curl",
-			commitSha="41d4f9d39d18cfca5ff0af1a310c0bf4f01d5adc",
-			repositoryUrl="https://github.com/Silverlan/pr_curl.git"
-		)
-		add_pragma_module(
-			name="pr_dmx",
-			commitSha="d4ae5defaf03cf3d1b8337818be1ccedbdbaebcd",
-			repositoryUrl="https://github.com/Silverlan/pr_dmx.git"
-		)
-	if with_all_pfm_modules:
-		add_pragma_module(
-			name="pr_chromium",
-			commitSha="1477b93859c9ae5058c66a6b436ac24dd03ebff7",
-			repositoryUrl="https://github.com/Silverlan/pr_chromium.git"
-		)
-		add_pragma_module(
-			name="pr_unirender",
-			commitSha="60d97df3bed19ae00f471fa6630c97b530b71fb3",
-			repositoryUrl="https://github.com/Silverlan/pr_cycles.git"
-		)
-		add_pragma_module(
-			name="pr_xatlas",
-			commitSha="5d7ff7f4728ed5bf1290757b161df4bb3ef58b69",
-			repositoryUrl="https://github.com/Silverlan/pr_xatlas.git"
-		)
-		add_pragma_module(
-			name="pr_davinci",
-			commitSha="c09482375a0ff1098283513b6d7e06a67b30b9f9",
-			repositoryUrl="https://github.com/Silverlan/pr_davinci.git"
-		)
-		add_pragma_module(
-			name="pr_opencv",
-			commitSha="6899a8504225e232db73a4f9be514fcb889a14f9",
-			repositoryUrl="https://github.com/Silverlan/pr_opencv.git"
-		)
-
-if with_pfm:
-	add_pragma_module(
-		name="pr_git",
-		commitSha="5af153f8d5c3d969f3df2cdd05f2929e680845aa",
-		repositoryUrl="https://github.com/Silverlan/pr_git.git"
-	)
-
-if with_vr:
-	add_pragma_module(
-		name="pr_openvr",
-		commitSha="91c3d5175bb229c9afc0b02a91256d3673dfc221",
-		repositoryUrl="https://github.com/Silverlan/pr_openvr.git"
-	)
-
-if with_networking:
-	add_pragma_module(
-		name="pr_steam_networking_sockets",
-		commitSha="a1a3fda9bbe6987aba23559f8bc58301c17b7a15",
-		repositoryUrl="https://github.com/Silverlan/pr_steam_networking_sockets.git",
-		skipBuildTarget=True
-	)
-
-# These modules are shipped with the Pragma repository and will have to be excluded from the
-# CMake configuration explicitly if they should be disabled.
-shippedModules = []
-
+# Fetch additional modules
 index = 0
 # The module list can be modified during iteration, so we have to use a while loop here.
 while index < len(module_info):
@@ -830,33 +681,27 @@ while index < len(module_info):
 		if not moduleName in shippedModules:
 			if moduleUrl:
 				get_submodule(moduleName,moduleUrl,commitId,branch)
-
-	os.chdir(moduleDir)
-	scriptPath = moduleDir +"build_scripts/setup.py"
-	if Path(scriptPath).is_file():
-		print_msg("Executing module setup script...")
-		execbuildscript(scriptPath)
-
-	if not skipBuildTarget:
-		module_list.append(moduleName)
+				
+	module_list.append(moduleName)
 	index += 1
 
-for module in shippedModules:
-	if module != "pr_curl": # Curl is currently required
-		if not module in module_list:
-			cmake_args.append("-DPRAGMA_DISABLE_MODULE_" +module +"=ON")
-		else:
-			cmake_args.append("-DPRAGMA_DISABLE_MODULE_" +module +"=OFF")
+# Run module build scripts
+modules_dir = Path(root) / "modules"
+for item in modules_dir.iterdir():
+	if item.is_dir():
+		moduleDir = str(item)
+		os.chdir(moduleDir)
+		scriptPath = str(Path(moduleDir) / "build_scripts/setup.py")
+		if Path(scriptPath).is_file():
+			print_msg("Executing module setup script...")
+			
+			moduleName = item.name
+			moduleUrl = ""
+			commitId = ""
+			branch = ""
+			skipBuildTarget = False
 
-os.chdir(install_dir)
-for url in modules_prebuilt:
-	print_msg("Downloading prebuilt binaries for module '" +url +"'...")
-	install_prebuilt_binaries(url)
-
-if with_pfm:
-	additional_build_targets.append("pfm")
-
-cmake_args.append("-DPRAGMA_INSTALL_CUSTOM_TARGETS=" +";".join(module_list +additional_build_targets))
+			execbuildscript(scriptPath)
 
 print("Modules:" +', '.join(module_list))
 print("Additional CMake Arguments:" +', '.join(cmake_args))
@@ -867,12 +712,8 @@ if not deps_only:
 	print_msg("Configuring Pragma...")
 	os.chdir(build_dir)
 
-	cmake_args += [
-		"-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +""
-	]
-
-	if platform == "linux":
-		cmake_args += ["-DCMAKE_CXX_STDLIB_MODULES_JSON=" +modules_json_path]
+	cmake_args.append("-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +"")
+	cmake_args.append("-DPRAGMA_ADDITIONAL_MODULES=" + ";".join(module_list))
 
 	vtune_enabled = False
 	if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
@@ -884,20 +725,26 @@ if not deps_only:
 		else:
 			raise argparse.ArgumentError(None,"Both the --vtune-include-path and --vtune-library-path options have to be specified to enable VTune support!")
 
-	cmake_args += [f"-DCONFIG_BUILD_WITH_VTUNE_SUPPORT={1 if vtune_enabled else 0}"]
+	cmake_args.append(f"-DCONFIG_BUILD_WITH_VTUNE_SUPPORT={1 if vtune_enabled else 0}")
 
-	cmake_args += [f"-DWITH_PFM={1 if with_pfm else 0}"]
-	cmake_args += [f"-DWITH_VR={1 if with_vr else 0}"]
-	cmake_args += [f"-DWITH_COMMON_ENTITIES={1 if with_common_entities else 0}"]
-	cmake_args += [f"-DWITH_COMMON_MODULES={1 if with_common_modules else 0}"]
+	cmake_args += cmake_with_args
 	if platform == "linux":
-		cmake_args += [f"-DPRAGMA_DEBUG={1 if with_debug else 0}"]
+		cmake_args.append(f"-DPRAGMA_DEBUG={1 if with_debug else 0}")
 
 	cmake_args += additional_cmake_args
-	cmake_args.append("-DCMAKE_POLICY_VERSION_MINIMUM=4.0")
-	cmake_args.append("-DCMAKE_CXX_SCAN_FOR_MODULES=1")
-	cmake_args.append("-DCMAKE_EXPORT_COMPILE_COMMANDS=1")
 	cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_staging_dir)
+
+	if platform == "win32":
+		if toolset == "msvc":
+			preset = "windows-ninja-msvc"
+		elif toolset == "clang":
+			preset = "windows-ninja-clang"
+	else:
+		preset = "linux-ninja-clang"
+
+	cmake_args.append("--preset")
+	cmake_args.append(preset)
+
 	cmake_configure_def_toolset(root,generator,cmake_args,additional_cmake_flags)
 
 	print_msg("Build files have been written to \"" +build_dir +"\".")

@@ -820,3 +820,7 @@ def apply_patch(path_path: str):
 def build_third_party_library(name, *args, **kwargs):
 	module = importlib.import_module(f"third_party.{name}")
 	return module.main(*args, **kwargs)
+
+def run_cmake_script(fileName):
+	os.chdir(config.pragma_root)
+	subprocess.run(["cmake", "-DTOOLSET=" +config.toolset, "-DCMAKE_SOURCE_DIR=" +config.pragma_root, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", fileName],check=True)

@@ -719,7 +719,6 @@ if not deps_only:
 	cmake_args.append(f"-DCONFIG_BUILD_WITH_VTUNE_SUPPORT={1 if vtune_enabled else 0}")
 
 	cmake_args += cmake_with_args
-	cmake_args.append(f"-DCMAKE_CXX_STDLIB_MODULES_JSON=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/modules/modules.json")
 	if platform == "linux":
 		cmake_args.append(f"-DPRAGMA_DEBUG={1 if with_debug else 0}")
 

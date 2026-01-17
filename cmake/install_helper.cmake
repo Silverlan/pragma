@@ -87,7 +87,7 @@ function(pr_fetch_prebuilt_binaries base_path base_url version)
     set(multiValueArgs)
     cmake_parse_arguments(PARSE_ARGV 3 PA "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
-    if(PA_TOOLSET)
+    if(DEFINED PA_TOOLSET AND NOT "${PA_TOOLSET}" STREQUAL "")
         set(effective_toolset "${PA_TOOLSET}")
     else()
         set(effective_toolset "${toolset}")

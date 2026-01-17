@@ -217,7 +217,7 @@ config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 # Use prebuilt binaries if --build-all is not set
 os.chdir(root)
 if build_all == False:
-	subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-Dtoolset=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
+	subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-DTOOLSET=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
 subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-P", "cmake/fetch_clang.cmake"],check=True)
 
 if platform == "win32":

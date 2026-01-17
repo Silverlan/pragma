@@ -90,7 +90,7 @@ function(pr_fetch_prebuilt_binaries base_path base_url version)
     if(DEFINED PA_TOOLSET AND NOT "${PA_TOOLSET}" STREQUAL "")
         set(effective_toolset "${PA_TOOLSET}")
     else()
-        set(effective_toolset "${toolset}")
+        set(effective_toolset "${TOOLSET}")
     endif()
 
     if(PA_PRIMARY_DIR)

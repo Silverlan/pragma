@@ -13,7 +13,7 @@ function(pr_get_deps version)
             set(prebuilt_archive_format "zip")
         endif()
 
-        set(prebuilt_archive_name "lib-${platform_name}-x64-${toolset}.${prebuilt_archive_format}")
+        set(prebuilt_archive_name "lib-${platform_name}-x64-${TOOLSET}.${prebuilt_archive_format}")
         pr_http_extract(
             "https://github.com/Silverlan/pragma-deps-lib/releases/download/${version}/${prebuilt_archive_name}"
             "${PRAGMA_DEPS_DIR}"

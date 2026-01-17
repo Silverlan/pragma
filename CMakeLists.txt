@@ -62,13 +62,13 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIAN
     message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (clang-cl is currently not supported. Please use clang instead.).")
 endif()
 
-set(toolset "clang")
+set(TOOLSET "clang")
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    set(toolset "clang")
+    set(TOOLSET "clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set(toolset "msvc")
+    set(TOOLSET "msvc")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(toolset "gcc")
+    set(TOOLSET "gcc")
 endif()
 
 include("cmake/fetch_deps.cmake")

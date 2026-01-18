@@ -15,7 +15,6 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "CMAKE_DEFAULT_BUILD_TYPE": "RelWithDebInfo",
-        "CMAKE_POLICY_VERSION_MINIMUM": "4.0",
         "CMAKE_CXX_SCAN_FOR_MODULES": "1",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "1",
 
@@ -28,32 +27,200 @@
       }
     },
     {
-      "name": "linux-ninja-clang",
-      "displayName": "Ninja with Clang (Linux)",
-      "inherits": "base",
+      "name": "windows",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "linux",
+      "hidden": true,
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "config-linux-ninja-clang",
+      "displayName": "[Linux] Config - Ninja with Clang",
+      "inherits": ["base", "linux"],
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
       "cacheVariables": {
         "CMAKE_C_COMPILER": "${sourceDir}/build_tools/clang/bin/clang",
         "CMAKE_CXX_COMPILER": "${sourceDir}/build_tools/clang/bin/clang++"
       }
     },
     {
-      "name": "windows-ninja-clang",
-      "displayName": "Ninja with Clang (Windows)",
-      "inherits": "base",
+      "name": "config-windows-ninja-clang",
+      "displayName": "[Windows] Config - Ninja with Clang",
+      "inherits": ["base", "windows"],
       "cacheVariables": {
         "CMAKE_C_COMPILER": "${sourceDir}/build_tools/clang/bin/clang.exe",
         "CMAKE_CXX_COMPILER": "${sourceDir}/build_tools/clang/bin/clang++.exe"
       }
     },
     {
-      "name": "windows-ninja-msvc",
-      "displayName": "Ninja with MSVC (Windows)",
-      "inherits": "base",
+      "name": "config-windows-ninja-msvc",
+      "displayName": "[Windows] Config - Ninja with MSVC",
+      "inherits": ["base", "windows"],
       "cmakeExecutable": "${sourceDir}/deps/staging/cmake/bin/cmake.exe",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "cl.exe",
         "CMAKE_CXX_COMPILER": "cl.exe"
       }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "cleanFirst": false,
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "target-install",
+      "hidden": true,
+      "targets": "pragma-install"
+    },
+    {
+      "name": "target-install-full",
+      "hidden": true,
+      "targets": "pragma-install-full"
+    },
+
+    {
+      "name": "build-linux-ninja-clang-full",
+      "inherits": ["base", "target-install-full"],
+      "displayName": "[Linux] Full Build - Ninja with Clang",
+      "configurePreset": "config-linux-ninja-clang"
+    },
+    {
+      "name": "build-linux-ninja-clang-incremental",
+      "inherits": ["base", "target-install"],
+      "displayName": "[Linux] Incremental Build - Ninja with Clang",
+      "configurePreset": "config-linux-ninja-clang"
+    },
+
+    {
+      "name": "build-windows-ninja-clang-full",
+      "inherits": ["base", "target-install-full"],
+      "displayName": "[Windows] Full Build - Ninja with Clang",
+      "configurePreset": "config-windows-ninja-clang"
+    },
+    {
+      "name": "build-windows-ninja-clang-incremental",
+      "inherits": ["base", "target-install"],
+      "displayName": "[Windows] Incremental Build - Ninja with Clang",
+      "configurePreset": "config-windows-ninja-clang"
+    },
+
+    {
+      "name": "build-windows-ninja-msvc-full",
+      "inherits": ["base", "target-install-full"],
+      "displayName": "[Windows] Full Build - Ninja with MSVC",
+      "configurePreset": "config-windows-ninja-msvc"
+    },
+    {
+      "name": "build-windows-ninja-msvc-incremental",
+      "inherits": ["base", "target-install"],
+      "displayName": "[Windows] Incremental Build - Ninja with MSVC",
+      "configurePreset": "config-windows-ninja-msvc"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "linux-ninja-clang-full",
+      "displayName": "[Linux] Ninja with Clang (Full)",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "config-linux-ninja-clang"
+        },
+        {
+          "type": "build",
+          "name": "build-linux-ninja-clang-full"
+        }
+      ]
+    },
+    {
+      "name": "linux-ninja-clang",
+      "displayName": "[Linux] Ninja with Clang (Incremental)",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "config-linux-ninja-clang"
+        },
+        {
+          "type": "build",
+          "name": "build-linux-ninja-clang-incremental"
+        }
+      ]
+    },
+
+    {
+      "name": "windows-ninja-clang-full",
+      "displayName": "[Windows] Ninja with Clang (Full)",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "config-windows-ninja-clang"
+        },
+        {
+          "type": "build",
+          "name": "build-windows-ninja-clang-full"
+        }
+      ]
+    },
+    {
+      "name": "windows-ninja-clang",
+      "displayName": "[Windows] Ninja with Clang (Incremental)",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "config-windows-ninja-clang"
+        },
+        {
+          "type": "build",
+          "name": "build-windows-ninja-clang-incremental"
+        }
+      ]
+    },
+
+    {
+      "name": "windows-ninja-msvc-full",
+      "displayName": "[Windows] Ninja with MSVC (Full)",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "config-windows-ninja-msvc"
+        },
+        {
+          "type": "build",
+          "name": "build-windows-ninja-msvc-full"
+        }
+      ]
+    },
+    {
+      "name": "windows-ninja-msvc",
+      "displayName": "[Windows] Ninja with MSVC (Incremental)",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "config-windows-ninja-msvc"
+        },
+        {
+          "type": "build",
+          "name": "build-windows-ninja-msvc-incremental"
+        }
+      ]
     }
   ]
 }

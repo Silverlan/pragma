@@ -229,7 +229,7 @@ if platform == "win32":
 		#from third_party import clang
 		#clang.main()
 
-		clang_dir = str(Path(get_library_root_dir("clang")) / "bin/")
+		clang_dir = str(Path(config.build_tools_dir) / "clang/bin/")
 		config.toolsetArgs = [
 			"-DCMAKE_C_COMPILER=" +str(Path(clang_dir) / "clang.exe"),
 			"-DCMAKE_CXX_COMPILER=" +str(Path(clang_dir) / "clang++.exe"),
@@ -243,7 +243,7 @@ if platform == "win32":
 		cmake.main()
 		config.cmake_path = str(Path(get_library_root_dir("cmake")) / "bin/cmake.exe")
 	elif toolset == "clang-cl":
-		clang_dir = get_library_root_dir("clang") +"/bin"
+		clang_dir = str(Path(config.build_tools_dir) / "clang/bin")
 		
 		config.toolsetArgs = [
 			"-DCMAKE_C_COMPILER=" +clang_dir +"/clang-cl.exe",
@@ -265,7 +265,7 @@ elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++
 	# We'll use our own prebuilt version for now.
 	# from third_party import clang
 	# clang.main()
-	clang_staging_path = Path(get_library_root_dir("clang"))
+	clang_staging_path = Path(config.build_tools_dir) / "clang/"
 	if c_compiler == "clang-22":
 		c_compiler = str(clang_staging_path / "bin/clang")
 	if cxx_compiler == "clang++-22":

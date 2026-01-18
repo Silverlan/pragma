@@ -5,7 +5,7 @@ def main():
 	chdir_mkdir(deps_dir)
 	
 	os.chdir(deps_dir)
-	clang_dir = get_library_root_dir("clang")
+	clang_dir = str(Path(config.build_tools_dir) / "clang")
 	if platform == "win32":
 		if not Path(clang_dir).is_dir():
 			http_extract("https://github.com/llvm/llvm-project/releases/download/llvmorg-21.1.8/clang+llvm-21.1.8-x86_64-pc-windows-msvc.tar.xz",format="tar.xz")
@@ -15,7 +15,7 @@ def main():
 		os.chdir(deps_dir)
 		# We need clang-22, which is not actually available as a release yet, so we use our own prebuilt binaries for now.
 		clang20_root = os.getcwd() +"/LLVM-22.git-Linux-X64"
-		clang_staging_path = get_library_root_dir("clang")
+		clang_staging_path = clang_dir
 		if not Path(clang20_root).is_dir():
 			print_msg("Downloading clang-22...")
 			http_extract("https://github.com/Silverlan/clang_prebuilt/releases/download/2025-12-19/linux_x64.tar.xz",format="tar.xz")

@@ -218,7 +218,7 @@ config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 os.chdir(root)
 if build_all == False:
 	subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-DTOOLSET=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
-subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-P", "cmake/fetch_clang.cmake"],check=True)
+subprocess.run(["cmake", "-DPRAGMA_BUILD_TOOLS_DIR=" +config.build_tools_dir, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", "cmake/fetch_clang.cmake"],check=True)
 
 if platform == "win32":
 	if toolset == "msvc":

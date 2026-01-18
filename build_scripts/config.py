@@ -8,6 +8,7 @@ cmake_path = "cmake"
 deps_dir = str(Path.cwd() / "deps")
 deps_staging_dir = "staging"
 prebuilt_bin_dir = str(Path(deps_dir) / deps_staging_dir)
+build_tools_dir = str(Path.cwd() / "build_tools")
 prefer_git_https = True
 if platform == "win32":
 	generator_msvc = "Visual Studio 17 2022"

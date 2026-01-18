@@ -164,7 +164,7 @@ set(BUILD_SHARED_LIBS
 set(BUILD_STATIC_LIBS
     ON
     CACHE BOOL ON FORCE)
-pr_fetch_third_party_lib("clip2tri" TARGET clip2tri-static INC "clip2tri" "https://github.com/raptor/clip2tri" "f62a734d22733814b8a970ed8a68a4d94c24fa5f")
+pr_fetch_third_party_lib("clip2tri" TARGET clip2tri-static INC "clip2tri" "https://github.com/Silverlan/clip2tri.git" "a6bbeee8a29604faaff4e43e45e3d25b8b80ca5f")
 pr_fetch_third_party_lib(NAME clipper TARGET clipper-static)
 pr_fetch_third_party_lib(NAME poly2tri TARGET poly2tri-static)
 set(BUILD_SHARED_LIBS

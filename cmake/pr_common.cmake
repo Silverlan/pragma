@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 4.2.0)
 
 function(pr_get_normalized_identifier_name BASE_NAME)
     string(REPLACE "-" "_" IDENTIFIER_UNDERSCORE ${BASE_NAME})

@@ -67,7 +67,6 @@ endfunction()
 pr_fetch_third_party_repository("bvh"                 "https://github.com/madmann91/bvh"                    "ac41ab8")
 pr_fetch_third_party_repository("exprtk"              "https://github.com/ArashPartow/exprtk"               "f46bffcd6966d38a09023fb37ba9335214c9b959")
 pr_fetch_third_party_repository("freetype"            "https://github.com/aseprite/freetype2"               "9a2d6d97b2d8a5d22d02948b783df12b764afa2d")
-pr_fetch_third_party_repository("luajit"              "https://github.com/Silverlan/LuaJIT"                 "cb42653")                                  # Branch: "v2.1"
 pr_fetch_third_party_repository("miniball"            "https://github.com/Silverlan/miniball"               "609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")
 
 if(WIN32)
@@ -82,8 +81,8 @@ set(BUILD_SHARED_LIBS
     ON
     CACHE BOOL ".." FORCE)
 set(LUABIND_BUILD_SHARED ON CACHE BOOL "Build luabind as a shared library?" FORCE)
-set(LUA_INCLUDE_DIR ${DEPENDENCY_LUAJIT_INCLUDE} CACHE STRING "" FORCE)
-set(LUA_LIBRARY ${DEPENDENCY_LUA_LIBRARY} CACHE STRING "" FORCE)
+set(LUA_INCLUDE_DIR ${luajit_INCLUDE_DIRS} CACHE STRING "" FORCE)
+set(LUA_LIBRARY ${luajit_LIBRARIES} CACHE STRING "" FORCE)
 set(LUA_FOUND ON CACHE BOOL ON FORCE)
 set(LUA_LIBRARIES ${LUA_LIBRARY} CACHE STRING "" FORCE)
 pr_fetch_third_party_lib("luabind" INC luabind "https://github.com/Silverlan/luabind-deboostified" "38b223d4a8538d08f7ddded7989f4297aa74ee6d")

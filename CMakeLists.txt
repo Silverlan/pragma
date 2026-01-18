@@ -32,12 +32,13 @@ if ("${CMAKE_GENERATOR}" MATCHES "Ninja")
 endif()
 
 set(PRAGMA_DEPS_DIR "${CMAKE_SOURCE_DIR}/deps/staging/" CACHE PATH "Directory where dependencies will be extracted to.")
+set(PRAGMA_BUILD_TOOLS_DIR "${CMAKE_SOURCE_DIR}/build_tools/" CACHE PATH "Directory where additional build tool dependencies will be extracted to.")
 
 include("cmake/fetch_clang.cmake")
 
 if(UNIX)
     include("cmake/fetch_gcc.cmake")
-    set(CMAKE_CXX_STDLIB_MODULES_JSON "${PRAGMA_DEPS_DIR}/gcc/lib64/libstdc++.modules.json")
+    set(CMAKE_CXX_STDLIB_MODULES_JSON "${PRAGMA_BUILD_TOOLS_DIR}/gcc/lib64/libstdc++.modules.json")
 endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)

@@ -10,15 +10,15 @@ function(pr_fetch_clang)
         set(version "2025-12-19")
         set(url "https://github.com/Silverlan/clang_prebuilt/releases/download/2025-12-19/linux_x64.tar.xz")
     endif()
-    check_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json" IS_VALID)
+    check_content_version("${PRAGMA_BUILD_TOOLS_DIR}/clang" "${version}" "version.json" IS_VALID)
     if(NOT IS_VALID)
-        clear_content("${PRAGMA_DEPS_DIR}/clang")
+        clear_content("${PRAGMA_BUILD_TOOLS_DIR}/clang")
         pr_http_extract(
             "${url}"
-            "${PRAGMA_DEPS_DIR}/clang"
+            "${PRAGMA_BUILD_TOOLS_DIR}/clang"
             STRIP_TOP_DIR
         )
-        update_content_version("${PRAGMA_DEPS_DIR}/clang" "${version}" "version.json")
+        update_content_version("${PRAGMA_BUILD_TOOLS_DIR}/clang" "${version}" "version.json")
     endif()
 endfunction()
 pr_fetch_clang()

@@ -1,10 +1,10 @@
 include("cmake/install_helper.cmake")
 
 function(pr_get_deps version)    
-    check_content_version("${PRAGMA_DEPS_DIR}" "${version}" "version.json" IS_VALID)
+    check_content_version("${PRAGMA_DEPS_DIR}" "${version}-${TOOLSET}" "version.json" IS_VALID)
     if(NOT IS_VALID)
         clear_content("${PRAGMA_DEPS_DIR}")
-        update_content_version("${PRAGMA_DEPS_DIR}" "${version}" "version.json")
+        update_content_version("${PRAGMA_DEPS_DIR}" "${version}-${TOOLSET}" "version.json")
         if(UNIX)
             set(platform_name "linux")
             set(prebuilt_archive_format "tar.gz")
@@ -20,6 +20,4 @@ function(pr_get_deps version)
         )
     endif()
 endfunction()
-# TODO: Check if dir built?
-# If deps exists and contains no version.json -> assume custom build
 pr_get_deps("2026-01-10")

@@ -10,12 +10,14 @@
       "name": "base",
       "hidden": true,
       "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/build",
+      "installDir": "${sourceDir}/build/install",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_DEFAULT_BUILD_TYPE": "RelWithDebInfo",
         "CMAKE_POLICY_VERSION_MINIMUM": "4.0",
         "CMAKE_CXX_SCAN_FOR_MODULES": "1",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "1",
-        "CMAKE_INSTALL_PREFIX": "${sourceDir}/build/install",
 
         "PRAGMA_WITH_PFM": "1",
         "PRAGMA_WITH_VR": "1",
@@ -30,8 +32,8 @@
       "displayName": "Ninja with Clang (Linux)",
       "inherits": "base",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "${sourceDir}/deps/staging/clang/bin/clang",
-        "CMAKE_CXX_COMPILER": "${sourceDir}/deps/staging/clang/bin/clang++"
+        "CMAKE_C_COMPILER": "${sourceDir}/build_tools/clang/bin/clang",
+        "CMAKE_CXX_COMPILER": "${sourceDir}/build_tools/clang/bin/clang++"
       }
     },
     {
@@ -39,14 +41,15 @@
       "displayName": "Ninja with Clang (Windows)",
       "inherits": "base",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "${sourceDir}/deps/staging/clang/bin/clang.exe",
-        "CMAKE_CXX_COMPILER": "${sourceDir}/deps/staging/clang/bin/clang++.exe"
+        "CMAKE_C_COMPILER": "${sourceDir}/build_tools/clang/bin/clang.exe",
+        "CMAKE_CXX_COMPILER": "${sourceDir}/build_tools/clang/bin/clang++.exe"
       }
     },
     {
       "name": "windows-ninja-msvc",
       "displayName": "Ninja with MSVC (Windows)",
       "inherits": "base",
+      "cmakeExecutable": "${sourceDir}/deps/staging/cmake/bin/cmake.exe",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "cl.exe",
         "CMAKE_CXX_COMPILER": "cl.exe"

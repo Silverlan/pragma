@@ -5,15 +5,15 @@ include("cmake/install_helper.cmake")
 function(pr_fetch_gcc)
     set(version "2025-12-15")
     set(url "https://github.com/Silverlan/gcc_prebuilt/releases/download/2025-12-15/gcc-16-opt.tar.xz")
-    check_content_version("${PRAGMA_DEPS_DIR}/gcc" "${version}" "version.json" IS_VALID)
+    check_content_version("${PRAGMA_BUILD_TOOLS_DIR}/gcc" "${version}" "version.json" IS_VALID)
     if(NOT IS_VALID)
-        clear_content("${PRAGMA_DEPS_DIR}/gcc")
+        clear_content("${PRAGMA_BUILD_TOOLS_DIR}/gcc")
         pr_http_extract(
             "${url}"
-            "${PRAGMA_DEPS_DIR}/gcc"
+            "${PRAGMA_BUILD_TOOLS_DIR}/gcc"
             STRIP_TOP_DIR
         )
-        update_content_version("${PRAGMA_DEPS_DIR}/gcc" "${version}" "version.json")
+        update_content_version("${PRAGMA_BUILD_TOOLS_DIR}/gcc" "${version}" "version.json")
     endif()
 endfunction()
 pr_fetch_gcc()

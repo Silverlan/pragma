@@ -678,9 +678,8 @@ while index < len(module_info):
 	print("Module Directory: " +moduleDir)
 
 	if not skip_repository_updates:
-		if not moduleName in shippedModules:
-			if moduleUrl:
-				get_submodule(moduleName,moduleUrl,commitId,branch)
+		if moduleUrl:
+			get_submodule(moduleName,moduleUrl,commitId,branch)
 				
 	module_list.append(moduleName)
 	index += 1

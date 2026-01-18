@@ -49,5 +49,5 @@ if(PRAGMA_WITH_NETWORKING)
 endif()
 
 foreach(MODULE_NAME ${PRAGMA_ADDITIONAL_MODULES})
-    pr_add_module(${MODULE_NAME})
+    list(APPEND PRAGMA_FETCHED_MODULES "${MODULE_NAME}")
 endforeach()

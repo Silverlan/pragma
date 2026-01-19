@@ -121,13 +121,23 @@ def cmake_configure(scriptPath,generator,toolsetArgs=[],additionalArgs=[],cflags
 		print("Configure command failed:\n\n", cmd_line, flush=True)
 		raise
 
-def cmake_build(buildConfig,targets=None,env=None):
+def cmake_build(buildConfig,targets=None,env=None,verbose=False):
 	args = [config.cmake_path,"--build",".","--config",buildConfig]
 	if targets:
 		args.append("--target")
 		args += targets
 	args.append("--parallel")
 	args.append(str(multiprocessing.cpu_count()))
+
+	if verbose:
+		args.append("--")
+		if config.generator in ("Ninja", "Ninja Multi-Config"):
+			args.append("-v")
+		elif config.generator == "Unix Makefiles":
+			args.append("VERBOSE=1")
+		elif is_msbuild_generator(config.generator):
+			args.append("/verbosity:detailed")
+
 	print("Running CMake build command...")
 	# print("Running CMake build command:", ' '.join(f'"{arg}"' for arg in args))
 	try:

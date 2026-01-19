@@ -789,7 +789,7 @@ if not deps_only:
 		targets = ["pragma-install-full"]
 
 		print_msg("Running build command...")
-		cmake_build(build_config,targets)
+		cmake_build(build_config,targets,verbose=verbose)
 
 		print_msg("Build Successful! Pragma has been installed to \"" +normalize_path(install_dir) +"\".")
 		print_msg("If you make any changes to the core source code, you can build the \"pragma-install\" target to compile the changes and re-install the binaries automatically.")

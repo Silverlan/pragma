@@ -37,8 +37,15 @@ set(PRAGMA_BUILD_TOOLS_DIR "${CMAKE_SOURCE_DIR}/build_tools/" CACHE PATH "Direct
 include("cmake/fetch_clang.cmake")
 
 if(UNIX)
-    include("cmake/fetch_gcc.cmake")
-    set(CMAKE_CXX_STDLIB_MODULES_JSON "${PRAGMA_BUILD_TOOLS_DIR}/gcc/lib64/libstdc++.modules.json")
+    # Compilers are still somewhat unreliable at finding the modules.json (which is required for import std), so
+    # we'll help them out for now. For newer distros (e.g. arch-based), it's typically available on the system,
+    # for other cases (e.g. for Ubuntu 24), we'll use our own shipped version of gcc.
+    if(EXISTS "/usr/lib/libstdc++.modules.json")
+        set(CMAKE_CXX_STDLIB_MODULES_JSON "/usr/lib/libstdc++.modules.json")
+    else()
+        include("cmake/fetch_gcc.cmake")
+        set(CMAKE_CXX_STDLIB_MODULES_JSON "${PRAGMA_BUILD_TOOLS_DIR}/gcc/lib64/libstdc++.modules.json")
+    endif()
 endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)

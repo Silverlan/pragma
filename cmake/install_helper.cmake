@@ -24,7 +24,7 @@ function(check_content_version BASE_PATH CONTENTS FILENAME RESULT_VAR)
     endif()
 endfunction()
 
-function(clear_content)
+function(clear_content BASE_PATH)
     if(EXISTS "${BASE_PATH}")
         message(STATUS "Removing directory '${BASE_PATH}'...")
         file(REMOVE_RECURSE "${BASE_PATH}")

@@ -248,7 +248,7 @@ set(BUILD_LIBNOISE_UTILS
     CACHE BOOL ".." FORCE)
 unset(BUILD_SHARED_LIBS CACHE)
 
-pr_fetch_third_party_lib("libnoise" TARGET noise-static INC "libnoise/src" "https://github.com/qknight/libnoise" "9ce0737b55812f7de907e86dc633724524e3a8e8")
+pr_fetch_third_party_lib("libnoise" TARGET noise-static INC "libnoise/src" "https://github.com/Silverlan/libnoise.git" "3481e28d14854adc82682f4999c4f7cdeda9dce9")
 pr_fetch_third_party_lib(TARGET noiseutils-static INC "libnoise/noiseutils")
 set(BUILD_SHARED_LIBS
     ON
@@ -311,7 +311,7 @@ endif()
 set(USE_LIBTXC_DXTN
     OFF
     CACHE BOOL OFF FORCE)
-pr_fetch_third_party_lib("vtflib" TARGET VTFLib13 INC "vtflib/src" "https://github.com/Silverlan/VTFLib" "3e6b80bcd6dacf6bd4a35666869464fac55051cc")
+pr_fetch_third_party_lib("vtflib" TARGET VTFLib13 INC "vtflib/src" "https://github.com/Silverlan/VTFLib" "756c44439ffe876d7f9066069072b319f3a7cb6d")
 pr_set_include_path(vtflib_build "${VTFLib_BINARY_DIR}/src")
 pr_set_target_folder(VTFLib13 third_party_libs)
 
@@ -335,7 +335,7 @@ set(RECASTNAVIGATION_TESTS
 set(BUILD_SHARED_LIBS
     OFF
     CACHE BOOL OFF FORCE)
-pr_fetch_third_party_lib("recastnavigation" TARGET Recast INC "recastnavigation/Recast/Include" "https://github.com/recastnavigation/recastnavigation" "6dc1667") # v1.6.0
+pr_fetch_third_party_lib("recastnavigation" TARGET Recast INC "recastnavigation/Recast/Include" "https://github.com/recastnavigation/recastnavigation" "1078bfe346d9bb560faa748c8fde2e7aae73a3ab") # Trunk
 pr_fetch_third_party_lib(TARGET Detour INC "recastnavigation/Detour/Include")
 set(BUILD_SHARED_LIBS
     ON

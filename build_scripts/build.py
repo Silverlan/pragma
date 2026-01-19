@@ -747,6 +747,9 @@ if not deps_only:
 	cmake_args.append("--preset")
 	cmake_args.append(preset)
 
+	cmake_args.append("-B")
+	cmake_args.append(build_dir)
+
 	cmake_configure_def_toolset(root,generator,cmake_args,additional_cmake_flags)
 
 	print_msg("Build files have been written to \"" +build_dir +"\".")

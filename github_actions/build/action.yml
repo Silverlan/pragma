@@ -60,7 +60,7 @@ runs:
       run: |
         # TODO: CMAKE_EXE_LINKER_FLAGS and cmake-cxx-flag should only be set when using the clang compiler.
         # Since gcc isn't stable enough with cxx-modules yet, it doesn't matter, but once gcc is supported, this should be handled differently.
-        python build_scripts/build.py --no-confirm --build-config "${{inputs.build-config}}" --cmake-arg=-DCMAKE_CXX_STDLIB_MODULES_JSON="/opt/gcc-16/lib64/libstdc++.modules.json" --cmake-arg=-DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath,/opt/gcc-16/lib64 -L/opt/gcc-16/lib64" --cmake-cxx-flag="--gcc-toolchain=/opt/gcc-16" ${{inputs.build-args}}
+        python build_scripts/build.py --no-confirm --verbose --build-config "${{inputs.build-config}}" --cmake-arg=-DCMAKE_CXX_STDLIB_MODULES_JSON="/opt/gcc-16/lib64/libstdc++.modules.json" --cmake-arg=-DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath,/opt/gcc-16/lib64 -L/opt/gcc-16/lib64" --cmake-cxx-flag="--gcc-toolchain=/opt/gcc-16" ${{inputs.build-args}}
         
     - name: Build Pragma
       if: runner.os == 'Windows'
@@ -69,7 +69,7 @@ runs:
       working-directory: 'pragma'
       run: |
         # We write the dependencies and build files to c:/ because the workspace disk provided by the runner isn't large enough
-        python build_scripts/build.py --build-config "${{inputs.build-config}}" --build-directory "c:/pragma/build" --deps-directory "c:/pragma/deps" ${{inputs.build-args}}
+        python build_scripts/build.py --verbose --build-config "${{inputs.build-config}}" --build-directory "c:/pragma/build" --deps-directory "c:/pragma/deps" ${{inputs.build-args}}
 
     # Using the pragma build-script to build lua-debug results in errors, so we'll build it manually
     - name: Build lua-debug

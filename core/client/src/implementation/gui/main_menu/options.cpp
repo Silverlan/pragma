@@ -365,15 +365,16 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 	pList->SetTitle(title);
 
 	// Preset
+	auto *populateRenderPresets = +[](WIChoiceList *pList) {
+		pList->AddChoice(locale::get_text("minimal"), "0");
+		pList->AddChoice(locale::get_text("low"), "1");
+		pList->AddChoice(locale::get_text("medium"), "2");
+		pList->AddChoice(locale::get_text("high"), "3");
+		pList->AddChoice(locale::get_text("very_high"), "4");
+	};
 	auto *pListPreset = pList->AddChoiceList(
 	  locale::get_text("preset"),
-	  [](WIChoiceList *pList) {
-		  pList->AddChoice(locale::get_text("minimal"), "0");
-		  pList->AddChoice(locale::get_text("low"), "1");
-		  pList->AddChoice(locale::get_text("medium"), "2");
-		  pList->AddChoice(locale::get_text("high"), "3");
-		  pList->AddChoice(locale::get_text("very_high"), "4");
-	  },
+	  populateRenderPresets,
 	  "cl_render_preset");
 	auto hThis = GetHandle();
 	pListPreset->AddCallback("OnSelect", FunctionCallback<void, uint32_t, std::reference_wrapper<std::string>>::Create([hThis](uint32_t, std::reference_wrapper<std::string> value) mutable {
@@ -659,27 +660,29 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 	pList->AddChoiceList(locale::get_text("window_mode"), {locale::get_text("windowmode_fullscreen"), locale::get_text("windowmode_windowed"), locale::get_text("windowmode_noborder_window")}, "cl_render_window_mode");
 	//
 	// FPS Limit
+	auto *populateMaxFps = +[](WIChoiceList *pList) {
+		pList->AddChoice(locale::get_text("no_limit"), "-1");
+		pList->AddChoice("30 FPS", "30");
+		pList->AddChoice("60 FPS", "60");
+		pList->AddChoice("90 FPS", "90");
+		pList->AddChoice("120 FPS", "120");
+	};
 	pList->AddChoiceList(
 	  locale::get_text("fps_limit"),
-	  [](WIChoiceList *pList) {
-		  pList->AddChoice(locale::get_text("no_limit"), "-1");
-		  pList->AddChoice("30 FPS", "30");
-		  pList->AddChoice("60 FPS", "60");
-		  pList->AddChoice("90 FPS", "90");
-		  pList->AddChoice("120 FPS", "120");
-	  },
+	  populateMaxFps,
 	  "cl_max_fps");
 	//
 	// Texture Quality (Mipmap Level)
+	auto *populateTextureQuality = +[](WIChoiceList *pList) {
+		pList->AddChoice(locale::get_text("minimal"), "0");
+		pList->AddChoice(locale::get_text("low"), "1");
+		pList->AddChoice(locale::get_text("medium"), "2");
+		pList->AddChoice(locale::get_text("high"), "3");
+		pList->AddChoice(locale::get_text("very_high"), "4");
+	};
 	auto texList = pList->AddChoiceList(
 	  locale::get_text("texture_quality"),
-	  [](WIChoiceList *pList) {
-		  pList->AddChoice(locale::get_text("minimal"), "0");
-		  pList->AddChoice(locale::get_text("low"), "1");
-		  pList->AddChoice(locale::get_text("medium"), "2");
-		  pList->AddChoice(locale::get_text("high"), "3");
-		  pList->AddChoice(locale::get_text("very_high"), "4");
-	  },
+	  populateTextureQuality,
 	  "cl_render_texture_quality");
 	m_hTexQuality = texList->GetHandle();
 	//
@@ -687,15 +690,16 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 	auto *texStreaming = pList->AddToggleChoice(locale::get_text("texture_streaming"), "cl_material_streaming_enabled");
 	//
 	// Model Quality
+	auto *populateModelQuality = +[](WIChoiceList *pList) {
+		pList->AddChoice(locale::get_text("minimal"), "10000");
+		pList->AddChoice(locale::get_text("low"), "3");
+		pList->AddChoice(locale::get_text("medium"), "2");
+		pList->AddChoice(locale::get_text("high"), "1");
+		pList->AddChoice(locale::get_text("very_high"), "0");
+	};
 	auto *mdlQualityList = pList->AddChoiceList(
 	  locale::get_text("model_quality"),
-	  [](WIChoiceList *pList) {
-		  pList->AddChoice(locale::get_text("minimal"), "10000");
-		  pList->AddChoice(locale::get_text("low"), "3");
-		  pList->AddChoice(locale::get_text("medium"), "2");
-		  pList->AddChoice(locale::get_text("high"), "1");
-		  pList->AddChoice(locale::get_text("very_high"), "0");
-	  },
+	  populateModelQuality,
 	  "cl_render_lod_bias");
 	m_hMdlQuality = mdlQualityList->GetHandle();
 	//
@@ -730,17 +734,18 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 	}
 	//
 	// Tone Mapping
+	auto *populateToneMapping = +[](WIChoiceList *pList) {
+		pList->AddChoice(locale::get_text("default"), "-1");
+		pList->AddChoice(locale::get_text("gamma_correction"), "0");
+		pList->AddChoice(locale::get_text("tone_mapping_reinhard"), "1");
+		pList->AddChoice(locale::get_text("tone_mapping_hejil_richard"), "2");
+		pList->AddChoice(locale::get_text("tone_mapping_uncharted"), "3");
+		pList->AddChoice(locale::get_text("tone_mapping_aces"), "4");
+		pList->AddChoice(locale::get_text("tone_mapping_gran_turismo"), "5");
+	};
 	auto *pToneMappingList = pList->AddChoiceList(
 	  locale::get_text("tone_mapping"),
-	  [](WIChoiceList *pList) {
-		  pList->AddChoice(locale::get_text("default"), "-1");
-		  pList->AddChoice(locale::get_text("gamma_correction"), "0");
-		  pList->AddChoice(locale::get_text("tone_mapping_reinhard"), "1");
-		  pList->AddChoice(locale::get_text("tone_mapping_hejil_richard"), "2");
-		  pList->AddChoice(locale::get_text("tone_mapping_uncharted"), "3");
-		  pList->AddChoice(locale::get_text("tone_mapping_aces"), "4");
-		  pList->AddChoice(locale::get_text("tone_mapping_gran_turismo"), "5");
-	  },
+	  populateToneMapping,
 	  "cl_render_tone_mapping");
 	//
 	// SSAO
@@ -765,45 +770,47 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 	pList->AddSlider(locale::get_text("contrast"), sliderInitializer, "cl_render_contrast");
 	//
 	// Texture Filtering
+	auto *populateTextureFiltering = +[](WIChoiceList *pList) {
+		pList->AddChoice(locale::get_text("off"), "0");
+		pList->AddChoice(locale::get_text("texfilter_bilinear_filtering"), "1");
+		pList->AddChoice(locale::get_text("texfilter_trilinear_filtering"), "2");
+
+		auto limits = get_cengine()->GetRenderContext().GetPhysicalDeviceLimits();
+		std::vector<int> anisotropy;
+		auto maxAnisotropy = limits.maxSamplerAnisotropy;
+		if(maxAnisotropy >= 2.f) {
+			anisotropy.push_back(2);
+			if(maxAnisotropy >= 4.f) {
+				anisotropy.push_back(4);
+				if(maxAnisotropy >= 8.f) {
+					anisotropy.push_back(8);
+					if(maxAnisotropy >= 16.f)
+						anisotropy.push_back(16);
+				}
+			}
+		}
+		auto start = 3;
+		for(auto it = anisotropy.begin(); it != anisotropy.end(); ++it) {
+			auto v = *it;
+			pList->AddChoice(locale::get_text("texfilter_anisotropic_filtering") + " x" + std::to_string(v), std::to_string(start++));
+		}
+	};
 	auto *texFilter = pList->AddChoiceList(
 	  locale::get_text("texture_filtering"),
-	  [](WIChoiceList *pList) {
-		  pList->AddChoice(locale::get_text("off"), "0");
-		  pList->AddChoice(locale::get_text("texfilter_bilinear_filtering"), "1");
-		  pList->AddChoice(locale::get_text("texfilter_trilinear_filtering"), "2");
-
-		  auto limits = get_cengine()->GetRenderContext().GetPhysicalDeviceLimits();
-		  std::vector<int> anisotropy;
-		  auto maxAnisotropy = limits.maxSamplerAnisotropy;
-		  if(maxAnisotropy >= 2.f) {
-			  anisotropy.push_back(2);
-			  if(maxAnisotropy >= 4.f) {
-				  anisotropy.push_back(4);
-				  if(maxAnisotropy >= 8.f) {
-					  anisotropy.push_back(8);
-					  if(maxAnisotropy >= 16.f)
-						  anisotropy.push_back(16);
-				  }
-			  }
-		  }
-		  auto start = 3;
-		  for(auto it = anisotropy.begin(); it != anisotropy.end(); ++it) {
-			  auto v = *it;
-			  pList->AddChoice(locale::get_text("texfilter_anisotropic_filtering") + " x" + std::to_string(v), std::to_string(start++));
-		  }
-	  },
+	  populateTextureFiltering,
 	  "cl_render_texture_filtering");
 	m_hTextureFiltering = texFilter->GetHandle();
 	//
 	// Occlusion Culling
+	auto *populateOcclusionCulling = +[](WIChoiceList *pList) {
+		pList->AddChoice(locale::get_text("disabled"), "0");
+		pList->AddChoice(locale::get_text("bruteforce"), "1");
+		pList->AddChoice(locale::get_text("chcplusplus"), "2");
+		pList->AddChoice(locale::get_text("bsp_and_octree"), "4");
+	};
 	auto *occlusionCulling = pList->AddChoiceList(
 	  locale::get_text("occlusion_culling"),
-	  [](WIChoiceList *pList) {
-		  pList->AddChoice(locale::get_text("disabled"), "0");
-		  pList->AddChoice(locale::get_text("bruteforce"), "1");
-		  pList->AddChoice(locale::get_text("chcplusplus"), "2");
-		  pList->AddChoice(locale::get_text("bsp_and_octree"), "4");
-	  },
+	  populateOcclusionCulling,
 	  "cl_render_occlusion_culling");
 	m_hOcclusionCulling = occlusionCulling->GetHandle();
 	//
@@ -812,88 +819,94 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 	//m_hDOF = dof->GetHandle();
 	//
 	// Present Mode
+	auto *populatePresentMode = +[](WIChoiceList *pList) {
+		auto limits = get_cengine()->GetRenderContext().GetPhysicalDeviceLimits();
+		auto maxImageCount = limits.maxSurfaceImageCount;
+		if(maxImageCount > 0) {
+			if(get_cengine()->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Immediate))
+				pList->AddChoice(locale::get_text("immediate"), "0");
+			if(maxImageCount > 1) {
+				if(get_cengine()->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Fifo))
+					pList->AddChoice(locale::get_text("fifo"), "1");
+				if(maxImageCount > 2) {
+					if(get_cengine()->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Mailbox))
+						pList->AddChoice(locale::get_text("mailbox"), "2");
+				}
+			}
+		}
+	};
 	auto *presentMode = pList->AddChoiceList(
 	  locale::get_text("present_mode"),
-	  [](WIChoiceList *pList) {
-		  auto limits = get_cengine()->GetRenderContext().GetPhysicalDeviceLimits();
-		  auto maxImageCount = limits.maxSurfaceImageCount;
-		  if(maxImageCount > 0) {
-			  if(get_cengine()->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Immediate))
-				  pList->AddChoice(locale::get_text("immediate"), "0");
-			  if(maxImageCount > 1) {
-				  if(get_cengine()->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Fifo))
-					  pList->AddChoice(locale::get_text("fifo"), "1");
-				  if(maxImageCount > 2) {
-					  if(get_cengine()->GetRenderContext().IsPresentationModeSupported(prosper::PresentModeKHR::Mailbox))
-						  pList->AddChoice(locale::get_text("mailbox"), "2");
-				  }
-			  }
-		  }
-	  },
+	  populatePresentMode,
 	  "cl_render_present_mode");
 	m_hPresentMode = presentMode->GetHandle();
 	//
 	// Particle Quality
+	auto *populateRenderParticleQuality = +[](WIChoiceList *pList) {
+		pList->AddChoice(locale::get_text("disabled"), "0");
+		pList->AddChoice(locale::get_text("low"), "1");
+		pList->AddChoice(locale::get_text("medium"), "2");
+		pList->AddChoice(locale::get_text("high"), "3");
+	};
 	auto *particleQuality = pList->AddChoiceList(
 	  locale::get_text("particle_quality"),
-	  [](WIChoiceList *pList) {
-		  pList->AddChoice(locale::get_text("disabled"), "0");
-		  pList->AddChoice(locale::get_text("low"), "1");
-		  pList->AddChoice(locale::get_text("medium"), "2");
-		  pList->AddChoice(locale::get_text("high"), "3");
-	  },
+	  populateRenderParticleQuality,
 	  "cl_render_particle_quality");
 	m_hParticleQuality = particleQuality->GetHandle();
 	//
 	// Shader Quality
+	auto *populateShaderQuality = +[](WIChoiceList *pList) {
+		pList->AddChoice(locale::get_text("very_low"), "1");
+		pList->AddChoice(locale::get_text("low"), "3");
+		pList->AddChoice(locale::get_text("medium"), "6");
+		pList->AddChoice(locale::get_text("high"), "8");
+		pList->AddChoice(locale::get_text("very_high"), "10");
+	};
 	auto *shaderQuality = pList->AddChoiceList(
 	  locale::get_text("shader_quality"),
-	  [](WIChoiceList *pList) {
-		  pList->AddChoice(locale::get_text("very_low"), "1");
-		  pList->AddChoice(locale::get_text("low"), "3");
-		  pList->AddChoice(locale::get_text("medium"), "6");
-		  pList->AddChoice(locale::get_text("high"), "8");
-		  pList->AddChoice(locale::get_text("very_high"), "10");
-	  },
+	  populateShaderQuality,
 	  "cl_render_shader_quality");
 	m_hShaderQuality = shaderQuality->GetHandle();
 	//
 	// Reflection Quality
+	auto *populateReflectionQuality = +[](WIChoiceList *pList) {
+		pList->AddChoice(locale::get_text("static_only"), "0");
+		pList->AddChoice(locale::get_text("dynamic"), "1");
+		pList->AddChoice(locale::get_text("full"), "2");
+	};
 	auto *pReflectionQuality = pList->AddChoiceList(
 	  locale::get_text("reflection_quality"),
-	  [](WIChoiceList *pList) {
-		  pList->AddChoice(locale::get_text("static_only"), "0");
-		  pList->AddChoice(locale::get_text("dynamic"), "1");
-		  pList->AddChoice(locale::get_text("full"), "2");
-	  },
+	  populateReflectionQuality,
 	  "cl_render_reflection_quality");
 	m_hReflectionQuality = pReflectionQuality->GetHandle();
 	//
 	auto *pRow = pList->AddHeaderRow();
 	pRow->SetValue(0, locale::get_text("lighting_and_shadows"));
 	// Shadow Resolution
+	auto *populateShadowResolution = +[](WIChoiceList *pList) {
+		pList->AddChoice("256x256", "256");
+		pList->AddChoice("512x512", "512");
+		pList->AddChoice("1024x1024", "1024");
+		pList->AddChoice("2048x2048", "2048");
+		//pList->AddChoice(pragma::locale::get_text("very_high"),"4096"); // NOT supported! See "cl_render_shadow_resolution"-callback in c_shadowmap.cpp for more information.
+	};
 	auto *shadowRes = pList->AddChoiceList(
 	  locale::get_text("shadow_resolution"),
-	  [](WIChoiceList *pList) {
-		  pList->AddChoice("256x256", "256");
-		  pList->AddChoice("512x512", "512");
-		  pList->AddChoice("1024x1024", "1024");
-		  pList->AddChoice("2048x2048", "2048");
-		  //pList->AddChoice(pragma::locale::get_text("very_high"),"4096"); // NOT supported! See "cl_render_shadow_resolution"-callback in c_shadowmap.cpp for more information.
-	  },
+	  populateShadowResolution,
 	  "cl_render_shadow_resolution");
 	m_hShadowRes = shadowRes->GetHandle();
 	//
 	// Shadow Quality
+	auto *populateShadowQuality = +[](WIChoiceList *pList) {
+		pList->AddChoice(locale::get_text("disabled"), "0");
+		pList->AddChoice(locale::get_text("low"), "1");
+		pList->AddChoice(locale::get_text("medium"), "2");
+		pList->AddChoice(locale::get_text("high"), "3");
+		pList->AddChoice(locale::get_text("very_high"), "4");
+	};
 	auto *pShadowQuality = pList->AddChoiceList(
 	  locale::get_text("shadow_quality"),
-	  [](WIChoiceList *pList) {
-		  pList->AddChoice(locale::get_text("disabled"), "0");
-		  pList->AddChoice(locale::get_text("low"), "1");
-		  pList->AddChoice(locale::get_text("medium"), "2");
-		  pList->AddChoice(locale::get_text("high"), "3");
-		  pList->AddChoice(locale::get_text("very_high"), "4");
-	  },
+	  populateShadowQuality,
 	  "render_shadow_quality");
 	m_hShadowQuality = pShadowQuality->GetHandle();
 	//

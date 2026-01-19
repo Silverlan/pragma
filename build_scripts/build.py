@@ -651,6 +651,9 @@ cmake_with_args.append(f"-DPRAGMA_WITH_COMMON_ENTITIES={1 if with_common_entitie
 cmake_with_args.append(f"-DPRAGMA_WITH_COMMON_MODULES={1 if with_common_modules else 0}")
 cmake_with_args.append(f"-DPRAGMA_WITH_ESSENTIAL_CLIENT_MODULES={1 if with_essential_client_modules else 0}")
 
+cmake_with_args.append(f"-DPRAGMA_WITH_CORE_PFM_MODULES={1 if with_core_pfm_modules else 0}")
+cmake_with_args.append(f"-DPRAGMA_WITH_ALL_PFM_MODULES={1 if with_all_pfm_modules else 0}")
+
 # Fetch base modules
 os.chdir(root)
 subprocess.run(["cmake"] +cmake_with_args +["-P", "cmake/fetch_modules.cmake"],check=True)

@@ -136,7 +136,7 @@ if(WIN32)
     set(BUILD_SHARED_LIBS
         OFF
         CACHE BOOL OFF FORCE)
-    pr_fetch_third_party_lib("7zpp" "https://github.com/Silverlan/7zip-cpp" "afed5bccd4faf4f825a640aa94a7ed78f54c178c")
+    pr_fetch_third_party_lib("7zpp" "https://github.com/Silverlan/7zip-cpp" "1e22ea369a689f2811666514f5bd5dce571934e0")
     set(BUILD_SHARED_LIBS
         ON
         CACHE BOOL ".." FORCE)

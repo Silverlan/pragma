@@ -28,7 +28,7 @@ pr_fetch_external_lib("prosper"                 "https://github.com/Silverlan/pr
 pr_fetch_external_lib("sharedutils"             "https://github.com/Silverlan/sharedutils"            "598fbf3bf920685c3e605092454525b336247d68")
 pr_fetch_external_lib("util_bsp"                "https://github.com/Silverlan/util_bsp"               "9eeb876a6fafe1b92966bb8f0fe6bd93ebb7b41f")
 pr_fetch_external_lib("util_formatted_text"     "https://github.com/Silverlan/util_formatted_text"    "50bd69695d55a61d9ecab8c3453a88fd8bc17a99")
-pr_fetch_external_lib("util_image"              "https://github.com/Silverlan/util_image"             "6ed1b546d48900b74e07ab655c09d7e1ae3fdebb")
+pr_fetch_external_lib("util_image"              "https://github.com/Silverlan/util_image"             "61a4b1ebbf98c57cf9cee88c2c3f4cd91165c21e")
 pr_fetch_external_lib("util_pad"                "https://github.com/Silverlan/util_pad"               "9f353dbad247e742a67f87b171dd30810f908b66")
 pr_fetch_external_lib("util_pragma_doc"         "https://github.com/Silverlan/util_pragma_doc"        "e235cea9acf0e59eefabf7027aff3315753991db")
 pr_fetch_external_lib("util_smdmodel"           "https://github.com/Silverlan/util_smdmodel"          "d56004a9920e1477a19d45bdfc76ccfa605caaf0")

@@ -67,10 +67,7 @@ static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVa
 }
 
 std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &pragma::Engine::GetConVarPtrs() { return get_convar_ptrs(); }
-pragma::console::ConVarHandle pragma::Engine::GetConVarHandle(std::string scvar)
-{
-	return CVarHandler::GetConVarHandle(get_convar_ptrs(), scvar);
-}
+pragma::console::ConVarHandle pragma::Engine::GetConVarHandle(std::string scvar) { return CVarHandler::GetConVarHandle(get_convar_ptrs(), scvar); }
 
 static pragma::Engine *g_engine = nullptr;
 
@@ -87,7 +84,7 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 	g_engine = this;
 
 	static auto registeredGlobals = false;
-	if (!registeredGlobals) {
+	if(!registeredGlobals) {
 		registeredGlobals = true;
 		datasystem::register_base_types();
 		datasystem::Texture::register_type();
@@ -1024,7 +1021,8 @@ void pragma::Engine::Start()
 
 void pragma::Engine::UpdateTickCount() { m_ctTick.Update(); }
 
-static void add_zip_file(uzip::ZIPFile &zip, const std::string &fileName, const std::string &zipFileName) {
+static void add_zip_file(uzip::ZIPFile &zip, const std::string &fileName, const std::string &zipFileName)
+{
 	std::string path;
 	if(!pragma::fs::find_absolute_path(fileName, path))
 		return;
@@ -1105,6 +1103,38 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 		}
 	}
 	zip.AddFile("engine.txt", engineInfo.str());
+
+	std::stringstream compilerInfo;
+#if defined(__clang__)
+
+#if defined(_MSC_VER)
+	compilerInfo << "Compiler: Clang-cl (MSVC Emulator)\n";
+	compilerInfo << "Emulating MSVC version: " << (_MSC_VER / 100) << '.' << (_MSC_VER % 100) << '\n';
+#else
+	compilerInfo << "Compiler: Clang\n";
+#endif
+
+	compilerInfo << "Version string: " << __clang_version__ << '\n';
+	compilerInfo << "Version: " << __clang_major__ << '.' << __clang_minor__ << '.' << __clang_patchlevel__ << '\n';
+#elif defined(__GNUC__) || defined(__GNUG__)
+	compilerInfo << "Version string: " << __VERSION__ << '\n';
+	compilerInfo << "Version: " << __GNUC__ << '.' << __GNUC_MINOR__ << '.' << __GNUC_PATCHLEVEL__ << '\n';
+#elif defined(_MSC_VER)
+	compilerInfo << "Compiler: MSVC\n";
+	// _MSC_VER encodes major*100 + minor (e.g. 1928 -> 19.28)
+	int msc = _MSC_VER;
+	int major = msc / 100;
+	int minor = msc % 100;
+	compilerInfo << "Version: " << major << '.' << minor << '\n';
+#ifdef _MSC_FULL_VER
+	// full build number (format is vendor-specific)
+	compilerInfo << "Full: " << _MSC_FULL_VER << '\n';
+#endif
+
+#else
+	compilerInfo << "Compiler: Unknown\n";
+#endif
+	zip.AddFile("compiler.txt", compilerInfo.str());
 
 	add_zip_file(zip, "git_info.txt", "git_info.txt");
 

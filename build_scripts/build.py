@@ -222,7 +222,6 @@ subprocess.run(["cmake", "-DPRAGMA_BUILD_TOOLS_DIR=" +config.build_tools_dir, "-
 
 if platform == "win32":
 	if toolset == "msvc":
-		toolset = None # Let the compiler use the default toolset
 		print_warning(f"Visual Studio toolset is currently not recommended and may not work. If you run into issues, try using the clang toolset instead.")
 	elif toolset == "clang":
 		# We need an up-to-date version of clang, so we'll use our shipped version for now.

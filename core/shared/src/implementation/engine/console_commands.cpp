@@ -578,10 +578,8 @@ void pragma::Engine::RegisterConsoleCommands()
 	  },
 	  console::ConVarFlags::None, "Searches for the specified text in all currently loaded text strings.");
 
-	conVarMap.RegisterConCommand(
-	  "asset_clear_unused_models", [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(asset::Type::Model, true); }, console::ConVarFlags::None, "Clears all unused models from memory.");
-	conVarMap.RegisterConCommand(
-	  "asset_clear_unused_materials", [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(asset::Type::Material, true); }, console::ConVarFlags::None, "Clears all unused materials from memory.");
+	conVarMap.RegisterConCommand("asset_clear_unused_models", [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(asset::Type::Model, true); }, console::ConVarFlags::None, "Clears all unused models from memory.");
+	conVarMap.RegisterConCommand("asset_clear_unused_materials", [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(asset::Type::Material, true); }, console::ConVarFlags::None, "Clears all unused materials from memory.");
 	conVarMap.RegisterConCommand(
 	  "asset_clear_unused",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
@@ -858,17 +856,22 @@ class ModuleInstallJob : public pragma::util::ParallelWorker<bool> {
 
 void ModuleInstallJob::Install()
 {
+	std::stringstream archiveName;
+	archiveName << "binaries";
+	archiveName << "-" << pragma::engine_info::get_platform_name();
+	archiveName << "-" << pragma::engine_info::get_architecture_name();
+	archiveName << "-" << pragma::engine_info::get_compiler_name();
 #ifdef _WIN32
-	std::string archiveName = "binaries_windows64.zip";
+	archiveName << ".zip";
 #else
-	std::string archiveName = "binaries_linux64.tar.gz";
+	archiveName << ".tar.gz";
 #endif
 	std::string url = std::string {"https://github.com/"} + m_module + "/releases/download/";
 	if(m_version.has_value())
 		url += "v" + *m_version;
 	else
 		url += "latest";
-	url += "/" + archiveName;
+	url += "/" + archiveName.str();
 
 #ifdef __linux__
 	{
@@ -883,7 +886,7 @@ void ModuleInstallJob::Install()
 #endif
 
 	pragma::fs::create_directory("temp");
-	auto archivePath = "temp/" + archiveName;
+	auto archivePath = "temp/" + archiveName.str();
 	m_lastProgressTime = std::chrono::steady_clock::now();
 	Con::COUT << "Downloading module from '" << url << "'..." << Con::endl;
 	m_curl.AddResource(

@@ -25,7 +25,7 @@ pr_fetch_external_lib("networkmanager"          "https://github.com/Silverlan/ne
 pr_fetch_external_lib("oskit"                   "https://github.com/Silverlan/oskit"                  "2c13e0963ef719d8c3a806f5c4ea0e151db58367")
 pr_fetch_external_lib("panima"                  "https://github.com/Silverlan/panima"                 "8faebe12b47542657adaec8afc95baff327f452f")
 pr_fetch_external_lib("prosper"                 "https://github.com/Silverlan/prosper"                "d9e4fe85af77ef9967540e44d9ba6fa540bb6cf2")
-pr_fetch_external_lib("sharedutils"             "https://github.com/Silverlan/sharedutils"            "598fbf3bf920685c3e605092454525b336247d68")
+pr_fetch_external_lib("sharedutils"             "https://github.com/Silverlan/sharedutils"            "00f97986b9360996237c8f8ac41d7764b049c184")
 pr_fetch_external_lib("util_bsp"                "https://github.com/Silverlan/util_bsp"               "9eeb876a6fafe1b92966bb8f0fe6bd93ebb7b41f")
 pr_fetch_external_lib("util_formatted_text"     "https://github.com/Silverlan/util_formatted_text"    "50bd69695d55a61d9ecab8c3453a88fd8bc17a99")
 pr_fetch_external_lib("util_image"              "https://github.com/Silverlan/util_image"             "61a4b1ebbf98c57cf9cee88c2c3f4cd91165c21e")

@@ -93,7 +93,7 @@ if(PRAGMA_WITH_COMMON_MODULES)
     # Unfortunately ExternalProject_Add strips the first component of the tar.gz and there is no way to disable that behavior.
     # For this reason we have to re-add the root folder as argument here.
     if(NOT TARGET pr_mount_external)
-        pr_install_git_release(mount_external "Silverlan/pr_mount_external_prebuilt" "modules" "2026-01-11")
+        pr_install_git_release(mount_external "Silverlan/pr_mount_external_prebuilt" "modules" "2026-01-19")
     endif()
     if(NOT TARGET pr_rig)
         pr_install_git_release(rig "Silverlan/pr_rig_prebuilt" "addons" "2026-01-18")

@@ -3,8 +3,6 @@ include(ExternalProject)
 function(pr_install_git_repository IDENTIFIER GIT_URL GIT_SHA INSTALL_PATH)
     set(ADDON_SHA   "${GIT_SHA}")
     set(ADDON_URL   "${GIT_URL}")
-    set(ADDON_SRC   "${CMAKE_BINARY_DIR}/_deps/${IDENTIFIER}-src")
-    set(ADDON_BUILD "${CMAKE_BINARY_DIR}/_deps/${IDENTIFIER}-build")
     set(ADDON_PREF  "${CMAKE_BINARY_DIR}/_deps/${IDENTIFIER}-prefix")
 
     include(ExternalProject)
@@ -19,11 +17,7 @@ function(pr_install_git_repository IDENTIFIER GIT_URL GIT_SHA INSTALL_PATH)
     )
     ExternalProject_Get_Property(addon_${IDENTIFIER} source_dir)
     add_dependencies(pragma-install-full addon_${IDENTIFIER})
-    install(
-        DIRECTORY "${source_dir}/"
-        DESTINATION "${INSTALL_PATH}"
-        COMPONENT   pragma-install-full
-    )
+    pr_manifest_install(${IDENTIFIER} "${ADDON_PREF}/src/addon_${IDENTIFIER}" "${INSTALL_PATH}" pragma-install-full)
 endfunction()
 
 function(pr_install_git_release IDENTIFIER BASE_URL BASE_DIR TAG_NAME)
@@ -48,8 +42,6 @@ function(pr_install_git_release IDENTIFIER BASE_URL BASE_DIR TAG_NAME)
     set(ARCHIVE_URL "https://github.com/${BASE_URL}/releases/download/${TAG_NAME}/${ARCH_FILE_NAME}")
 
     set(ADDON_URL   "${ARCHIVE_URL}")
-    set(ADDON_SRC   "${CMAKE_BINARY_DIR}/_deps/${IDENTIFIER}-src")
-    set(ADDON_BUILD "${CMAKE_BINARY_DIR}/_deps/${IDENTIFIER}-build")
     set(ADDON_PREF  "${CMAKE_BINARY_DIR}/_deps/${IDENTIFIER}-prefix")
 
     include(ExternalProject)
@@ -64,11 +56,7 @@ function(pr_install_git_release IDENTIFIER BASE_URL BASE_DIR TAG_NAME)
     )
     ExternalProject_Get_Property(addon_${IDENTIFIER} source_dir)
     add_dependencies(pragma-install-full addon_${IDENTIFIER})
-    install(
-        DIRECTORY "${source_dir}/"
-        DESTINATION "${BASE_DIR}"
-        COMPONENT   pragma-install-full
-    )
+    pr_manifest_install(${IDENTIFIER} "${ADDON_PREF}/src/addon_${IDENTIFIER}" "${BASE_DIR}" pragma-install-full)
 endfunction()
 
 if(PRAGMA_WITH_PFM)

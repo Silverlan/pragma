@@ -404,11 +404,20 @@ foreach(_COMP IN LISTS COMPONENT_LIST)
     set_target_properties(pragma-install-${_COMP} PROPERTIES FOLDER "Hidden/Install")
 endforeach()
 
+function(pr_manifest_install IDENTIFIER SRC_DIR REL_DST_DIR COMPONENT)
+    set(MANIFEST_PATH "${CMAKE_INSTALL_PREFIX}/.install_cache/manifests/${IDENTIFIER}.txt")
+    set(FULL_DST_DIR "${CMAKE_INSTALL_PREFIX}/${REL_DST_DIR}")
+
+    install(CODE "
+        set(SRC_DIR \"${SRC_DIR}\")
+        set(DST_DIR \"${FULL_DST_DIR}\")
+        set(MANIFEST_FILE \"${MANIFEST_PATH}\")
+        include(\"${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManifestInstall.cmake\")
+    " COMPONENT ${COMPONENT})
+endfunction()
+
 # Install assets
-install(
-    DIRECTORY assets/
-    DESTINATION "."
-    COMPONENT pragma-install-full)
+pr_manifest_install("core" "${CMAKE_CURRENT_SOURCE_DIR}/assets" "" pragma-install-full)
 
 message("Processing addons...")
 include(${CMAKE_SOURCE_DIR}/Addons.cmake)

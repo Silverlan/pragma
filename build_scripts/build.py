@@ -737,11 +737,11 @@ if not deps_only:
 
 	if platform == "win32":
 		if toolset == "msvc":
-			preset = "config-windows-ninja-msvc"
+			preset = "config-windows-msvc"
 		elif toolset == "clang":
-			preset = "config-windows-ninja-clang"
+			preset = "config-windows-clang"
 	else:
-		preset = "config-linux-ninja-clang"
+		preset = "config-linux-clang"
 
 	cmake_args.append("--preset")
 	cmake_args.append(preset)

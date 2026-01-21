@@ -1,10 +1,6 @@
 {
   "version": 6,
-  "cmakeMinimumRequired": {
-    "major": 4,
-    "minor": 2,
-    "patch": 0
-  },
+  "cmakeMinimumRequired": { "major": 4, "minor": 2, "patch": 0 },
   "configurePresets": [
     {
       "name": "base",
@@ -16,8 +12,13 @@
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "CMAKE_DEFAULT_BUILD_TYPE": "RelWithDebInfo",
         "CMAKE_CXX_SCAN_FOR_MODULES": "1",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "1",
-
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "1"
+      }
+    },
+    {
+      "name": "features-full",
+      "hidden": true,
+      "cacheVariables": {
         "PRAGMA_WITH_PFM": "1",
         "PRAGMA_WITH_VR": "1",
         "PRAGMA_WITH_NETWORKING": "1",
@@ -27,60 +28,66 @@
       }
     },
     {
-      "name": "windows",
+      "name": "platform-linux",
       "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
     },
     {
-      "name": "linux",
+      "name": "platform-windows",
       "hidden": true,
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      }
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
     },
+
     {
-      "name": "config-linux-ninja-clang",
-      "displayName": "[Linux] Config - Ninja with Clang",
-      "inherits": ["base", "linux"],
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      },
+      "name": "config-linux-clang",
+      "displayName": "[Linux] Configure - Clang (Core Features)",
+      "inherits": ["base", "platform-linux"],
       "cacheVariables": {
         "CMAKE_C_COMPILER": "${sourceDir}/build_tools/clang/bin/clang",
         "CMAKE_CXX_COMPILER": "${sourceDir}/build_tools/clang/bin/clang++"
       }
     },
     {
-      "name": "config-windows-ninja-clang",
-      "displayName": "[Windows] Config - Ninja with Clang",
-      "inherits": ["base", "windows"],
+      "name": "config-linux-clang-all",
+      "displayName": "[Linux] Configure - Clang (All Features)",
+      "inherits": ["config-linux-clang", "features-full"]
+    },
+
+    {
+      "name": "config-windows-clang",
+      "displayName": "[Windows] Configure - Clang (Core Features)",
+      "inherits": ["base", "platform-windows"],
       "cacheVariables": {
         "CMAKE_C_COMPILER": "${sourceDir}/build_tools/clang/bin/clang.exe",
         "CMAKE_CXX_COMPILER": "${sourceDir}/build_tools/clang/bin/clang++.exe"
       }
     },
     {
-      "name": "config-windows-ninja-msvc",
-      "displayName": "[Windows] Config - Ninja with MSVC",
-      "inherits": ["base", "windows"],
+      "name": "config-windows-clang-all",
+      "displayName": "[Windows] Configure - Clang (All Features)",
+      "inherits": ["config-windows-clang", "features-full"]
+    },
+
+    {
+      "name": "config-windows-msvc",
+      "displayName": "[Windows] Configure - MSVC (Core Features)",
+      "inherits": ["base", "platform-windows"],
       "cmakeExecutable": "${sourceDir}/deps/staging/cmake/bin/cmake.exe",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "cl.exe",
         "CMAKE_CXX_COMPILER": "cl.exe"
       }
+    },
+    {
+      "name": "config-windows-msvc-all",
+      "displayName": "[Windows] Configure - MSVC (All Features)",
+      "inherits": ["config-windows-msvc", "features-full"]
     }
   ],
+
   "buildPresets": [
     {
-      "name": "base",
+      "name": "build-base",
       "hidden": true,
       "cleanFirst": false,
       "configuration": "RelWithDebInfo"
@@ -88,138 +95,97 @@
     {
       "name": "target-install",
       "hidden": true,
-      "targets": "pragma-install"
-    },
-    {
-      "name": "target-install-full",
-      "hidden": true,
       "targets": "pragma-install-full"
     },
 
     {
-      "name": "build-linux-ninja-clang-full",
-      "inherits": ["base", "target-install-full"],
-      "displayName": "[Linux] Full Build - Ninja with Clang",
-      "configurePreset": "config-linux-ninja-clang"
+      "name": "build-linux-clang",
+      "displayName": "[Linux] Build - Clang (Core Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-linux-clang"
     },
     {
-      "name": "build-linux-ninja-clang-incremental",
-      "inherits": ["base", "target-install"],
-      "displayName": "[Linux] Incremental Build - Ninja with Clang",
-      "configurePreset": "config-linux-ninja-clang"
-    },
-
-    {
-      "name": "build-windows-ninja-clang-full",
-      "inherits": ["base", "target-install-full"],
-      "displayName": "[Windows] Full Build - Ninja with Clang",
-      "configurePreset": "config-windows-ninja-clang"
-    },
-    {
-      "name": "build-windows-ninja-clang-incremental",
-      "inherits": ["base", "target-install"],
-      "displayName": "[Windows] Incremental Build - Ninja with Clang",
-      "configurePreset": "config-windows-ninja-clang"
+      "name": "build-linux-clang-all",
+      "displayName": "[Linux] Build - Clang (All Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-linux-clang-all"
     },
 
     {
-      "name": "build-windows-ninja-msvc-full",
-      "inherits": ["base", "target-install-full"],
-      "displayName": "[Windows] Full Build - Ninja with MSVC",
-      "configurePreset": "config-windows-ninja-msvc"
+      "name": "build-windows-clang",
+      "displayName": "[Windows] Build - Clang (Core Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-windows-clang"
     },
     {
-      "name": "build-windows-ninja-msvc-incremental",
-      "inherits": ["base", "target-install"],
-      "displayName": "[Windows] Incremental Build - Ninja with MSVC",
-      "configurePreset": "config-windows-ninja-msvc"
+      "name": "build-windows-clang-all",
+      "displayName": "[Windows] Build - Clang (All Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-windows-clang-all"
+    },
+
+    {
+      "name": "build-windows-msvc",
+      "displayName": "[Windows] Build - MSVC (Core Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-windows-msvc"
+    },
+    {
+      "name": "build-windows-msvc-all",
+      "displayName": "[Windows] Build - MSVC (All Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-windows-msvc-all"
     }
   ],
   "workflowPresets": [
     {
-      "name": "linux-ninja-clang-full",
-      "displayName": "[Linux] Ninja with Clang (Full)",
+      "name": "linux-clang",
+      "displayName": "[Linux] Clang (Core Features)",
       "steps": [
-        {
-          "type": "configure",
-          "name": "config-linux-ninja-clang"
-        },
-        {
-          "type": "build",
-          "name": "build-linux-ninja-clang-full"
-        }
+        { "type": "configure", "name": "config-linux-clang" },
+        { "type": "build",     "name": "build-linux-clang" }
       ]
     },
     {
-      "name": "linux-ninja-clang",
-      "displayName": "[Linux] Ninja with Clang (Incremental)",
+      "name": "linux-clang-full",
+      "displayName": "[Linux] Clang (All Features)",
       "steps": [
-        {
-          "type": "configure",
-          "name": "config-linux-ninja-clang"
-        },
-        {
-          "type": "build",
-          "name": "build-linux-ninja-clang-incremental"
-        }
+        { "type": "configure", "name": "config-linux-clang-all" },
+        { "type": "build",     "name": "build-linux-clang-all" }
       ]
     },
 
     {
-      "name": "windows-ninja-clang-full",
-      "displayName": "[Windows] Ninja with Clang (Full)",
+      "name": "windows-clang",
+      "displayName": "[Windows] Clang (Core Features)",
       "steps": [
-        {
-          "type": "configure",
-          "name": "config-windows-ninja-clang"
-        },
-        {
-          "type": "build",
-          "name": "build-windows-ninja-clang-full"
-        }
+        { "type": "configure", "name": "config-windows-clang" },
+        { "type": "build",     "name": "build-windows-clang" }
       ]
     },
     {
-      "name": "windows-ninja-clang",
-      "displayName": "[Windows] Ninja with Clang (Incremental)",
+      "name": "windows-clang-full",
+      "displayName": "[Windows] Clang (All Features)",
       "steps": [
-        {
-          "type": "configure",
-          "name": "config-windows-ninja-clang"
-        },
-        {
-          "type": "build",
-          "name": "build-windows-ninja-clang-incremental"
-        }
+        { "type": "configure", "name": "config-windows-clang-all" },
+        { "type": "build",     "name": "build-windows-clang-all" }
       ]
     },
 
     {
-      "name": "windows-ninja-msvc-full",
-      "displayName": "[Windows] Ninja with MSVC (Full)",
+      "name": "windows-msvc",
+      "displayName": "[Windows] MSVC (Core Features)",
       "steps": [
-        {
-          "type": "configure",
-          "name": "config-windows-ninja-msvc"
-        },
-        {
-          "type": "build",
-          "name": "build-windows-ninja-msvc-full"
-        }
+        { "type": "configure", "name": "config-windows-msvc" },
+        { "type": "build",     "name": "build-windows-msvc" }
       ]
     },
     {
-      "name": "windows-ninja-msvc",
-      "displayName": "[Windows] Ninja with MSVC (Incremental)",
+      "name": "windows-msvc-full",
+      "displayName": "[Windows] MSVC (All Features)",
       "steps": [
-        {
-          "type": "configure",
-          "name": "config-windows-ninja-msvc"
-        },
-        {
-          "type": "build",
-          "name": "build-windows-ninja-msvc-incremental"
-        }
+        { "type": "configure", "name": "config-windows-msvc-all" },
+        { "type": "build",     "name": "build-windows-msvc-all" }
       ]
     }
   ]

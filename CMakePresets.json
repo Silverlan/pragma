@@ -48,7 +48,7 @@
       }
     },
     {
-      "name": "config-linux-clang-all",
+      "name": "config-linux-clang-full",
       "displayName": "[Linux] Configure - Clang (All Features)",
       "inherits": ["config-linux-clang", "features-full"]
     },
@@ -63,7 +63,7 @@
       }
     },
     {
-      "name": "config-windows-clang-all",
+      "name": "config-windows-clang-full",
       "displayName": "[Windows] Configure - Clang (All Features)",
       "inherits": ["config-windows-clang", "features-full"]
     },
@@ -79,7 +79,7 @@
       }
     },
     {
-      "name": "config-windows-msvc-all",
+      "name": "config-windows-msvc-full",
       "displayName": "[Windows] Configure - MSVC (All Features)",
       "inherits": ["config-windows-msvc", "features-full"]
     }
@@ -105,10 +105,10 @@
       "configurePreset": "config-linux-clang"
     },
     {
-      "name": "build-linux-clang-all",
+      "name": "build-linux-clang-full",
       "displayName": "[Linux] Build - Clang (All Features)",
       "inherits": ["build-base", "target-install"],
-      "configurePreset": "config-linux-clang-all"
+      "configurePreset": "config-linux-clang-full"
     },
 
     {
@@ -118,10 +118,10 @@
       "configurePreset": "config-windows-clang"
     },
     {
-      "name": "build-windows-clang-all",
+      "name": "build-windows-clang-full",
       "displayName": "[Windows] Build - Clang (All Features)",
       "inherits": ["build-base", "target-install"],
-      "configurePreset": "config-windows-clang-all"
+      "configurePreset": "config-windows-clang-full"
     },
 
     {
@@ -131,10 +131,10 @@
       "configurePreset": "config-windows-msvc"
     },
     {
-      "name": "build-windows-msvc-all",
+      "name": "build-windows-msvc-full",
       "displayName": "[Windows] Build - MSVC (All Features)",
       "inherits": ["build-base", "target-install"],
-      "configurePreset": "config-windows-msvc-all"
+      "configurePreset": "config-windows-msvc-full"
     }
   ],
   "workflowPresets": [
@@ -150,8 +150,8 @@
       "name": "linux-clang-full",
       "displayName": "[Linux] Clang (All Features)",
       "steps": [
-        { "type": "configure", "name": "config-linux-clang-all" },
-        { "type": "build",     "name": "build-linux-clang-all" }
+        { "type": "configure", "name": "config-linux-clang-full" },
+        { "type": "build",     "name": "build-linux-clang-full" }
       ]
     },
 
@@ -167,8 +167,8 @@
       "name": "windows-clang-full",
       "displayName": "[Windows] Clang (All Features)",
       "steps": [
-        { "type": "configure", "name": "config-windows-clang-all" },
-        { "type": "build",     "name": "build-windows-clang-all" }
+        { "type": "configure", "name": "config-windows-clang-full" },
+        { "type": "build",     "name": "build-windows-clang-full" }
       ]
     },
 
@@ -184,8 +184,8 @@
       "name": "windows-msvc-full",
       "displayName": "[Windows] MSVC (All Features)",
       "steps": [
-        { "type": "configure", "name": "config-windows-msvc-all" },
-        { "type": "build",     "name": "build-windows-msvc-all" }
+        { "type": "configure", "name": "config-windows-msvc-full" },
+        { "type": "build",     "name": "build-windows-msvc-full" }
       ]
     }
   ]

@@ -277,6 +277,15 @@ function(pr_set_output_directory_to_install TARGET_NAME)
     )
 endfunction()
 
+function(pr_set_engine_executable TARGET_NAME OUTPUT_NAME)
+    set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_NAME "${OUTPUT_NAME}")
+
+    add_dependencies(pragma-install ${TARGET_NAME})
+    add_dependencies(pragma-install-full ${TARGET_NAME})
+
+    pr_add_executable_install_target(${OUTPUT_NAME} ${TARGET_NAME})
+endfunction()
+
 message("Processing core libraries...")
 add_subdirectory(core)
 
@@ -331,7 +340,6 @@ pr_install_targets(
     wgui)
 
 message("Custom install targets: ${PRAGMA_INSTALL_CUSTOM_TARGETS}")
-add_dependencies(pragma-install pragma_executable pragma_server_executable)
 set(PRAGMA_INSTALL_DEPENDENCIES iclient iserver udm_convert prad pragma_updater ${PRAGMA_INSTALL_CUSTOM_TARGETS})
 if(WIN32)
     list(APPEND PRAGMA_INSTALL_DEPENDENCIES pragma_console)

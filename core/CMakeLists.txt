@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 4.2.0)
 
 project(pragma_engine)
 
@@ -23,7 +23,7 @@ add_subdirectory(wms_shared)
 set_target_properties(shared PROPERTIES FOLDER core/engine)
 set_target_properties(server PROPERTIES FOLDER core/engine)
 set_target_properties(client PROPERTIES FOLDER core/engine)
-set_target_properties(pragma PROPERTIES FOLDER core)
+set_target_properties(pragma_executable PROPERTIES FOLDER core)
 set_target_properties(pragma_server PROPERTIES FOLDER core)
 set_target_properties(wms_shared PROPERTIES FOLDER external_libs)
 if(WIN32)

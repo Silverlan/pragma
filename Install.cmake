@@ -39,6 +39,9 @@ pr_install_binaries(7z)
 # cpptrace
 pr_install_binaries(cpptrace)
 
+# spdlog
+pr_install_targets(spdlog)
+
 pr_install_binaries(icu)
 
 if(TARGET util_ocio)

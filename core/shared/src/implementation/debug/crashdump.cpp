@@ -1,21 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/engine.h"
-#include "pragma/debug/debug_utils.hpp"
-#include "pragma/logging.hpp"
-#include "crashdump_helper.hpp"
-#include <fsys/filesystem.h>
-#include <sharedutils/util_debug.h>
-#include <sharedutils/util_clock.hpp>
-#include <sharedutils/util.h>
-#include <sharedutils/util_file.h>
-#include <exception>
-#include "pragma/engine_info.hpp"
 #ifdef _WIN32
+#include <Windows.h>
 #include <tchar.h>
 #include <signal.h>
 #else
@@ -23,10 +11,15 @@ module;
 #include <execinfo.h>
 #endif
 
-module pragma.debug.crashdump;
+#include "crashdump_helper.hpp"
 
+module pragma.shared;
+
+import :debug.crashdump;
+import :locale;
 import util_zip;
-import pragma.locale;
+
+#undef CreateDirectory
 
 using namespace pragma::debug;
 
@@ -151,7 +144,7 @@ std::optional<std::string> CrashHandler::GenerateMiniDump(std::string &outErr) c
 		return {};
 	}
 
-	auto programPath = filemanager::get_program_write_path();
+	auto programPath = fs::get_program_write_path();
 	auto szDumpPath = programPath + "/crashdumps/";
 	szDumpPath += m_appName + std::string(".dmp");
 
@@ -276,31 +269,31 @@ bool CrashHandler::GenerateCrashDump() const
 {
 	std::cout << "Generating crashdump..." << std::endl;
 	LOGGER.info("Generating crashdump...");
-	pragma::flush_loggers();
+	flush_loggers();
 
 	LOGGER.debug("Loading localization files...");
 	std::string szResult;
-	pragma::locale::load("prompts.txt");
+	locale::load("prompts.txt");
 
 	LOGGER.debug("Creating 'crashdumps' directory...");
-	FileManager::CreateDirectory("crashdumps");
+	fs::create_directory("crashdumps");
 
 	// ask the user if they want to save a dump file
 	auto saveDump = false;
-	auto *engine = pragma::get_engine();
-	auto shouldShowMsBox = !engine->IsNonInteractiveMode();
+	auto *engine = get_engine();
+	auto shouldShowMsBox = !Engine::Get()->IsNonInteractiveMode();
 #ifdef _WIN32
-	shouldShowMsBox = (shouldShowMsBox && util::get_subsystem() == util::SubSystem::GUI);
+	shouldShowMsBox = (shouldShowMsBox && pragma::util::get_subsystem() == pragma::util::SubSystem::GUI);
 #endif
 	if(!shouldShowMsBox)
 		saveDump = true;
 	else {
 		LOGGER.debug("Displaying prompt message...");
-		auto msg = pragma::locale::get_text("prompt_crash");
-		auto res = util::debug::show_message_prompt(msg, util::debug::MessageBoxButtons::YesNo, m_appName);
+		auto msg = locale::get_text("prompt_crash");
+		auto res = show_message_prompt(msg, MessageBoxButtons::YesNo, m_appName);
 		// If res is nullopt, the message prompt most likely failed to show. In this case we'll assume yes as
 		// default answer.
-		saveDump = (res == std::nullopt || *res == util::debug::MessageBoxButton::Yes);
+		saveDump = (res == std::nullopt || *res == MessageBoxButton::Yes);
 	}
 
 #ifdef __linux__
@@ -332,25 +325,25 @@ bool CrashHandler::GenerateCrashDump() const
 	if(saveDump) {
 		std::string err;
 		std::string zipFileName;
-		LOGGER.debug("Closing logger...");
-		pragma::detail::close_logger();
 		auto zipFile = Engine::GenerateEngineDump("crashdumps/crashdump", zipFileName, err);
+		// Logger should already be closed at this point, but to make sure...
+		detail::close_logger();
 		if(zipFile) {
 #ifdef _WIN32
 			std::string dumpErr;
 			auto minidumpPath = GenerateMiniDump(dumpErr);
 			if(minidumpPath) {
 				// Write Minidump
-				VFilePtrReal f = nullptr;
-				auto t = util::Clock::now();
+				fs::VFilePtrReal f = nullptr;
+				auto t = pragma::util::Clock::now();
 				while(f == nullptr) // Wait until dump has been written
 				{
-					auto tNow = util::Clock::now();
+					auto tNow = pragma::util::Clock::now();
 					auto tDelta = std::chrono::duration_cast<std::chrono::seconds>(tNow - t).count();
 					if(tDelta >= 4) // Don't wait more than 4 seconds
 						break;
 					std::this_thread::sleep_for(std::chrono::milliseconds(250));
-					f = FileManager::OpenSystemFile(minidumpPath->c_str(), "rb");
+					f = fs::open_system_file(*minidumpPath, fs::FileMode::Read | fs::FileMode::Binary);
 				}
 				if(f != nullptr) {
 					auto size = f->GetSize();
@@ -371,9 +364,9 @@ bool CrashHandler::GenerateCrashDump() const
 #endif
 			zipFile = nullptr;
 
-			szResult = pragma::locale::get_text("prompt_crash_dump_saved", std::vector<std::string> {zipFileName, "crashdumps@pragma-engine.com"});
+			szResult = locale::get_text("prompt_crash_dump_saved", std::vector<std::string> {zipFileName, "crashdumps@pragma-engine.com"});
 			std::string absPath;
-			if(filemanager::find_absolute_path(zipFileName, absPath)) {
+			if(fs::find_absolute_path(zipFileName, absPath)) {
 				auto path = util::FilePath(absPath);
 				util::open_path_in_explorer(std::string {path.GetPath()}, std::string {path.GetFileName()});
 			}
@@ -381,11 +374,11 @@ bool CrashHandler::GenerateCrashDump() const
 			success = true;
 		}
 		else
-			szResult = pragma::locale::get_text("prompt_crash_dump_archive_failed", {err});
+			szResult = locale::get_text("prompt_crash_dump_archive_failed", {err});
 	}
 
 	if(!szResult.empty() && shouldShowMsBox)
-		util::debug::show_message_prompt(szResult, util::debug::MessageBoxButtons::Ok, m_appName);
+		show_message_prompt(szResult, MessageBoxButtons::Ok, m_appName);
 
 	auto crashInProsperModule = false;
 #ifdef _WIN32
@@ -395,7 +388,7 @@ bool CrashHandler::GenerateCrashDump() const
 #endif
 	if(crashInProsperModule) {
 		// Probably a rendering related crash.
-		engine->HandleOpenGLFallback();
+		Engine::Get()->HandleOpenGLFallback();
 	}
 
 	// We've done all we can, just force quit at this point
@@ -408,7 +401,7 @@ bool CrashHandler::GenerateCrashDump() const
 #ifdef _WIN32
 static auto g_crashDumpGenerated = false;
 static std::mutex g_crashMutex;
-LONG CrashHandler::TopLevelFilter(struct _EXCEPTION_POINTERS *pExceptionInfo)
+LONG CrashHandler::TopLevelFilter(_EXCEPTION_POINTERS *pExceptionInfo)
 {
 	// When a crash occurs, there's a good chance that other threads will also crash.
 	// This can cause the entire application to die before the crash dump has been fully generated.

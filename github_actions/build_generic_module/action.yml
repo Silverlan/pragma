@@ -8,6 +8,10 @@ inputs:
     description: 'The build configuration to use.'
     required: true
     default: "RelWithDebInfo"
+  toolset:
+    description: 'The toolset to use.'
+    required: true
+    default: "clang"
   build-args:
     description: 'Module Build arguments'
     required: true
@@ -50,7 +54,7 @@ runs:
   using: "composite"
   steps:
     - name: Setup Pragma
-      uses: Silverlan/pragma/github_actions/setup@main
+      uses: Silverlan/pragma/github_actions/setup@develop
       with:
         with_cuda: ${{ inputs.with-cuda }}
         branch: ${{ inputs.branch }}
@@ -58,7 +62,7 @@ runs:
     # We need the latest Windows SDK
     - name: Install Windows SDK
       if: runner.os == 'Windows'
-      uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.11
+      uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
       with:
         sdk-version: 22621
 
@@ -78,7 +82,7 @@ runs:
         fi
         echo "build-args=$build_args" >> $GITHUB_OUTPUT
 
-    - name: "Download Module"
+    - name: "Checkout Module"
       uses: actions/checkout@v4
       with:
         submodules: 'recursive'
@@ -89,9 +93,9 @@ runs:
 
     - name: Build Pragma
       id: build-pragma
-      uses: Silverlan/pragma/github_actions/build@main
+      uses: Silverlan/pragma/github_actions/build@develop
       with:
-        build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} ${{ steps.set-cmake-args.outputs.build-args }}'
+        build-args: '--with-lua-debugger=0 --with-common-modules=0 --with-essential-client-modules=0 --toolset=${{ inputs.toolset }} --build-config=${{ inputs.build-config }} --cmake-arg=${{ steps.set-cmake-args.outputs.cmake-args }} ${{ steps.set-cmake-args.outputs.build-args }}'
 
     - name: Set Output Variables
       shell: bash

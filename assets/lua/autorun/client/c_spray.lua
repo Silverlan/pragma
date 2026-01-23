@@ -36,7 +36,10 @@ local function spray()
 	entSpray:SetRotation(rot)
 	entSpray:Spawn()
 
-	sound.play("player/sprayer.wav", sound.TYPE_EFFECT, sound.FCREATE_MONO, decalPos)
+	local playInfo = sound.PlayInfo()
+	playInfo.flags = bit.bor(playInfo.flags, sound.FCREATE_MONO)
+	playInfo.origin = decalPos
+	sound.play("player/sprayer.wav", sound.TYPE_EFFECT, playInfo)
 end
 
 console.register_command("spray", function(pl, joystickAxisMagnitude)

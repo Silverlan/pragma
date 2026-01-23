@@ -1,6 +1,6 @@
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 
-set(PROJ_NAME pragma)
+set(PROJ_NAME pragma_executable)
 pr_add_executable(${PROJ_NAME} APP_ICON_WIN "${CMAKE_CURRENT_SOURCE_DIR}/appicon.rc" DEBUGGER_LAUNCH_ARGS "-console -luaext")
 
 pr_add_headers(${PROJ_NAME} "include/")
@@ -12,6 +12,7 @@ if(UNIX)
 endif()
 
 pr_finalize(${PROJ_NAME})
+pr_set_engine_executable(${PROJ_NAME} pragma)
 
 if(WIN32)
     # On Windows we need a separate version of pragma to allow launching it from within a console. This version will use the console subsystem and has the
@@ -23,12 +24,9 @@ if(WIN32)
     pr_add_headers(${PROJ_NAME} "include/")
     pr_add_sources(${PROJ_NAME} "src/")
 
-    if(UNIX)
-        target_link_libraries(${PROJ_NAME} PRIVATE "dl")
-        target_link_libraries(${PROJ_NAME} PRIVATE "pthread")
-    endif()
-
-    set_target_properties(${PROJ_NAME} PROPERTIES OUTPUT_NAME "pragma" SUFFIX ".com")
+    # Note: The executable will be renamed to "pragma.com" on install, but we can't call the build target that due to
+    # a msvc bug that causes a naming conflict with the "pragma" executable above.
+    set_target_properties(${PROJ_NAME} PROPERTIES OUTPUT_NAME "pragma_console" SUFFIX ".com")
 
     pr_finalize(${PROJ_NAME})
 endif()

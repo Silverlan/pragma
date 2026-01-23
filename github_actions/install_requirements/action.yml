@@ -12,52 +12,27 @@ runs:
       with:
         name: "pragma > install_requirements"
 
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v2
+
+    - name: Install Dependencies
+      shell: bash
+      if: ${{ runner.os == 'Linux' }}
+      run: |
+        sudo apt install ninja-build
+
+    - name: Setup Visual Studio Developer Prompt
+      if: ${{ runner.os == 'Windows' }}
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+
     # This is a temporary fix until https://github.com/actions/runner-images/pull/9956 has been merged
     - name: Purge needrestart
       shell: bash
       if: ${{ runner.os == 'Linux' }}
       run: |
         sudo apt-get purge needrestart
-  
-    # Required for CUDA
-    - name: Set up GCC 11
-      shell: bash
-      if: ${{ inputs.with_cuda == '1' && runner.os == 'Linux' }}
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y software-properties-common
-        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        sudo apt-get update
-        sudo apt-get install -y gcc-11 g++-11
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 60
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 60
-        sudo update-alternatives --set gcc /usr/bin/gcc-11
-        sudo update-alternatives --set g++ /usr/bin/g++-11
-
-    # For Cycles
-    - name: Install Cuda (Linux)
-      if: ${{ runner.os == 'Linux' && inputs.with_cuda == '1' }}
-      uses: Jimver/cuda-toolkit@v0.2.23
-      with:
-        cuda: '12.8.1'
-        use-github-cache: false
-        use-local-cache: true
-        linux-local-args: '["--toolkit"]'
-        method: 'network'
-        sub-packages: '["nvcc"]'
-    # TODO: Install OptiX
-
-    - name: Clone setup_cuda repository (Windows)
-      shell: bash
-      if: ${{ runner.os != 'Linux' }}
-      run: git clone https://github.com/Silverlan/setup_cuda.git
-
-    - name: Install Cuda (Windows)
-      if: ${{ runner.os != 'Linux' }}
-      shell: pwsh
-      run: setup_cuda/setup_cuda.ps1
-      env:
-          INPUT_CUDA_VERSION: "12.5.0"
 
     - name: Set PIP_BREAK_SYSTEM_PACKAGES env variable
       shell: bash
@@ -88,13 +63,13 @@ runs:
     #    docker-images: true
     #    swap-storage: true
 
-    - name: Maximize build space
-      if: ${{ runner.os == 'Linux' && !github.event.repository.private }}
-      uses: easimon/maximize-build-space@master
-      with:
-        root-reserve-mb: 512
-        swap-size-mb: 1024
-        remove-dotnet: 'true'
+    #- name: Maximize build space
+    #  if: ${{ runner.os == 'Linux' && !github.event.repository.private }}
+    #  uses: easimon/maximize-build-space@master
+    #  with:
+    #    root-reserve-mb: 512
+    #    swap-size-mb: 1024
+    #    remove-dotnet: 'true'
         
     - name: Print Disk Space Post-Optimization
       shell: bash

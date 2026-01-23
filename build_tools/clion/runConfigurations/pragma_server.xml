@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="pragma_server" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" WORKING_DIR="file://$CMAKE_INSTALL_PREFIX$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pragma" TARGET_NAME="pragma_server" CONFIG_NAME="config-linux-clang-full - build-linux-clang-full" RUN_PATH="$CMAKE_INSTALL_PREFIX$/pragma_server">
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

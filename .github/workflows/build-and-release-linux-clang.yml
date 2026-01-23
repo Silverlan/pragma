@@ -1,0 +1,133 @@
+name: Build and Release Linux (Clang)
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: build-and-release-lin-clang-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  # See https://github.com/git-lfs/git-lfs/issues/5749
+  GIT_CLONE_PROTECTION_ACTIVE: 'false'
+
+jobs:
+  build:
+    permissions:
+      actions: write
+      contents: write
+      issues: read
+      pull-requests: read
+
+    name: Build and Release - ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-latest
+            name: "Linux (Clang)"
+    steps:
+      - name: Setup Pragma
+        uses: Silverlan/pragma/github_actions/setup@develop
+        with:
+          clone_url: "https://github.com/${{ github.repository }}.git"
+
+      - name: Build Pragma
+        uses: ./pragma/github_actions/build
+        id: build-pragma
+        with:
+          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0 --with-swiftshader --toolset=clang"
+
+      - name: Create Release Archive
+        shell: bash
+        run: |
+          curDir="$PWD"
+          # Add info file
+          cd "${{ steps.build-pragma.outputs.install-dir }}"
+          echo -e "ref: $GITHUB_REF \ncommit: $GITHUB_SHA\nbuild: $(date +"%Y-%m-%dT%H:%M:%SZ")" \
+          > ./git_info.txt
+
+          # Delete .git folders
+          find . -name ".git*" -exec rm -R {} \; 2>/dev/null || true
+
+          # Enable experimental updates
+          cd cfg
+          echo "pfm_enable_experimental_updates \"1\"" >> client.cfg
+          cd ..
+
+          tar -czvf pragma-linux-x64-clang.tar.gz *
+          mv "${{ steps.build-pragma.outputs.install-dir }}/pragma-linux-x64-clang.tar.gz" "$curDir/"
+
+      - name: Generate nightly tag description
+        shell: bash
+        run:   |
+          curDate=$(date -u '+%Y-%m-%d %H:%M:%S %Z')
+          printf "This is an auto-generated pre-release, built from the latest version of the source code.\nIt includes all files necessary to run Pragma, as well as the latest version of the Pragma Filmmaker, however functionality and stability are **not** guaranteed.\n\nLatest release date: $curDate" > tag_text.txt
+
+      - name: Update nightly tag description
+        uses: softprops/action-gh-release@v0.1.15
+        with:
+          body_path: tag_text.txt
+          tag_name: nightly
+          prerelease: true
+
+      - name: Update nightly release
+        uses: pyTooling/Actions/releaser/composite@v4.2.2
+        with:
+          tag: nightly
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: "pragma-linux-x64-clang.tar.gz"
+          
+      - name: Run Tests
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: run-tests.yml
+          inputs: '{ "os": "ubuntu" }'
+
+      - name: Generate File Lists
+        shell: bash
+        if: always()
+        run: |
+          sudo apt install tree
+          curDir=$(pwd)
+
+          if [ -d "pragma/build" ]; then
+            cd pragma/build
+            sudo tree --dirsfirst > "$curDir/files_pragma_build.txt"
+            cd "$curDir"
+          fi
+          if [ -d "pragma/deps" ]; then
+            cd pragma/deps
+            sudo tree --dirsfirst > "$curDir/files_pragma_deps.txt"
+            cd "$curDir"
+          fi
+          if [ -d "pragma/build/install" ]; then
+            cd pragma/build/install
+            sudo tree --dirsfirst > "$curDir/files_pragma_install.txt"
+            cd "$curDir"
+          fi
+
+          mkdir artifacts
+          cp -u "pragma/build/CMakeCache.txt" artifacts/
+          cp -u "files_pragma_build.txt" artifacts/
+          cp -u "files_pragma_deps.txt" artifacts/
+          cp -u "files_pragma_install.txt" artifacts/
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Artifacts
+          overwrite: true
+          path: "artifacts"
+
+      - name: Handle Error
+        uses: Silverlan/common_actions/action_handle_error@main
+        if: failure()

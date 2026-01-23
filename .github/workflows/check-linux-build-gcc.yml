@@ -1,12 +1,10 @@
-# Note: This workflow is currently not functional due to compiler bugs in GCC. The workflow is currently triggered every day.
-# Once the compiler bugs have been fixed and the workflow runs successfully, it can be changed to be triggered on-push.
 name: Check Linux Build (GCC)
+# Note: Due to ongoing GCC compiler errors with C++20 modules, this workflow will likely fail. Once the compiler errors have been resolved, this should be changed to on: push.
 on:
-  schedule:
-    - cron: '0 0 * * *'  # Run daily at midnight
+  workflow_dispatch:
 
 concurrency:
-  group: check-build-lin-gcc
+  group: check-build-lin-gcc-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -15,33 +13,43 @@ env:
 
 jobs:
   build:
-    name: Build - ${{ matrix.config.os }}
+    name: Build - ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         config:
-          - os: ubuntu-24.04
-            name: "Ubuntu 24.04"
+          - os: ubuntu-latest
+            name: "Linux (GCC)"
     steps:
       - name: Setup Pragma
-        uses: Silverlan/pragma/github_actions/setup@main
+        uses: Silverlan/pragma/github_actions/setup@develop
         with:
-          branch: 'develop'
+          branch: ${{ github.ref_name }}
           clone_url: "https://github.com/${{ github.repository }}.git"
-
-      - name: Install gcc-14
-        shell: bash
-        id: install-gcc
-        run: |
-          sudo apt-get install gcc-14
-          sudo apt-get install g++-14
 
       - name: Build Pragma
         uses: ./pragma/github_actions/build
         id: build-pragma
         with:
-          build-args: '--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0 --with-swiftshader --c-compiler="gcc-14" --cxx-compiler="g++-14"'
+          build-args: '--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0 --with-swiftshader --c-compiler=gcc --cxx-compiler=g++'
+            
+      - name: Run Tests
+        uses: ./pragma/github_actions/run_common_tests
+        timeout-minutes: 60
+        with:
+          working-directory: "${{ steps.build-pragma.outputs.install-dir }}"
+          import-tests-token: ${{ secrets.PRAGMA_TESTS_IMPORT_TOKEN }}
+
+      #- name: Handle Error
+      #  uses: Silverlan/common_actions/action_handle_error@main
+      #  if: failure()
+      #  with:
+      #    timeout-minutes: 15
+
+      - name: Analyze Disk Space
+        uses: Silverlan/common_actions/analyze_disk_space@main
+        if: failure()
 
       - name: Upload Debug Artifacts
         if: ${{ !cancelled() }}

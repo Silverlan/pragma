@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+#include <vector>
 #include "pragma/pragma_executable.hpp"
 
 int main(int argc, char *argv[])

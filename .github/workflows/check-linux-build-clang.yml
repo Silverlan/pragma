@@ -1,0 +1,68 @@
+name: Check Linux Build (Clang)
+on:
+  push:
+    branches-ignore:
+      - main
+
+concurrency:
+  group: check-build-lin-clang-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # See https://github.com/git-lfs/git-lfs/issues/5749
+  GIT_CLONE_PROTECTION_ACTIVE: 'false'
+
+jobs:
+  build:
+    name: Build - ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-latest
+            name: "Linux (Clang)"
+    steps:
+      - name: Setup Pragma
+        uses: Silverlan/pragma/github_actions/setup@develop
+        with:
+          branch: ${{ github.ref_name }}
+          clone_url: "https://github.com/${{ github.repository }}.git"
+
+      - name: Build Pragma
+        uses: ./pragma/github_actions/build
+        id: build-pragma
+        with:
+          build-args: '--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0 --with-swiftshader'
+            
+      - name: Run Tests
+        uses: ./pragma/github_actions/run_common_tests
+        timeout-minutes: 60
+        with:
+          working-directory: "${{ steps.build-pragma.outputs.install-dir }}"
+          import-tests-token: ${{ secrets.PRAGMA_TESTS_IMPORT_TOKEN }}
+
+      #- name: Handle Error
+      #  uses: Silverlan/common_actions/action_handle_error@main
+      #  if: failure()
+      #  with:
+      #    timeout-minutes: 15
+
+      - name: Analyze Disk Space
+        uses: Silverlan/common_actions/analyze_disk_space@main
+        if: failure()
+
+      - name: Upload Debug Artifacts
+        if: ${{ !cancelled() }}
+        uses: ./pragma/github_actions/upload_debug_artifacts
+        with:
+          build-dir: '${{ steps.build-pragma.outputs.build-dir }}'
+          deps-dir: '${{ steps.build-pragma.outputs.deps-dir }}'
+          install-dir: '${{ steps.build-pragma.outputs.install-dir }}'
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: pragma-lin64
+          path: ${{ steps.build-pragma.outputs.install-dir }}
+          retention-days: 1

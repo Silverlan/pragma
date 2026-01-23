@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 4.2.0)
 
 project(external_libs)
 
@@ -25,7 +25,6 @@ endfunction(register_external_lib)
 # any other libraries that they are being referenced by.
 register_external_lib("mathutil")
 register_external_lib("sharedutils")
-register_external_lib("sharedutils-static")
 register_external_lib("util_udm")
 register_external_lib("util_pragma_doc")
 register_external_lib("cppbezierfit")
@@ -45,6 +44,7 @@ register_external_lib("util_smdmodel")
 register_external_lib("util_sound")
 register_external_lib("util_source_script")
 register_external_lib("util_source2")
+register_external_lib("util_string")
 register_external_lib("util_timeline_scene")
 register_external_lib("util_unicode")
 register_external_lib("util_versioned_archive")

@@ -4,16 +4,9 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include <cstdlib>
 
-#include <iostream>
-#include <string>
-#include <filesystem>
-#include <sharedutils/util.h>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/util_string.h>
-#include <sharedutils/util_command_manager.hpp>
-#include <sharedutils/scope_guard.h>
-#include <udm.hpp>
+import pragma.filesystem;
 
 static bool launch_child_console_process(const char *childProcess, const char *args)
 {
@@ -42,16 +35,16 @@ static bool launch_child_console_process(const char *childProcess, const char *a
 		return false;
 	}
 
-	util::ScopeGuard sgStdoutRead {[hStdoutRead]() { CloseHandle(hStdoutRead); }};
-	util::ScopeGuard sgStdoutWrite {[hStdoutWrite]() { CloseHandle(hStdoutWrite); }};
+	pragma::util::ScopeGuard sgStdoutRead {[hStdoutRead]() { CloseHandle(hStdoutRead); }};
+	pragma::util::ScopeGuard sgStdoutWrite {[hStdoutWrite]() { CloseHandle(hStdoutWrite); }};
 
 	if(!CreatePipe(&hStderrRead, &hStderrWrite, &sa, 0)) {
 		std::cerr << "Failed to create stderr pipe (" << GetLastError() << ")." << std::endl;
 		return false;
 	}
 
-	util::ScopeGuard sgStderrRead {[hStderrRead]() { CloseHandle(hStderrRead); }};
-	util::ScopeGuard sgStderrWrite {[hStderrWrite]() { CloseHandle(hStderrWrite); }};
+	pragma::util::ScopeGuard sgStderrRead {[hStderrRead]() { CloseHandle(hStderrRead); }};
+	pragma::util::ScopeGuard sgStderrWrite {[hStderrWrite]() { CloseHandle(hStderrWrite); }};
 
 	// Ensure the write handle to the pipe for stdout is not inherited.
 	if(!SetHandleInformation(hStdoutRead, HANDLE_FLAG_INHERIT, 0)) {
@@ -85,7 +78,7 @@ static bool launch_child_console_process(const char *childProcess, const char *a
 		return false;
 	}
 
-	util::ScopeGuard sgProcess {[&pi]() {
+	pragma::util::ScopeGuard sgProcess {[&pi]() {
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
 	}};
@@ -119,12 +112,12 @@ static bool launch_child_console_process(const char *childProcess, const char *a
 
 	return true;
 #else
-	util::CommandInfo cmdInfo;
+	pragma::util::CommandInfo cmdInfo;
 	cmdInfo.command = childProcess;
 	cmdInfo.absoluteCommandPath = true;
 	std::vector<std::string> &argv = cmdInfo.args;
-	ustring::explode(args, " ", argv);
-	if(!util::start_process(cmdInfo)) {
+	pragma::string::explode(args, " ", argv);
+	if(!pragma::util::start_process(cmdInfo)) {
 		std::cerr << "Command '" << fullCmd << "' has failed!" << std::endl;
 		return false;
 	}
@@ -178,19 +171,19 @@ int main(int argc, char *argv[])
 		if(arg == "-width") {
 			auto value = checkArg(i);
 			if(value)
-				width = util::to_int(*value);
+				width = pragma::util::to_int(*value);
 			continue;
 		}
 		if(arg == "-height") {
 			auto value = checkArg(i);
 			if(value)
-				height = util::to_int(*value);
+				height = pragma::util::to_int(*value);
 			continue;
 		}
 		if(arg == "-samples") {
 			auto value = checkArg(i);
 			if(value)
-				samples = util::to_int(*value);
+				samples = pragma::util::to_int(*value);
 			continue;
 		}
 	}
@@ -211,25 +204,25 @@ int main(int argc, char *argv[])
 	std::string mapPath = argv[argc - 1];
 	std::cout << "Map Path: " << mapPath << std::endl;
 	auto bspPath = mapPath + ".bsp";
-	if(filemanager::is_system_file(bspPath) == false) {
+	if(pragma::fs::is_system_file(bspPath) == false) {
 		std::cerr << "BSP File '" << bspPath << "' not found!" << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	auto pragmaPath = util::Path::CreatePath(filemanager::get_program_write_path());
+	auto pragmaPath = pragma::util::Path::CreatePath(pragma::fs::get_program_write_path());
 	pragmaPath.PopBack();
 	std::cout << "Pragma installation path: " << pragmaPath.GetString() << std::endl;
 	auto rootPath = pragmaPath.GetString();
 	rootPath = rootPath.substr(0, rootPath.length() - 1);
 
 	auto importAddonPath = pragmaPath + "addons/imported/maps/";
-	if(filemanager::create_system_path(rootPath, "addons/imported/maps/") == false) {
+	if(pragma::fs::create_system_path(rootPath, "addons/imported/maps/") == false) {
 		std::cerr << "Failed to create addon path '" << importAddonPath.GetString() << "'!" << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	auto convertedAddonPath = pragmaPath + "addons/converted/maps/";
-	if(filemanager::create_system_path(rootPath, "addons/converted/maps/") == false) {
+	if(pragma::fs::create_system_path(rootPath, "addons/converted/maps/") == false) {
 		std::cerr << "Failed to create addon path '" << convertedAddonPath.GetString() << "'!" << std::endl;
 		return EXIT_FAILURE;
 	}
@@ -243,9 +236,9 @@ int main(int argc, char *argv[])
 
 	auto outputFileName = convertedAddonPath.GetString() + mapName + ".pmap_b";
 	std::cout << "Output file path: " << outputFileName << std::endl;
-	if(filemanager::exists_system(outputFileName)) {
+	if(pragma::fs::exists_system(outputFileName)) {
 		std::cout << "Map already exists at target location. Deleting existing file..." << std::endl;
-		if(filemanager::remove_system_file(outputFileName) == false) {
+		if(pragma::fs::remove_system_file(outputFileName) == false) {
 			std::cerr << "Failed to delete file '" << outputFileName << "'! Aborting..." << std::endl;
 			return EXIT_FAILURE;
 		}
@@ -253,7 +246,7 @@ int main(int argc, char *argv[])
 
 	auto importPath = importAddonPath.GetString() + mapName + ".bsp";
 	std::cout << "Copying BSP from '" << bspPath << "' to '" << importPath << "'..." << std::endl;
-	if(filemanager::copy_system_file(bspPath, importPath) == false) {
+	if(pragma::fs::copy_system_file(bspPath, importPath) == false) {
 		std::cerr << "Failed to copy BSP file! Aborting..." << std::endl;
 		return EXIT_FAILURE;
 	}

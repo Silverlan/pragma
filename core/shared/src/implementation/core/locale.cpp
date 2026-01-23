@@ -1,19 +1,15 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
-
 module;
 
-#include "stdafx_shared.h"
-#include "pragma/logging.hpp"
-#include <fsys/directory_watcher.h>
-#include <fsys/filesystem.h>
-#include <sharedutils/util_string.h>
-#include <sharedutils/util_path.hpp>
-#include <sharedutils/magic_enum.hpp>
+#include <cassert>
+
+module pragma.shared;
+
+import :console.output;
+import :locale;
 
 #undef CreateFile
-
-module pragma.locale;
 
 static std::vector<std::string> g_loadedFiles;
 static std::string g_language;
@@ -24,7 +20,7 @@ static spdlog::logger &LOGGER = pragma::register_logger("locale");
 
 static constexpr auto LOCALIZATION_ROOT_PATH = "scripts/localization/";
 
-static std::unique_ptr<DirectoryWatcherCallback> g_locFileWatcher = nullptr;
+static std::unique_ptr<pragma::fs::DirectoryWatcherCallback> g_locFileWatcher = nullptr;
 
 namespace pragma::locale {
 	static LoadResult load(const std::string &file, const std::string &lan, bool bReload);
@@ -47,7 +43,7 @@ pragma::locale::LoadResult pragma::locale::load(const std::string &file, const s
 	auto it = std::find(g_loadedFiles.begin(), g_loadedFiles.end(), filePath.GetString());
 	if(it != g_loadedFiles.end()) {
 		if(bReload == false)
-			return pragma::locale::LoadResult::AlreadyLoaded;
+			return LoadResult::AlreadyLoaded;
 		g_loadedFiles.erase(it);
 	}
 	return load_file(filePath.GetString(), lan);
@@ -55,18 +51,18 @@ pragma::locale::LoadResult pragma::locale::load(const std::string &file, const s
 
 std::string pragma::locale::get_file_location(const std::string &file, const std::string &lan) { return LOCALIZATION_ROOT_PATH + lan + "/texts/" + file; }
 
-pragma::locale::LoadResult pragma::locale::parse_file(const std::string &file, const std::string &lan, std::unordered_map<std::string, pragma::string::Utf8String> &outTexts)
+pragma::locale::LoadResult pragma::locale::parse_file(const std::string &file, const std::string &lan, std::unordered_map<std::string, string::Utf8String> &outTexts)
 {
 	auto filePath = get_file_location(file, lan);
-	auto f = FileManager::OpenFile(filePath.c_str(), "r");
+	auto f = pragma::fs::open_file(filePath.c_str(), fs::FileMode::Read);
 	if(f != nullptr) {
 		while(!f->Eof()) {
 			auto l = f->ReadLine();
 			std::string key;
 			std::string val;
-			if(ustring::get_key_value(l, key, val)) {
-				ustring::replace(val, "\\\"", "\"");
-				ustring::replace(val, "\\n", "\n");
+			if(string::get_key_value(l, key, val)) {
+				string::replace(val, "\\\"", "\"");
+				string::replace(val, "\\n", "\n");
 				outTexts[key] = val;
 			}
 		}
@@ -113,7 +109,7 @@ void pragma::locale::reload_files()
 void pragma::locale::set_language(std::string lan)
 {
 	LOGGER.debug("Changing global language to '{}'...", lan);
-	ustring::to_lower(lan);
+	string::to_lower(lan);
 	g_language = lan;
 
 	auto loadedFiles = g_loadedFiles;
@@ -122,12 +118,12 @@ void pragma::locale::set_language(std::string lan)
 		load_file(fpath, lan);
 
 	try {
-		g_locFileWatcher = std::make_unique<DirectoryWatcherCallback>(LOCALIZATION_ROOT_PATH + lan + '/', [](const std::string &str) {
+		g_locFileWatcher = std::make_unique<fs::DirectoryWatcherCallback>(LOCALIZATION_ROOT_PATH + lan + '/', [](const std::string &str) {
 			auto filePath = util::Path::CreateFile(str);
 			auto it = std::find(g_loadedFiles.begin(), g_loadedFiles.end(), filePath.GetString());
 			if(it == g_loadedFiles.end())
 				return;
-			Con::cout << "Reloading localization file '" << str << "'..." << Con::endl;
+			Con::COUT << "Reloading localization file '" << str << "'..." << Con::endl;
 			load(str, true);
 		});
 	}
@@ -149,10 +145,10 @@ const std::unordered_map<std::string, pragma::locale::LanguageInfo> &pragma::loc
 	if(g_languages.empty()) {
 		std::vector<std::string> lanDirs;
 		std::string baseDir = "scripts/localization/";
-		filemanager::find_files(baseDir + "*", nullptr, &lanDirs);
+		fs::find_files(baseDir + "*", nullptr, &lanDirs);
 		for(auto &identifier : lanDirs) {
 			auto lanPath = baseDir + identifier + "/";
-			if(!filemanager::exists(lanPath + "language.udm"))
+			if(!fs::exists(lanPath + "language.udm"))
 				continue;
 			LanguageInfo lanInfo {};
 			try {
@@ -170,14 +166,14 @@ const std::unordered_map<std::string, pragma::locale::LanguageInfo> &pragma::loc
 	}
 	return g_languages;
 }
-bool pragma::locale::set_localization(const std::string &id, const pragma::string::Utf8String &text, bool overwriteIfExists)
+bool pragma::locale::set_localization(const std::string &id, const string::Utf8String &text, bool overwriteIfExists)
 {
 	if(!overwriteIfExists && g_localization.texts.find(id) != g_localization.texts.end())
 		return false;
 	g_localization.texts[id] = text;
 	return true;
 }
-bool pragma::locale::get_text(const std::string &id, pragma::string::Utf8String &outText) { return get_text(id, {}, outText); }
+bool pragma::locale::get_text(const std::string &id, string::Utf8String &outText) { return get_text(id, {}, outText); }
 bool pragma::locale::get_text(const std::string &id, std::string &outText) { return get_text(id, {}, outText); }
 bool pragma::locale::get_raw_text(const std::string &id, std::string &outText)
 {
@@ -187,7 +183,7 @@ bool pragma::locale::get_raw_text(const std::string &id, std::string &outText)
 	outText = it->second.cpp_str();
 	return true;
 }
-bool pragma::locale::get_raw_text(const std::string &id, pragma::string::Utf8String &outText)
+bool pragma::locale::get_raw_text(const std::string &id, string::Utf8String &outText)
 {
 	auto it = g_localization.texts.find(id);
 	if(it == g_localization.texts.end())
@@ -260,13 +256,13 @@ static void insert_arguments(const std::vector<TString> &args, TString &inOutTex
 		startPos = inOutText.find('{', endPos);
 	}
 }
-bool pragma::locale::get_text(const std::string &id, const std::vector<pragma::string::Utf8String> &args, pragma::string::Utf8String &outText)
+bool pragma::locale::get_text(const std::string &id, const std::vector<string::Utf8String> &args, string::Utf8String &outText)
 {
 	auto it = g_localization.texts.find(id);
 	if(it == g_localization.texts.end())
 		return false;
 	outText = it->second;
-	insert_arguments<pragma::string::Utf8String>(args, outText);
+	insert_arguments<string::Utf8String>(args, outText);
 	return true;
 }
 bool pragma::locale::get_text(const std::string &id, const std::vector<std::string> &args, std::string &outText)
@@ -289,7 +285,7 @@ std::string pragma::locale::get_text(const std::string &id, const std::vector<st
 	insert_arguments<std::string>(args, r);
 	return r;
 }
-pragma::string::Utf8String pragma::locale::get_text_utf8(const std::string &id, const std::vector<pragma::string::Utf8String> &args)
+pragma::string::Utf8String pragma::locale::get_text_utf8(const std::string &id, const std::vector<string::Utf8String> &args)
 {
 	auto it = g_localization.texts.find(id);
 	if(it == g_localization.texts.end()) {
@@ -297,7 +293,7 @@ pragma::string::Utf8String pragma::locale::get_text_utf8(const std::string &id, 
 		return std::string("<MISSING LOCALIZATION: ") + id + std::string(">");
 	}
 	auto r = it->second;
-	insert_arguments<pragma::string::Utf8String>(args, r);
+	insert_arguments<string::Utf8String>(args, r);
 	return r;
 }
 std::string pragma::locale::determine_system_language()
@@ -311,7 +307,7 @@ void pragma::locale::load_all()
 {
 	auto &lan = get_language();
 	std::vector<std::string> files;
-	filemanager::find_files(LOCALIZATION_ROOT_PATH + lan + "/texts/*.txt", &files, nullptr);
+	fs::find_files(LOCALIZATION_ROOT_PATH + lan + "/texts/*.txt", &files, nullptr);
 	for(auto &f : files)
 		load_file(f, lan);
 }
@@ -327,7 +323,7 @@ pragma::string::Utf8String pragma::locale::get_used_characters()
 	for(auto c : usedCharacters)
 		vUsedCharacters.push_back(c);
 	std::sort(vUsedCharacters.begin(), vUsedCharacters.end());
-	pragma::string::Utf8String usedCharsStr;
+	string::Utf8String usedCharsStr;
 	for(auto c : vUsedCharacters)
 		usedCharsStr += static_cast<char16_t>(c);
 	return usedCharsStr;
@@ -349,15 +345,15 @@ static bool save_localization(const pragma::locale::Localization &loc, const std
 			first = false;
 
 		auto val = loc.texts.find(key)->second;
-		ustring::replace<pragma::string::Utf8String>(val, "\"", "\\\"");
-		ustring::replace<pragma::string::Utf8String>(val, "\n", "\\n");
+		pragma::string::replace<pragma::string::Utf8String>(val, "\"", "\\\"");
+		pragma::string::replace<pragma::string::Utf8String>(val, "\n", "\\n");
 		out << key << " = \"" << val << "\"";
 	}
 
 	auto fullFileName = pragma::locale::get_file_location(fileName, lan);
-	if(!FileManager::FindLocalPath(fullFileName, fullFileName))
+	if(!pragma::fs::find_local_path(fullFileName, fullFileName))
 		return false;
-	auto f = filemanager::open_file<VFilePtrReal>(fullFileName, filemanager::FileMode::Write);
+	auto f = pragma::fs::open_file<pragma::fs::VFilePtrReal>(fullFileName, pragma::fs::FileMode::Write);
 	if(!f)
 		return false;
 	f->WriteString(out.str());
@@ -366,9 +362,9 @@ static bool save_localization(const pragma::locale::Localization &loc, const std
 bool pragma::locale::relocalize(const std::string &identifier, const std::string &newIdentifier, const std::string &oldCategory, const std::string &newCategory)
 {
 	auto fileName = oldCategory + ".txt";
-	for(auto &[lan, lanInfo] : pragma::locale::get_languages()) {
+	for(auto &[lan, lanInfo] : get_languages()) {
 		Localization loc {};
-		if(pragma::locale::load_file(fileName, lan, loc) == LoadResult::Failed)
+		if(load_file(fileName, lan, loc) == LoadResult::Failed)
 			continue;
 		auto it = loc.texts.find(identifier);
 		if(it == loc.texts.end())
@@ -382,22 +378,22 @@ bool pragma::locale::relocalize(const std::string &identifier, const std::string
 	}
 	return true;
 }
-bool pragma::locale::localize(const std::string &identifier, const std::string &lan, const std::string &category, const pragma::string::Utf8String &text)
+bool pragma::locale::localize(const std::string &identifier, const std::string &lan, const std::string &category, const string::Utf8String &text)
 {
 	auto fileName = category + ".txt";
 	Localization loc {};
-	if(pragma::locale::load_file(fileName, lan, loc) == LoadResult::Failed) {
+	if(load_file(fileName, lan, loc) == LoadResult::Failed) {
 		auto success = false;
 		auto filePath = get_file_location(fileName, lan);
-		if(!filemanager::exists(filePath) && lan != "en") {
+		if(!fs::exists(filePath) && lan != "en") {
 			auto filePathEn = get_file_location(fileName, "en");
 			std::string absPath;
-			if(FileManager::FindLocalPath(filePathEn, absPath)) {
-				ustring::replace(absPath, "\\", "/");
+			if(fs::find_local_path(filePathEn, absPath)) {
+				string::replace(absPath, "\\", "/");
 				auto newPath = absPath;
-				ustring::replace(newPath, "/en/", "/" + lan + "/");
-				if(filemanager::create_path(ufile::get_path_from_filename(newPath)) && filemanager::write_file(newPath, ""))
-					success = (pragma::locale::load_file(fileName, lan, loc) != LoadResult::Failed); // Try again
+				string::replace(newPath, "/en/", "/" + lan + "/");
+				if(fs::create_path(ufile::get_path_from_filename(newPath)) && fs::write_file(newPath, ""))
+					success = (load_file(fileName, lan, loc) != LoadResult::Failed); // Try again
 			}
 		}
 		if(!success)

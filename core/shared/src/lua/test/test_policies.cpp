@@ -2,17 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 #if 0
-#include "stdafx_shared.h"
-#include "pragma/lua/policies/pair_policy.hpp"
-#include "pragma/lua/policies/tuple_policy.hpp"
-#include "pragma/lua/policies/vector_policy.hpp"
-#include "pragma/lua/policies/string_view_policy.hpp"
-#include "pragma/lua/policies/shared_from_this_policy.hpp"
-#include "pragma/lua/policies/optional_policy.hpp"
-#include "pragma/lua/policies/property_policy.hpp"
-#include "pragma/lua/policies/default_parameter_policy.hpp"
-#include "pragma/lua/lua_error_handling.hpp"
-#include <sharedutils/property/util_property.hpp>
+
 
 static void test_pair_policy_param(const std::pair<float,std::string> &pair)
 {
@@ -70,15 +60,15 @@ struct TestSharedFromThis
 	float x = 5.f;
 };
 
-static std::shared_ptr<TestSharedFromThis> g_shared_from_this = std::make_shared<TestSharedFromThis>();
+static std::shared_ptr<TestSharedFromThis> g_shared_from_this = pragma::util::make_shared<TestSharedFromThis>();
 static TestSharedFromThis *test_shared_from_this_policy_ret()
 {
 	return g_shared_from_this.get();
 }
 
-static util::PFloatProperty test_property_policy_ret()
+static pragma::util::PFloatProperty test_property_policy_ret()
 {
-	return util::FloatProperty::Create(111.f);
+	return pragma::util::FloatProperty::Create(111.f);
 }
 
 static std::optional<std::string> test_optional_policy_ret(int i)
@@ -94,7 +84,7 @@ static void test_default_parameter_policy_param(const Vector3 &v={1,2,3},float f
 	std::cout<<"Default float: "<<f<<std::endl;
 }
 
-__declspec(dllexport) void test_lua_policies(lua_State *l)
+__declspec(dllexport) void test_lua_policies(lua::State *l)
 {
 	auto modTest = luabind::module_(l,"test_policies");
 

@@ -1,17 +1,98 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 4.2.0)
+
+message(STATUS "CMake version: ${CMAKE_VERSION}")
+
+# Required for "import std;" as long as its experimental in CMake
+set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_MODULE_STD 1)
+
+# set(CMAKE_C_STANDARD 23)
+# set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS ON)
+
+# Use response files to avoid "The command line is too long." errors
+set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_INCLUDES 1)
+set(CMAKE_C_USE_RESPONSE_FILE_FOR_INCLUDES 1)
+set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_INCLUDES 1)
+
+set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+set(CMAKE_C_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_OBJECTS 1)
+
+set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
+set(CMAKE_C_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
+set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
+
+if(CMAKE_GENERATOR MATCHES "Visual Studio.*")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio generator is currently not supported. Please use Ninja generator for the time being).")
+endif()
+if ("${CMAKE_GENERATOR}" MATCHES "Ninja")
+    set(CMAKE_NINJA_FORCE_RESPONSE_FILE TRUE CACHE BOOL "Force Ninja to use response files for long command lines")
+endif()
+
+set(PRAGMA_DEPS_DIR "${CMAKE_SOURCE_DIR}/deps/staging/" CACHE PATH "Directory where dependencies will be extracted to.")
+set(PRAGMA_BUILD_TOOLS_DIR "${CMAKE_SOURCE_DIR}/build_tools/" CACHE PATH "Directory where additional build tool dependencies will be extracted to.")
+
+include("cmake/fetch_clang.cmake")
+
+if(UNIX)
+    # Compilers are still somewhat unreliable at finding the modules.json (which is required for import std), so
+    # we'll help them out for now. For newer distros (e.g. arch-based), it's typically available on the system,
+    # for other cases (e.g. for Ubuntu 24), we'll use our own shipped version of gcc.
+    if(EXISTS "/usr/lib/libstdc++.modules.json")
+        set(CMAKE_CXX_STDLIB_MODULES_JSON "/usr/lib/libstdc++.modules.json")
+    else()
+        include("cmake/fetch_gcc.cmake")
+        set(CMAKE_CXX_STDLIB_MODULES_JSON "${PRAGMA_BUILD_TOOLS_DIR}/gcc/lib64/libstdc++.modules.json")
+    endif()
+endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/pr_legacy.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/pr_install.cmake)
 
+include(FetchContent)
+
+function(pr_fetch_repository IDENTIFIER GIT_URL GIT_SHA CHECKOUT_PATH)
+    FetchContent_Declare(
+        ${IDENTIFIER}
+        GIT_REPOSITORY ${GIT_URL}
+        GIT_TAG        ${GIT_SHA}
+        SOURCE_DIR     "${CMAKE_SOURCE_DIR}/${CHECKOUT_PATH}"
+    )
+    FetchContent_MakeAvailable(${IDENTIFIER})
+endfunction()
+
 project(pragma)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (clang-cl is currently not supported. Please use clang instead.).")
+endif()
+
+set(TOOLSET "clang")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(TOOLSET "clang")
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(TOOLSET "msvc")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(TOOLSET "gcc")
+endif()
+
+include("cmake/fetch_deps.cmake")
 
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
-option(WITH_PFM "Build with Pragma Filmmaker?" OFF)
-option(WITH_VR "Build with VR support?" OFF)
-option(WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
-option(WITH_COMMON_MODULES "Build with common modules?" ON)
+option(PRAGMA_DEBUG "Build in debug mode?" OFF)
+option(PRAGMA_WITH_VR "Build with VR support?" OFF)
+option(PRAGMA_WITH_NETWORKING "Build with networking support?" OFF)
+option(PRAGMA_WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
+option(PRAGMA_WITH_COMMON_MODULES "Build with common modules?" ON)
+option(PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES "Build with essential client modules?" ON)
+
+option(PRAGMA_WITH_PFM "Build with Pragma Filmmaker?" OFF)
+option(PRAGMA_WITH_CORE_PFM_MODULES "Include essential PFM modules." ON)
+option(PRAGMA_WITH_ALL_PFM_MODULES "Include non-essential PFM modules (e.g. chromium and cycles)." ON)
 
 # Global settings
 set(CMAKE_COLOR_DIAGNOSTICS ON)
@@ -128,77 +209,110 @@ else()
 endif()
 
 message("Processing third-party libaries...")
-
 set(LIBRARY_OUTPUT_PATH
     ""
     CACHE PATH "" FORCE)
 
-set(PRAGMA_INSTALL_COMPONENT "pragma")
-set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")
-
-add_custom_target(pragma-install
-    ALL
-    COMMAND ${CMAKE_COMMAND}
-            --install ${CMAKE_BINARY_DIR}
-            --config ${CONFIG_BUILD_TYPE}
-            --prefix "${INSTALL_PREFIX}"
-            --component pragma-install
-    COMMENT "Installing 'pragma-install' component into ${INSTALL_PREFIX}"
-    VERBATIM
-)
-
-add_custom_target(pragma-install-full
-    ALL
-    COMMAND ${CMAKE_COMMAND}
-            --install ${CMAKE_BINARY_DIR}
-            --config ${CONFIG_BUILD_TYPE}
-            --prefix "${INSTALL_PREFIX}"
-            --component pragma-install-full
-    COMMENT "Installing 'pragma-install-full' component into ${INSTALL_PREFIX}"
-    VERBATIM
-)
+set_property(GLOBAL PROPERTY PR_INSTALL_COMMANDS "")
+set(install_targets "pragma-install-base" "pragma-install" "pragma-install-full" "pragma-install-full-no-executable")
+set_property(GLOBAL PROPERTY PR_INSTALL_TARGETS ${install_targets})
+foreach(install_target ${install_targets})
+    add_custom_target(${install_target}
+        ALL
+        COMMAND ${CMAKE_COMMAND}
+                --install ${CMAKE_BINARY_DIR}
+                --config ${CONFIG_BUILD_TYPE}
+                --prefix "${INSTALL_PREFIX}"
+                --component ${install_target}
+        COMMENT "Installing '${install_target}' component into ${INSTALL_PREFIX}"
+        VERBATIM
+    )
+endforeach()
 
 add_custom_target(pragma-core)
 set_target_properties(pragma-core PROPERTIES FOLDER "Hidden")
 
-include(${CMAKE_SOURCE_DIR}/ThirdPartyLibs.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/third_party_libs.cmake)
 
 message("Processing external libraries...")
-add_subdirectory(external_libs)
+include(${CMAKE_SOURCE_DIR}/cmake/external_libs.cmake)
 pr_set_target_folder(wgui external_libs/wgui)
 pr_set_target_folder(sample_application external_libs/wgui)
+
+set_target_properties(networkmanager PROPERTIES FOLDER external_libs/networkmanager)
+set_target_properties(clientmanager PROPERTIES FOLDER external_libs/networkmanager)
+set_target_properties(servermanager PROPERTIES FOLDER external_libs/networkmanager)
+
+set_target_properties(materialsystem PROPERTIES FOLDER external_libs/materialsystem)
+set_target_properties(cmaterialsystem PROPERTIES FOLDER external_libs/materialsystem)
+
 target_include_directories(util_image PUBLIC ${DEPENDENCY_ZLIB_INCLUDE})
 target_include_directories(cmaterialsystem PUBLIC ${DEPENDENCY_ZLIB_INCLUDE})
+
+# Registers a convenience target, which will do a full-build +install and can be used to run an executable target.
+function(pr_add_executable_install_target TARGET_NAME EXECUTABLE_TARGET_NAME)
+    add_custom_target(${TARGET_NAME}
+        ALL
+        COMMAND ${CMAKE_COMMAND}
+                --install ${CMAKE_BINARY_DIR}
+                --config ${CONFIG_BUILD_TYPE}
+                --prefix "${INSTALL_PREFIX}"
+                --component ${TARGET_NAME}
+        COMMENT "Installing '${TARGET_NAME}' component into ${INSTALL_PREFIX}"
+        VERBATIM
+    )
+    pr_set_install_target(${TARGET_NAME})
+    add_dependencies(${TARGET_NAME} ${EXECUTABLE_TARGET_NAME} pragma-install-full-no-executable)
+    add_dependencies(${EXECUTABLE_TARGET_NAME} pragma-install-full-no-executable)
+    pr_set_target_folder(${TARGET_NAME} core)
+endfunction()
+
+function(pr_set_output_directory_to_install TARGET_NAME)
+    set_target_properties(${TARGET_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_INSTALL_PREFIX}"
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_INSTALL_PREFIX}"
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_INSTALL_PREFIX}"
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_INSTALL_PREFIX}"
+        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_INSTALL_PREFIX}"
+    )
+endfunction()
+
+function(pr_set_engine_executable TARGET_NAME OUTPUT_NAME)
+    set_target_properties(${TARGET_NAME} PROPERTIES RUNTIME_OUTPUT_NAME "${OUTPUT_NAME}")
+
+    add_dependencies(pragma-install ${TARGET_NAME})
+    add_dependencies(pragma-install-full ${TARGET_NAME})
+
+    pr_add_executable_install_target(${OUTPUT_NAME} ${TARGET_NAME})
+endfunction()
 
 message("Processing core libraries...")
 add_subdirectory(core)
 
+message("Processing modules...")
+include(${CMAKE_SOURCE_DIR}/cmake/modules.cmake)
+
 message("Processing tools...")
 add_subdirectory(tools)
 
-message("Processing modules...")
-add_subdirectory(modules)
-
-target_include_directories(libcurl_shared PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
 target_include_directories(materialsystem PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
 
+set_target_properties(pragma_executable PROPERTIES DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
+set_target_properties(pragma_server_executable PROPERTIES DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
 if(WIN32)
-    set_target_properties(pragma PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
-    set_target_properties(pragma_server PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
+    set_target_properties(pragma_executable PROPERTIES VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma.exe")
+    set_target_properties(pragma_server_executable PROPERTIES VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma_server.exe")
 
-    set_target_properties(pragma PROPERTIES VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma.exe")
-    set_target_properties(pragma_server PROPERTIES VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma_server.exe")
-
-    set_target_properties(pragma PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext -graphics_api vulkan")
-    set_target_properties(pragma_server PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
+    set_target_properties(pragma_executable PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext -graphics_api vulkan")
+    set_target_properties(pragma_server_executable PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
 endif()
 
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT pragma)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT pragma_executable)
 
 # Installation
-pr_install_targets(pragma pragma_server INSTALL_DIR ".")
+pr_install_targets(pragma_executable pragma_server_executable INSTALL_DIR ".")
 if(WIN32)
-    pr_install_targets(pragma_console INSTALL_DIR ".")
+    pr_install_targets(pragma_console INSTALL_DIR "." RENAME "pragma.com")
 endif()
 pr_install_targets(
     alsoundsystem
@@ -226,24 +340,20 @@ pr_install_targets(
     wgui)
 
 message("Custom install targets: ${PRAGMA_INSTALL_CUSTOM_TARGETS}")
-set(PRAGMA_INSTALL_DEPENDENCIES pragma pragma_server iclient iserver udm_convert prad pragma_updater ${PRAGMA_INSTALL_CUSTOM_TARGETS})
+set(PRAGMA_INSTALL_DEPENDENCIES iclient iserver udm_convert prad pragma_updater ${PRAGMA_INSTALL_CUSTOM_TARGETS})
 if(WIN32)
     list(APPEND PRAGMA_INSTALL_DEPENDENCIES pragma_console)
 endif()
 add_dependencies(pragma-core ${PRAGMA_INSTALL_DEPENDENCIES})
-add_dependencies(pragma-install-full pragma-install)
 
 pr_install_create_directory(modules)
 
 pr_install_targets(
     luabind
     ogg
-    Detour
-    Recast
     vorbis
     vorbisfile
     VTFLib13
-    spdlog
     mpaheader
     bz2
     KVParser
@@ -258,31 +368,42 @@ message("Installing core components...")
 pr_include_install(".")
 
 # Modules
-file(GLOB PR_MODULES "modules/pr_*")
-foreach(MODULE_PATH ${PR_MODULES})
-    get_filename_component(MODULE_NAME "${MODULE_PATH}" NAME)
-    if(NOT DEFINED PRAGMA_DISABLE_MODULE_${MODULE_NAME} OR NOT PRAGMA_DISABLE_MODULE_${MODULE_NAME})
-        if(WIN32)
-            set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_NAME}.dll")
-        else()
-            set(PR_MODULE_PATH_WITH_EXT "${CMAKE_CURRENT_BINARY_DIR}/modules/${MODULE_NAME}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_NAME}.so")
-        endif()
-        if(EXISTS "${MODULE_PATH}/Install.cmake")
-            message("Running install script for module '${MODULE_PATH}'...")
-	        pr_install_component(${MODULE_NAME})
-            pr_include_install("${MODULE_PATH}")
-        else()
-            # Default behavior
-            message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
-            add_custom_command(
-                TARGET pragma-install
-                POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -DInstallSrc=${PR_MODULE_PATH_WITH_EXT} -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\" -P
-                        ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
-                COMMENT "Copying ${PR_MODULE_PATH_WITH_EXT} to ${CMAKE_INSTALL_PREFIX}/modules/...")
-            pr_include_cmake_modules("${MODULE_PATH}")
+get_property(MODULE_NAMES GLOBAL PROPERTY PRAGMA_MODULE_NAMES)
+foreach(MODULE_NAME ${MODULE_NAMES})
+    set(MODULE_PATH "${CMAKE_SOURCE_DIR}/modules/${MODULE_NAME}")
+    if(EXISTS "${MODULE_PATH}/Install.cmake")
+        message("Running install script for module '${MODULE_PATH}'...")
+        pr_install_component(${MODULE_NAME})
+        pr_include_install("${MODULE_PATH}")
+    else()
+        # Default behavior
+        get_property(skip_install GLOBAL PROPERTY PRAGMA_MODULE_${MODULE_NAME}_SKIP_INSTALL)
+        if(NOT skip_install)
+            get_property(_targets GLOBAL PROPERTY PRAGMA_MODULE_${MODULE_NAME}_TARGETS)
+            foreach(MODULE_TARGET IN LISTS _targets)
+                get_target_property(MODULE_BIN_PATH ${MODULE_TARGET} BINARY_DIR)
+                if(WIN32)
+                    set(PR_MODULE_PATH_WITH_EXT "${MODULE_BIN_PATH}/${PR_MODULE_INSTALL_SUBDIR}/${MODULE_TARGET}.dll")
+                else()
+                    set(PR_MODULE_PATH_WITH_EXT "${MODULE_BIN_PATH}/${PR_MODULE_INSTALL_SUBDIR}/lib${MODULE_TARGET}.so")
+                endif()
+
+                message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
+                add_custom_command(
+                    TARGET pragma-install-base
+                    POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -DInstallSrc=${PR_MODULE_PATH_WITH_EXT} -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\" -P
+                            ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
+                    COMMENT "Copying ${PR_MODULE_PATH_WITH_EXT} to ${CMAKE_INSTALL_PREFIX}/modules/...")
+                pr_include_cmake_modules("${MODULE_PATH}")
+            endforeach()
         endif()
     endif()
+endforeach()
+
+get_property(MODULE_TARGETS GLOBAL PROPERTY PRAGMA_MODULE_TARGETS)
+foreach(MODULE_TARGET ${MODULE_TARGETS})
+    add_dependencies(pragma-core ${MODULE_TARGET})
 endforeach()
 
 # Tools
@@ -296,7 +417,7 @@ foreach(MODULE_PATH ${PR_MODULES})
     endif()
 endforeach()
 
-# Link components to pragma-install
+# Link components to pragma-install-base
 get_property(COMPONENT_LIST GLOBAL PROPERTY PRAGMA_INSTALL_COMPONENTS)
 foreach(_COMP IN LISTS COMPONENT_LIST)
     add_custom_target(pragma-install-${_COMP} COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${_COMP} -DBUILD_TYPE=${CONFIG_BUILD_TYPE} -P
@@ -304,19 +425,66 @@ foreach(_COMP IN LISTS COMPONENT_LIST)
     # We need to make sure all build-targets run first, before any install targets
     add_dependencies(pragma-install-${_COMP} pragma-core)
 
-    add_dependencies(pragma-install pragma-install-${_COMP})
+    add_dependencies(pragma-install-base pragma-install-${_COMP})
 
     set_target_properties(pragma-install-${_COMP} PROPERTIES FOLDER "Hidden/Install")
 endforeach()
 
+function(pr_manifest_install IDENTIFIER SRC_DIR REL_DST_DIR COMPONENT)
+    set(MANIFEST_PATH "${CMAKE_INSTALL_PREFIX}/.install_cache/manifests/${IDENTIFIER}.txt")
+    set(FULL_DST_DIR "${CMAKE_INSTALL_PREFIX}/${REL_DST_DIR}")
+
+    install(CODE "
+        set(SRC_DIR \"${SRC_DIR}\")
+        set(DST_DIR \"${FULL_DST_DIR}\")
+        set(MANIFEST_FILE \"${MANIFEST_PATH}\")
+        include(\"${CMAKE_CURRENT_SOURCE_DIR}/cmake/ManifestInstall.cmake\")
+    " COMPONENT ${COMPONENT})
+endfunction()
+
 # Install assets
-install(
-    DIRECTORY assets/
-    DESTINATION "."
-    COMPONENT pragma-install-full)
+pr_manifest_install("core" "${CMAKE_CURRENT_SOURCE_DIR}/assets" "" pragma-install-full)
+pr_manifest_install("core" "${CMAKE_CURRENT_SOURCE_DIR}/assets" "" pragma-install-full-no-executable)
 
 message("Processing addons...")
 include(${CMAKE_SOURCE_DIR}/Addons.cmake)
 
+pr_set_target_folder(pragma-install-base core)
 pr_set_target_folder(pragma-install core)
 pr_set_target_folder(pragma-install-full core)
+
+get_property(install_targets GLOBAL PROPERTY PR_INSTALL_TARGETS)
+get_property(install_commands GLOBAL PROPERTY PR_INSTALL_COMMANDS)
+foreach(component IN LISTS install_targets)
+    add_dependencies(${component} pragma-install-base)
+    cmake_language(EVAL CODE "${install_commands}")
+endforeach()
+
+if(DEFINED ENV{CLION_IDE})
+    # When using CLion, we'll copy over some pre-made configuration files to
+    # make it easier to run Pragma directly from the install folder.
+    # TODO: This could be removed once CLion supports VS_DEBUGGER_WORKING_DIRECTORY: https://youtrack.jetbrains.com/issue/CPP-20844
+
+    set(RUN_CONFIG_SRC "${CMAKE_SOURCE_DIR}/build_tools/clion/runConfigurations")
+    set(RUN_CONFIG_DEST "${CMAKE_SOURCE_DIR}/.idea/runConfigurations")
+
+    # Only run if the destination folder doesn't exist yet
+    if(NOT EXISTS "${RUN_CONFIG_DEST}")
+        message(STATUS "CLion: Initializing run configurations from templates...")
+
+        # Get a list of all files in the template directory
+        file(GLOB TEMPLATE_FILES LIST_DIRECTORIES false "${RUN_CONFIG_SRC}/*")
+
+        foreach(FILE_PATH ${TEMPLATE_FILES})
+            # Insert install path into configuration files
+            get_filename_component(FILE_NAME "${FILE_PATH}" NAME)
+            file(READ "${FILE_PATH}" FILE_CONTENTS)
+            string(REPLACE "$CMAKE_INSTALL_PREFIX$" "${CMAKE_INSTALL_PREFIX}" UPDATED_CONTENTS "${FILE_CONTENTS}")
+
+            # Write the modified content to the new location
+            file(WRITE "${RUN_CONFIG_DEST}/${FILE_NAME}" "${UPDATED_CONTENTS}")
+        endforeach()
+        
+        message(STATUS "CLion: Configuration files deployed to .idea/runConfigurations")
+    endif()
+endif()

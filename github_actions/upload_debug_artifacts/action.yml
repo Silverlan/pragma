@@ -59,6 +59,7 @@ runs:
 
         mkdir -p artifacts
         cp -u "${{ inputs.build-dir }}/CMakeCache.txt" artifacts/ || true
+        cp -u "${{ inputs.build-dir }}/compile_commands.json" artifacts/ || true
         cp -u "files_pragma_build.txt" artifacts/ || true
         cp -u "files_pragma_deps.txt" artifacts/ || true
         cp -u "files_pragma_install.txt" artifacts/ || true

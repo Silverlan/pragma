@@ -73,12 +73,12 @@ function ents.WeaponPhyscannon:OnPrimaryAttack()
 	local prop, hitPos = self:FindPhysProp()
 	if CLIENT == true then
 		if prop == nil then
-			sound.play("weapon_physcannon.dryfire", sound.TYPE_WEAPON, 1.0, 1.0)
+			sound.play("weapon_physcannon.dryfire", sound.TYPE_WEAPON)
 			if wepComponent ~= nil then
 				wepComponent:PlayViewActivity(Animation.ACT_VM_PRIMARY_ATTACK, ents.AnimatedComponent.FPLAYANIM_RESET)
 			end
 		else
-			sound.play("weapon_physcannon.launch", sound.TYPE_WEAPON, 1.0, 1.0)
+			sound.play("weapon_physcannon.launch", sound.TYPE_WEAPON)
 			if wepComponent ~= nil then
 				wepComponent:PlayViewActivity(Animation.ACT_VM_SECONDARY_ATTACK, ents.AnimatedComponent.FPLAYANIM_RESET)
 			end

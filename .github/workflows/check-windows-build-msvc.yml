@@ -1,0 +1,121 @@
+name: Check Windows Build (MSVC)
+# Note: Building with MSVC will hit the GitHub runner time limit for workflow jobs, due to long build times. This is likely due to MSVC compiler bugs with C++20 modules.
+# Once these issues have been resolved, this should be changed to on: push.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: check-build-win-msvc-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # See https://github.com/git-lfs/git-lfs/issues/5749
+  GIT_CLONE_PROTECTION_ACTIVE: 'false'
+
+jobs:
+  build:
+    name: Build - ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: windows-latest
+            name: "Windows (MSVC)"
+    steps:
+      - name: Setup Pragma
+        uses: Silverlan/pragma/github_actions/setup@develop
+        with:
+          branch: ${{ github.ref_name }}
+          clone_url: "https://github.com/${{ github.repository }}.git"
+
+      # We need the latest Windows SDK
+      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
+        with:
+          sdk-version: 22621
+          
+      - name: Free disk space
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "=== Disk before ==="
+          powershell -NoProfile -Command "Get-PSDrive C | Select-Object Used,Free,Name | Format-List"
+
+          safe_rm() {
+            target="$1"
+            if [ -e "$target" ]; then
+              echo "Removing: $target"
+              rm -rf "$target" || true
+            else
+              echo "Not found, skipping: $target"
+            fi
+          }
+
+          safe_rm "/c/Users/runneradmin/AppData/Local/Temp/WindowsSDK/winsdk_22621.iso"
+
+          if [ -d "/c/Program Files/MongoDB" ]; then
+            echo "Removing MongoDB .pdb files (if any)"
+            find "/c/Program Files/MongoDB" -type f -iname '*.pdb' -print -delete || true
+          fi
+
+          safe_rm "/c/Program Files (x86)/Android"
+          safe_rm "/c/Program Files/dotnet"
+          safe_rm "/c/Windows/Installer/32dbbb.msi"
+          safe_rm "/c/Windows/Installer/32dbbf.msi"
+
+          echo "=== Disk after ==="
+          powershell -NoProfile -Command "Get-PSDrive C | Select-Object Used,Free,Name | Format-List"
+
+      - name: Build Pragma
+        uses: ./pragma/github_actions/build
+        id: build-pragma
+        with:
+          build-args: "--with-pfm --with-all-pfm-modules --with-vr --with-networking --with-lua-debugger=0 --with-swiftshader"
+
+      - name: Run Tests
+        uses: ./pragma/github_actions/run_common_tests
+        timeout-minutes: 60
+        with:
+          working-directory: "${{ steps.build-pragma.outputs.install-dir }}"
+          import-tests-token: ${{ secrets.PRAGMA_TESTS_IMPORT_TOKEN }}
+
+      #- name: Handle Error
+      #  uses: Silverlan/common_actions/action_handle_error@main
+      #  if: failure()
+      #  with:
+      #    timeout-minutes: 15
+
+      - name: Analyze Disk Space
+        uses: Silverlan/common_actions/analyze_disk_space@main
+        if: failure()
+
+      - name: Upload Debug Artifacts
+        if: ${{ !cancelled() }}
+        uses: ./pragma/github_actions/upload_debug_artifacts
+        with:
+          build-dir: '${{ steps.build-pragma.outputs.build-dir }}'
+          deps-dir: '${{ steps.build-pragma.outputs.deps-dir }}'
+          install-dir: '${{ steps.build-pragma.outputs.install-dir }}'
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: pragma-win64
+          path: ${{ steps.build-pragma.outputs.install-dir }}
+          retention-days: 1
+
+      - name: Collect PDB files
+        uses: ./pragma/github_actions/collect_pdb_files
+        if: ${{ !cancelled() }}
+        with:
+          source-directory: "${{ steps.build-pragma.outputs.build-dir }}"
+          target-directory: "${{ github.workspace }}/pdb"
+
+      - name: Upload PDB Artifacts
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: debug-pdb
+          path: "${{ github.workspace }}/pdb"
+          retention-days: 1

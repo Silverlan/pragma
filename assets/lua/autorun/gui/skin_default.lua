@@ -499,7 +499,9 @@ skin["wimainmenuelement"] = {
 
 			pElement:AddCallback("Select", function()
 				local index = pElement:GetParent():FindChildIndex(pElement)
-				sound.play(GUI:MENU_ITEM_SELECT_SOUND(), sound.TYPE_GUI, sound.FCREATE_NONE, 1, 0.8)
+				local playInfo = sound.PlayInfo()
+				playInfo.pitch = 0.8
+				sound.play(GUI:MENU_ITEM_SELECT_SOUND(), sound.TYPE_GUI, playInfo)
 				if pText:IsValid() then
 					pText:SetColorRGB(GUI.MENU_ITEM_SELECTED_COLOR)
 				end

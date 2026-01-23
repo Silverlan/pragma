@@ -1,17 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-#define MUTIL_STATIC
+#include <cstdlib>
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
-#include <iostream>
-#include <string>
-#include <filesystem>
-#include <sharedutils/util.h>
-#include <sharedutils/util_path.hpp>
+import pragma.updater;
+import std;
 
 static int update_failed()
 {
@@ -33,14 +26,14 @@ int main(int argc, char *argv[])
 	executableName = "pragma";
 #endif
 
-	auto launchParams = util::get_launch_parameters(argc, argv);
+	auto launchParams = pragma::util::get_launch_parameters(argc, argv);
 	auto itExe = launchParams.find("-executable");
 	if(itExe != launchParams.end())
 		executableName = itExe->second;
 
 	std::cout << "Waiting for " << executableName << " to close... " << std::endl;
 	// Wait until pragma has been closed
-	while(util::is_process_running(executableName.c_str()))
+	while(pragma::util::is_process_running(executableName.c_str()))
 		std::this_thread::sleep_for(std::chrono::milliseconds(250));
 
 	auto pos = path.find_last_of("\\/");
@@ -76,7 +69,7 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
 	deleteFromUpdateFiles(std::string {"bin"} + pathSeparator + "updater.exe");
 #else
-    //This shouldn't be the case here, as we can still replace an file during self-run.
+	//This shouldn't be the case here, as we can still replace an file during self-run.
 	deleteFromUpdateFiles(std::string {"bin"} + pathSeparator + "updater");
 #endif
 
@@ -86,19 +79,18 @@ int main(int argc, char *argv[])
 	deleteFromUpdateFiles(std::string {"fonts"} + pathSeparator + "ubuntu" + pathSeparator + "UbuntuMono-R.ttf");
 
 	// Copy files from update folder to root folder
-	auto pUpdatePath = util::Path::CreatePath(updatePath);
+	auto pUpdatePath = std::filesystem::path(updatePath).lexically_normal();
 	for(const auto &entry : std::filesystem::recursive_directory_iterator(updatePath)) {
 		if(std::filesystem::is_regular_file(entry)) {
 			auto fullSrcPath = entry.path().string();
-			auto relPath = util::Path::CreateFile(fullSrcPath);
-			relPath.MakeRelative(pUpdatePath);
+			auto relPath = std::filesystem::path(fullSrcPath).lexically_normal().lexically_relative(pUpdatePath);
 
-			auto filename = relPath.GetString();
-			auto newPath = path + pathSeparator + filename;
+			auto filename = relPath.string();
+			std::filesystem::path newPath = std::filesystem::path(path) / relPath;
 			std::cout << "Copying '" << relPath << "'..." << std::endl;
 			auto success = true;
 			try {
-				std::filesystem::create_directories(ufile::get_path_from_filename(newPath));
+				std::filesystem::create_directories(newPath.parent_path());
 				success = std::filesystem::copy_file(fullSrcPath, newPath, std::filesystem::copy_options::overwrite_existing);
 			}
 			catch(const std::filesystem::filesystem_error &err) {

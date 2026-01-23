@@ -1,6 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Flatpak Remote Debug" type="CLion_Remote" version="1" remoteCommand="localhost:2345" symbolFile="" sysroot="">
-    <debugger kind="GDB" isBundled="true" />
-    <method v="2" />
-  </configuration>
-</component>

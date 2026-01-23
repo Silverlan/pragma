@@ -17,34 +17,38 @@ runs:
       with:
         name: "pragma > build_luadebug"
   
-    - name: Install Ninja
+    - name: Install Prerequisites
       if: runner.os == 'Linux'
       shell: bash
       run: |
         sudo apt-get update -y
-        sudo apt-get install -y ninja-build
+        sudo apt-get install -y ninja-build binutils-dev libunwind-dev
 
     - name: Build luamake
       shell: bash
       run: |
-        python "${{inputs.root_dir}}/build_scripts/scripts/lua_debug/build_luamake.py" "${{inputs.deps_dir}}"
+        cd "${{inputs.root_dir}}/build_scripts"
+        python "third_party/lua_debug/build_luamake.py" "${{inputs.deps_dir}}"
 
     - name: Build luadebug
       if: runner.os == 'Linux'
       shell: bash
       run: |
-        python "${{inputs.root_dir}}/build_scripts/scripts/lua_debug/build_luadebug.py" "${{inputs.deps_dir}}"
+        cd "${{inputs.root_dir}}/build_scripts"
+        python "third_party/lua_debug/build_luadebug.py" "${{inputs.deps_dir}}"
 
     # On Windows we have to run this in powershell
     - name: Build luadebug
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        python "${{inputs.root_dir}}/build_scripts/scripts/lua_debug/build_luadebug.py" "${{inputs.deps_dir}}"
+        cd "${{inputs.root_dir}}/build_scripts"
+        python "third_party/lua_debug/build_luadebug.py" "${{inputs.deps_dir}}"
 
     - name: Install
       shell: bash
       run: |
-        python "${{inputs.root_dir}}/build_scripts/scripts/lua_debug/install_files.py" "${{inputs.deps_dir}}" "${{inputs.install_dir}}"
+        cd "${{inputs.root_dir}}/build_scripts"
+        python "third_party/lua_debug/install_files.py" "${{inputs.deps_dir}}" "${{inputs.install_dir}}"
   
     - uses: Silverlan/common_actions/action_end@main

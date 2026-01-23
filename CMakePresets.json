@@ -1,0 +1,192 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 4, "minor": 2, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/build",
+      "installDir": "${sourceDir}/build/install",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_DEFAULT_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_CXX_SCAN_FOR_MODULES": "1",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "1"
+      }
+    },
+    {
+      "name": "features-full",
+      "hidden": true,
+      "cacheVariables": {
+        "PRAGMA_WITH_PFM": "1",
+        "PRAGMA_WITH_VR": "1",
+        "PRAGMA_WITH_NETWORKING": "1",
+        "PRAGMA_WITH_COMMON_ENTITIES": "1",
+        "PRAGMA_WITH_COMMON_MODULES": "1",
+        "PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES": "1"
+      }
+    },
+    {
+      "name": "platform-linux",
+      "hidden": true,
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" }
+    },
+    {
+      "name": "platform-windows",
+      "hidden": true,
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+
+    {
+      "name": "config-linux-clang",
+      "displayName": "[Linux] Configure - Clang (Core Features)",
+      "inherits": ["base", "platform-linux"],
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "${sourceDir}/build_tools/clang/bin/clang",
+        "CMAKE_CXX_COMPILER": "${sourceDir}/build_tools/clang/bin/clang++"
+      }
+    },
+    {
+      "name": "config-linux-clang-full",
+      "displayName": "[Linux] Configure - Clang (All Features)",
+      "inherits": ["config-linux-clang", "features-full"]
+    },
+
+    {
+      "name": "config-windows-clang",
+      "displayName": "[Windows] Configure - Clang (Core Features)",
+      "inherits": ["base", "platform-windows"],
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "${sourceDir}/build_tools/clang/bin/clang.exe",
+        "CMAKE_CXX_COMPILER": "${sourceDir}/build_tools/clang/bin/clang++.exe"
+      }
+    },
+    {
+      "name": "config-windows-clang-full",
+      "displayName": "[Windows] Configure - Clang (All Features)",
+      "inherits": ["config-windows-clang", "features-full"]
+    },
+
+    {
+      "name": "config-windows-msvc",
+      "displayName": "[Windows] Configure - MSVC (Core Features)",
+      "inherits": ["base", "platform-windows"],
+      "cmakeExecutable": "${sourceDir}/deps/staging/cmake/bin/cmake.exe",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe"
+      }
+    },
+    {
+      "name": "config-windows-msvc-full",
+      "displayName": "[Windows] Configure - MSVC (All Features)",
+      "inherits": ["config-windows-msvc", "features-full"]
+    }
+  ],
+
+  "buildPresets": [
+    {
+      "name": "build-base",
+      "hidden": true,
+      "cleanFirst": false,
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "target-install",
+      "hidden": true,
+      "targets": "pragma-install-full"
+    },
+
+    {
+      "name": "build-linux-clang",
+      "displayName": "[Linux] Build - Clang (Core Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-linux-clang"
+    },
+    {
+      "name": "build-linux-clang-full",
+      "displayName": "[Linux] Build - Clang (All Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-linux-clang-full"
+    },
+
+    {
+      "name": "build-windows-clang",
+      "displayName": "[Windows] Build - Clang (Core Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-windows-clang"
+    },
+    {
+      "name": "build-windows-clang-full",
+      "displayName": "[Windows] Build - Clang (All Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-windows-clang-full"
+    },
+
+    {
+      "name": "build-windows-msvc",
+      "displayName": "[Windows] Build - MSVC (Core Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-windows-msvc"
+    },
+    {
+      "name": "build-windows-msvc-full",
+      "displayName": "[Windows] Build - MSVC (All Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-windows-msvc-full"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "linux-clang",
+      "displayName": "[Linux] Clang (Core Features)",
+      "steps": [
+        { "type": "configure", "name": "config-linux-clang" },
+        { "type": "build",     "name": "build-linux-clang" }
+      ]
+    },
+    {
+      "name": "linux-clang-full",
+      "displayName": "[Linux] Clang (All Features)",
+      "steps": [
+        { "type": "configure", "name": "config-linux-clang-full" },
+        { "type": "build",     "name": "build-linux-clang-full" }
+      ]
+    },
+
+    {
+      "name": "windows-clang",
+      "displayName": "[Windows] Clang (Core Features)",
+      "steps": [
+        { "type": "configure", "name": "config-windows-clang" },
+        { "type": "build",     "name": "build-windows-clang" }
+      ]
+    },
+    {
+      "name": "windows-clang-full",
+      "displayName": "[Windows] Clang (All Features)",
+      "steps": [
+        { "type": "configure", "name": "config-windows-clang-full" },
+        { "type": "build",     "name": "build-windows-clang-full" }
+      ]
+    },
+
+    {
+      "name": "windows-msvc",
+      "displayName": "[Windows] MSVC (Core Features)",
+      "steps": [
+        { "type": "configure", "name": "config-windows-msvc" },
+        { "type": "build",     "name": "build-windows-msvc" }
+      ]
+    },
+    {
+      "name": "windows-msvc-full",
+      "displayName": "[Windows] MSVC (All Features)",
+      "steps": [
+        { "type": "configure", "name": "config-windows-msvc-full" },
+        { "type": "build",     "name": "build-windows-msvc-full" }
+      ]
+    }
+  ]
+}

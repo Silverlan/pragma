@@ -11,6 +11,10 @@ inputs:
     description: 'Install CUDA?'
     required: true
     default: '0'
+  with_system_gcc:
+    description: 'Use system GCC?'
+    required: true
+    default: '0'
 runs:
   using: "composite"
   steps:
@@ -19,24 +23,20 @@ runs:
         name: "pragma > setup"
   
     - name: Install Requirements
-      uses: Silverlan/pragma/github_actions/install_requirements@main
+      uses: Silverlan/pragma/github_actions/install_requirements@develop
       with:
         with_cuda: ${{ inputs.with_cuda }}
       
+    - name: Clear Disk Space
+      uses: Silverlan/common_actions/clear_disk_space@main
+
+    - name: Setup GCC
+      if: ${{ runner.os == 'Linux' && inputs.with_system_gcc == '0' }}
+      uses: Silverlan/common_actions/setup_gcc@main
+
     - name: Download Pragma
       shell: bash
       run: |
         git clone ${{ inputs.clone_url }} --recurse-submodules --branch ${{ inputs.branch }} pragma
   
-    # This is a temporary workaround until gcc 14.2 is available
-    # with a fix for https://gcc.gnu.org/git/gitweb.cgi?p=gcc.git;h=e909d360dfaeafa9f45eda2461a1bedffac99ac2 
-    #- name: Workaround for libstdc++ Bug
-    #  if: runner.os == 'Linux'
-    #  shell: bash
-    #  run: |
-    #    sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-    #    sudo apt update
-    #    sudo apt install gcc-14 g++-14
-    #    sudo sed -i 's/\+\+this;/\+\+\*this;/g' /usr/include/c++/14/bits/unicode.h
-
     - uses: Silverlan/common_actions/action_end@main

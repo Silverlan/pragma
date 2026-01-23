@@ -4,8 +4,6 @@
 #ifndef __PRAGMA_CRASHDUMP_HELPER_HPP__
 #define __PRAGMA_CRASHDUMP_HELPER_HPP__
 
-#include "pragma/definitions.h"
-
 #ifdef _WIN32
 #if _MSC_VER < 1300
 #define DECLSPEC_DEPRECATED

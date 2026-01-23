@@ -1,7 +1,9 @@
 import os
 import pathlib
 import datetime
+import time
 import sys
+import json
 import subprocess
 import shutil
 import tarfile
@@ -10,6 +12,7 @@ import zipfile
 import shlex
 import fnmatch
 import filecmp
+import importlib
 import multiprocessing
 from pathlib import Path
 from urllib.parse import urlparse
@@ -67,7 +70,7 @@ def mkpath(path):
 	pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
 def git_clone(url,directory=None,branch=None):
-	args = ["git", "clone", url, "--recurse-submodules"]
+	args = ["git", "clone", get_git_clone_url(url, config.prefer_git_https), "--recurse-submodules"]
 	if branch:
 		args.extend(["-b", branch])
 	if directory:
@@ -87,8 +90,8 @@ def git_clone_commit(name, path, url, commitSha, branch=None):
 	reset_to_commit(commitSha)
 	return path
 
-def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cflags=[]):
-	args = ["cmake",scriptPath,"-G",generator]
+def cmake_configure(scriptPath,generator,toolsetArgs=[],additionalArgs=[],cflags=[],env=None):
+	args = [config.cmake_path,scriptPath,"-G",generator]
 	if cflags:
 		additionalArgs.append("-DCMAKE_C_FLAGS=" + " ".join(cflags))
 		additionalArgs.append("-DCMAKE_CXX_FLAGS=" + " ".join(cflags))
@@ -98,39 +101,47 @@ def cmake_configure(scriptPath,generator,toolsetArgs=None,additionalArgs=[],cfla
 	# print("Running CMake configure command...")
 
 	def _quote(arg: str) -> str:
-		# Handle -DKEY=VALUE specially
 		if arg.startswith("-D") and "=" in arg:
 			key, val = arg.split("=", 1)
 			if " " in val:
 				val = f'"{val}"'
 			return f"{key}={val}"
-		# Otherwise, only quote if there's whitespace
 		return f'"{arg}"' if " " in arg else arg
 
 	cmd = shlex.join(args)
-	print("Running CMake configure command:", cmd)
+	print("Running CMake configure command:", cmd, flush=True)
 
 	try:
-		subprocess.run(args,check=True)
+		subprocess.run(args,check=True,env=env)
 	except subprocess.CalledProcessError as e:
 		if platform == "win32":
 			cmd_line = subprocess.list2cmdline(e.cmd)
 		else:
 			cmd_line = shlex.join(e.cmd)
-		print("Configure command failed:\n\n", cmd_line)
+		print("Configure command failed:\n\n", cmd_line, flush=True)
 		raise
 
-def cmake_build(buildConfig,targets=None):
-	args = ["cmake","--build",".","--config",buildConfig]
+def cmake_build(buildConfig,targets=None,env=None,verbose=False):
+	args = [config.cmake_path,"--build",".","--config",buildConfig]
 	if targets:
 		args.append("--target")
 		args += targets
 	args.append("--parallel")
 	args.append(str(multiprocessing.cpu_count()))
+
+	if verbose:
+		args.append("--")
+		if config.generator in ("Ninja", "Ninja Multi-Config"):
+			args.append("-v")
+		elif config.generator == "Unix Makefiles":
+			args.append("VERBOSE=1")
+		elif is_msbuild_generator(config.generator):
+			args.append("/verbosity:detailed")
+
 	print("Running CMake build command...")
 	# print("Running CMake build command:", ' '.join(f'"{arg}"' for arg in args))
 	try:
-		subprocess.run(args,check=True)
+		subprocess.run(args,check=True,env=env)
 	except subprocess.CalledProcessError as e:
 		if platform == "win32":
 			cmd_line = subprocess.list2cmdline(e.cmd)
@@ -139,34 +150,68 @@ def cmake_build(buildConfig,targets=None):
 		print("Build command failed:\n\n", cmd_line)
 		raise
 
+def cmake_configure_def_toolset(scriptPath,generator,additionalArgs=[],additionalCFlags=[],env=None,additionalToolsetArgs=[]):
+	toolsetArgs = (config.toolsetArgs or []) +additionalToolsetArgs
+	cflags = additionalCFlags
+	if config.toolsetCFlags is not None:
+		cflags += config.toolsetCFlags
+	cmake_configure(scriptPath,generator,toolsetArgs,additionalArgs,cflags,env)
+
 def mkdir(dirName,cd=False):
 	if not Path(dirName).is_dir():
 		os.makedirs(dirName)
 	if cd:
 		os.chdir(dirName)
 
-def http_download_report_hook(block_num, block_size, total_size):
-    downloaded = block_num * block_size
-    if total_size > 0:
-        percent = downloaded * 100.0 / total_size
-        if percent > 100:
-            percent = 100.0
-        bar_len = 40
-        filled = int(bar_len * downloaded / total_size)
-        bar = '=' * filled + ' ' * (bar_len - filled)
-        sys.stdout.write(
-            f"\rDownloading: [{bar}] {percent:6.2f}% "
-            f"({downloaded/1024/1024:6.2f}MB/{total_size/1024/1024:6.2f}MB)")
-    else:
-        sys.stdout.write(f"\rDownloading: {downloaded} bytes")
-    sys.stdout.flush()
+def make_reporthook(bar_len=40, min_interval_tty=0.05, min_interval_nontty=2.0, nontty_step_percent=5.0):
+	is_tty = sys.stdout.isatty()
+	last_time = [0.0]
+	last_percent = [-1.0]
+
+	def reporthook(block_num, block_size, total_size):
+		downloaded = block_num * block_size
+		now = time.time()
+
+		if total_size > 0:
+			percent = downloaded * 100.0 / total_size
+			if percent > 100:
+				percent = 100.0
+
+			if is_tty:
+				# interactive terminal: update inline, but not *too* frequently
+				if now - last_time[0] >= min_interval_tty or percent == 100.0:
+					last_time[0] = now
+					filled = int(bar_len * downloaded / total_size)
+					bar = '=' * filled + ' ' * (bar_len - filled)
+					sys.stdout.write(
+						f"\rDownloading: [{bar}] {percent:6.2f}% "
+						f"({downloaded/1024/1024:6.2f}MB/{total_size/1024/1024:6.2f}MB)")
+					sys.stdout.flush()
+			else:
+				# non-interactive (CI): print only at coarse steps or end
+				if percent - last_percent[0] >= nontty_step_percent or percent == 100.0:
+					last_percent[0] = percent
+					print(f"Downloading: {percent:6.2f}% "
+						  f"({downloaded/1024/1024:6.2f}MB/{total_size/1024/1024:6.2f}MB)")
+		else:
+			# unknown total_size: behave similarly but with bytes
+			if is_tty:
+				sys.stdout.write(f"\rDownloading: {downloaded} bytes")
+				sys.stdout.flush()
+			else:
+				# rate-limit by time for unknown length
+				if now - last_time[0] >= min_interval_nontty:
+					last_time[0] = now
+					print(f"Downloading: {downloaded} bytes")
+	return reporthook
 
 def http_download(url,fileName=None):
 	if not fileName:
 		a = urlparse(url)
 		fileName = os.path.basename(a.path)
+	hook = make_reporthook()
 	try:
-		urllib.request.urlretrieve(url, fileName, reporthook=http_download_report_hook)
+		urllib.request.urlretrieve(url, fileName, reporthook=hook)
 	except PermissionError as e:
 		print_warning("Failed to download '" +url +"' as '" +fileName +"' (PermissionError) (cwd: " + os.getcwd() +"): {}".format(e))
 		raise
@@ -189,40 +234,74 @@ class ZipFileWithPermissions(ZipFile):
 			os.chmod(targetpath, attr)
 		return targetpath
 
-def extract(zipName,removeZip=True,format="zip"):
+def extract(zipName, removeZip=True, format="zip"):
+	print_msg("Extracting " + zipName + "...")
 	if format == "zip":
 		with ZipFileWithPermissions(zipName, 'r') as zip_ref:
+			names = zip_ref.namelist()
 			zip_ref.extractall(".")
 	elif format == "tar.bz2":
-		tar = tarfile.open(zipName, "r:bz2")  
+		import tarfile
+		tar = tarfile.open(zipName, "r:bz2")
+		names = tar.getnames()
 		tar.extractall()
 		tar.close()
 	elif format == "tar.gz":
-		tar = tarfile.open(zipName, "r:gz")  
+		import tarfile
+		tar = tarfile.open(zipName, "r:gz")
+		names = tar.getnames()
 		tar.extractall()
 		tar.close()
 	elif format == "tar.xz":
+		import tarfile
 		tar = tarfile.open(zipName, "r:xz")
+		names = tar.getnames()
 		tar.extractall()
 		tar.close()
+
+	from pathlib import Path
+	tops = {n.lstrip("./").split("/", 1)[0] for n in names if n.lstrip("./")}
+	dirs = [t for t in tops if Path(t).is_dir()]
+
 	if removeZip:
 		os.remove(zipName)
 
+	return dirs
+
 def http_extract(url,removeZip=True,format="zip"):
 	from scripts.shared import print_msg
-	print_msg("Downloading and extracting " +url +"...")
+	print_msg("Downloading " +url +"...")
 	fileName = http_download(url)
-	extract(fileName,removeZip,format)
+	return extract(fileName,removeZip,format)
 
-def install_prebuilt_binaries(baseUrl, fileName = None):
+def install_prebuilt_binaries(baseUrl, fileName = None, version = None, cacheDir = None, filepaths = None, toolset = None):
+	global config
+	cacheFileName = "prebuilt_binary_version.json"
+	if version is not None:
+		curDir = os.getcwd()
+		if cacheDir is None:
+			cacheDir = curDir
+			os.chdir(Path(cacheDir).parent)
+		if not check_content_version(cacheDir, version, cacheFileName):
+			update_content_version(cacheDir, version, cacheFileName)
+			os.chdir(curDir)
+		else:
+			os.chdir(curDir)
+			return
+	if toolset is None:
+		toolset = config.toolset
 	if platform == "linux":
 		if not fileName:
-			fileName = "binaries_linux64.tar.gz"
-		http_extract(baseUrl +fileName,format="tar.gz")
+			fileName = "binaries-linux-x64-" +toolset +".tar.gz"
+		extractedDirs = http_extract(baseUrl +fileName,format="tar.gz")
+		if version is not None:
+			add_filepaths_to_content_version(cacheDir, cacheFileName, extractedDirs)
 	else:
 		if not fileName:
-			fileName = "binaries_windows64.zip"
-		http_extract(baseUrl +fileName)
+			fileName = "binaries-windows-x64-" +toolset +".zip"
+		extractedDirs = http_extract(baseUrl +fileName)
+		if version is not None:
+			add_filepaths_to_content_version(cacheDir, cacheFileName, extractedDirs)
 
 
 def cp(src,dst):
@@ -301,11 +380,73 @@ def check_repository_commit(path, commitId, libName=None):
 		["git", "rev-parse", "HEAD"], cwd=path
 	).decode('utf-8').strip()
 	short_current = full_sha[: len(commitId)]
+	os.chdir(curDir)
 	if short_current == commitId:
 		if libName:
 			print_msg(f"{libName} is already up-to-date at commit '{commitId}', skipping...")
 		return True
 	return False
+
+def get_git_clone_url(idOrUrl, preferGitHttps):
+    s = idOrUrl.strip()
+
+    def normalize_repo_part(part):
+        part = part.strip().rstrip('/')
+        if part.endswith('.git'):
+            part = part[:-4]
+        return part
+
+    # 1) SSH input e.g. git@github.com:owner/repo.git
+    if s.startswith('git@'):
+        try:
+            after_at = s.split('@', 1)[1]
+        except IndexError:
+            return s
+        if ':' in after_at:
+            host, repo = after_at.split(':', 1)
+            host = host.strip()
+            repo = normalize_repo_part(repo)
+            if host in ('github.com', 'gitlab.com'):
+                if preferGitHttps:
+                    return f"https://{host}/{repo}.git"
+                else:
+                    return f"git@{host}:{repo}.git"
+            else:
+                return s
+        else:
+            return s
+
+    # 2+3) URL with scheme OR host without scheme (e.g. "github.com/owner/repo" or "https://github.com/owner/repo")
+    if '://' in s or s.startswith('github.com') or s.startswith('gitlab.com'):
+        # If scheme present, split it off; otherwise treat the whole string as rest
+        if '://' in s:
+            _, rest = s.split('://', 1)
+        else:
+            rest = s
+
+        if '/' in rest:
+            host = rest.split('/', 1)[0].strip()
+            repo_part = rest.split('/', 1)[1]
+        else:
+            host = rest.strip()
+            repo_part = ''
+
+        repo = normalize_repo_part(repo_part)
+
+        if host in ('github.com', 'gitlab.com'):
+            if not repo:
+                # nothing after host -> return original (can't build repo)
+                return s
+            if preferGitHttps:
+                return f"https://{host}/{repo}.git"
+            else:
+                return f"git@{host}:{repo}.git"
+        else:
+            # other hosts unchanged
+            return s
+
+    return s
+
 
 def get_submodule(directory,url,commitId=None,branch=None):
 	from scripts.shared import print_msg
@@ -344,6 +485,17 @@ def get_submodule(directory,url,commitId=None,branch=None):
 		subprocess.run(["git","pull"],check=True)
 	subprocess.run(["git","submodule","update","--init","--recursive"],check=True)
 	os.chdir(curDir)
+
+def get_gh_submodule(directory,ghRepoId,commitId=None,branch=None):
+	get_submodule(directory,"https://github.com/" +ghRepoId +".git",commitId,branch)
+
+def get_gl_submodule(directory,ghRepoId,commitId=None,branch=None):
+	get_submodule(directory,"https://gitlab.com/" +ghRepoId +".git",commitId,branch)
+
+def chdir_mkdir(path):
+	path = Path(path)
+	path.mkdir(parents=True, exist_ok=True)
+	os.chdir(path)
 
 def compile_lua_file(deps_dir, luaFile):
 	from scripts.shared import normalize_path
@@ -605,3 +757,80 @@ def get_library_include_dir(lib_name):
 
 def get_library_lib_dir(lib_name):
 	return get_library_root_dir(lib_name) +"lib/"
+
+def get_library_bin_dir(lib_name):
+	return get_library_root_dir(lib_name) +"bin/"
+
+def get_zlib_lib_path():
+	if platform == "linux":
+		return get_library_lib_dir("zlib") +"libz.a"
+	return get_library_lib_dir("zlib") +"zs.lib"
+
+def check_content_version(base_path: str, contents: str, filename: str) -> bool:
+	target_file = Path(base_path) / filename
+	if not target_file.exists():
+		return False
+	try:
+		with target_file.open("r", encoding="utf-8") as f:
+			data = json.load(f)
+			if data.get("version") != contents:
+				filepaths: List[str] = data.get("filepaths", [])
+				for p in filepaths:
+					print(f"Removing directory '{p}'...")
+					shutil.rmtree(p)
+				return False
+			return True
+		return False
+	except Exception:
+		return False
+
+def update_content_version(base_path: str, commit_id: str, filename: str) -> None:
+	base = Path(base_path)
+	if base.exists():
+		print(f"Removing directory '{base}'...")
+		shutil.rmtree(base)
+
+	print(f"Creating directory '{base}'...")
+	base.mkdir(parents=True, exist_ok=True)
+
+	target_file = base / filename
+	print(f"Writing content version to '{target_file}'...")
+
+	payload = {"version": commit_id}
+	json_text = json.dumps(payload, ensure_ascii=False, indent=2)
+	target_file.write_text(json_text, encoding="utf-8")
+
+def add_filepaths_to_content_version(base_path: str, filename: str, filepaths) -> None:
+	target_file = Path(base_path) / filename
+	if not target_file.exists():
+		raise FileNotFoundError(f"File not found: {target_file}")
+
+	with target_file.open("r", encoding="utf-8") as f:
+		data = json.load(f)
+
+	if not isinstance(data, dict):
+		raise ValueError("JSON root must be an object")
+
+	existing = data.get("filepaths") or []
+	if not isinstance(existing, list):
+		raise ValueError("Existing 'filepaths' must be a list")
+
+	existing.extend(str(p) for p in filepaths)
+	data["filepaths"] = existing
+
+	target_file.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+def prefer_pacman():
+    return shutil.which("pacman") is not None
+
+def apply_patch(path_path: str):
+	print_msg("Applying patch '{path_path}'...")
+	subprocess.run(["git","apply",path_path],check=False)
+
+def build_third_party_library(name, *args, **kwargs):
+	module = importlib.import_module(f"third_party.{name}")
+	return module.main(*args, **kwargs)
+
+def run_cmake_script(fileName):
+	os.chdir(config.pragma_root)
+	subprocess.run(["cmake", "-DTOOLSET=" +config.toolset, "-DCMAKE_SOURCE_DIR=" +config.pragma_root, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", fileName],check=True)

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 4.2.0)
 
 function(pr_get_normalized_identifier_name BASE_NAME)
     string(REPLACE "-" "_" IDENTIFIER_UNDERSCORE ${BASE_NAME})
@@ -9,7 +9,10 @@ function(pr_get_normalized_identifier_name BASE_NAME)
         list(GET ARGV 0 PRETTY_IDENTIFIER)
     endif()
     string(TOUPPER ${IDENTIFIER_UNDERSCORE} NORMALIZED_IDENTIFIER)
-    return(PROPAGATE PRETTY_IDENTIFIER NORMALIZED_IDENTIFIER)
+
+    set(PRETTY_IDENTIFIER "${PRETTY_IDENTIFIER}" PARENT_SCOPE)
+    set(NORMALIZED_IDENTIFIER "${NORMALIZED_IDENTIFIER}" PARENT_SCOPE)
+    return()
 endfunction()
 
 include("${CMAKE_CURRENT_LIST_DIR}/pr_modules.cmake")

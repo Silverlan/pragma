@@ -1,14 +1,11 @@
 name: Check Windows Build (Clang)
-
-#on:
-#  push:
-#    branches-ignore:
-#      - main
 on:
-  workflow_dispatch:
+  push:
+    branches-ignore:
+      - main
 
 concurrency:
-  group: check-build-win-clang-
+  group: check-build-win-clang-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -17,31 +14,23 @@ env:
 
 jobs:
   build:
-    name: Build - ${{ matrix.config.os }}
+    name: Build - ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
         config:
           - os: windows-latest
-            name: "Windows x64 MSVC"
-            artifact: "Windows-MSVC.tar.xz"
-            build_type: "RelWithDebInfo"
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-            cc: "cl"
-            cxx: "cl"
-            archiver: "7z a"
-            generators: "Visual Studio 17 2022"
-            build_dir: 'build'
+            name: "Windows (Clang)"
     steps:
       - name: Setup Pragma
-        uses: Silverlan/pragma/github_actions/setup@main
+        uses: Silverlan/pragma/github_actions/setup@develop
         with:
           branch: ${{ github.ref_name }}
           clone_url: "https://github.com/${{ github.repository }}.git"
 
       # We need the latest Windows SDK
-      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v1.11
+      - uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
         with:
           sdk-version: 22621
           

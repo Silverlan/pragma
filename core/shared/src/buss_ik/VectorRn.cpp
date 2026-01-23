@@ -25,8 +25,7 @@ subject to the following restrictions:
 // VectorRn:  Vector over Rn  (Variable length vector)
 //
 
-#include "stdafx_shared.h"
-#include "pragma/buss_ik/VectorRn.h"
+#include "buss_ik/VectorRn.h"
 VectorRn VectorRn::WorkVector;
 
 double VectorRn::MaxAbs () const

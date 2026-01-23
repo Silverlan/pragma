@@ -24,7 +24,6 @@
 #ifndef __MIKKTSPACE_H__
 #define __MIKKTSPACE_H__
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -58,23 +57,22 @@ extern "C" {
  * and also quad triangulator plugin.
  */
 
-
 typedef int tbool;
 typedef struct SMikkTSpaceContext SMikkTSpaceContext;
 
 typedef struct {
 	// Returns the number of faces (triangles/quads) on the mesh to be processed.
-	int (*m_getNumFaces)(const SMikkTSpaceContext * pContext);
+	int (*m_getNumFaces)(const SMikkTSpaceContext *pContext);
 
 	// Returns the number of vertices on face number iFace
 	// iFace is a number in the range {0, 1, ..., getNumFaces()-1}
-	int (*m_getNumVerticesOfFace)(const SMikkTSpaceContext * pContext, const int iFace);
+	int (*m_getNumVerticesOfFace)(const SMikkTSpaceContext *pContext, const int iFace);
 
 	// returns the position/normal/texcoord of the referenced face of vertex number iVert.
 	// iVert is in the range {0,1,2} for triangles and {0,1,2,3} for quads.
-	void (*m_getPosition)(const SMikkTSpaceContext * pContext, float fvPosOut[], const int iFace, const int iVert);
-	void (*m_getNormal)(const SMikkTSpaceContext * pContext, float fvNormOut[], const int iFace, const int iVert);
-	void (*m_getTexCoord)(const SMikkTSpaceContext * pContext, float fvTexcOut[], const int iFace, const int iVert);
+	void (*m_getPosition)(const SMikkTSpaceContext *pContext, float fvPosOut[], const int iFace, const int iVert);
+	void (*m_getNormal)(const SMikkTSpaceContext *pContext, float fvNormOut[], const int iFace, const int iVert);
+	void (*m_getTexCoord)(const SMikkTSpaceContext *pContext, float fvTexcOut[], const int iFace, const int iVert);
 
 	// either (or both) of the two setTSpace callbacks can be set.
 	// The call-back m_setTSpaceBasic() is sufficient for basic normal mapping.
@@ -86,7 +84,7 @@ typedef struct {
 	// Note that the results are returned unindexed. It is possible to generate a new index list
 	// But averaging/overwriting tangent spaces by using an already existing index list WILL produce INCRORRECT results.
 	// DO NOT! use an already existing index list.
-	void (*m_setTSpaceBasic)(const SMikkTSpaceContext * pContext, const float fvTangent[], const float fSign, const int iFace, const int iVert);
+	void (*m_setTSpaceBasic)(const SMikkTSpaceContext *pContext, const float fvTangent[], const float fSign, const int iFace, const int iVert);
 
 	// This function is used to return tangent space results to the application.
 	// fvTangent and fvBiTangent are unit length vectors and fMagS and fMagT are their
@@ -99,20 +97,17 @@ typedef struct {
 	// Note that the results are returned unindexed. It is possible to generate a new index list
 	// But averaging/overwriting tangent spaces by using an already existing index list WILL produce INCRORRECT results.
 	// DO NOT! use an already existing index list.
-	void (*m_setTSpace)(const SMikkTSpaceContext * pContext, const float fvTangent[], const float fvBiTangent[], const float fMagS, const float fMagT,
-						const tbool bIsOrientationPreserving, const int iFace, const int iVert);
+	void (*m_setTSpace)(const SMikkTSpaceContext *pContext, const float fvTangent[], const float fvBiTangent[], const float fMagS, const float fMagT, const tbool bIsOrientationPreserving, const int iFace, const int iVert);
 } SMikkTSpaceInterface;
 
-struct SMikkTSpaceContext
-{
-	SMikkTSpaceInterface * m_pInterface;	// initialized with callback functions
-	void * m_pUserData;						// pointer to client side mesh data etc. (passed as the first parameter with every interface call)
+struct SMikkTSpaceContext {
+	SMikkTSpaceInterface *m_pInterface; // initialized with callback functions
+	void *m_pUserData;                  // pointer to client side mesh data etc. (passed as the first parameter with every interface call)
 };
 
 // these are both thread safe!
-tbool genTangSpaceDefault(const SMikkTSpaceContext * pContext);	// Default (recommended) fAngularThreshold is 180 degrees (which means threshold disabled)
-tbool genTangSpace(const SMikkTSpaceContext * pContext, const float fAngularThreshold);
-
+tbool genTangSpaceDefault(const SMikkTSpaceContext *pContext); // Default (recommended) fAngularThreshold is 180 degrees (which means threshold disabled)
+tbool genTangSpace(const SMikkTSpaceContext *pContext, const float fAngularThreshold);
 
 // To avoid visual errors (distortions/unwanted hard edges in lighting), when using sampled normal maps, the
 // normal map sampler must use the exact inverse of the pixel shader transformation.

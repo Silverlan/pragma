@@ -1,10 +1,9 @@
 // SPDX-FileCopyrightText: (c) 2025 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
+module pragma.client;
 
-module pragma.client.rendering.material_property_block;
-
+import :rendering.material_property_block;
 pragma::rendering::MaterialPropertyBlock::MaterialPropertyBlock() : m_propertyBlock {udm::Property::Create(udm::Type::Element)}
 {
 	(*m_propertyBlock)["properties"] = udm::Property::Create(udm::Type::Element);

@@ -1,7 +1,8 @@
 build/*
 .cache/*
 deps/*
-build_tools/*
+build_tools/clang*
+build_tools/gcc*
 CMakeLists.txt.user
 build_scripts/user_modules.py
 modules/*

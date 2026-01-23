@@ -213,30 +213,21 @@ set(LIBRARY_OUTPUT_PATH
     ""
     CACHE PATH "" FORCE)
 
-set(PRAGMA_INSTALL_COMPONENT "pragma")
-set(PRAGMA_INSTALL_COMPONENT_FULL "pragma-full")
-
-add_custom_target(pragma-install
-    ALL
-    COMMAND ${CMAKE_COMMAND}
-            --install ${CMAKE_BINARY_DIR}
-            --config ${CONFIG_BUILD_TYPE}
-            --prefix "${INSTALL_PREFIX}"
-            --component pragma-install
-    COMMENT "Installing 'pragma-install' component into ${INSTALL_PREFIX}"
-    VERBATIM
-)
-
-add_custom_target(pragma-install-full
-    ALL
-    COMMAND ${CMAKE_COMMAND}
-            --install ${CMAKE_BINARY_DIR}
-            --config ${CONFIG_BUILD_TYPE}
-            --prefix "${INSTALL_PREFIX}"
-            --component pragma-install-full
-    COMMENT "Installing 'pragma-install-full' component into ${INSTALL_PREFIX}"
-    VERBATIM
-)
+set_property(GLOBAL PROPERTY PR_INSTALL_COMMANDS "")
+set(install_targets "pragma-install-base" "pragma-install" "pragma-install-full" "pragma-install-full-no-executable")
+set_property(GLOBAL PROPERTY PR_INSTALL_TARGETS ${install_targets})
+foreach(install_target ${install_targets})
+    add_custom_target(${install_target}
+        ALL
+        COMMAND ${CMAKE_COMMAND}
+                --install ${CMAKE_BINARY_DIR}
+                --config ${CONFIG_BUILD_TYPE}
+                --prefix "${INSTALL_PREFIX}"
+                --component ${install_target}
+        COMMENT "Installing '${install_target}' component into ${INSTALL_PREFIX}"
+        VERBATIM
+    )
+endforeach()
 
 add_custom_target(pragma-core)
 set_target_properties(pragma-core PROPERTIES FOLDER "Hidden")
@@ -258,6 +249,34 @@ set_target_properties(cmaterialsystem PROPERTIES FOLDER external_libs/materialsy
 target_include_directories(util_image PUBLIC ${DEPENDENCY_ZLIB_INCLUDE})
 target_include_directories(cmaterialsystem PUBLIC ${DEPENDENCY_ZLIB_INCLUDE})
 
+# Registers a convenience target, which will do a full-build +install and can be used to run an executable target.
+function(pr_add_executable_install_target TARGET_NAME EXECUTABLE_TARGET_NAME)
+    add_custom_target(${TARGET_NAME}
+        ALL
+        COMMAND ${CMAKE_COMMAND}
+                --install ${CMAKE_BINARY_DIR}
+                --config ${CONFIG_BUILD_TYPE}
+                --prefix "${INSTALL_PREFIX}"
+                --component ${TARGET_NAME}
+        COMMENT "Installing '${TARGET_NAME}' component into ${INSTALL_PREFIX}"
+        VERBATIM
+    )
+    pr_set_install_target(${TARGET_NAME})
+    add_dependencies(${TARGET_NAME} ${EXECUTABLE_TARGET_NAME} pragma-install-full-no-executable)
+    add_dependencies(${EXECUTABLE_TARGET_NAME} pragma-install-full-no-executable)
+    pr_set_target_folder(${TARGET_NAME} core)
+endfunction()
+
+function(pr_set_output_directory_to_install TARGET_NAME)
+    set_target_properties(${TARGET_NAME} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_INSTALL_PREFIX}"
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_INSTALL_PREFIX}"
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_INSTALL_PREFIX}"
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_INSTALL_PREFIX}"
+        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_INSTALL_PREFIX}"
+    )
+endfunction()
+
 message("Processing core libraries...")
 add_subdirectory(core)
 
@@ -269,21 +288,20 @@ add_subdirectory(tools)
 
 target_include_directories(materialsystem PRIVATE ${DEPENDENCY_ZLIB_INCLUDE})
 
+set_target_properties(pragma_executable PROPERTIES DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
+set_target_properties(pragma_server_executable PROPERTIES DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
 if(WIN32)
-    set_target_properties(pragma PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
-    set_target_properties(pragma_server PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}")
+    set_target_properties(pragma_executable PROPERTIES VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma.exe")
+    set_target_properties(pragma_server_executable PROPERTIES VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma_server.exe")
 
-    set_target_properties(pragma PROPERTIES VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma.exe")
-    set_target_properties(pragma_server PROPERTIES VS_DEBUGGER_COMMAND "${CMAKE_INSTALL_PREFIX}/pragma_server.exe")
-
-    set_target_properties(pragma PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext -graphics_api vulkan")
-    set_target_properties(pragma_server PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
+    set_target_properties(pragma_executable PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext -graphics_api vulkan")
+    set_target_properties(pragma_server_executable PROPERTIES VS_DEBUGGER_COMMAND_ARGUMENTS "-console -luaext")
 endif()
 
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT pragma)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT pragma_executable)
 
 # Installation
-pr_install_targets(pragma pragma_server INSTALL_DIR ".")
+pr_install_targets(pragma_executable pragma_server_executable INSTALL_DIR ".")
 if(WIN32)
     pr_install_targets(pragma_console INSTALL_DIR "." RENAME "pragma.com")
 endif()
@@ -313,12 +331,12 @@ pr_install_targets(
     wgui)
 
 message("Custom install targets: ${PRAGMA_INSTALL_CUSTOM_TARGETS}")
-set(PRAGMA_INSTALL_DEPENDENCIES pragma pragma_server iclient iserver udm_convert prad pragma_updater ${PRAGMA_INSTALL_CUSTOM_TARGETS})
+add_dependencies(pragma-install pragma_executable pragma_server_executable)
+set(PRAGMA_INSTALL_DEPENDENCIES iclient iserver udm_convert prad pragma_updater ${PRAGMA_INSTALL_CUSTOM_TARGETS})
 if(WIN32)
     list(APPEND PRAGMA_INSTALL_DEPENDENCIES pragma_console)
 endif()
 add_dependencies(pragma-core ${PRAGMA_INSTALL_DEPENDENCIES})
-add_dependencies(pragma-install-full pragma-install)
 
 pr_install_create_directory(modules)
 
@@ -364,7 +382,7 @@ foreach(MODULE_NAME ${MODULE_NAMES})
 
                 message("Adding default installation rule for module \"${MODULE_PATH}\": \"${PR_MODULE_PATH_WITH_EXT}\" to \"${CMAKE_INSTALL_PREFIX}/modules/\"...")
                 add_custom_command(
-                    TARGET pragma-install
+                    TARGET pragma-install-base
                     POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -DInstallSrc=${PR_MODULE_PATH_WITH_EXT} -DInstallDst=\"${CMAKE_INSTALL_PREFIX}/modules/\" -P
                             ${CMAKE_CURRENT_SOURCE_DIR}/build_scripts/cmake/install_file.cmake
@@ -391,7 +409,7 @@ foreach(MODULE_PATH ${PR_MODULES})
     endif()
 endforeach()
 
-# Link components to pragma-install
+# Link components to pragma-install-base
 get_property(COMPONENT_LIST GLOBAL PROPERTY PRAGMA_INSTALL_COMPONENTS)
 foreach(_COMP IN LISTS COMPONENT_LIST)
     add_custom_target(pragma-install-${_COMP} COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=${_COMP} -DBUILD_TYPE=${CONFIG_BUILD_TYPE} -P
@@ -399,7 +417,7 @@ foreach(_COMP IN LISTS COMPONENT_LIST)
     # We need to make sure all build-targets run first, before any install targets
     add_dependencies(pragma-install-${_COMP} pragma-core)
 
-    add_dependencies(pragma-install pragma-install-${_COMP})
+    add_dependencies(pragma-install-base pragma-install-${_COMP})
 
     set_target_properties(pragma-install-${_COMP} PROPERTIES FOLDER "Hidden/Install")
 endforeach()
@@ -418,9 +436,18 @@ endfunction()
 
 # Install assets
 pr_manifest_install("core" "${CMAKE_CURRENT_SOURCE_DIR}/assets" "" pragma-install-full)
+pr_manifest_install("core" "${CMAKE_CURRENT_SOURCE_DIR}/assets" "" pragma-install-full-no-executable)
 
 message("Processing addons...")
 include(${CMAKE_SOURCE_DIR}/Addons.cmake)
 
+pr_set_target_folder(pragma-install-base core)
 pr_set_target_folder(pragma-install core)
 pr_set_target_folder(pragma-install-full core)
+
+get_property(install_targets GLOBAL PROPERTY PR_INSTALL_TARGETS)
+get_property(install_commands GLOBAL PROPERTY PR_INSTALL_COMMANDS)
+foreach(component IN LISTS install_targets)
+    add_dependencies(${component} pragma-install-base)
+    cmake_language(EVAL CODE "${install_commands}")
+endforeach()

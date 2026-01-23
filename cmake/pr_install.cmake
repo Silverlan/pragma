@@ -6,6 +6,21 @@ function(pr_install_component NAME)
     list(APPEND _parts ${NAME})
     set_property(GLOBAL PROPERTY PRAGMA_INSTALL_COMPONENTS "${_parts}")
 endfunction(pr_install_component)
+function(pr_append_install_command cmd)
+    get_property(install_commands GLOBAL PROPERTY PR_INSTALL_COMMANDS)
+    set(install_commands "${install_commands} ${cmd}")
+    set_property(GLOBAL PROPERTY PR_INSTALL_COMMANDS ${install_commands})
+
+    if(ARGC GREATER 1)
+        set(component "${ARGV1}")
+        cmake_language(EVAL CODE "${cmd}")
+    endif()
+endfunction()
+function(pr_set_install_target target)
+    get_property(install_targets GLOBAL PROPERTY PR_INSTALL_TARGETS)
+    set(install_targets ${install_targets} ${target})
+    set_property(GLOBAL PROPERTY PR_INSTALL_TARGETS ${install_targets})
+endfunction()
 function(pr_install_files)
     set(options)
     set(oneValueArgs INSTALL_DIR)
@@ -17,16 +32,6 @@ function(pr_install_files)
     endif()
 
     get_property(part GLOBAL PROPERTY PRAGMA_INSTALL_COMPONENT_PART)
-    if(NOT part)
-        set(part "${PRAGMA_INSTALL_COMPONENT}")
-    endif()
-
-    set(components
-        ${part}
-        pragma-install
-        pragma-install-full
-    )
-
     foreach(FILE_PATH ${PA_UNPARSED_ARGUMENTS})
         string(REPLACE "\\" "/" FILE_PATH ${FILE_PATH})
         if (NOT FILE_PATH MATCHES ".*\\.a$") # Skip static Linux libraries
@@ -37,13 +42,14 @@ function(pr_install_files)
 
             if(FILE_PATH STREQUAL REAL_FILE_PATH)
                 # If the file is not a symlink, just install it
-                foreach(component IN LISTS components)
-                    install(
-                        FILES "${FILE_PATH}"
-                        DESTINATION "${PA_INSTALL_DIR}"
-                        COMPONENT ${component}
-                    )
-                endforeach()
+                pr_append_install_command(
+                    "install(
+                        FILES \"${FILE_PATH}\"
+                        DESTINATION \"${PA_INSTALL_DIR}\"
+                        COMPONENT \${component}
+                    )\n"
+                    ${part}
+                )
             else()
                 # on Linux/UNIX: gather the link and all its intermediate targets
                 set(_to_install_list "${FILE_PATH}")
@@ -62,13 +68,14 @@ function(pr_install_files)
                 # now install each file (will include the original symlink + each real target)
                 foreach(_f IN LISTS _to_install_list)
                     message(STATUS "Installing file \"${_f}\" to \"${PA_INSTALL_DIR}\"...")
-                    foreach(component IN LISTS components)
-                        install(
-                            FILES "${_f}"
-                            DESTINATION "${PA_INSTALL_DIR}"
-                            COMPONENT ${component}
-                        )
-                    endforeach()
+                    pr_append_install_command(
+                        "install(
+                            FILES \"${_f}\"
+                            DESTINATION \"${PA_INSTALL_DIR}\"
+                            COMPONENT \${component}
+                        )\n"
+                        ${part}
+                    )
                 endforeach()
             endif()
         endif()
@@ -86,35 +93,27 @@ function(pr_install_libraries)
     endif()
 
     get_property(part GLOBAL PROPERTY PRAGMA_INSTALL_COMPONENT_PART)
-    if(NOT part)
-        set(part "${PRAGMA_INSTALL_COMPONENT}")
-    endif()
-
-    set(components
-        ${part}
-        pragma-install
-        pragma-install-full
-    )
-
     foreach(TARGET ${PA_UNPARSED_ARGUMENTS})
         pr_get_normalized_identifier_name(${TARGET})
         set(FILE_PATH "${DEPENDENCY_${NORMALIZED_IDENTIFIER}_LIBRARY}")
         string(REPLACE "\\" "/" FILE_PATH ${FILE_PATH})
         message("Adding install rule for library \"${TARGET}\" (\"${FILE_PATH}\") to \"${PA_INSTALL_DIR}\"...")
-        foreach(component IN LISTS components)
-            install(
-                FILES "${FILE_PATH}"
-                DESTINATION "${PA_INSTALL_DIR}"
-                COMPONENT ${component})
-        endforeach()
+        pr_append_install_command(
+            "install(
+                FILES \"${FILE_PATH}\"
+                DESTINATION \"${PA_INSTALL_DIR}\"
+                COMPONENT \${component})\n"
+            ${part}
+        )
         if(UNIX)
-            foreach(component IN LISTS components)
-                install(
-                    TARGETS "${TARGET}"
-                    RUNTIME DESTINATION "${PA_INSTALL_DIR}"
-                    LIBRARY DESTINATION "${PA_INSTALL_DIR}"
-                    COMPONENT ${component})
-            endforeach()
+            pr_append_install_command(
+                "install(
+                    TARGETS \"${TARGET}\"
+                    RUNTIME DESTINATION \"${PA_INSTALL_DIR}\"
+                    LIBRARY DESTINATION \"${PA_INSTALL_DIR}\"
+                    COMPONENT \${component})\n"
+                ${part}
+            )
         endif()
     endforeach()
 endfunction(pr_install_libraries)
@@ -130,16 +129,6 @@ function(pr_install_targets)
     endif()
 
     get_property(part GLOBAL PROPERTY PRAGMA_INSTALL_COMPONENT_PART)
-    if(NOT part)
-        set(part "${PRAGMA_INSTALL_COMPONENT}")
-    endif()
-
-    set(components
-        ${part}
-        pragma-install
-        pragma-install-full
-    )
-
     set(additional_args "")
     if(DEFINED PA_RENAME)
         set(additional_args RENAME "${PA_RENAME}")
@@ -149,38 +138,41 @@ function(pr_install_targets)
         get_target_property(_type ${TARGET} TYPE)
         if(UNIX AND _type STREQUAL "EXECUTABLE")
             # On UNIX, we need to install the executable as a program to ensure it is executable
-            foreach(component IN LISTS components)
-                install(
+            pr_append_install_command(
+                "install(
                     PROGRAMS
                     $<TARGET_FILE:${TARGET}>
                     OPTIONAL
-                    DESTINATION "${PA_INSTALL_DIR}"
+                    DESTINATION \"${PA_INSTALL_DIR}\"
                     ${additional_args}
-                    COMPONENT ${component}
-                )
-            endforeach()
+                    COMPONENT \${component}
+                )\n"
+                ${part}
+            )
         else()
             set(FILE_PATH "$<TARGET_FILE:${TARGET}>")
             string(REPLACE "\\" "/" FILE_PATH ${FILE_PATH})
             message("Adding install rule for target \"${TARGET}\" (\"${FILE_PATH}\") to \"${PA_INSTALL_DIR}\"...")
-            foreach(component IN LISTS components)
-                install(
-                    FILES "${FILE_PATH}"
+            pr_append_install_command(
+                "install(
+                    FILES \"${FILE_PATH}\"
                     OPTIONAL
-                    DESTINATION "${PA_INSTALL_DIR}"
+                    DESTINATION \"${PA_INSTALL_DIR}\"
                     ${additional_args}
-                    COMPONENT ${component})
-            endforeach()
+                    COMPONENT \${component})\n"
+                ${part}
+            )
             if(UNIX)
-                foreach(component IN LISTS components)
-                    install(
-                        TARGETS "${TARGET}"
-                        RUNTIME DESTINATION "${PA_INSTALL_DIR}"
-                        LIBRARY DESTINATION "${PA_INSTALL_DIR}"
+                pr_append_install_command(
+                    "install(
+                        TARGETS \"${TARGET}\"
+                        RUNTIME DESTINATION \"${PA_INSTALL_DIR}\"
+                        LIBRARY DESTINATION \"${PA_INSTALL_DIR}\"
                         ${additional_args}
                         OPTIONAL
-                        COMPONENT ${component})
-                endforeach()
+                        COMPONENT \${component})\n"
+                    ${part}
+                )
             endif()
         endif()
     endforeach()
@@ -207,28 +199,19 @@ function(pr_install_directory FILE_PATH)
     endif()
 
     get_property(part GLOBAL PROPERTY PRAGMA_INSTALL_COMPONENT_PART)
-    if(NOT part)
-        set(part "${PRAGMA_INSTALL_COMPONENT}")
-    endif()
-
-    set(components
-        ${part}
-        pragma-install
-        pragma-install-full
-    )
-
-    foreach(component IN LISTS components)
-        install(
-            DIRECTORY "${FILE_PATH}"
-            DESTINATION "${PA_INSTALL_DIR}"
+    pr_append_install_command(
+        "install(
+            DIRECTORY \"${FILE_PATH}\"
+            DESTINATION \"${PA_INSTALL_DIR}\"
             USE_SOURCE_PERMISSIONS
-            COMPONENT ${component} ${PA_UNPARSED_ARGUMENTS})
-    endforeach()
+            COMPONENT \${component} ${PA_UNPARSED_ARGUMENTS})\n"
+        ${part}
+    )
 endfunction(pr_install_directory)
 
 function(pr_install_create_directory DIR_NAME)
     add_custom_command(
-        TARGET pragma-install
+        TARGET pragma-install-base
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_INSTALL_PREFIX}/${DIR_NAME})
 endfunction(pr_install_create_directory)

@@ -451,3 +451,32 @@ foreach(component IN LISTS install_targets)
     add_dependencies(${component} pragma-install-base)
     cmake_language(EVAL CODE "${install_commands}")
 endforeach()
+
+if(DEFINED ENV{CLION_IDE})
+    # When using CLion, we'll copy over some pre-made configuration files to
+    # make it easier to run Pragma directly from the install folder.
+    # TODO: This could be removed once CLion supports VS_DEBUGGER_WORKING_DIRECTORY: https://youtrack.jetbrains.com/issue/CPP-20844
+
+    set(RUN_CONFIG_SRC "${CMAKE_SOURCE_DIR}/build_tools/clion/runConfigurations")
+    set(RUN_CONFIG_DEST "${CMAKE_SOURCE_DIR}/.idea/runConfigurations")
+
+    # Only run if the destination folder doesn't exist yet
+    if(NOT EXISTS "${RUN_CONFIG_DEST}")
+        message(STATUS "CLion: Initializing run configurations from templates...")
+
+        # Get a list of all files in the template directory
+        file(GLOB TEMPLATE_FILES LIST_DIRECTORIES false "${RUN_CONFIG_SRC}/*")
+
+        foreach(FILE_PATH ${TEMPLATE_FILES})
+            # Insert install path into configuration files
+            get_filename_component(FILE_NAME "${FILE_PATH}" NAME)
+            file(READ "${FILE_PATH}" FILE_CONTENTS)
+            string(REPLACE "$CMAKE_INSTALL_PREFIX$" "${CMAKE_INSTALL_PREFIX}" UPDATED_CONTENTS "${FILE_CONTENTS}")
+
+            # Write the modified content to the new location
+            file(WRITE "${RUN_CONFIG_DEST}/${FILE_NAME}" "${UPDATED_CONTENTS}")
+        endforeach()
+        
+        message(STATUS "CLion: Configuration files deployed to .idea/runConfigurations")
+    endif()
+endif()

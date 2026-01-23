@@ -47,80 +47,134 @@ Please consider creating a [binary module](https://github.com/Silverlan/pragma#m
 
 Build Requirements
 ------
-- ~30 GiB of disk space (~60 GiB for a full build with third-party dependencies)
-- CMake 4.2.0 or newer
-- Ninja-build (https://ninja-build.org/)
-- Python 3.9.5 or newer, with NumPy
-- Recommended IDE: CLion
+- [CMake](https://cmake.org/download/) 4.2.0 or newer
+- [Ninja-build](https://ninja-build.org/)
+- Recommended IDE: [CLion](https://www.jetbrains.com/clion/)
+
+###### Linux (Recommended)
+- ~30 GiB of disk space
+- Ubuntu 24.04 or newer, or Arch-based distro with up-to-date packages
 
 ###### Windows
-- Visual Studio 2022
-  - Visual Studio 2026 is currently *not* supported and will fail to compile
-  - The Visual Studio generator is currently *not* supported as CMake does not support "import std;" for it yet. Use the Ninja generator for the time being.
+- ~80 GiB of disk space
+- Visual Studio 2022 or newer *
 - Windows SDK 10.0.22000.0 or newer
 
-###### Linux
-- Ubuntu 24.04 or newer
-- clang-22 or newer (Pragma is currently *not* compatible with gcc!)
+<sub>\* Generating a Visual Studio project is currently not supported, but you can still use the MSVC compiler.</sub>
 
 Build Instructions
 ------
-Quick-Start: Simply run the "build.bat" for Windows or "build.sh" for Linux systems to build Pragma with the default settings.
-
-Alternatively you can run the following command from a command-line interface:
+To clone Pragma, run:
 ```console
-git clone https://github.com/Silverlan/pragma.git && cd pragma && python build_scripts/build.py --with-pfm --with-all-pfm-modules --with-vr
+git clone https://github.com/Silverlan/pragma.git
 ```
-(Use `python3` instead of `python` if you're on Linux.)
 
-This will clone Pragma and run the build-script, which will automatically download all dependencies, configure CMake, and build and install the project (this will take several hours).
-If you don't need the filmmaker, you can omit the `--with-pfm --with-all-pfm-modules` arguments, which will reduce the build time and the required amount of disk space.
+Then use the build method of your choice below. CMake will be used regardless of which build method you choose. The build files will be placed in "pragma/build", and Pragma will be installed to "pragma/build/install" by default. The default (and recommended) compiler (regardless of the os) is clang and the default build system is Ninja.
+
+To cut down on disk space, Pragma uses prebuilt binaries for a lot of third-party dependencies by default. You can use the build script if you want to build those as well, but this will **significantly** increase the build time and disk space usage and is generally not recommended.
+
+### CLion (Recommended)
+If you're using the [CLion IDE](https://www.jetbrains.com/clion/), you can simply open the cloned Pragma repository and it should prompt you with a list of the available profiles. Make sure to **delete or disable the default Debug profile**, then enable the profile of your choice:
+
+<img src="https://wiki.pragma-engine.com/uploads/images/gallery/2026-01/clion-profiles.png" width="800" />
+
+Use a profile with the `-full` suffix if you want to have all features available, including VR support and PFM. If you only want the core Engine, use a profile without the suffix. Whether you use a `build-` profile or not should not matter. Enabling more than one profile is not recommended.
+
+Press OK and CLion will configure the project automatically. Once the configuration, you should restart CLion at least once to make sure CLion loads the most up-to-date configuration files, otherwise you may get issues when trying to run Pragma through CLion.
+
+You can then build, install and launch Pragma using the "pragma" configuration. If you have chosen a `-full` profile, you can use the "pfm" configuration respectively to launch PFM.
+
+### CMake Presets
+If you want to use a different IDE or just want to set up Pragma via command-line, you can set up Pragma using a CMake workflow preset:
+
+**Linux**:
+```
+git clone https://github.com/Silverlan/pragma.git
+cd pragma
+cmake --workflow --preset linux-clang
+```
+
+**Windows**:
+```
+git clone https://github.com/Silverlan/pragma.git
+cd pragma
+cmake --workflow --preset windows-clang
+```
+
+Available presets are:
+* linux-clang
+* linux-clang-full
+* windows-clang
+* windows-clang-full
+* windows-msvc *
+* windows-msvc-full *
+
+Use the `-full` suffix if you want all features, including PFM and VR support.
+
+Please note that all presets will use the **Ninja** generator. No other generators are supported at the moment.
+
+<sub>\* Using the MSVC compiler will **significantly** increase build times and disk space usage and is therefore not recommended until MSVC support for C++20 modules improves substantially.</sub>
+<br/><br/><br/>
+The following CMake options are available when using this method:
+
+| Option | Description | Default |
+|---|---|:---:|
+| `PRAGMA_WITH_VR` | Build with VR support? | `OFF` |
+| `PRAGMA_WITH_NETWORKING` | Build with networking support? | `OFF` |
+| `PRAGMA_WITH_COMMON_ENTITIES` | Build with common entity scripts? | `OFF` |
+| `PRAGMA_WITH_COMMON_MODULES` | Build with common modules? | `ON` |
+| `PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES` | Build with essential client modules? | `ON` |
+| `PRAGMA_WITH_PFM` | Build with Pragma Filmmaker? | `OFF` |
+| `PRAGMA_WITH_CORE_PFM_MODULES` | Include essential PFM modules. | `ON` |
+| `PRAGMA_WITH_ALL_PFM_MODULES` | Include non-essential PFM modules (e.g. chromium and cycles). | `ON` |
+
+Example usage:
+```
+cmake --workflow --preset linux-clang -DPRAGMA_WITH_VR=ON
+```
+Please note that the `-full` preset variants already enable all of these options by default.
+
+Once the project has been generated, you can build the "pragma" (or "pfm", if enabled) target to build and install Pragma:
+```console
+cd build
+cmake --build . --config RelWithDebInfo --target pragma
+```
+
+### Build Script
+To build Pragma using the build script, simply launch "build.bat" for Windows, or "build.sh" for Linux. This method requires Python 3.9.5 or newer (with NumPy).
+
+You can also invoke the build script using python like so:
+```console
+git clone https://github.com/Silverlan/pragma.git
+cd pragma
+python build_scripts/build.py
+```
+(On some systems you may have to substitute the "python" command with "python3".)
+
 > :warning: Linux<br/>
 > Do **not** run the script as superuser.<br/>
 > The script will automatically install all required system packages. Since this requires admin priviliges, you may be prompted for your password several times.<br/>
 > You can disable confirmation prompts (e.g. for automated builds) by adding the `--no-confirm` argument, however entering your password may still be required.
 <br/>
 
-Once the build script has been completed, you can find the build files in `pragma/build`, and the install files in `pragma/build/install`. The `install` directory contains everything you need to run Pragma.
+By default the build script will set up Pragma with core features only, but you can use the options below to customize the build. The build script also allows you to build all of the third-party dependencies yourself instead of using prebuilt binaries, but this is generally not recommended as it significantly increases build times and disk space usage.
 
-###### Update
-To update Pragma to a newer version (assuming the command above has completed successfully at least once), you can use the following command:
+Once the project has been generated, you can build the "pragma" (or "pfm", if enabled) target to build and install Pragma:
 ```console
-python build_scripts/build.py --update
+cd build
+cmake --build . --config RelWithDebInfo --target pragma
 ```
 
-This will pull all of the latest changes for the Pragma repository and the modules. The `--update` option will re-use all of the arguments used in the last execution of the build script, so you don't have to specify them again.
+#### Build Customization
 
-If you just wish to re-run the build script without updating to the latest commit, you can use the `--rerun` option instead. Like the `--update` option, this will also re-use the arguments used in the last execution of the build script.
-
-###### Branches
-The purpose of the branches is as follows:
-### `main` Branch
-- **Purpose:** The `main` branch is the primary branch that contains the latest functional code and should always be deployable. The [nightly pre-release builds](https://github.com/Silverlan/pragma/releases/tag/nightly) are generated from this branch. Please note that only [commits tagged with release points](https://github.com/Silverlan/pragma/tags) (e.g. v1.3.0) are considered stable!
-- **Usage:** 
-  - Only tested and approved features or bug fixes from the `develop` branch should be merged into `main`.
-  - Direct commits to `main` are discouraged.
-  - A stable release can be generated from `main` using the `Create Stable Release` action once the nightly release has been thoroughly tested.
-
-### `develop` Branch
-- **Purpose:** The `develop` branch is used as the integration branch for new features, bug fixes, and other changes. It acts as the "working" version of the codebase where ongoing development takes place. This branch is *not* considered stable and may not be functional or even build without errors.
-- **Usage:** 
-  - Developers create feature branches (e.g., `feature/feature-name`) off the `develop` branch for new features or improvements.
-  - Once a feature is complete and tested, it is merged back into `develop`.
-
-###### Code Changes
-If you make any code changes to the source code, you can build the `pragma-install` target to build them. This will also re-install the binaries.
-
-### Build Customization
-
-Running the build-script with the arguments above will build and install Pragma and the Pragma Filmmaker with all dependencies. Alternatively you can also configure the build to your liking with the following parameters:
+You can configure the build to your liking with the following parameters:
 
 | Parameter                               | Description                                                                                  | Default          |
 | --------------------------------------- | -------------------------------------------------------------------------------------------- | ---------------- |
 | `--help`                                | Display this help                                                                            |                  |
-| `--generator <generator>`               | The generator to use.                                                                        | Windows: `Visual Studio 17 2022`<br/>Linux: `Ninja Multi-Config` |
-| `--c-compiler`                          | [Linux only] The C-compiler to use.                                                          | `clang-18`       |
-| `--cxx-compiler`                        | [Linux only] The C++-compiler to use.                                                        | `clang++-18`     |
+| `--generator <generator>`               | The generator to use.                                                                        | Linux: `Ninja Multi-Config` |
+| `--c-compiler`                          | [Linux only] The C-compiler to use.                                                          | `clang-22`       |
+| `--cxx-compiler`                        | [Linux only] The C++-compiler to use.                                                        | `clang++-22`     |
 | `--no-sudo`                             | [Linux only] Will not run sudo commands. System packages will have to be installed manually. | `0`              |
 | `--no-confirm`                          | [Linux only] Disable any interaction with user (suitable for automated run).                 | `0`              |
 | `--debug`                               | [Linux only] Enable debug assertions and disable code optimizations.                         | `0`              |
@@ -164,6 +218,32 @@ If you want to have full CUDA and OptiX support when rendering with Cycles, you 
 - [OptiX SDK 7.3.0](https://developer.nvidia.com/designworks/optix/download) (NVIDIA account required)
 
 Please note that newer versions of CUDA or OptiX will likely not work.
+
+###### Update
+To update Pragma to a newer version (assuming the command above has completed successfully at least once), you can use the following command:
+```console
+python build_scripts/build.py --update
+```
+
+This will pull all of the latest changes for the Pragma repository and the modules. The `--update` option will re-use all of the arguments used in the last execution of the build script, so you don't have to specify them again.
+
+If you just wish to re-run the build script without updating to the latest commit, you can use the `--rerun` option instead. Like the `--update` option, this will also re-use the arguments used in the last execution of the build script.
+
+Branches
+------
+The purpose of the branches is as follows:
+### `main` Branch
+- **Purpose:** The `main` branch is the primary branch that contains the latest functional code and should always be deployable. The [nightly pre-release builds](https://github.com/Silverlan/pragma/releases/tag/nightly) are generated from this branch. Please note that only [commits tagged with release points](https://github.com/Silverlan/pragma/tags) (e.g. v1.3.0) are considered stable!
+- **Usage:** 
+  - Only tested and approved features or bug fixes from the `develop` branch should be merged into `main`.
+  - Direct commits to `main` are discouraged.
+  - A stable release can be generated from `main` using the `Create Stable Release` action once the nightly release has been thoroughly tested.
+
+### `develop` Branch
+- **Purpose:** The `develop` branch is used as the integration branch for new features, bug fixes, and other changes. It acts as the "working" version of the codebase where ongoing development takes place. This branch is *not* considered stable and may not be functional or even build without errors.
+- **Usage:** 
+  - Developers create feature branches (e.g., `feature/feature-name`) off the `develop` branch for new features or improvements.
+  - Once a feature is complete and tested, it is merged back into `develop`.
 
 Modules
 ------

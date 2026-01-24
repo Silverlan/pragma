@@ -31,15 +31,15 @@ jobs:
       if: runner.os == 'Windows'
       run: |
         $repo = $env:GITHUB_REPOSITORY
-        Invoke-WebRequest -Uri "https://github.com/$repo/releases/download/nightly/pragma-win64.zip" -OutFile "pragma-win64.zip"
-        Expand-Archive -Path "pragma-win64.zip" -DestinationPath "pragma"
+        Invoke-WebRequest -Uri "https://github.com/$repo/releases/download/nightly/windows-x64-clang.zip" -OutFile "windows-x64-clang.zip"
+        Expand-Archive -Path "windows-x64-clang.zip" -DestinationPath "pragma"
 
     - name: Download Pragma (Linux)
       if: runner.os == 'Linux'
       run: |
-        wget https://github.com/$GITHUB_REPOSITORY/releases/download/nightly/pragma-lin64.tar.gz
+        wget https://github.com/$GITHUB_REPOSITORY/releases/download/nightly/pragma-linux-x64-clang.tar.gz
         mkdir pragma
-        tar -xzvf pragma-lin64.tar.gz -C pragma
+        tar -xzvf pragma-linux-x64-clang.tar.gz -C pragma
 
     - name: Run Test Scripts
       shell: bash

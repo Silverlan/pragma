@@ -25,15 +25,15 @@ runs:
           dlUrl="https://github.com/Silverlan/pragma/releases/download/${version}/"
           if [ "$RUNNER_OS" == "Linux" ]; then
             if [ "$version" == "nightly" ]; then
-              fileName="pragma-lin64.tar.gz"
+              fileName="pragma-linux-x64-clang.tar.gz"
             else
-              fileName="pragma-${version}-lin64.tar.gz"
+              fileName="pragma-${version}-linux-x64-clang.tar.gz"
             fi
           else
             if [ "$version" == "nightly" ]; then
-              fileName="pragma-win64.zip"
+              fileName="pragma-windows-x64-clang.zip"
             else
-              fileName="pragma-${version}-win64.zip"
+              fileName="pragma-${version}-windows-x64-clang.zip"
             fi
           fi
           dlUrl="${dlUrl}${fileName}"

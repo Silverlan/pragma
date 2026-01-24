@@ -536,6 +536,42 @@ if platform == "win32":
 		vsdevcmd_path = os.path.join(installation_path, "Common7", "Tools", "vsdevcmd.bat")
 		return vsdevcmd_path
 
+	def is_vs_env_active():
+		return "VSCMD_VER" in os.environ or "VCINSTALLDIR" in os.environ
+
+	def load_vs_env(deps_dir, arch="x64"):
+		if is_vs_env_active():
+			return
+		bat_path = determine_vsdevcmd_path(deps_dir)
+		if not os.path.exists(bat_path):
+			raise FileNotFoundError(f"Could not find vsdevcmd/vcvarsall at: {bat_path}")
+
+		# Construct a command that runs the bat file, then runs 'set' to dump env vars
+		# We use "&&" to ensure 'set' only runs if the bat file succeeds.
+		cmd = f'"{bat_path}" -arch={arch} && set'
+
+		# Run the command and capture stdout
+		print(f"Initializing VS environment from: {bat_path}...")
+		result = subprocess.run(
+			cmd, 
+			capture_output=True, 
+			text=True, 
+			shell=True, 
+			check=True
+		)
+
+		# Parse the output of 'set' to find environment variables
+		new_env = {}
+		for line in result.stdout.splitlines():
+			# 'set' outputs in format KEY=VALUE
+			if '=' in line:
+				key, _, value = line.partition('=')
+				new_env[key.upper()] = value
+
+		# Update Python process's environment
+		os.environ.update(new_env)
+		print("VS Environment initialized successfully.")
+
 if platform == "linux":
 	def install_system_packages(packages, no_confirm):
 		print("")

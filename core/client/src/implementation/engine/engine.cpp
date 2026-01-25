@@ -520,7 +520,7 @@ const std::vector<pragma::CEngine::DroppedFile> &pragma::CEngine::GetDroppedFile
 void pragma::CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::string> &files)
 {
 	auto *client = get_client_state();
-	if(client != nullptr)
+	if(client == nullptr)
 		return;
 
 	m_droppedFiles.reserve(files.size());
@@ -571,7 +571,7 @@ void pragma::CEngine::OnFilesDropped(prosper::Window &window, std::vector<std::s
 void pragma::CEngine::OnDragEnter(prosper::Window &window)
 {
 	auto *client = get_client_state();
-	if(client != nullptr)
+	if(client == nullptr)
 		return;
 	if(gui::WGUI::GetInstance().HandleFileDragEnter(window))
 		return;
@@ -580,7 +580,7 @@ void pragma::CEngine::OnDragEnter(prosper::Window &window)
 void pragma::CEngine::OnDragExit(prosper::Window &window)
 {
 	auto *client = get_client_state();
-	if(client != nullptr)
+	if(client == nullptr)
 		return;
 	if(gui::WGUI::GetInstance().HandleFileDragExit(window))
 		return;
@@ -589,21 +589,21 @@ void pragma::CEngine::OnDragExit(prosper::Window &window)
 bool pragma::CEngine::OnWindowShouldClose(prosper::Window &window)
 {
 	auto *client = get_client_state();
-	if(client != nullptr)
+	if(client == nullptr)
 		return true;
 	return client->OnWindowShouldClose(window);
 }
 void pragma::CEngine::OnPreedit(prosper::Window &window, const string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)
 {
 	auto *client = get_client_state();
-	if(client != nullptr)
+	if(client == nullptr)
 		return;
 	client->OnPreedit(window, preeditString, blockSizes, focusedBlock, caret);
 }
 void pragma::CEngine::OnIMEStatusChanged(prosper::Window &window, bool imeEnabled)
 {
 	auto *client = get_client_state();
-	if(client != nullptr)
+	if(client == nullptr)
 		return;
 	gui::WGUI::GetInstance().HandleIMEStatusChanged(window, imeEnabled);
 	client->OnIMEStatusChanged(window, imeEnabled);
@@ -2215,7 +2215,7 @@ namespace {
 		  Vector2i resolution(x, y);
 		  pragma::get_cengine()->GetWindow().SetResolution(resolution);
 		  auto *client = static_cast<pragma::ClientState *>(pragma::get_cengine()->GetClientState());
-		  if(client != nullptr)
+		  if(client == nullptr)
 			  return;
 		  auto &wgui = pragma::gui::WGUI::GetInstance();
 		  auto *el = wgui.GetBaseElement();

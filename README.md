@@ -98,16 +98,16 @@ cmake --workflow --preset linux-clang
 ```
 git clone https://github.com/Silverlan/pragma.git
 cd pragma
-cmake --workflow --preset windows-clang
+cmake --workflow --preset windows-clang-ninja
 ```
 
 Available presets are:
 * linux-clang
 * linux-clang-full
-* windows-clang
-* windows-clang-full
-* windows-msvc *
-* windows-msvc-full *
+* windows-clang-ninja
+* windows-clang-ninja-full
+* windows-msvc-ninja *
+* windows-msvc-ninja-full *
 
 Use the `-full` suffix if you want all features, including PFM and VR support.
 

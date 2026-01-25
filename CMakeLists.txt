@@ -24,8 +24,12 @@ set(CMAKE_ASM_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 set(CMAKE_C_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 
-if(CMAKE_GENERATOR MATCHES "Visual Studio.*")
-    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio generator is currently not supported. Please use Ninja generator for the time being).")
+option(PRAGMA_IGNORE_WARNINGS "Ignore warnings and configure anyway?" OFF)
+
+if(NOT PRAGMA_IGNORE_WARNINGS)
+    if(CMAKE_GENERATOR MATCHES "Visual Studio.*")
+        message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (Visual Studio generator is currently not supported. Please use Ninja generator for the time being).")
+    endif()
 endif()
 if ("${CMAKE_GENERATOR}" MATCHES "Ninja")
     set(CMAKE_NINJA_FORCE_RESPONSE_FILE TRUE CACHE BOOL "Force Ninja to use response files for long command lines")
@@ -66,8 +70,10 @@ endfunction()
 
 project(pragma)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
-    message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (clang-cl is currently not supported. Please use clang instead.).")
+if(NOT PRAGMA_IGNORE_WARNINGS)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+        message(FATAL_ERROR "Detected generator: ${CMAKE_GENERATOR} (clang-cl is currently not supported. Please use clang instead.).")
+    endif()
 endif()
 
 set(TOOLSET "clang")

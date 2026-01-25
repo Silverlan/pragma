@@ -40,6 +40,7 @@ parser.add_argument("--clean-deps-build-files", type=str2bool, nargs='?', const=
 parser.add_argument('--install-directory', help='Installation directory. Can be relative (to build directory) or absolute.', default='install')
 parser.add_argument('--cmake-arg', help='Additional cmake argument for configuring Pragma. This parameter can be used multiple times.', action='append', default=[])
 parser.add_argument("--cmake-cxx-flag", action="append", help="Additional flags to add to CMAKE_CXX_FLAGS.", default=[])
+parser.add_argument("--ignore-warnings", type=str2bool, nargs='?', const=True, default=False, help="Ignore all warnings and allow building with unsupported configurations.")
 parser.add_argument('--module', help='Custom modules to install. Use this parameter multiple times to use multiple modules. Usage example: --module pr_physx:\"https://github.com/Silverlan/pr_physx.git\"', action='append', default=[])
 # parser.add_argument('--log-file', help='Script output will be written to this file.', default='build_log.txt')
 parser.add_argument("--verbose", type=str2bool, nargs='?', const=True, default=False, help="Print additional verbose output.")
@@ -129,6 +130,7 @@ modules = args["module"]
 rerun = args["rerun"]
 prefer_git_https = args["prefer_git_https"]
 update = args["update"]
+ignore_warnings = args["ignore_warnings"]
 
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
@@ -221,6 +223,7 @@ if build_all == False:
 subprocess.run(["cmake", "-DPRAGMA_BUILD_TOOLS_DIR=" +config.build_tools_dir, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", "cmake/fetch_clang.cmake"],check=True)
 
 if platform == "win32":
+	load_vs_env(deps_dir)
 	if toolset == "msvc":
 		print_warning(f"Visual Studio toolset is currently not recommended and may not work. If you run into issues, try using the clang toolset instead.")
 	elif toolset == "clang":
@@ -253,11 +256,20 @@ if platform == "win32":
 		]
 		config.toolsetCFlags = ["-Wno-error", "-Wno-unused-command-line-argument", "-Wno-enum-constexpr-conversion", "-fexceptions", "-fcxx-exceptions"]
 		print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
-		sys.exit(1)
+		if not ignore_warnings:
+			sys.exit(1)
+		else:
+			print_msg("--ignore-warnings has been enabled, continuing...")
 	if generator != "Ninja Multi-Config":
 		if not deps_only:
 			print_warning(f"Generator {generator} for platform {platform} is currently not supported! Please use \"Ninja Multi-Config\".")
-			sys.exit(1)
+			print_msg("If you want to try using this generator anyway, follow these steps:")
+			print_msg("1) Open CMakePresets.json in the root Pragma directory and remove the '\"hidden\": true' fields from the \"config-windows-msvc-*\" and \"build-windows-msvc-*\" presets.")
+			print_msg("2) Re-run this script with --ignore-warnings")
+			if not ignore_warnings:
+				sys.exit(1)
+			else:
+				print_msg("--ignore-warnings has been enabled, continuing...")
 elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-22"):
 	# Due to a compiler bug with C++20 Modules in clang, we need the
 	# very latest version of clang, which is not available in package managers yet.
@@ -716,6 +728,9 @@ if not deps_only:
 	cmake_args.append("-DCMAKE_INSTALL_PREFIX:PATH=" +install_dir +"")
 	cmake_args.append("-DPRAGMA_ADDITIONAL_MODULES=" + ";".join(module_list))
 
+	if ignore_warnings:
+		cmake_args.append("-DPRAGMA_IGNORE_WARNINGS=ON")
+
 	vtune_enabled = False
 	if len(vtune_include_path) > 0 or len(vtune_library_path) > 0:
 		if len(vtune_include_path) > 0 and len(vtune_library_path) > 0:
@@ -737,9 +752,14 @@ if not deps_only:
 
 	if platform == "win32":
 		if toolset == "msvc":
-			preset = "config-windows-msvc"
+			if generator == "Visual Studio 17 2022":
+				preset = "config-windows-msvc-vs2022"
+			elif generator == "Visual Studio 18 2026":
+				preset = "config-windows-msvc-vs2026"
+			else:
+				preset = "config-windows-msvc-ninja"
 		elif toolset == "clang":
-			preset = "config-windows-clang"
+			preset = "config-windows-clang-ninja"
 	else:
 		preset = "config-linux-clang"
 

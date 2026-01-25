@@ -59,8 +59,9 @@ jobs:
           echo -e "ref: $GITHUB_REF \ncommit: $GITHUB_SHA\nbuild: $(date +"%Y-%m-%dT%H:%M:%SZ")" \
           > ./git_info.txt
 
-          # Delete .git folders
+          # Delete git and install cache folders
           find . -name ".git*" -exec rm -R {} \; 2>/dev/null || true
+          find . -name ".install_cache*" -exec rm -R {} \; 2>/dev/null || true
 
           # Enable experimental updates
           cd cfg

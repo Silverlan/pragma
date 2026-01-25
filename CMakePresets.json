@@ -10,10 +10,30 @@
       "installDir": "${sourceDir}/build/install",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "CMAKE_DEFAULT_BUILD_TYPE": "RelWithDebInfo",
         "CMAKE_CXX_SCAN_FOR_MODULES": "1",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "1"
       }
+    },
+    {
+      "name": "base-ninja",
+      "hidden": true,
+      "generator": "Ninja Multi-Config",
+      "inherits": ["base"],
+      "cacheVariables": {
+        "CMAKE_DEFAULT_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "base-msvc-vs2022",
+      "hidden": true,
+      "generator": "Visual Studio 17 2022",
+      "inherits": ["base"]
+    },
+    {
+      "name": "base-msvc-vs2026",
+      "hidden": true,
+      "generator": "Visual Studio 18 2026",
+      "inherits": ["base"]
     },
     {
       "name": "features-full",
@@ -41,7 +61,7 @@
     {
       "name": "config-linux-clang",
       "displayName": "[Linux] Configure - Clang (Core Features)",
-      "inherits": ["base", "platform-linux"],
+      "inherits": ["base-ninja", "platform-linux"],
       "cacheVariables": {
         "CMAKE_C_COMPILER": "${sourceDir}/build_tools/clang/bin/clang",
         "CMAKE_CXX_COMPILER": "${sourceDir}/build_tools/clang/bin/clang++"
@@ -54,24 +74,24 @@
     },
 
     {
-      "name": "config-windows-clang",
-      "displayName": "[Windows] Configure - Clang (Core Features)",
-      "inherits": ["base", "platform-windows"],
+      "name": "config-windows-clang-ninja",
+      "displayName": "[Windows] Configure - Clang with Ninja (Core Features)",
+      "inherits": ["base-ninja", "platform-windows"],
       "cacheVariables": {
         "CMAKE_C_COMPILER": "${sourceDir}/build_tools/clang/bin/clang.exe",
         "CMAKE_CXX_COMPILER": "${sourceDir}/build_tools/clang/bin/clang++.exe"
       }
     },
     {
-      "name": "config-windows-clang-full",
-      "displayName": "[Windows] Configure - Clang (All Features)",
-      "inherits": ["config-windows-clang", "features-full"]
+      "name": "config-windows-clang-ninja-full",
+      "displayName": "[Windows] Configure - Clang with Ninja (All Features)",
+      "inherits": ["config-windows-clang-ninja", "features-full"]
     },
 
     {
-      "name": "config-windows-msvc",
-      "displayName": "[Windows] Configure - MSVC (Core Features)",
-      "inherits": ["base", "platform-windows"],
+      "name": "config-windows-msvc-ninja",
+      "displayName": "[Windows] Configure - MSVC with Ninja (Core Features)",
+      "inherits": ["base-ninja", "platform-windows"],
       "cmakeExecutable": "${sourceDir}/deps/staging/cmake/bin/cmake.exe",
       "cacheVariables": {
         "CMAKE_C_COMPILER": "cl.exe",
@@ -79,9 +99,37 @@
       }
     },
     {
-      "name": "config-windows-msvc-full",
-      "displayName": "[Windows] Configure - MSVC (All Features)",
-      "inherits": ["config-windows-msvc", "features-full"]
+      "name": "config-windows-msvc-ninja-full",
+      "displayName": "[Windows] Configure - MSVC with Ninja (All Features)",
+      "inherits": ["config-windows-msvc-ninja", "features-full"]
+    },
+
+    {
+      "name": "config-windows-msvc-vs2022",
+      "displayName": "[Windows] Configure - Visual Studio 2022 (Core Features)",
+      "inherits": ["base-msvc-vs2022", "platform-windows"],
+      "cmakeExecutable": "${sourceDir}/deps/staging/cmake/bin/cmake.exe",
+      "hidden": true
+    },
+    {
+      "name": "config-windows-msvc-vs2022-full",
+      "displayName": "[Windows] Configure - Visual Studio 2022 (All Features)",
+      "inherits": ["config-windows-msvc-vs2022", "features-full"],
+      "hidden": true
+    },
+
+    {
+      "name": "config-windows-msvc-vs2026",
+      "displayName": "[Windows] Configure - Visual Studio 2026 (Core Features)",
+      "inherits": ["base-msvc-vs2026", "platform-windows"],
+      "cmakeExecutable": "${sourceDir}/deps/staging/cmake/bin/cmake.exe",
+      "hidden": true
+    },
+    {
+      "name": "config-windows-msvc-vs2026-full",
+      "displayName": "[Windows] Configure - Visual Studio 2026 (All Features)",
+      "inherits": ["config-windows-msvc-vs2026", "features-full"],
+      "hidden": true
     }
   ],
 
@@ -112,29 +160,59 @@
     },
 
     {
-      "name": "build-windows-clang",
-      "displayName": "[Windows] Build - Clang (Core Features)",
+      "name": "build-windows-clang-ninja",
+      "displayName": "[Windows] Build - Clang with Ninja (Core Features)",
       "inherits": ["build-base", "target-install"],
-      "configurePreset": "config-windows-clang"
+      "configurePreset": "config-windows-clang-ninja"
     },
     {
-      "name": "build-windows-clang-full",
-      "displayName": "[Windows] Build - Clang (All Features)",
+      "name": "build-windows-clang-ninja-full",
+      "displayName": "[Windows] Build - Clang with Ninja (All Features)",
       "inherits": ["build-base", "target-install"],
-      "configurePreset": "config-windows-clang-full"
+      "configurePreset": "config-windows-clang-ninja-full"
     },
 
     {
-      "name": "build-windows-msvc",
-      "displayName": "[Windows] Build - MSVC (Core Features)",
+      "name": "build-windows-msvc-ninja",
+      "displayName": "[Windows] Build - MSVC with Ninja (Core Features)",
       "inherits": ["build-base", "target-install"],
-      "configurePreset": "config-windows-msvc"
+      "configurePreset": "config-windows-msvc-ninja"
     },
     {
-      "name": "build-windows-msvc-full",
-      "displayName": "[Windows] Build - MSVC (All Features)",
+      "name": "build-windows-msvc-ninja-full",
+      "displayName": "[Windows] Build - MSVC with Ninja (All Features)",
       "inherits": ["build-base", "target-install"],
-      "configurePreset": "config-windows-msvc-full"
+      "configurePreset": "config-windows-msvc-ninja-full"
+    },
+
+    {
+      "name": "build-windows-msvc-vs2022",
+      "displayName": "[Windows] Build - Visual Studio 2022 (Core Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-windows-msvc-vs2022",
+      "hidden": true
+    },
+    {
+      "name": "build-windows-msvc-vs2022-full",
+      "displayName": "[Windows] Build - Visual Studio 2022 (All Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-windows-msvc-vs2022-full",
+      "hidden": true
+    },
+
+    {
+      "name": "build-windows-msvc-vs2026",
+      "displayName": "[Windows] Build - Visual Studio 2026 (Core Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-windows-msvc-vs2026",
+      "hidden": true
+    },
+    {
+      "name": "build-windows-msvc-vs2026-full",
+      "displayName": "[Windows] Build - Visual Studio 2026 (All Features)",
+      "inherits": ["build-base", "target-install"],
+      "configurePreset": "config-windows-msvc-vs2026-full",
+      "hidden": true
     }
   ],
   "workflowPresets": [
@@ -156,36 +234,70 @@
     },
 
     {
-      "name": "windows-clang",
-      "displayName": "[Windows] Clang (Core Features)",
+      "name": "windows-clang-ninja",
+      "displayName": "[Windows] Clang with Ninja (Core Features)",
       "steps": [
-        { "type": "configure", "name": "config-windows-clang" },
-        { "type": "build",     "name": "build-windows-clang" }
+        { "type": "configure", "name": "config-windows-clang-ninja" },
+        { "type": "build",     "name": "build-windows-clang-ninja" }
       ]
     },
     {
-      "name": "windows-clang-full",
-      "displayName": "[Windows] Clang (All Features)",
+      "name": "windows-clang-ninja-full",
+      "displayName": "[Windows] Clang with Ninja (All Features)",
       "steps": [
-        { "type": "configure", "name": "config-windows-clang-full" },
-        { "type": "build",     "name": "build-windows-clang-full" }
+        { "type": "configure", "name": "config-windows-clang-ninja-full" },
+        { "type": "build",     "name": "build-windows-clang-ninja-full" }
       ]
     },
 
     {
-      "name": "windows-msvc",
-      "displayName": "[Windows] MSVC (Core Features)",
+      "name": "windows-msvc-ninja",
+      "displayName": "[Windows] MSVC with Ninja (Core Features)",
       "steps": [
-        { "type": "configure", "name": "config-windows-msvc" },
-        { "type": "build",     "name": "build-windows-msvc" }
+        { "type": "configure", "name": "config-windows-msvc-ninja" },
+        { "type": "build",     "name": "build-windows-msvc-ninja" }
       ]
     },
     {
-      "name": "windows-msvc-full",
-      "displayName": "[Windows] MSVC (All Features)",
+      "name": "windows-msvc-ninja-full",
+      "displayName": "[Windows] MSVC with Ninja (All Features)",
       "steps": [
-        { "type": "configure", "name": "config-windows-msvc-full" },
-        { "type": "build",     "name": "build-windows-msvc-full" }
+        { "type": "configure", "name": "config-windows-msvc-ninja-full" },
+        { "type": "build",     "name": "build-windows-msvc-ninja-full" }
+      ]
+    },
+
+    {
+      "name": "windows-msvc-vs2022",
+      "displayName": "[Windows] Visual Studio 2022 (Core Features)",
+      "steps": [
+        { "type": "configure", "name": "config-windows-msvc-vs2022" },
+        { "type": "build",     "name": "build-windows-msvc-vs2022" }
+      ]
+    },
+    {
+      "name": "windows-msvc-vs2022-full",
+      "displayName": "[Windows] Visual Studio 2022 (All Features)",
+      "steps": [
+        { "type": "configure", "name": "config-windows-msvc-vs2022-full" },
+        { "type": "build",     "name": "build-windows-msvc-vs2022-full" }
+      ]
+    },
+
+    {
+      "name": "windows-msvc-vs2026",
+      "displayName": "[Windows] Visual Studio 2026 (Core Features)",
+      "steps": [
+        { "type": "configure", "name": "config-windows-msvc-vs2026" },
+        { "type": "build",     "name": "build-windows-msvc-vs2026" }
+      ]
+    },
+    {
+      "name": "windows-msvc-vs2026-full",
+      "displayName": "[Windows] Visual Studio 2026 (All Features)",
+      "steps": [
+        { "type": "configure", "name": "config-windows-msvc-vs2026-full" },
+        { "type": "build",     "name": "build-windows-msvc-vs2026-full" }
       ]
     }
   ]

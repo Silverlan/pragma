@@ -69,9 +69,11 @@ To clone Pragma, run:
 git clone https://github.com/Silverlan/pragma.git
 ```
 
-Then use the build method of your choice below. CMake will be used regardless of which build method you choose. The build files will be placed in "pragma/build", and Pragma will be installed to "pragma/build/install" by default. The default (and recommended) compiler (regardless of the os) is clang and the default build system is Ninja.
+Then use the build method of your choice below *. CMake will be used regardless of which build method you choose. The build files will be placed in "pragma/build", and Pragma will be installed to "pragma/build/install" by default. The default (and recommended) compiler (regardless of the os) is clang and the default build system is Ninja.
 
 To cut down on disk space, Pragma uses prebuilt binaries for a lot of third-party dependencies by default. You can use the build script if you want to build those as well, but this will **significantly** increase the build time and disk space usage and is generally not recommended.
+
+<sub>\* :warning: On Windows only the [build script](#build-script) method is currently supported. Simply double-click "build.bat"/"build_full.bat" or execute it from a command-line window.</sub>
 
 ### CLion (Recommended)
 If you're using the [CLion IDE](https://www.jetbrains.com/clion/), you can simply open the cloned Pragma repository and it should prompt you with a list of the available profiles. Make sure to **delete or disable the default Debug profile**, then enable the profile of your choice:
@@ -141,7 +143,9 @@ cmake --build . --config RelWithDebInfo --target pragma
 ```
 
 ### Build Script
-To build Pragma using the build script, simply launch "build.bat" for Windows, or "build.sh" for Linux. This method requires Python 3.9.5 or newer (with NumPy).
+This method requires Python 3.9.5 or newer (with NumPy).
+
+To build Pragma using the build script, simply launch "build.bat" for Windows, or "build.sh" for Linux. Use the "build_full" version if you want to include additional features such as VR support and PFM.
 
 You can also invoke the build script using python like so:
 ```console

@@ -75,14 +75,6 @@ static void LPARAM_auto_exec(const std::vector<std::string> &argv)
 		g_autoExecScripts->push_back(arg);
 }
 
-extern std::optional<std::string> g_customWindowIcon;
-static void LPARAM_icon(const std::vector<std::string> &argv)
-{
-	if(argv.empty())
-		return;
-	g_customWindowIcon = argv.front();
-}
-
 static void LPARAM_windowless(const std::vector<std::string> &argv)
 {
 	auto windowless = true;
@@ -154,7 +146,6 @@ void pragma::register_client_launch_parameters(LaunchParaMap &map)
 	map.RegisterParameterHelp("-graphics_api", &LPARAM_render_api, "<moduleName>", "Changes the graphics API to use for rendering.");
 	map.RegisterParameterHelp("-audio_api", &LPARAM_audio_api, "<moduleName>", "Changes the audio API to use for audio playback.");
 	map.RegisterParameterHelp("-auto_exec", &LPARAM_auto_exec, "<script>", "Auto-execute this Lua-script on launch.");
-	map.RegisterParameterHelp("-icon", &LPARAM_icon, "<iconPath>", "Path to custom window icon location.");
 	map.RegisterParameterHelp("-windowless", &LPARAM_windowless, "<1/0>", "If enabled, Pragma will be launched without a visible window.");
 	map.RegisterParameterHelp("-title_bar_color", &LPARAM_title_bar_color, "<hexColor>", "Hex color for the window title bar.");
 	map.RegisterParameterHelp("-border_color", &LPARAM_border_bar_color, "<hexColor>", "Hex color for the window border.");

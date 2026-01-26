@@ -121,6 +121,7 @@ The following CMake options are available when using this method:
 
 | Option | Description | Default |
 |---|---|:---:|
+| `PRAGMA_DEBUG` | Build without optimizations? | `OFF` |
 | `PRAGMA_WITH_VR` | Build with VR support? | `OFF` |
 | `PRAGMA_WITH_NETWORKING` | Build with networking support? | `OFF` |
 | `PRAGMA_WITH_COMMON_ENTITIES` | Build with common entity scripts? | `OFF` |

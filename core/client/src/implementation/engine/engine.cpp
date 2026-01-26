@@ -1476,7 +1476,6 @@ void pragma::CEngine::OnWindowResized(prosper::Window &window, Vector2i size)
 	m_tWindowResizeTime = util::Clock::now();
 }
 
-DLLCLIENT std::optional<std::string> g_customWindowIcon {};
 void pragma::CEngine::OnWindowInitialized()
 {
 	RenderContext::OnWindowInitialized();
@@ -1484,13 +1483,12 @@ void pragma::CEngine::OnWindowInitialized()
 	InitializeWindowInputCallbacks(window);
 	window->SetWindowSizeCallback([this, &window](platform::Window &glfwWindow, Vector2i size) mutable { OnWindowResized(window, size); });
 
-	if(g_customWindowIcon.has_value()) {
-		auto imgBuf = image::load_image(*g_customWindowIcon, image::PixelFormat::LDR);
-		if(imgBuf) {
-			imgBuf->ToLDRFormat(image::Format::RGBA32);
-			window->SetWindowIcon(imgBuf->GetWidth(), imgBuf->GetHeight(), static_cast<uint8_t *>(imgBuf->GetData()));
-			platform::poll_events();
-		}
+	auto programIcon = engine_info::get_icon_path();
+	auto imgBuf = image::load_image(programIcon.GetString(), image::PixelFormat::LDR);
+	if(imgBuf) {
+		imgBuf->ToLDRFormat(image::Format::RGBA32);
+		window->SetWindowIcon(imgBuf->GetWidth(), imgBuf->GetHeight(), static_cast<uint8_t *>(imgBuf->GetData()));
+		platform::poll_events();
 	}
 }
 void pragma::CEngine::InitializeExternalArchiveManager() { pragma::util::initialize_external_archive_manager(GetClientState()); }

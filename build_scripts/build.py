@@ -216,18 +216,65 @@ mkpath(tools)
 
 config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 
+def check_cmake(min_version):
+	cmake_path = shutil.which("cmake")
+	if not cmake_path:
+		# CMake not found
+		return False
+
+	try:
+		result = subprocess.run(
+			[cmake_path, "--version"], 
+			capture_output=True, 
+			text=True, 
+			check=True
+		)
+		
+		match = re.search(r"(\d+\.\d+\.\d+)", result.stdout)
+		if not match:
+			# Failed to parse version
+			return False
+
+		version_str = match.group(1)
+		current_version = tuple(map(int, version_str.split(".")))
+
+		if current_version >= min_version:
+			return True
+		else:
+			# CMake is too old
+			return False
+
+	except (subprocess.CalledProcessError, OSError) as e:
+		# CMake execution failed
+		return False
+
+def fetch_cmake():
+	from third_party import cmake
+	cmake.main()
+	if platform == "win32":
+		cmake_exe = "cmake.exe"
+	else:
+		cmake_exe = "cmake"
+	config.cmake_path = str(Path(get_library_root_dir("cmake")) / "bin" / cmake_exe)
+
+# At least CMake 4.2.0 is needed, which is still very new and not available in the package managers of
+# most distros yet. If the detected CMake version is too old (or none was found), we'll download it here.
+use_custom_cmake = False
+if not check_cmake((4, 2, 0)):
+	use_custom_cmake = True
+	fetch_cmake()
+
 # Use prebuilt binaries if --build-all is not set
 os.chdir(root)
 if build_all == False:
-	subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-DTOOLSET=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
-subprocess.run(["cmake", "-DPRAGMA_BUILD_TOOLS_DIR=" +config.build_tools_dir, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", "cmake/fetch_clang.cmake"],check=True)
+	subprocess.run([config.cmake_path, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-DTOOLSET=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
+subprocess.run([config.cmake_path, "-DPRAGMA_BUILD_TOOLS_DIR=" +config.build_tools_dir, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", "cmake/fetch_clang.cmake"],check=True)
 
 import shutil
 import subprocess
 import re
 import sys
 
-use_custom_cmake = False
 if platform == "win32":
 	load_vs_env(deps_dir)
 	if toolset == "msvc":
@@ -247,7 +294,9 @@ if platform == "win32":
 
 		# Due to "import std;" support still being experimental in CMake, we have to use a custom, patched
 		# version of CMake to build Pragma with clang on Windows.
-		use_custom_cmake = True
+		if not use_custom_cmake:
+			use_custom_cmake = True
+			fetch_cmake()
 	elif toolset == "clang-cl":
 		clang_dir = str(Path(config.build_tools_dir) / "clang/bin")
 		
@@ -287,45 +336,6 @@ elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++
 		cxx_compiler = str(clang_staging_path / "bin/clang++")
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
-
-def check_cmake(min_version):
-	cmake_path = shutil.which("cmake")
-	if not cmake_path:
-		# CMake not found
-		return False
-
-	try:
-		result = subprocess.run(
-			[cmake_path, "--version"], 
-			capture_output=True, 
-			text=True, 
-			check=True
-		)
-		
-		match = re.search(r"(\d+\.\d+\.\d+)", result.stdout)
-		if not match:
-			# Failed to parse version
-			return False
-
-		version_str = match.group(1)
-		current_version = tuple(map(int, version_str.split(".")))
-
-		if current_version >= min_version:
-			return True
-		else:
-			# CMake is too old
-			return False
-
-	except (subprocess.CalledProcessError, OSError) as e:
-		# CMake execution failed
-		return False
-
-# At least CMake 4.2.0 is needed, which is still very new and not available in the package managers of
-# most distros yet. If the detected CMake version is too old (or none was found), we'll download it here.
-if use_custom_cmake or not check_cmake((4, 2, 0)):
-	from third_party import cmake
-	cmake.main()
-	config.cmake_path = str(Path(get_library_root_dir("cmake")) / "bin/cmake.exe")
 
 if update:
 	os.chdir(root)
@@ -460,6 +470,10 @@ if platform == "linux":
 				"libxi-dev",
 				"pkg-config"
 			]
+
+			# Required for curl
+			# packages += ["libssl-dev"]
+
 			for pck in packages:
 				commands.append("apt install " +pck)
 		install_system_packages(commands, no_confirm)
@@ -677,7 +691,7 @@ cmake_with_args.append(f"-DPRAGMA_WITH_ALL_PFM_MODULES={1 if with_all_pfm_module
 
 # Fetch base modules
 os.chdir(root)
-subprocess.run(["cmake"] +cmake_with_args +["-P", "cmake/fetch_modules.cmake"],check=True)
+subprocess.run([config.cmake_path] +cmake_with_args +["-P", "cmake/fetch_modules.cmake"],check=True)
 
 # Fetch additional modules
 index = 0

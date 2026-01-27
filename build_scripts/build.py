@@ -222,6 +222,12 @@ if build_all == False:
 	subprocess.run(["cmake", "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-DTOOLSET=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
 subprocess.run(["cmake", "-DPRAGMA_BUILD_TOOLS_DIR=" +config.build_tools_dir, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", "cmake/fetch_clang.cmake"],check=True)
 
+import shutil
+import subprocess
+import re
+import sys
+
+use_custom_cmake = False
 if platform == "win32":
 	load_vs_env(deps_dir)
 	if toolset == "msvc":
@@ -241,9 +247,7 @@ if platform == "win32":
 
 		# Due to "import std;" support still being experimental in CMake, we have to use a custom, patched
 		# version of CMake to build Pragma with clang on Windows.
-		from third_party import cmake
-		cmake.main()
-		config.cmake_path = str(Path(get_library_root_dir("cmake")) / "bin/cmake.exe")
+		use_custom_cmake = True
 	elif toolset == "clang-cl":
 		clang_dir = str(Path(config.build_tools_dir) / "clang/bin")
 		
@@ -283,6 +287,45 @@ elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++
 		cxx_compiler = str(clang_staging_path / "bin/clang++")
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
+
+def check_cmake(min_version):
+	cmake_path = shutil.which("cmake")
+	if not cmake_path:
+		# CMake not found
+		return False
+
+	try:
+		result = subprocess.run(
+			[cmake_path, "--version"], 
+			capture_output=True, 
+			text=True, 
+			check=True
+		)
+		
+		match = re.search(r"(\d+\.\d+\.\d+)", result.stdout)
+		if not match:
+			# Failed to parse version
+			return False
+
+		version_str = match.group(1)
+		current_version = tuple(map(int, version_str.split(".")))
+
+		if current_version >= min_version:
+			return True
+		else:
+			# CMake is too old
+			return False
+
+	except (subprocess.CalledProcessError, OSError) as e:
+		# CMake execution failed
+		return False
+
+# At least CMake 4.2.0 is needed, which is still very new and not available in the package managers of
+# most distros yet. If the detected CMake version is too old (or none was found), we'll download it here.
+if use_custom_cmake or not check_cmake((4, 2, 0)):
+	from third_party import cmake
+	cmake.main()
+	config.cmake_path = str(Path(get_library_root_dir("cmake")) / "bin/cmake.exe")
 
 if update:
 	os.chdir(root)
@@ -390,68 +433,34 @@ if platform == "linux":
 		print_msg("--no-sudo has been specified. System packages will be skipped, this may cause errors later on...")
 	else:
 		if(prefer_pacman()):
-			commands = [
-				"pacman -S --needed cmake",
-				"pacman -S --needed ninja",
-				"pacman -Syu base-devel git curl zip unzip tar cmake ninja" # Required for vcpkg
+			packages = [
+				# "cmake",
+				"ninja"
 			]
+
+			# Required for vcpkg
+			packages += ["base-devel git curl zip unzip tar cmake ninja"]
+
+			for pck in packages:
+				commands.append("pacman -S " +pck)
 		else:
-			commands = [
-				# Required for the build script
-				"apt-get install python3",
-				
-				# Required for Pragma core
-				"apt install build-essential",
-				# "add-apt-repository ppa:savoury1/llvm-defaults-14",
-				"apt update",
-				"apt install clang-18",
-				"apt-get install clang-tools-18", # Required for C++20 Modules
-				"apt install libstdc++-12-dev",
-				"apt install libstdc++6",
-				"apt-get install patchelf",
-
-				# Required for Vulkan
-				"apt-get -qq install -y libwayland-dev libxrandr-dev",
-
-				"apt-get install libxcb-keysyms1-dev",
-				"apt-get install xcb libxcb-xkb-dev x11-xkb-utils libx11-xcb-dev libxkbcommon-x11-dev",
-
-				# Required for GLFW
-				"apt install xorg-dev",
-
-				# Required for OIDN
-				"apt install git-lfs",
-
-				# Required for Cycles
-				"apt-get install subversion",
-				"apt-get install meson", # epoxy
-				
-				# CMake
-				"apt-get install cmake",
-
-				# Required for Curl
-				"apt-get install libssl-dev",
-				
-				# Curl
-				"apt-get install curl zip unzip tar",
-
-				# Required for OIIO
-				# "apt-get install python3-distutils",
-
-				#install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
-				"apt-get install pkg-config libfreetype-dev",
-
-				# Ninja
-				"apt-get install ninja-build",
-
-				# libdecor (required for Wayland)
-				"apt-get install wayland-protocols",
-				"apt-get install libdbus-1-dev",
-				"apt-get install libgtk-3-dev",
-
-				# Required for libsdbus-c++
-				"apt-get install meson ninja-build libcap-dev libsystemd-dev pkg-config gperf"
+			packages = [
+				# "cmake",
+				"ninja-build",
+				"gcc",
+				"g++",
+				"libfreetype6-dev",
+				"libwayland-dev",
+				"libxkbcommon-dev",
+				"libx11-dev",
+				"libxrandr-dev",
+				"libxinerama-dev",
+				"libxcursor-dev",
+				"libxi-dev",
+				"pkg-config"
 			]
+			for pck in packages:
+				commands.append("apt install " +pck)
 		install_system_packages(commands, no_confirm)
 
 module_list = []

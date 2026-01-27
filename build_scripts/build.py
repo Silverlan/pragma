@@ -255,7 +255,7 @@ def fetch_cmake():
 		cmake_exe = "cmake.exe"
 	else:
 		cmake_exe = "cmake"
-	config.cmake_path = str(Path(get_library_root_dir("cmake")) / "bin" / cmake_exe)
+	config.cmake_path = str(Path(config.build_tools_dir) / "cmake" / "bin" / cmake_exe)
 
 # At least CMake 4.2.0 is needed, which is still very new and not available in the package managers of
 # most distros yet. If the detected CMake version is too old (or none was found), we'll download it here.

@@ -432,6 +432,7 @@ if platform == "linux":
 	if(no_sudo):
 		print_msg("--no-sudo has been specified. System packages will be skipped, this may cause errors later on...")
 	else:
+		commands = []
 		if(prefer_pacman()):
 			packages = [
 				# "cmake",

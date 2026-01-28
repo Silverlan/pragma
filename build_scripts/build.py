@@ -468,6 +468,8 @@ if platform == "linux":
 				"libxinerama-dev",
 				"libxcursor-dev",
 				"libxi-dev",
+				"libxcb-keysyms1-dev",
+				"libx11-xcb-dev",
 				"pkg-config"
 			]
 

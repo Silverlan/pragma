@@ -461,16 +461,22 @@ if platform == "linux":
 				"gcc",
 				"g++",
 				"libfreetype6-dev",
+				
+				# glfw
 				"libwayland-dev",
-				"libxkbcommon-dev",
 				"libx11-dev",
+				"libxkbcommon-dev",
 				"libxrandr-dev",
 				"libxinerama-dev",
 				"libxcursor-dev",
 				"libxi-dev",
+				"pkg-config",
+				
+				# anvil
 				"libxcb-keysyms1-dev",
-				"libx11-xcb-dev",
-				"pkg-config"
+				
+				# prosper_vulkan
+				"libx11-xcb-dev"
 			]
 
 			# Required for curl

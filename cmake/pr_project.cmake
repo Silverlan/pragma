@@ -16,6 +16,11 @@ function(pr_setup_default_project_settings TARGET_NAME)
     if(UNIX AND PRAGMA_DEBUG)
         target_compile_definitions(${TARGET_NAME} PRIVATE _GLIBCXX_ASSERTIONS)
     endif()
+    
+    target_compile_options(${TARGET_NAME} PRIVATE --gcc-toolchain=/home/slv/Desktop/pragma/build_tools/gcc)
+target_link_options(${TARGET_NAME} PRIVATE
+    --gcc-toolchain=/home/slv/Desktop/pragma/build_tools/gcc
+)
 
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         target_compile_options(${TARGET_NAME} PRIVATE -Wno-c++11-narrowing)

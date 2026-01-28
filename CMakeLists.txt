@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 4.2.0)
 
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 
+add_compile_options(--gcc-toolchain=/home/slv/Desktop/pragma/build_tools/gcc)
+
 # Required for "import std;" as long as its experimental in CMake
 set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
 set(CMAKE_CXX_STANDARD 23)

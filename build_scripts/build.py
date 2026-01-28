@@ -444,31 +444,35 @@ if platform == "linux":
 	else:
 		commands = []
 		if(prefer_pacman()):
+			# Assuming arch-based system
 			packages = [
-				# "cmake",
+				"cmake",
 				"ninja"
 			]
 
-			# deps
-			# libdecor
-			packages.append("meson")
+			if build_all:
+				# libdecor
+				packages.append("meson")
 
-			# cycles
-			packages.append("git-lfs")
+				# cycles
+				packages.append("git-lfs")
 
-			# vcpkg
-			packages += ["base-devel git curl zip unzip tar cmake ninja"]
+				# vcpkg
+				packages += ["base-devel git curl zip unzip tar cmake ninja"]
 
 			commands.append("pacman -S " +" ".join(packages))
 		else:
+			# Assuming apt-based system
 			packages = [
-				# "cmake",
+				"cmake",
 				"ninja-build",
 				"gcc",
 				"g++",
-				"libfreetype6-dev",
-				
-				# glfw
+				"libfreetype6-dev"
+			]
+
+			# glfw
+			packages += [
 				"libwayland-dev",
 				"libx11-dev",
 				"libxkbcommon-dev",
@@ -476,26 +480,86 @@ if platform == "linux":
 				"libxinerama-dev",
 				"libxcursor-dev",
 				"libxi-dev",
-				"pkg-config",
-				
-				# anvil
-				"libxcb-keysyms1-dev",
-				
-				# prosper_vulkan
-				"libx11-xcb-dev",
-				
-			    # pr_curl
-			    "libssl-dev"
+				"pkg-config"
 			]
 
-			# cycles
-			packages.append("git-lfs")
+			# anvil
+			packages.append("libxcb-keysyms1-dev")
 
-			# vcpkg
-			#   sudo apt-get install curl zip unzip tar
+			# prosper_vulkan
+			packages.append("libx11-xcb-dev")
 
-			for pck in packages:
-				commands.append("apt install " +pck)
+			# pr_curl
+			# we'll only need this if we're building with pr_curl,
+			# so this condition should match the one in cmake/fetch_modules.cmake
+			if with_pfm and (with_core_pfm_modules or with_all_pfm_modules):
+				packages.append("libssl-dev")
+
+			if build_all:
+				packages.append("patchelf")
+
+				# Required for Vulkan
+				packages += [
+					"xcb",
+					"libxcb-xkb-dev",
+					"x11-xkb-utils",
+					"libxkbcommon-x11-dev"
+				]
+
+				# GLFW
+				packages.append("xorg-dev")
+
+				# cycles and OIDN
+				packages.append("git-lfs")
+
+				# vcpkg
+				packages += [
+					"curl",
+					"zip",
+					"unzip",
+					"tar"
+				]
+
+				# Required for Cycles
+				packages += [
+					"subversion",
+					"meson" # epoxy
+				]
+
+				# curl
+				packages += [
+					"libssl-dev",
+					"curl",
+					"zip",
+					"unzip",
+					"tar"
+				]
+
+				# Required for OIIO
+				# packages.append("python3-distutils")
+
+				# install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
+				packages += [
+					"pkg-config",
+					"libfreetype-de"
+				]
+
+				# libdecor (required for Wayland)
+				packages += [
+					"wayland-protocols",
+					"libdbus-1-dev",
+					"libgtk-3-dev"
+				]
+
+				# Required for libsdbus-c++
+				packages += [
+					"meson",
+					"libcap-dev",
+					"libsystemd-dev",
+					"pkg-config",
+					"gperf"
+				]
+			package_list = " ".join(packages)
 		install_system_packages(commands, no_confirm)
 
 module_list = []

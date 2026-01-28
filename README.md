@@ -49,11 +49,25 @@ Build Requirements
 ------
 - [CMake](https://cmake.org/download/) 4.2.0 or newer
 - [Ninja-build](https://ninja-build.org/)
+- At least 16 GiB of RAM
 - Recommended IDE: [CLion](https://www.jetbrains.com/clion/)
 
 ###### Linux (Recommended)
 - ~30 GiB of disk space
 - Ubuntu 24.04 or newer, or Arch-based distro with up-to-date packages
+
+The following system packages have to be installed (these will be installed automatically if you're using the build script):
+
+Ubuntu:
+```bash
+sudo apt install cmake ninja-build gcc g++ libfreetype6-dev libwayland-dev libx11-dev libxkbcommon-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev pkg-config libxcb-keysyms1-dev libx11-xcb-dev libssl-dev
+```
+(`libssl-dev` is only required if you're building with PFM.)
+
+Arch:
+```
+sudo pacman -S cmake ninja
+```
 
 ###### Windows
 - ~80 GiB of disk space
@@ -65,7 +79,7 @@ Build Requirements
 Build Instructions
 ------
 To clone Pragma, run:
-```console
+```bash
 git clone https://github.com/Silverlan/pragma.git
 ```
 
@@ -86,18 +100,18 @@ Press OK and CLion will configure the project automatically. Once the configurat
 
 You can then build, install and launch Pragma using the "pragma" configuration. If you have chosen a `-full` profile, you can use the "pfm" configuration respectively to launch PFM.
 
-### CMake Presets
+### CMake
 If you want to use a different IDE or just want to set up Pragma via command-line, you can set up Pragma using a CMake workflow preset:
 
 **Linux**:
-```
+```bash
 git clone https://github.com/Silverlan/pragma.git
 cd pragma
 cmake --workflow --preset linux-clang
 ```
 
 **Windows**:
-```
+```bash
 git clone https://github.com/Silverlan/pragma.git
 cd pragma
 cmake --workflow --preset windows-clang-ninja
@@ -138,7 +152,7 @@ cmake --workflow --preset linux-clang -DPRAGMA_WITH_VR=ON
 Please note that the `-full` preset variants already enable all of these options by default.
 
 Once the project has been generated, you can build the "pragma" (or "pfm", if enabled) target to build and install Pragma:
-```console
+```bash
 cd build
 cmake --build . --config RelWithDebInfo --target pragma
 ```
@@ -149,7 +163,7 @@ This method requires Python 3.9.5 or newer (with NumPy).
 To build Pragma using the build script, simply launch "build.bat" for Windows, or "build.sh" for Linux. Use the "build_full" version if you want to include additional features such as VR support and PFM.
 
 You can also invoke the build script using python like so:
-```console
+```bash
 git clone https://github.com/Silverlan/pragma.git
 cd pragma
 python build_scripts/build.py
@@ -165,7 +179,7 @@ python build_scripts/build.py
 By default the build script will set up Pragma with core features only, but you can use the options below to customize the build. The build script also allows you to build all of the third-party dependencies yourself instead of using prebuilt binaries, but this is generally not recommended as it significantly increases build times and disk space usage.
 
 Once the project has been generated, you can build the "pragma" (or "pfm", if enabled) target to build and install Pragma:
-```console
+```bash
 cd build
 cmake --build . --config RelWithDebInfo --target pragma
 ```
@@ -209,7 +223,7 @@ You can configure the build to your liking with the following parameters:
 | `--vtune-library-path <libPath>`        | Path to "libittnotify" VTune library. Required for CPU profiling with Intel VTune Profiler.  |                  |
 
 Example for using the `--module` parameter:
-```console
+```bash
 --module pr_physx:"https://github.com/Silverlan/pr_physx.git"
 ```
 
@@ -226,7 +240,7 @@ Please note that newer versions of CUDA or OptiX will likely not work.
 
 ###### Update
 To update Pragma to a newer version (assuming the command above has completed successfully at least once), you can use the following command:
-```console
+```bash
 python build_scripts/build.py --update
 ```
 
@@ -285,7 +299,7 @@ There are also various pre-made binary modules available for Pragma, some of whi
 - pr_audio_alure: https://github.com/Silverlan/pr_audio_alure
 
 To build a module, simply run the build-script with the following parameter:
-```console
+```bash
 --module <moduleName>:<gitUrl>
 ```
 

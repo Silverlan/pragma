@@ -30,10 +30,6 @@ runs:
     - name: Clear Disk Space
       uses: Silverlan/common_actions/clear_disk_space@main
 
-    - name: Setup GCC
-      if: ${{ runner.os == 'Linux' && inputs.with_system_gcc == '0' }}
-      uses: Silverlan/common_actions/setup_gcc@main
-
     - name: Download Pragma
       shell: bash
       run: |

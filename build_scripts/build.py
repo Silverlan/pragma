@@ -476,7 +476,10 @@ if platform == "linux":
 				"libxcb-keysyms1-dev",
 				
 				# prosper_vulkan
-				"libx11-xcb-dev"
+				"libx11-xcb-dev",
+				
+			    # pr_curl
+			    "libssl-dev",
 			]
 
 			# Required for curl

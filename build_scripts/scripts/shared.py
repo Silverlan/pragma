@@ -869,4 +869,4 @@ def build_third_party_library(name, *args, **kwargs):
 
 def run_cmake_script(fileName):
 	os.chdir(config.pragma_root)
-	subprocess.run(["cmake", "-DTOOLSET=" +config.toolset, "-DCMAKE_SOURCE_DIR=" +config.pragma_root, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", fileName],check=True)
+	subprocess.run([config.cmake_path, "-DTOOLSET=" +config.toolset, "-DCMAKE_SOURCE_DIR=" +config.pragma_root, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", fileName],check=True)

@@ -449,11 +449,17 @@ if platform == "linux":
 				"ninja"
 			]
 
-			# Required for vcpkg
+			# deps
+			# libdecor
+			packages.append("meson")
+
+			# cycles
+			packages.append("git-lfs")
+
+			# vcpkg
 			packages += ["base-devel git curl zip unzip tar cmake ninja"]
 
-			for pck in packages:
-				commands.append("pacman -S " +pck)
+			commands.append("pacman -S " +" ".join(packages))
 		else:
 			packages = [
 				# "cmake",
@@ -479,11 +485,14 @@ if platform == "linux":
 				"libx11-xcb-dev",
 				
 			    # pr_curl
-			    "libssl-dev",
+			    "libssl-dev"
 			]
 
-			# Required for curl
-			# packages += ["libssl-dev"]
+			# cycles
+			packages.append("git-lfs")
+
+			# vcpkg
+			#   sudo apt-get install curl zip unzip tar
 
 			for pck in packages:
 				commands.append("apt install " +pck)

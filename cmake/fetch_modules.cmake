@@ -8,7 +8,7 @@ function(pr_fetch_module IDENTIFIER GIT_URL GIT_SHA)
     pr_checkout_submodule(${IDENTIFIER} ${GIT_URL} ${GIT_SHA} "modules/${IDENTIFIER}")
 endfunction()
 
-pr_fetch_module("interfaces"                      "https://github.com/Silverlan/pragma_interfaces.git"      "eb90acc68573c1c6b83f8d0a405e070ce3690986")
+pr_fetch_module("interfaces"                      "https://github.com/Silverlan/pragma_interfaces.git"      "42d550ec9450080042d32b6f959e71d1a0bfbec2")
 
 if(PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES)
     pr_fetch_module("pr_prosper_vulkan"           "https://github.com/Silverlan/pr_prosper_vulkan.git"      "de9237173562903f9e3ae06b183505f214d68a60")
@@ -45,7 +45,7 @@ if(PRAGMA_WITH_VR)
 endif()
 
 if(PRAGMA_WITH_NETWORKING)
-    pr_fetch_module("pr_steam_networking_sockets" "https://github.com/Silverlan/pr_steam_networking_sockets.git" "47f09fe87964703c209ddb987aa59266916ce100")
+    pr_fetch_module("pr_steam_networking_sockets" "https://github.com/Silverlan/pr_steam_networking_sockets.git" "d514677f8598cea34408e59699964ce8f2cb01ac")
 endif()
 
 foreach(MODULE_NAME ${PRAGMA_ADDITIONAL_MODULES})

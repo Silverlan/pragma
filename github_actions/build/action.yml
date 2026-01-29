@@ -58,9 +58,7 @@ runs:
       shell: bash
       working-directory: 'pragma'
       run: |
-        # TODO: CMAKE_EXE_LINKER_FLAGS and cmake-cxx-flag should only be set when using the clang compiler.
-        # Since gcc isn't stable enough with cxx-modules yet, it doesn't matter, but once gcc is supported, this should be handled differently.
-        python build_scripts/build.py --no-confirm --verbose --build-config "${{inputs.build-config}}" --cmake-arg=-DCMAKE_CXX_STDLIB_MODULES_JSON="/opt/gcc-16/lib64/libstdc++.modules.json" --cmake-arg=-DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath,/opt/gcc-16/lib64 -L/opt/gcc-16/lib64" --cmake-cxx-flag="--gcc-toolchain=/opt/gcc-16" ${{inputs.build-args}}
+        python build_scripts/build.py --no-confirm --verbose --build-config "${{inputs.build-config}}" ${{inputs.build-args}}
         
     - name: Build Pragma
       if: runner.os == 'Windows'
@@ -81,3 +79,4 @@ runs:
         install_dir: '${{ steps.set-output-vars.outputs.install-dir }}'
 
     - uses: Silverlan/common_actions/action_end@main
+

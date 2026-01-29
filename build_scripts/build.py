@@ -559,7 +559,7 @@ if platform == "linux":
 					"pkg-config",
 					"gperf"
 				]
-			package_list = " ".join(packages)
+			commands.append("apt install " +" ".join(packages))
 		install_system_packages(commands, no_confirm)
 
 module_list = []

@@ -1,6 +1,6 @@
 {
   "version": 6,
-  "cmakeMinimumRequired": { "major": 4, "minor": 1, "patch": 2 },
+  "cmakeMinimumRequired": { "major": 4, "minor": 2, "patch": 0 },
   "configurePresets": [
     {
       "name": "base",

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.1.2)
+cmake_minimum_required(VERSION 4.2.0)
 
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 

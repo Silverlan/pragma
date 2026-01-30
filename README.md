@@ -50,7 +50,9 @@ Build Requirements
 - [CMake](https://cmake.org/download/) 4.2.0 or newer
 - [Ninja-build](https://ninja-build.org/)
 - At least 16 GiB of RAM
-- Recommended IDE: [CLion](https://www.jetbrains.com/clion/)
+- Recommended IDE: [CLion](https://www.jetbrains.com/clion/) *
+
+<sub>\* CLion ships with a slightly older version of CMake. If you want to use CLion, you will have to download the latest version of CMake manually and set it up in the CLion settings under File > Settings... > Build, Execution, Deployment > Toolchains > CMake.</sub>
 
 ###### Linux (Recommended)
 - ~30 GiB of disk space

@@ -71,7 +71,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/Silverlan/pragma
-        commit: 
+        commit: b315db438e12ff3cb82b73a61b52c4af17454e8b
         dest: 'pragma'
 @PR_FLATPAK_SOURCES@
     build-commands:

@@ -172,6 +172,12 @@ void ComponentMemberInfo::SetName(const GString &name)
 	m_name = name;
 	m_nameHash = get_component_member_name_hash(*name);
 }
+void ComponentMemberInfo::SetName(const char *name)
+{
+	std::string normName = name;
+	string::to_lower(normName);
+	SetName(GString{normName});
+}
 
 //////////////
 

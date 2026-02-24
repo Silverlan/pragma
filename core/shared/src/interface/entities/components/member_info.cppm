@@ -200,6 +200,7 @@ export {
 			}
 
 			void SetName(const GString &name);
+			void SetName(const char *name);
 			const GString &GetName() const { return m_name; }
 			size_t GetNameHash() const { return m_nameHash; }
 

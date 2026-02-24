@@ -8,6 +8,15 @@ function(pr_fetch_module IDENTIFIER GIT_URL GIT_SHA)
     if(NOT PRAGMA_DISABLE_BUILD_FETCH)
         pr_checkout_submodule(${IDENTIFIER} ${GIT_URL} ${GIT_SHA} "modules/${IDENTIFIER}")
     endif()
+
+    file(RELATIVE_PATH _relative_dir "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+    get_property(_sources GLOBAL PROPERTY PR_FLATPAK_SOURCES)
+    string(APPEND _sources "
+      - type: git
+        url: ${GIT_URL}
+        commit: ${GIT_SHA}
+        dest: 'pragma/${_relative_dir}/modules/${IDENTIFIER}'")
+    set_property(GLOBAL PROPERTY PR_FLATPAK_SOURCES "${_sources}")
 endfunction()
 
 pr_fetch_module("interfaces"                      "https://github.com/Silverlan/pragma_interfaces.git"      "adda2aba1fbf570cf5f251ec5c1a503bab89544b")

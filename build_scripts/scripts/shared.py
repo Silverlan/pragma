@@ -857,7 +857,10 @@ def add_filepaths_to_content_version(base_path: str, filename: str, filepaths) -
 	target_file.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 def prefer_pacman():
-    return shutil.which("pacman") is not None
+	return shutil.which("pacman") is not None
+
+def prefer_dnf():
+	return shutil.which("dnf") is not None
 
 def apply_patch(path_path: str):
 	print_msg("Applying patch '{path_path}'...")

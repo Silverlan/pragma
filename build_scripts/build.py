@@ -443,8 +443,62 @@ if platform == "linux":
 		print_msg("--no-sudo has been specified. System packages will be skipped, this may cause errors later on...")
 	else:
 		commands = []
-		if(prefer_pacman()):
-			# Assuming arch-based system
+		if(prefer_dnf()): # Fedora / dnf
+			packages = [
+				"cmake",
+				"ninja",
+				"gcc",
+				"g++",
+				"freetype-devel"
+			]
+
+			# glfw
+			packages += [
+				"wayland-devel",
+				"libxkbcommon-devel",
+				"libXrandr-devel",
+				"libXinerama-devel",
+				"libXcursor-devel",
+				"libXi-devel"
+			]
+
+			# anvil
+			packages.append("xcb-util-keysyms-devel")
+
+			# pr_curl
+			# we'll only need this if we're building with pr_curl,
+			# so this condition should match the one in cmake/fetch_modules.cmake
+			if with_pfm and (with_core_pfm_modules or with_all_pfm_modules):
+				packages.append("openssl-devel")
+
+			if build_all:
+				packages.append("patchelf")
+				
+				# libdecor
+				packages.append("meson")
+
+				# Required for libsdbus-c++
+				packages += [
+					"meson",
+					"systemd-devel",
+					"dbus-devel"
+				]
+				
+				# luasocket
+				packages += [
+					"libunwind-devel",
+					"binutils-devel",
+					"libstdc++-static"
+				]
+				
+				# Required for Cycles
+				packages += [
+					"patch",
+					"git-lfs"
+				]
+
+			commands.append("dnf install " +" ".join(packages))
+		elif(prefer_pacman()): # Arch / pacman
 			packages = [
 				"cmake",
 				"ninja"
@@ -461,8 +515,7 @@ if platform == "linux":
 				packages += ["base-devel git curl zip unzip tar cmake ninja"]
 
 			commands.append("pacman -S " +" ".join(packages))
-		else:
-			# Assuming apt-based system
+		else: # Ubuntu / apt
 			packages = [
 				"cmake",
 				"ninja-build",

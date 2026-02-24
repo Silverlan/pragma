@@ -365,7 +365,7 @@ pr_set_include_path(rapidxml "${CMAKE_SOURCE_DIR}/third_party_libs/rapidxml")
 set(BUILD_SHARED_LIBS
     OFF
     CACHE BOOL OFF FORCE)
-pr_fetch_third_party_lib("openfbx" TARGET OpenFBX INC "OpenFBX/src" "https://github.com/Silverlan/OpenFBX" "e757b8a8db76a9c4bb168eee5321bdc1ba704a54")
+pr_fetch_third_party_lib("openfbx" TARGET OpenFBX INC "OpenFBX/src" "https://github.com/Silverlan/OpenFBX" "2ea6f85cf7473738a016223974ca4320c724e3b4")
 set(BUILD_SHARED_LIBS
     ON
     CACHE BOOL ON FORCE)

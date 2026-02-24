@@ -42,7 +42,20 @@ function(pr_fetch_third_party_lib)
     if(SHOULD_INCLUDE_FOLDER)
         list(GET PA_UNPARSED_ARGUMENTS 1 GIT_URL)
         list(GET PA_UNPARSED_ARGUMENTS 2 GIT_SHA)
-        pr_fetch_repository(${IDENTIFIER} ${GIT_URL} ${GIT_SHA} "third_party_libs/${PA_DIR}")
+        if(NOT PRAGMA_DISABLE_BUILD_FETCH)
+            pr_fetch_repository(${IDENTIFIER} ${GIT_URL} ${GIT_SHA} "third_party_libs/${PA_DIR}")
+        else()
+            add_subdirectory("third_party_libs/${PA_DIR}")
+        endif()
+
+        file(RELATIVE_PATH _relative_dir "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+        get_property(_sources GLOBAL PROPERTY PR_FLATPAK_SOURCES)
+        string(APPEND _sources "
+      - type: git
+        url: ${GIT_URL}
+        commit: ${GIT_SHA}
+        dest: 'pragma/${_relative_dir}/third_party_libs/${PA_DIR}'")
+        set_property(GLOBAL PROPERTY PR_FLATPAK_SOURCES "${_sources}")
     endif()
     if(NOT PA_LINK_ONLY)
 		# Some third-party libraries might be using older CMake functions that don't
@@ -53,14 +66,29 @@ function(pr_fetch_third_party_lib)
 endfunction()
 
 function(pr_fetch_third_party_repository IDENTIFIER GIT_URL GIT_SHA)
-    FetchContent_Declare(
-        ${IDENTIFIER}
-        GIT_REPOSITORY ${GIT_URL}
-        GIT_TAG        ${GIT_SHA}
-        SOURCE_DIR     "${CMAKE_SOURCE_DIR}/third_party_libs/${IDENTIFIER}"
-        SOURCE_SUBDIR  "${CMAKE_SOURCE_DIR}/devnull"
-    )
-    FetchContent_MakeAvailable(${IDENTIFIER})
+    if(NOT PRAGMA_DISABLE_BUILD_FETCH)
+        set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/third_party_libs/${IDENTIFIER}")
+        if(ARGC GREATER 3)
+            set(SOURCE_DIR "${ARGV3}")
+        endif()
+        FetchContent_Declare(
+            ${IDENTIFIER}
+            GIT_REPOSITORY ${GIT_URL}
+            GIT_TAG        ${GIT_SHA}
+            SOURCE_DIR     "${SOURCE_DIR}"
+            SOURCE_SUBDIR  "${CMAKE_SOURCE_DIR}/devnull"
+        )
+        FetchContent_MakeAvailable(${IDENTIFIER})
+
+        file(RELATIVE_PATH _relative_dir "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+        get_property(_sources GLOBAL PROPERTY PR_FLATPAK_SOURCES)
+        string(APPEND _sources "
+      - type: git
+        url: ${GIT_URL}
+        commit: ${GIT_SHA}
+        dest: 'pragma/${_relative_dir}/third_party_libs/${IDENTIFIER}'")
+        set_property(GLOBAL PROPERTY PR_FLATPAK_SOURCES "${_sources}")
+    endif()
 endfunction()
 
 # Misc

@@ -5,21 +5,64 @@ function(pr_install_git_repository IDENTIFIER GIT_URL GIT_SHA INSTALL_PATH)
     set(ADDON_URL   "${GIT_URL}")
     set(ADDON_PREF  "${CMAKE_BINARY_DIR}/_deps/${IDENTIFIER}-prefix")
 
-    include(ExternalProject)
-    ExternalProject_Add(addon_${IDENTIFIER}
-        PREFIX         ${ADDON_PREF}
-        GIT_REPOSITORY ${ADDON_URL}
-        GIT_TAG        ${ADDON_SHA}
+    set(FLATPAK_DEST_DIR "_deps/addon_${IDENTIFIER}")
+    get_property(_sources GLOBAL PROPERTY PR_FLATPAK_SOURCES)
+    string(APPEND _sources "
+      - type: git
+        url: ${GIT_URL}
+        commit: ${GIT_SHA}
+        dest: '${FLATPAK_DEST_DIR}'")
+    set_property(GLOBAL PROPERTY PR_FLATPAK_SOURCES "${_sources}")
 
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND     ""
-        INSTALL_COMMAND   ""
+    if(NOT PRAGMA_DISABLE_BUILD_FETCH)
+        include(ExternalProject)
+        ExternalProject_Add(addon_${IDENTIFIER}
+            PREFIX         ${ADDON_PREF}
+            GIT_REPOSITORY ${ADDON_URL}
+            GIT_TAG        ${ADDON_SHA}
+
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND     ""
+            INSTALL_COMMAND   ""
+        )
+        # ExternalProject_Get_Property(addon_${IDENTIFIER} source_dir)
+        set(_source_dir "${ADDON_PREF}/src/addon_${IDENTIFIER}")
+        
+        add_dependencies(pragma-install-full addon_${IDENTIFIER})
+        add_dependencies(pragma-install-full-no-executable addon_${IDENTIFIER})
+    else()
+        set(_source_dir "${CMAKE_SOURCE_DIR}/${FLATPAK_DEST_DIR}")
+    endif()
+    pr_manifest_install(${IDENTIFIER} "${_source_dir}" "${INSTALL_PATH}" pragma-install-full)
+    pr_manifest_install(${IDENTIFIER} "${_source_dir}" "${INSTALL_PATH}" pragma-install-full-no-executable)
+endfunction()
+
+function(fetch_checksum BASE_URL TAG_NAME TARGET_ASSET_NAME OUT_CHECKSUM)
+    set(URL "https://api.github.com/repos/${BASE_URL}/releases/tags/${TAG_NAME}")
+    file(DOWNLOAD
+        "${URL}"
+        "${CMAKE_BINARY_DIR}/release_info.json"
     )
-    ExternalProject_Get_Property(addon_${IDENTIFIER} source_dir)
-    add_dependencies(pragma-install-full addon_${IDENTIFIER})
-    add_dependencies(pragma-install-full-no-executable addon_${IDENTIFIER})
-    pr_manifest_install(${IDENTIFIER} "${ADDON_PREF}/src/addon_${IDENTIFIER}" "${INSTALL_PATH}" pragma-install-full)
-    pr_manifest_install(${IDENTIFIER} "${ADDON_PREF}/src/addon_${IDENTIFIER}" "${INSTALL_PATH}" pragma-install-full-no-executable)
+    file(READ "${CMAKE_BINARY_DIR}/release_info.json" RELEASE_JSON)
+
+    if("${RELEASE_JSON}" STREQUAL "")
+        message(FATAL_ERROR "Failed to fetch release info from ${URL} .")
+    endif()
+
+    string(JSON ASSETS_JSON GET "${RELEASE_JSON}" "assets")
+    string(JSON ASSET_COUNT LENGTH "${RELEASE_JSON}" "assets")
+
+    math(EXPR LAST_INDEX "${ASSET_COUNT} - 1")
+    foreach(i RANGE ${LAST_INDEX})
+        string(JSON ASSET GET "${RELEASE_JSON}" "assets" ${i})
+        string(JSON ASSET_NAME GET "${ASSET}" "name")
+        if(ASSET_NAME STREQUAL TARGET_ASSET_NAME)
+            string(JSON ASSET_DIGEST GET "${ASSET}" "digest")
+            break()
+        endif()
+    endforeach()
+    string(REGEX REPLACE "^[^:]+:" "" ASSET_DIGEST "${ASSET_DIGEST}")
+    set(${OUT_CHECKSUM} "${ASSET_DIGEST}" PARENT_SCOPE)
 endfunction()
 
 function(pr_install_git_release IDENTIFIER BASE_URL BASE_DIR TAG_NAME)
@@ -46,19 +89,36 @@ function(pr_install_git_release IDENTIFIER BASE_URL BASE_DIR TAG_NAME)
     set(ADDON_URL   "${ARCHIVE_URL}")
     set(ADDON_PREF  "${CMAKE_BINARY_DIR}/_deps/${IDENTIFIER}-prefix")
 
-    include(ExternalProject)
-    ExternalProject_Add(addon_${IDENTIFIER}
-        PREFIX            ${ADDON_PREF}
-        SOURCE_DIR "${ADDON_PREF}/src/addon_${IDENTIFIER}/${BASE_DIR}"
-        URL    ${ADDON_URL}
+    if(NOT PRAGMA_DISABLE_BUILD_FETCH)
+        fetch_checksum(${BASE_URL} ${TAG_NAME} ${ARCH_FILE_NAME} CHECKSUM)
+        set(FLATPAK_DEST_DIR "_deps/addon_${IDENTIFIER}")
+        get_property(_sources GLOBAL PROPERTY PR_FLATPAK_SOURCES)
+        string(APPEND _sources "
+        - type: archive
+            url: ${ADDON_URL}
+            sha256: ${CHECKSUM}
+            dest: '${FLATPAK_DEST_DIR}'")
+        set_property(GLOBAL PROPERTY PR_FLATPAK_SOURCES "${_sources}")
 
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND     ""
-        INSTALL_COMMAND   ""
-    )
-    ExternalProject_Get_Property(addon_${IDENTIFIER} source_dir)
-    add_dependencies(pragma-install-full addon_${IDENTIFIER})
-    add_dependencies(pragma-install-full-no-executable addon_${IDENTIFIER})
+        include(ExternalProject)
+        ExternalProject_Add(addon_${IDENTIFIER}
+            PREFIX            ${ADDON_PREF}
+            SOURCE_DIR "${ADDON_PREF}/src/addon_${IDENTIFIER}/${BASE_DIR}"
+            URL    ${ADDON_URL}
+
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND     ""
+            INSTALL_COMMAND   ""
+        )
+        # ExternalProject_Get_Property(addon_${IDENTIFIER} source_dir)
+
+        set(_source_dir "${ADDON_PREF}/src/addon_${IDENTIFIER}")
+        
+        add_dependencies(pragma-install-full addon_${IDENTIFIER})
+        add_dependencies(pragma-install-full-no-executable addon_${IDENTIFIER})
+    else()
+        set(_source_dir "${CMAKE_SOURCE_DIR}/${FLATPAK_DEST_DIR}")
+    endif()
     pr_manifest_install(${IDENTIFIER} "${ADDON_PREF}/src/addon_${IDENTIFIER}" "." pragma-install-full)
     pr_manifest_install(${IDENTIFIER} "${ADDON_PREF}/src/addon_${IDENTIFIER}" "." pragma-install-full-no-executable)
 endfunction()

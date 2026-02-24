@@ -5,7 +5,9 @@ function(pr_fetch_module IDENTIFIER GIT_URL GIT_SHA)
     list(APPEND PRAGMA_FETCHED_MODULES "${IDENTIFIER}")
     set(PRAGMA_FETCHED_MODULES "${PRAGMA_FETCHED_MODULES}" PARENT_SCOPE)
 
-    pr_checkout_submodule(${IDENTIFIER} ${GIT_URL} ${GIT_SHA} "modules/${IDENTIFIER}")
+    if(NOT PRAGMA_DISABLE_BUILD_FETCH)
+        pr_checkout_submodule(${IDENTIFIER} ${GIT_URL} ${GIT_SHA} "modules/${IDENTIFIER}")
+    endif()
 endfunction()
 
 pr_fetch_module("interfaces"                      "https://github.com/Silverlan/pragma_interfaces.git"      "adda2aba1fbf570cf5f251ec5c1a503bab89544b")

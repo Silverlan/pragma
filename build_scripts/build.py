@@ -35,6 +35,7 @@ parser.add_argument("--build-all", type=str2bool, nargs='?', const=True, default
 parser.add_argument('--build-config', help='The build configuration to use.', default='RelWithDebInfo')
 parser.add_argument('--build-directory', help='Directory to write the build files to. Can be relative or absolute.', default='build')
 parser.add_argument('--deps-directory', help='Directory to write the dependency files to. Can be relative or absolute.', default='deps')
+parser.add_argument('--build-tools-directory', help='Directory where additional build tools are located. Can be relative or absolute.', default='build_tools')
 parser.add_argument("--deps-only", type=str2bool, nargs='?', const=True, default=False, help="Configuration, build and installation of Pragma will be skipped.")
 parser.add_argument("--clean-deps-build-files", type=str2bool, nargs='?', const=True, default=False, help="Automatically clean up build files of third-party dependencies to save disk space.")
 parser.add_argument('--install-directory', help='Installation directory. Can be relative (to build directory) or absolute.', default='install')
@@ -48,6 +49,7 @@ parser.add_argument("--update", type=str2bool, nargs='?', const=True, default=Fa
 parser.add_argument("--rerun", type=str2bool, nargs='?', const=True, default=False, help="Re-run the build script with the previous arguments.")
 parser.add_argument("--prefer-git-https", type=str2bool, nargs='?', const=True, default=True, help="Clone repositories via HTTPS instead of SSH.")
 parser.add_argument("--skip-repository-updates", type=str2bool, nargs='?', const=True, default=False, help=argparse.SUPPRESS)
+parser.add_argument("--no-build-networking", type=str2bool, nargs='?', const=True, default=False, help="Disable all downloads during the build script execution.")
 if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
@@ -117,12 +119,16 @@ build_all = args["build_all"]
 build_config = args["build_config"]
 build_directory = args["build_directory"]
 deps_directory = args["deps_directory"]
+build_tools_directory = args["build_tools_directory"]
 deps_only = args["deps_only"]
 clean_deps_build_files = args["clean_deps_build_files"]
 install_directory = args["install_directory"]
 additional_cmake_args = args["cmake_arg"]
 additional_cmake_flags = args["cmake_cxx_flag"]
 skip_repository_updates = args["skip_repository_updates"]
+no_build_networking = args["no_build_networking"]
+if no_build_networking:
+	skip_repository_updates = True
 scripts_dir = os.getcwd() +"/build_scripts"
 #log_file = args["log_file"]
 verbose = args["verbose"]
@@ -135,6 +141,7 @@ ignore_warnings = args["ignore_warnings"]
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
 deps_dir = normalize_path(deps_directory)
+build_tools_directory = normalize_path(build_tools_directory)
 install_dir = install_directory
 tools = root +"/tools"
 
@@ -177,6 +184,7 @@ config.prefer_git_https = prefer_git_https
 config.toolset = toolset
 config.with_lua_debugger = with_lua_debugger
 config.with_swiftshader = with_swiftshader
+config.no_build_networking = True
 if platform == "linux":
 	config.no_sudo = no_sudo
 	config.no_confirm = no_confirm
@@ -199,6 +207,7 @@ print("build_all: " +str(build_all))
 print("build_config: " +build_config)
 print("build_directory: " +build_directory)
 print("deps_directory: " +deps_directory)
+print("build_tools_directory: " +build_tools_directory)
 print("deps_only: " +str(deps_only))
 print("clean_deps_build_files: " +str(clean_deps_build_files))
 print("install_directory: " +install_directory)
@@ -260,15 +269,16 @@ def fetch_cmake():
 # At least CMake 4.2.0 is needed, which is still very new and not available in the package managers of
 # most distros yet. If the detected CMake version is too old (or none was found), we'll download it here.
 use_custom_cmake = False
-if not check_cmake((4, 2, 0)):
+if not no_build_networking and not check_cmake((4, 2, 0)):
 	use_custom_cmake = True
 	fetch_cmake()
 
 # Use prebuilt binaries if --build-all is not set
 os.chdir(root)
-if build_all == False:
-	subprocess.run([config.cmake_path, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-DTOOLSET=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
-subprocess.run([config.cmake_path, "-DPRAGMA_BUILD_TOOLS_DIR=" +config.build_tools_dir, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", "cmake/fetch_clang.cmake"],check=True)
+if not no_build_networking:
+	if build_all == False:
+		subprocess.run([config.cmake_path, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-DTOOLSET=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
+	subprocess.run([config.cmake_path, "-DPRAGMA_BUILD_TOOLS_DIR=" +config.build_tools_dir, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", "cmake/fetch_clang.cmake"],check=True)
 
 import shutil
 import subprocess
@@ -294,7 +304,7 @@ if platform == "win32":
 
 		# Due to "import std;" support still being experimental in CMake, we have to use a custom, patched
 		# version of CMake to build Pragma with clang on Windows.
-		if not use_custom_cmake:
+		if not no_build_networking and not use_custom_cmake:
 			use_custom_cmake = True
 			fetch_cmake()
 	elif toolset == "clang-cl":
@@ -828,7 +838,8 @@ cmake_with_args.append(f"-DPRAGMA_WITH_ALL_PFM_MODULES={1 if with_all_pfm_module
 
 # Fetch base modules
 os.chdir(root)
-subprocess.run([config.cmake_path] +cmake_with_args +["-P", "cmake/fetch_modules.cmake"],check=True)
+if not no_build_networking:
+	subprocess.run([config.cmake_path] +cmake_with_args +["-P", "cmake/fetch_modules.cmake"],check=True)
 
 # Fetch additional modules
 index = 0
@@ -910,6 +921,9 @@ if not deps_only:
 
 	cmake_args += additional_cmake_args
 	cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_staging_dir)
+	cmake_args.append("-DPRAGMA_BUILD_TOOLS_DIR=" +build_tools_directory)
+	if no_build_networking:
+		cmake_args.append("-DPRAGMA_DISABLE_BUILD_FETCH=ON")
 
 	if platform == "win32":
 		if toolset == "msvc":

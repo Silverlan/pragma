@@ -94,10 +94,10 @@ function(pr_install_git_release IDENTIFIER BASE_URL BASE_DIR TAG_NAME)
         set(FLATPAK_DEST_DIR "_deps/addon_${IDENTIFIER}")
         get_property(_sources GLOBAL PROPERTY PR_FLATPAK_SOURCES)
         string(APPEND _sources "
-        - type: archive
-            url: ${ADDON_URL}
-            sha256: ${CHECKSUM}
-            dest: '${FLATPAK_DEST_DIR}'")
+      - type: archive
+        url: ${ADDON_URL}
+        sha256: ${CHECKSUM}
+        dest: '${FLATPAK_DEST_DIR}'")
         set_property(GLOBAL PROPERTY PR_FLATPAK_SOURCES "${_sources}")
 
         include(ExternalProject)

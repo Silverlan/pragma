@@ -70,6 +70,9 @@ function(pr_fetch_third_party_repository IDENTIFIER GIT_URL GIT_SHA)
         set(SOURCE_DIR "${CMAKE_SOURCE_DIR}/third_party_libs/${IDENTIFIER}")
         if(ARGC GREATER 3)
             set(SOURCE_DIR "${ARGV3}")
+            set(REL_SOURCE_DIR "${SOURCE_DIR}")
+        else()
+            file(RELATIVE_PATH REL_SOURCE_DIR "${CMAKE_SOURCE_DIR}" "${SOURCE_DIR}")
         endif()
         FetchContent_Declare(
             ${IDENTIFIER}
@@ -80,13 +83,12 @@ function(pr_fetch_third_party_repository IDENTIFIER GIT_URL GIT_SHA)
         )
         FetchContent_MakeAvailable(${IDENTIFIER})
 
-        file(RELATIVE_PATH _relative_dir "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
         get_property(_sources GLOBAL PROPERTY PR_FLATPAK_SOURCES)
         string(APPEND _sources "
       - type: git
         url: ${GIT_URL}
         commit: ${GIT_SHA}
-        dest: 'pragma/${_relative_dir}/third_party_libs/${IDENTIFIER}'")
+        dest: 'pragma/${REL_SOURCE_DIR}'")
         set_property(GLOBAL PROPERTY PR_FLATPAK_SOURCES "${_sources}")
     endif()
 endfunction()

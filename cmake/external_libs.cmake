@@ -8,16 +8,15 @@ function(pr_fetch_external_lib IDENTIFIER GIT_URL GIT_SHA)
 	if(NOT PRAGMA_DISABLE_BUILD_FETCH)
 		pr_fetch_repository(${IDENTIFIER} ${GIT_URL} ${GIT_SHA} "external_libs/${IDENTIFIER}")
 	else()
-		add_subdirectory("external_libs/${IDENTIFIER}")
+		add_subdirectory("${CMAKE_SOURCE_DIR}/external_libs/${IDENTIFIER}")
 	endif()
 
-	file(RELATIVE_PATH _relative_dir "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 	get_property(_sources GLOBAL PROPERTY PR_FLATPAK_SOURCES)
 	string(APPEND _sources "
       - type: git
         url: ${GIT_URL}
         commit: ${GIT_SHA}
-        dest: 'pragma/${_relative_dir}/external_libs/${IDENTIFIER}'")
+        dest: 'pragma/external_libs/${IDENTIFIER}'")
 	set_property(GLOBAL PROPERTY PR_FLATPAK_SOURCES "${_sources}")
 
 	if(IDENTIFIER MATCHES "util_*")

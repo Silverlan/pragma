@@ -604,7 +604,7 @@ if platform == "linux":
 				# install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
 				packages += [
 					"pkg-config",
-					"libfreetype-de"
+					"libfreetype-dev"
 				]
 
 				# libdecor (required for Wayland)

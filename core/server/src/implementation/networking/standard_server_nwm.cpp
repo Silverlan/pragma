@@ -33,7 +33,7 @@ void pragma::networking::NWMActiveServer::OnPacketSent(const NWMEndpoint &ep, co
 #if DEBUG_SERVER_VERBOSE == 1
 	auto id = packet.GetMessageID();
 	auto *clMap = get_client_message_map();
-	util::StringMap<uint32_t> *clMsgs;
+	string::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 	auto it = std::find_if(clMsgs->begin(), clMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != clMsgs->end()) ? it->first : "Unknown";
@@ -47,7 +47,7 @@ void pragma::networking::NWMActiveServer::OnPacketReceived(const NWMEndpoint &ep
 	Server::OnPacketReceived(ep, cl, id, packet);
 #if DEBUG_SERVER_VERBOSE == 1
 	auto *svMap = get_server_message_map();
-	util::StringMap<uint32_t> *svMsgs;
+	string::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 	auto it = std::find_if(svMsgs->begin(), svMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != svMsgs->end()) ? it->first : "Unknown";

@@ -48,7 +48,7 @@ void pragma::networking::MessageTracker::SetMemoryCount(uint32_t count)
 	m_trackedMessageMutex.unlock();
 }
 
-void pragma::networking::MessageTracker::DebugDump(const std::string &dumpFileName, const util::StringMap<uint32_t> &inMsgs, const util::StringMap<uint32_t> &outMsgs)
+void pragma::networking::MessageTracker::DebugDump(const std::string &dumpFileName, const string::StringMap<uint32_t> &inMsgs, const string::StringMap<uint32_t> &outMsgs)
 {
 	auto f = fs::open_file<fs::VFilePtrReal>(dumpFileName, fs::FileMode::Write | fs::FileMode::Binary);
 	if(f == nullptr)
@@ -79,7 +79,7 @@ void pragma::networking::MessageTracker::DebugDump(const std::string &dumpFileNa
 	}
 }
 
-void pragma::networking::MessageTracker::DebugPrint(const util::StringMap<uint32_t> &inMsgs, const util::StringMap<uint32_t> &outMsgs)
+void pragma::networking::MessageTracker::DebugPrint(const string::StringMap<uint32_t> &inMsgs, const string::StringMap<uint32_t> &outMsgs)
 {
 	auto tNow = util::Clock::now();
 	for(auto type : {MessageType::Incoming, MessageType::Outgoing}) {

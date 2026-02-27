@@ -48,6 +48,22 @@ pragma::ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo
 	pragma::asset::update_extension_cache(asset::Type::Model);
 
 	auto &gui = gui::WGUI::GetInstance();
+	// Register new GUI type enums for lua states
+	const_cast<gui::TypeFactory &>(gui.GetTypeFactory()).SetRegistrationCallback(+[](const std::string &className, gui::TypeId typeId) {
+		auto *cl = get_client_state();
+		if(!cl)
+			return;
+		auto *luaGui = cl->GetGUILuaState();
+		if(luaGui)
+			Lua::gui::register_gui_type_lua_enum(luaGui, className, typeId);
+
+		auto *game = get_client_game();
+		if(game) {
+			auto *lua = game->GetLuaState();
+			if(lua)
+				Lua::gui::register_gui_type_lua_enum(lua, className, typeId);
+		}
+	});
 	// gui.SetCreateCallback(WGUILuaInterface::InitializeGUIElement);
 	//CVarHandler::Initialize();
 	fs::add_custom_mount_directory("downloads", static_cast<fs::SearchFlags>(networking::FSYS_SEARCH_RESOURCES));
@@ -158,8 +174,8 @@ void pragma::ClientState::Initialize()
 	});
 
 	get_cengine()->LoadClientConfig();
-	InitializeGUILua();
 	auto &gui = gui::WGUI::GetInstance();
+	InitializeGUILua();
 	m_hMainMenu = gui.Create<gui::types::WIMainMenu>()->GetHandle();
 
 	UpdateGameWorldShaderSettings();
@@ -204,7 +220,6 @@ Lua::Interface &pragma::ClientState::GetGUILuaInterface() { return *m_luaGUI; }
 
 //__declspec(dllimport) void test_lua_policies(lua::State *l);
 std::optional<std::vector<std::string>> g_autoExecScripts {};
-
 void pragma::ClientState::InitializeGUILua()
 {
 	m_luaGUI = pragma::util::make_shared<Lua::Interface>();
@@ -231,6 +246,8 @@ void pragma::ClientState::InitializeGUILua()
 	auto enMod = luabind::module(m_luaGUI->GetState(), "engine");
 	enMod[luabind::def("poll_console_output", &Lua::engine::poll_console_output)];
 	Lua::engine::register_library(GetGUILuaState());
+
+	Lua::gui::initialize_gui_type_lua_enums(GetGUILuaState());
 
 	// Testing
 	/*{

@@ -354,6 +354,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("IsFadingOut", &pragma::gui::types::WIBase::IsFadingOut);
 	classDef.def("IsFadingIn", &pragma::gui::types::WIBase::IsFadingIn);
 	classDef.def("GetClass", &pragma::gui::types::WIBase::GetClass);
+	classDef.def("GetTypeId", &pragma::gui::types::WIBase::GetTypeId);
+	classDef.def("IsType", +[](const pragma::gui::types::WIBase &el, pragma::gui::TypeId typeId) { return el.GetTypeId() == typeId; });
 	classDef.def(
 	  "Think", +[](pragma::gui::types::WIBase &el, std::shared_ptr<prosper::ICommandBuffer> &cmd) {
 		  if(!cmd->IsPrimary())

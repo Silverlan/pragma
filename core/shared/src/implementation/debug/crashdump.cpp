@@ -321,6 +321,11 @@ bool CrashHandler::GenerateCrashDump() const
 	}
 #endif
 
+	if(backtraceStr) {
+		std::cout << "Backtrace:" << std::endl;
+		std::cout << *backtraceStr << std::endl;
+	}
+
 	auto success = false;
 	if(saveDump) {
 		std::string err;

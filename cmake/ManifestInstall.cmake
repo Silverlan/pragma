@@ -1,6 +1,12 @@
 # ManifestInstall.cmake
 # Variables: SRC_DIR, DST_DIR, MANIFEST_FILE
 
+if(EXISTS "${DST_DIR}/.git")
+    # User likely replaced the directory with an actual git repository, in this case we don't want to touch it.
+    message(STATUS "Skipping directory ${DST_DIR} as it contains a .git directory.")
+    return()
+endif()
+
 if(NOT EXISTS "${DST_DIR}")
     file(MAKE_DIRECTORY "${DST_DIR}")
 endif()

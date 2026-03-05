@@ -458,10 +458,7 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetAttachmentPosProperty", &pragma::gui::types::WIBase::GetAttachmentPosProperty);
 	classDef.def("SetAnchor", static_cast<void (pragma::gui::types::WIBase::*)(float, float, float, float, uint32_t, uint32_t)>(&pragma::gui::types::WIBase::SetAnchor));
 	classDef.def("SetAnchor", static_cast<void (*)(pragma::gui::types::WIBase &, float, float, float, float)>([](pragma::gui::types::WIBase &el, float left, float top, float right, float bottom) { el.SetAnchor(left, top, right, bottom); }));
-	classDef.def("SetAnchorLeft", &pragma::gui::types::WIBase::SetAnchorLeft);
-	classDef.def("SetAnchorRight", &pragma::gui::types::WIBase::SetAnchorRight);
-	classDef.def("SetAnchorTop", &pragma::gui::types::WIBase::SetAnchorTop);
-	classDef.def("SetAnchorBottom", &pragma::gui::types::WIBase::SetAnchorBottom);
+	classDef.def("SetAnchor", static_cast<void (pragma::gui::types::WIBase::*)(pragma::gui::Anchor::Edge, float)>(&pragma::gui::types::WIBase::SetAnchor));
 	classDef.def("ClearAnchor", &pragma::gui::types::WIBase::ClearAnchor);
 	classDef.def(
 	  "GetAnchor", +[](pragma::gui::types::WIBase &el) -> std::optional<std::tuple<float, float, float, float>> {
@@ -518,6 +515,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetFileHovering", &pragma::gui::types::WIBase::SetFileHovering);
 	classDef.def("GetFileDropInputEnabled", &pragma::gui::types::WIBase::GetFileDropInputEnabled);
 	classDef.def("SetFileDropInputEnabled", &pragma::gui::types::WIBase::SetFileDropInputEnabled);
+	classDef.def("SetAnchorEdgeEnabled", &pragma::gui::types::WIBase::SetAnchorEdgeEnabled);
+	classDef.def("IsAnchorEdgeEnabled", &pragma::gui::types::WIBase::IsAnchorEdgeEnabled);
 
 	auto defDrawInfo = luabind::class_<pragma::gui::DrawInfo>("DrawInfo");
 	defDrawInfo.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::gui::DrawInfo::Flags::None));

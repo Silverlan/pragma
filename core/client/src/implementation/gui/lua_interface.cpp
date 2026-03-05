@@ -381,6 +381,8 @@ luabind::object pragma::gui::WGUILuaInterface::CreateLuaObject(lua::State *l, ty
 		return cast_to_type<types::WIRoot>(l, p);
 	else if(dynamic_cast<types::WI9SliceRect *>(&p) != nullptr)
 		return cast_to_type<types::WI9SliceRect>(l, p);
+	else if(dynamic_cast<types::WI9SliceRectSegment *>(&p) != nullptr)
+		return cast_to_type<types::WI9SliceRectSegment>(l, p);
 	return LuaCore::raw_object_to_luabind_object(l, p.GetHandle());
 }
 

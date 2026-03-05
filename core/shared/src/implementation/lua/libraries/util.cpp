@@ -339,8 +339,8 @@ static Lua::var<bool, Lua::opt<std::string>, pragma::util::FunctionalParallelWor
 }
 void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 {
-	mod[(luabind::def("is_valid", static_cast<bool (*)(lua::State *)>(is_valid)), luabind::def("is_valid", static_cast<bool (*)(lua::State *, const luabind::object &)>(is_valid)),
-	  luabind::def("remove", static_cast<void (*)(lua::State *, const luabind::object &)>(remove)), luabind::def("remove", static_cast<void (*)(lua::State *, const luabind::object &, bool)>(remove)),
+	mod[(luabind::def("is_valid", static_cast<bool (*)(lua::State *)>(is_valid)), luabind::def("is_valid", static_cast<bool (*)(lua::State *, const luabind::object &)>(is_valid)), luabind::def("remove", static_cast<void (*)(lua::State *, const luabind::object &)>(remove)),
+	  luabind::def("remove", static_cast<void (*)(lua::State *, const luabind::object &, bool)>(remove)),
 	  luabind::def(
 	    "remove", +[]() {}),
 	  luabind::def(
@@ -360,26 +360,20 @@ void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 	  luabind::def("register_class", static_cast<luabind::object (*)(lua::State *, const luabind::table<> &, const std::string &)>(register_class)), luabind::def("local_to_world", static_cast<Quat (*)(lua::State *, const Quat &, const Quat &)>(local_to_world)),
 	  luabind::def("local_to_world", static_cast<Vector3 (*)(lua::State *, const Vector3 &, const Quat &, const Vector3 &)>(local_to_world)), luabind::def("local_to_world", static_cast<void (*)(lua::State *, const Vector3 &, const Quat &, const Vector3 &, const Quat &)>(local_to_world)),
 	  luabind::def("world_to_local", static_cast<Quat (*)(lua::State *, const Quat &, const Quat &)>(world_to_local)), luabind::def("world_to_local", static_cast<Vector3 (*)(lua::State *, const Vector3 &, const Quat &, const Vector3 &)>(world_to_local)),
-	  luabind::def("world_to_local", static_cast<void (*)(lua::State *, const Vector3 &, const Quat &, const Vector3 &, const Quat &)>(world_to_local)),
-	  luabind::def("get_pretty_duration", static_cast<std::string (*)(lua::State *, uint32_t, uint32_t, bool)>(get_pretty_duration)), luabind::def("get_pretty_duration", static_cast<std::string (*)(lua::State *, uint32_t, uint32_t)>(get_pretty_duration)),
-	  luabind::def("get_pretty_duration", static_cast<std::string (*)(lua::State *, uint32_t)>(get_pretty_duration)), luabind::def("get_pretty_time", get_pretty_time),
+	  luabind::def("world_to_local", static_cast<void (*)(lua::State *, const Vector3 &, const Quat &, const Vector3 &, const Quat &)>(world_to_local)), luabind::def("get_pretty_duration", static_cast<std::string (*)(lua::State *, uint32_t, uint32_t, bool)>(get_pretty_duration)),
+	  luabind::def("get_pretty_duration", static_cast<std::string (*)(lua::State *, uint32_t, uint32_t)>(get_pretty_duration)), luabind::def("get_pretty_duration", static_cast<std::string (*)(lua::State *, uint32_t)>(get_pretty_duration)), luabind::def("get_pretty_time", get_pretty_time),
 	  luabind::def(
 	    "get_object_hash", +[](userData o) { return std::hash<void *> {}(lua::to_user_data(o.interpreter(), 1)); }),
-	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LColorProperty &, const ::Color &, float)>(fade_property)),
-	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LVector2iProperty &, const ::Vector2i &, float)>(fade_property)),
-	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LVector3Property &, const Vector3 &, float)>(fade_property)),
-	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LVector3iProperty &, const Vector3i &, float)>(fade_property)),
-	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LVector4Property &, const ::Vector4 &, float)>(fade_property)),
-	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LVector4iProperty &, const ::Vector4i &, float)>(fade_property)),
-	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LQuatProperty &, const Quat &, float)>(fade_property)),
-	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LEulerAnglesProperty &, const EulerAngles &, float)>(fade_property)),
+	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LColorProperty &, const ::Color &, float)>(fade_property)), luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LVector2iProperty &, const ::Vector2i &, float)>(fade_property)),
+	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LVector3Property &, const Vector3 &, float)>(fade_property)), luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LVector3iProperty &, const Vector3i &, float)>(fade_property)),
+	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LVector4Property &, const ::Vector4 &, float)>(fade_property)), luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LVector4iProperty &, const ::Vector4i &, float)>(fade_property)),
+	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LQuatProperty &, const Quat &, float)>(fade_property)), luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LEulerAnglesProperty &, const EulerAngles &, float)>(fade_property)),
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LGenericIntPropertyWrapper &, const int64_t &, float)>(fade_property)),
 	  luabind::def("fade_property", static_cast<luabind::object (*)(lua::State *, LGenericFloatPropertyWrapper &, const double &, float)>(fade_property)), luabind::def("round_string", static_cast<std::string (*)(lua::State *, float, uint32_t)>(round_string)),
-	  luabind::def("round_string", static_cast<std::string (*)(lua::State *, float)>(round_string)), luabind::def("get_type_name", get_type_name), luabind::def("is_same_object", is_same_object),
-	  luabind::def("clamp_resolution_to_aspect_ratio", clamp_resolution_to_aspect_ratio), luabind::def("get_class_value", get_class_value), luabind::def("pack_zip_archive", pack_zip_archive),
-	  luabind::def("world_space_point_to_screen_space_uv", static_cast<void (*)(lua::State *, const Vector3 &, const ::Mat4 &, float, float)>(world_space_point_to_screen_space_uv)),
-	  luabind::def("world_space_direction_to_screen_space", world_space_direction_to_screen_space), luabind::def("calc_screen_space_distance_to_world_space_position", calc_screenspace_distance_to_worldspace_position),
-	  luabind::def("depth_to_distance", depth_to_distance), luabind::def("generate_hair_file", &generate_hair_file),
+	  luabind::def("round_string", static_cast<std::string (*)(lua::State *, float)>(round_string)), luabind::def("get_type_name", get_type_name), luabind::def("is_same_object", is_same_object), luabind::def("clamp_resolution_to_aspect_ratio", clamp_resolution_to_aspect_ratio),
+	  luabind::def("get_class_value", get_class_value), luabind::def("pack_zip_archive", pack_zip_archive), luabind::def("world_space_point_to_screen_space_uv", static_cast<void (*)(lua::State *, const Vector3 &, const ::Mat4 &, float, float)>(world_space_point_to_screen_space_uv)),
+	  luabind::def("world_space_direction_to_screen_space", world_space_direction_to_screen_space), luabind::def("calc_screen_space_distance_to_world_space_position", calc_screenspace_distance_to_worldspace_position), luabind::def("depth_to_distance", depth_to_distance),
+	  luabind::def("generate_hair_file", &generate_hair_file),
 	  luabind::def(
 	    "generate_hair_data", +[](float hairPerArea, const pragma::geometry::ModelSubMesh &mesh) {
 		    struct MeshInterface : public pragma::util::HairGenerator::MeshInterface {
@@ -407,6 +401,99 @@ void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 		    gen.SetMeshDataInterface(std::move(meshInterface));
 		    return gen.Generate(hairPerArea);
 	    }))];
+	// is_valid overloads for up to 8 arguments
+	mod[(luabind::def("is_valid", +[](lua::State *l, const luabind::object o0, const luabind::object &o1) -> bool { return is_valid(l, o0) && is_valid(l, o1); }))];
+	mod[(luabind::def("is_valid", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2) -> bool { return is_valid(l, o0) && is_valid(l, o1) && is_valid(l, o2); }))];
+	mod[(luabind::def("is_valid", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2, const luabind::object &o3) -> bool { return is_valid(l, o0) && is_valid(l, o1) && is_valid(l, o2) && is_valid(l, o3); }))];
+	mod[(luabind::def(
+	  "is_valid", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2, const luabind::object &o3, const luabind::object &o4) -> bool { return is_valid(l, o0) && is_valid(l, o1) && is_valid(l, o2) && is_valid(l, o3) && is_valid(l, o4); }))];
+	mod[(luabind::def(
+	  "is_valid", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2, const luabind::object &o3, const luabind::object &o4, const luabind::object &o5) -> bool {
+		  return is_valid(l, o0) && is_valid(l, o1) && is_valid(l, o2) && is_valid(l, o3) && is_valid(l, o4) && is_valid(l, o5);
+	  }))];
+	mod[(luabind::def(
+	  "is_valid", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2, const luabind::object &o3, const luabind::object &o4, const luabind::object &o5, const luabind::object &o6) -> bool {
+		  return is_valid(l, o0) && is_valid(l, o1) && is_valid(l, o2) && is_valid(l, o3) && is_valid(l, o4) && is_valid(l, o5) && is_valid(l, o6);
+	  }))];
+	mod[(luabind::def(
+	  "is_valid", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2, const luabind::object &o3, const luabind::object &o4, const luabind::object &o5, const luabind::object &o6, const luabind::object &o7) -> bool {
+		  return is_valid(l, o0) && is_valid(l, o1) && is_valid(l, o2) && is_valid(l, o3) && is_valid(l, o4) && is_valid(l, o5) && is_valid(l, o6) && is_valid(l, o7);
+	  }))];
+	mod[(luabind::def(
+	  "is_valid", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2, const luabind::object &o3, const luabind::object &o4, const luabind::object &o5, const luabind::object &o6, const luabind::object &o7, const luabind::object &o8) -> bool {
+		  return is_valid(l, o0) && is_valid(l, o1) && is_valid(l, o2) && is_valid(l, o3) && is_valid(l, o4) && is_valid(l, o5) && is_valid(l, o6) && is_valid(l, o7) && is_valid(l, o8);
+	  }))];
+
+	// remove overloads for up to 8 arguments
+	mod[(luabind::def(
+	  "remove", +[](lua::State *l, const luabind::object o0, const luabind::object &o1) {
+		  remove(l, o0);
+		  remove(l, o1);
+	  }))];
+	mod[(luabind::def(
+	  "remove", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2) {
+		  remove(l, o0);
+		  remove(l, o1);
+		  remove(l, o2);
+	  }))];
+	mod[(luabind::def(
+	  "remove", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2, const luabind::object &o3) {
+		  remove(l, o0);
+		  remove(l, o1);
+		  remove(l, o2);
+		  remove(l, o3);
+	  }))];
+	mod[(luabind::def(
+	  "remove", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2, const luabind::object &o3, const luabind::object &o4) {
+		  remove(l, o0);
+		  remove(l, o1);
+		  remove(l, o2);
+		  remove(l, o3);
+		  remove(l, o4);
+	  }))];
+	mod[(luabind::def(
+	  "remove", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2, const luabind::object &o3, const luabind::object &o4, const luabind::object &o5) {
+		  remove(l, o0);
+		  remove(l, o1);
+		  remove(l, o2);
+		  remove(l, o3);
+		  remove(l, o4);
+		  remove(l, o5);
+	  }))];
+	mod[(luabind::def(
+	  "remove", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2, const luabind::object &o3, const luabind::object &o4, const luabind::object &o5, const luabind::object &o6) {
+		  remove(l, o0);
+		  remove(l, o1);
+		  remove(l, o2);
+		  remove(l, o3);
+		  remove(l, o4);
+		  remove(l, o5);
+		  remove(l, o6);
+	  }))];
+	mod[(luabind::def(
+	  "remove", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2, const luabind::object &o3, const luabind::object &o4, const luabind::object &o5, const luabind::object &o6, const luabind::object &o7) {
+		  remove(l, o0);
+		  remove(l, o1);
+		  remove(l, o2);
+		  remove(l, o3);
+		  remove(l, o4);
+		  remove(l, o5);
+		  remove(l, o6);
+		  remove(l, o7);
+	  }))];
+	mod[(luabind::def(
+	  "remove", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2, const luabind::object &o3, const luabind::object &o4, const luabind::object &o5, const luabind::object &o6, const luabind::object &o7, const luabind::object &o8) {
+		  remove(l, o0);
+		  remove(l, o1);
+		  remove(l, o2);
+		  remove(l, o3);
+		  remove(l, o4);
+		  remove(l, o5);
+		  remove(l, o6);
+		  remove(l, o7);
+		  remove(l, o8);
+	  }))];
+
 	register_world_data(l, mod);
 	auto defHairStrandData = luabind::class_<pragma::util::HairStrandData>("HairStrandData");
 	defHairStrandData.def(
@@ -544,8 +631,8 @@ void Lua::util::register_library(lua::State *l)
 		             }
 		             return luabind::object {l, res};
 	             }),
-	  luabind::def("exec", static_cast<mult<bool, opt<std::string>> (*)(lua::State *, const std::string &)>(&exec_python)),
-	  luabind::def("exec", static_cast<mult<bool, opt<std::string>> (*)(lua::State *, const std::string &, const std::vector<std::string> &)>(&exec_python)), luabind::def("init_blender", &pragma::python::init_blender), luabind::def("reload", &pragma::python::reload))];
+	  luabind::def("exec", static_cast<mult<bool, opt<std::string>> (*)(lua::State *, const std::string &)>(&exec_python)), luabind::def("exec", static_cast<mult<bool, opt<std::string>> (*)(lua::State *, const std::string &, const std::vector<std::string> &)>(&exec_python)),
+	  luabind::def("init_blender", &pragma::python::init_blender), luabind::def("reload", &pragma::python::reload))];
 	auto utilMod = luabind::module(l, "util");
 	auto defRigConfig = luabind::class_<pragma::ik::RigConfig>("IkRigConfig");
 	defRigConfig.def(luabind::constructor<>());
@@ -635,12 +722,11 @@ void Lua::util::register_library(lua::State *l)
 	defRenderTile.def_readwrite("h", &pragma::rendering::Tile::h);
 	utilMod[defRenderTile];
 	utilMod[(luabind::def("splash_damage", splash_damage), luabind::def("get_date_time", static_cast<std::string (*)(const std::string &)>(date_time)), luabind::def("get_date_time", static_cast<std::string (*)()>(date_time)),
-	  luabind::def("is_table", static_cast<bool (*)(luabind::argument)>(is_table)), luabind::def("is_table", static_cast<bool (*)()>(is_table)),
-	  luabind::def("get_faded_time_factor", static_cast<float (*)(float, float, float, float)>(get_faded_time_factor)), luabind::def("get_faded_time_factor", static_cast<float (*)(float, float, float)>(get_faded_time_factor)),
-	  luabind::def("get_scale_factor", static_cast<float (*)(float, float, float)>(get_scale_factor)), luabind::def("get_scale_factor", static_cast<float (*)(float, float)>(get_scale_factor)),
-	  luabind::def("open_path_in_explorer", static_cast<void (*)(const std::string &, const std::string &)>(open_path_in_explorer)), luabind::def("open_path_in_explorer", static_cast<void (*)(const std::string &)>(open_path_in_explorer)),
-	  luabind::def("get_pretty_bytes", get_pretty_bytes), luabind::def("units_to_metres", units_to_metres), luabind::def("metres_to_units", metres_to_units), luabind::def("variable_type_to_string", variable_type_to_string),
-	  luabind::def("open_url_in_browser", open_url_in_browser), luabind::def("get_addon_path", static_cast<std::string (*)(lua::State *)>(get_addon_path)), luabind::def("get_string_hash", get_string_hash),
+	  luabind::def("is_table", static_cast<bool (*)(luabind::argument)>(is_table)), luabind::def("is_table", static_cast<bool (*)()>(is_table)), luabind::def("get_faded_time_factor", static_cast<float (*)(float, float, float, float)>(get_faded_time_factor)),
+	  luabind::def("get_faded_time_factor", static_cast<float (*)(float, float, float)>(get_faded_time_factor)), luabind::def("get_scale_factor", static_cast<float (*)(float, float, float)>(get_scale_factor)),
+	  luabind::def("get_scale_factor", static_cast<float (*)(float, float)>(get_scale_factor)), luabind::def("open_path_in_explorer", static_cast<void (*)(const std::string &, const std::string &)>(open_path_in_explorer)),
+	  luabind::def("open_path_in_explorer", static_cast<void (*)(const std::string &)>(open_path_in_explorer)), luabind::def("get_pretty_bytes", get_pretty_bytes), luabind::def("units_to_metres", units_to_metres), luabind::def("metres_to_units", metres_to_units),
+	  luabind::def("variable_type_to_string", variable_type_to_string), luabind::def("open_url_in_browser", open_url_in_browser), luabind::def("get_addon_path", static_cast<std::string (*)(lua::State *)>(get_addon_path)), luabind::def("get_string_hash", get_string_hash),
 	  luabind::def(
 	    "generate_uuid_v4", +[]() -> Uuid { return Uuid {pragma::util::generate_uuid_v4()}; }),
 	  luabind::def(
@@ -1334,8 +1420,9 @@ luabind::object Lua::util::fade_property(lua::State *l, LQuatProperty &vProp, co
 luabind::object Lua::util::fade_property(lua::State *l, LEulerAnglesProperty &vProp, const EulerAngles &vDst, float duration)
 {
 	auto &game = *pragma::Engine::Get()->GetNetworkState(l)->GetGameState();
-	return fade_vector_property_generic<LEulerAnglesProperty, EulerAngles>(game, l, vProp, vDst, duration,
-	  [](const EulerAngles &a, const EulerAngles &b, float factor) -> EulerAngles { return EulerAngles {static_cast<float>(pragma::math::lerp_angle(a.p, b.p, factor)), static_cast<float>(pragma::math::lerp_angle(a.y, b.y, factor)), static_cast<float>(pragma::math::lerp_angle(a.r, b.r, factor))}; });
+	return fade_vector_property_generic<LEulerAnglesProperty, EulerAngles>(game, l, vProp, vDst, duration, [](const EulerAngles &a, const EulerAngles &b, float factor) -> EulerAngles {
+		return EulerAngles {static_cast<float>(pragma::math::lerp_angle(a.p, b.p, factor)), static_cast<float>(pragma::math::lerp_angle(a.y, b.y, factor)), static_cast<float>(pragma::math::lerp_angle(a.r, b.r, factor))};
+	});
 }
 luabind::object Lua::util::fade_property(lua::State *l, LGenericIntPropertyWrapper &vProp, const int64_t &vDst, float duration)
 {

@@ -264,6 +264,11 @@ static void register_gui(Lua::Interface &lua)
 	    })
 		)];
 
+	luabind::globals(l)["gui"]["ANCHOR_EDGE_LEFT"] = pragma::gui::Anchor::Edge::Left;
+	luabind::globals(l)["gui"]["ANCHOR_EDGE_RIGHT"] = pragma::gui::Anchor::Edge::Right;
+	luabind::globals(l)["gui"]["ANCHOR_EDGE_TOP"] = pragma::gui::Anchor::Edge::Top;
+	luabind::globals(l)["gui"]["ANCHOR_EDGE_BOTTOM"] = pragma::gui::Anchor::Edge::Bottom;
+
 	//
 	auto videoModeDef = luabind::class_<pragma::platform::Monitor::VideoMode>("VideoMode");
 	videoModeDef.def(
@@ -489,10 +494,29 @@ static void register_gui(Lua::Interface &lua)
 	wiWIContentWrapper.def("SetPaddingTopBottom", &pragma::gui::types::WIContentWrapper::SetPaddingTopBottom);
 	guiMod[wiWIContentWrapper];
 
+	auto wiNineSliceRectSegment = luabind::class_<pragma::gui::types::WI9SliceRectSegment, luabind::bases<pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>>("NineSliceRectSegment");
+	wiNineSliceRectSegment.def("SetRenderImageOffset", &pragma::gui::types::WI9SliceRectSegment::SetRenderImageOffset);
+	wiNineSliceRectSegment.def("SetRenderImageScale", &pragma::gui::types::WI9SliceRectSegment::SetRenderImageScale);
+	wiNineSliceRectSegment.def("GetRenderImageOffset", &pragma::gui::types::WI9SliceRectSegment::GetRenderImageOffset);
+	wiNineSliceRectSegment.def("GetRenderImageScale", &pragma::gui::types::WI9SliceRectSegment::GetRenderImageScale);
+	guiMod[wiNineSliceRectSegment];
+
 	auto wiNineSliceRect = luabind::class_<pragma::gui::types::WI9SliceRect, pragma::gui::types::WIBase>("NineSliceRect");
 	wiNineSliceRect.def("SetMaterial", static_cast<void (pragma::gui::types::WI9SliceRect ::*)(const std::string &)>(&pragma::gui::types::WI9SliceRect::SetMaterial));
 	wiNineSliceRect.def("SetMaterial", static_cast<void (pragma::gui::types::WI9SliceRect ::*)(pragma::material::Material &)>(&pragma::gui::types::WI9SliceRect::SetMaterial));
 	wiNineSliceRect.def("GetMaterial", &pragma::gui::types::WI9SliceRect::GetMaterial);
+	wiNineSliceRect.def("GetSegmentSize", static_cast<std::pair<int32_t, int32_t> (pragma::gui::types::WI9SliceRect ::*)(pragma::gui::types::WI9SliceRect::Segment) const>(&pragma::gui::types::WI9SliceRect::GetSegmentSize));
+	wiNineSliceRect.def("GetSegmentOffset", static_cast<std::pair<int32_t, int32_t> (pragma::gui::types::WI9SliceRect ::*)(pragma::gui::types::WI9SliceRect::Segment) const>(&pragma::gui::types::WI9SliceRect::GetSegmentSize));
+	wiNineSliceRect.add_static_constant("SEGMENT_TOP_LEFT_CORNER", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::TopLeftCorner));
+	wiNineSliceRect.add_static_constant("SEGMENT_TOP_RIGHT_CORNER", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::TopRightCorner));
+	wiNineSliceRect.add_static_constant("SEGMENT_BOTTOM_LEFT_CORNER", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::BottomLeftCorner));
+	wiNineSliceRect.add_static_constant("SEGMENT_BOTTOM_RIGHT_CORNER", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::BottomRightCorner));
+	wiNineSliceRect.add_static_constant("SEGMENT_TOP_EDGE", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::TopEdge));
+	wiNineSliceRect.add_static_constant("SEGMENT_BOTTOM_EDGE", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::BottomEdge));
+	wiNineSliceRect.add_static_constant("SEGMENT_LEFT_EDGE", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::LeftEdge));
+	wiNineSliceRect.add_static_constant("SEGMENT_RIGHT_EDGE", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::RightEdge));
+	wiNineSliceRect.add_static_constant("SEGMENT_CENTER", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::Center));
+	wiNineSliceRect.add_static_constant("SEGMENT_COUNT", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::Count));
 	guiMod[wiNineSliceRect];
 
 	auto wiRoundedTexturedRect = luabind::class_<pragma::gui::types::WIRoundedTexturedRect, luabind::bases<pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>>("RoundedTexturedRect");

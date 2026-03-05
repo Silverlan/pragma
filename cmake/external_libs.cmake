@@ -58,6 +58,6 @@ pr_fetch_external_lib("util_vmf"                "https://github.com/Silverlan/ut
 pr_fetch_external_lib("util_zip"                "https://github.com/Silverlan/util_zip"               "a8b0b3e1e126849b929ea04f4fe9afeb2b40cdc7")
 pr_fetch_external_lib("util_shadergraph"        "https://github.com/Silverlan/util_shadergraph"       "f6b39f3d067fb022cc456a979cef6bfe2c031fd4")
 pr_fetch_external_lib("vfilesystem"             "https://github.com/Silverlan/vfilesystem"            "9a135bde2c2032f3bd919c1d9637eb9383336c50")
-pr_fetch_external_lib("wgui"                    "https://github.com/Silverlan/wgui"                   "093c24a228427f782cfdb0f98db1a45da36bae03")
+pr_fetch_external_lib("wgui"                    "https://github.com/Silverlan/wgui"                   "30639f8e8c7b3e71db24e12fe016f94dfb5c0971")
 pr_fetch_external_lib("util_unicode"            "https://github.com/Silverlan/util_unicode"           "5f0519049aecfd52e02ffbabeb84d735d027d9f0")
 pr_fetch_external_lib("cppbezierfit"            "https://github.com/Silverlan/cppbezierfit"           "63dbcaeddba39c80b885fd7eadbbbad560bc1791")

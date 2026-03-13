@@ -1,7 +1,7 @@
 -- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 -- SPDX-License-Identifier: MIT
 
-include("hbox.lua")
+include("/gui/layout/hbox.lua")
 include("wicontextmenu.lua")
 
 util.register_class("gui.WIMenuBar", gui.HBox)
@@ -160,7 +160,7 @@ function gui.WIMenuBar:FindItemByIdentifier(identifier)
 	return self.m_idToItem[identifier]
 end
 function gui.WIMenuBar:AddItem(name, fcContextCallback, identifier)
-	local pItem = gui.create("WIMenuItem", self)
+	local pItem = gui.create("menu_item", self)
 	if util.is_valid(pItem) == false then
 		return
 	end
@@ -181,7 +181,7 @@ function gui.WIMenuBar:AddItem(name, fcContextCallback, identifier)
 	end
 	return pItem
 end
-gui.register("WIMenuBar", gui.WIMenuBar)
+gui.register("menu_bar", gui.WIMenuBar)
 
 get_event = function()
 	local events = {

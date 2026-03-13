@@ -6,7 +6,7 @@ include("cl_hud.lua")
 local Component = ents.GmZen
 
 function Component:InitializeHud()
-	--[[local p = gui.create("WIZenHUD")
+	--[[local p = gui.create("zen_hud")
 	p:SetSize(400, 200)
 
 	self.m_hudZen = p]]

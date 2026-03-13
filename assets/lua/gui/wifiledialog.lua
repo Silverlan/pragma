@@ -24,7 +24,7 @@ function gui.WIFileDialog:OnInitialize()
 	local pPath = gui.create("WIText", self)
 	self.m_pPath = pPath
 
-	local pButtonOpen = gui.create("WIButton", self)
+	local pButtonOpen = gui.create("wibutton", self)
 	pButtonOpen:SetName("apply")
 	pButtonOpen:AddCallback("OnPressed", function(pButton)
 		self:CallCallbacks("OnFileSelected", self:GetFilePath(false))
@@ -32,7 +32,7 @@ function gui.WIFileDialog:OnInitialize()
 	end)
 	self.m_pButtonOpen = pButtonOpen
 
-	local pButtonCancel = gui.create("WIButton", self)
+	local pButtonCancel = gui.create("wibutton", self)
 	pButtonCancel:SetName("cancel")
 	pButtonCancel:SetText(locale.get_text("cancel"))
 	pButtonCancel:AddCallback("OnPressed", function(pButton)
@@ -49,7 +49,7 @@ function gui.WIFileDialog:OnInitialize()
 	pFileName:SetName("filename")
 	self.m_pFileName = pFileName
 
-	local t = gui.create("WIFileExplorer", self)
+	local t = gui.create("file_explorer", self)
 	t:AddCallback("OnPathChanged", function(p, path)
 		if util.is_valid(self) == false or util.is_valid(self.m_pPath) == false then
 			return
@@ -78,7 +78,7 @@ function gui.WIFileDialog:OnInitialize()
 	t:UpdateColumns()
 	self.m_pFileList = t
 
-	local options = gui.create("WIPFMControlsMenu", self)
+	local options = gui.create("pfm_controls_menu", self)
 	options:SetAutoFillContentsToWidth(true)
 	options:SetAutoFillContentsToHeight(false)
 	self.m_pOptions = options
@@ -243,11 +243,11 @@ function gui.WIFileDialog:OnSizeChanged(w, h)
 	self.m_pFileName:SetPos(xOffset + margin, self.m_pLbFileName:GetY() - 1)
 	self.m_pFileName:SetSize(self.m_pButtonOpen:GetX() - xOffset - margin * 2, 24)
 end
-gui.register("WIFileDialog", gui.WIFileDialog)
+gui.register("file_dialog", gui.WIFileDialog)
 
 gui.create_file_open_dialog = function(fcOnFileSelected, parent)
 	local dialog, frame, fileDialog = gui.create_dialog(function()
-		local el = gui.create("WIFileDialog")
+		local el = gui.create("file_dialog")
 		el:SetName("file_dialog")
 		el:SetType(gui.WIFileDialog.TYPE_OPEN)
 		if fcOnFileSelected ~= nil then
@@ -260,7 +260,7 @@ gui.create_file_open_dialog = function(fcOnFileSelected, parent)
 end
 gui.create_file_save_dialog = function(fcOnFileSelected, parent)
 	local dialog, frame, fileDialog = gui.create_dialog(function()
-		local el = gui.create("WIFileDialog")
+		local el = gui.create("file_dialog")
 		el:SetName("file_dialog")
 		el:SetType(gui.WIFileDialog.TYPE_SAVE)
 		if fcOnFileSelected ~= nil then

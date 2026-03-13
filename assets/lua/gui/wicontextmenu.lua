@@ -2,7 +2,7 @@
 -- SPDX-License-Identifier: MIT
 
 include("wimenuitem.lua")
-include("vbox.lua")
+include("/gui/layout/vbox.lua")
 
 util.register_class("gui.WIContextMenu", gui.Base)
 
@@ -63,7 +63,7 @@ function gui.WIContextMenu:OnInitialize()
 	scrollContainer:GetVerticalScrollBar():SetScrollAmount(1)
 	self.m_scrollContainer = scrollContainer
 
-	local contents = gui.create("WIVBox", scrollContainer, 0, 0, self:GetWidth(), self:GetHeight())
+	local contents = gui.create("vbox", scrollContainer, 0, 0, self:GetWidth(), self:GetHeight())
 	contents:SetFixedWidth(true)
 	contents:AddCallback("SetSize", function(el)
 		for _, item in ipairs(self.m_tItems) do
@@ -242,7 +242,7 @@ local function get_base_element(window)
 	return elBase
 end
 function gui.WIContextMenu:AddItem(name, fcOnClick, keybind)
-	local pItem = gui.create("WIMenuItem", self.m_contents)
+	local pItem = gui.create("menu_item", self.m_contents)
 	if pItem == nil then
 		return
 	end
@@ -378,7 +378,7 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 			end
 		end
 	end)
-	pSubMenu = gui.create("WIContextMenu", self:GetParent())
+	pSubMenu = gui.create("context_menu", self:GetParent())
 	pSubMenu:SetZPos(self:GetZPos())
 	pSubMenu:SetParentMenu(self, pItem)
 	pSubMenu:AddCallback("OnCursorExited", function()
@@ -391,7 +391,7 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 	table.insert(self.m_subMenues, pSubMenu)
 	self.m_itemToSubMenu[pItem] = pSubMenu
 
-	local pIcon = gui.create("WIArrow", pItem)
+	local pIcon = gui.create("wiarrow", pItem)
 	local function updateIcon()
 		pIcon:CenterToParentY()
 		pIcon:SetX(pItem:GetWidth() - pIcon:GetWidth() - 5)
@@ -430,7 +430,7 @@ gui.open_context_menu = function(window)
 	if util.is_valid(elBase) == false then
 		return
 	end
-	local menu = gui.create("WIContextMenu", elBase)
+	local menu = gui.create("context_menu", elBase)
 	if menu ~= nil then
 		menu:SetName("context_menu")
 		menu:RequestFocus()
@@ -450,4 +450,4 @@ end
 gui.is_context_menu_open = function(elBase)
 	return util.is_valid(gui.get_context_menu(elBase))
 end
-gui.register("WIContextMenu", gui.WIContextMenu)
+gui.register("context_menu", gui.WIContextMenu)

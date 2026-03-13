@@ -62,4 +62,4 @@ end
 function gui.ZenHUD:OnWeaponChanged(weapon)
 	gui.BaseHUD.OnWeaponChanged(self, weapon)
 end
-gui.register("WIZenHUD", gui.ZenHUD)
+gui.register("zen_hud", gui.ZenHUD)

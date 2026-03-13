@@ -69,7 +69,7 @@ function gui.WITabbedPanelTab:GetTitle()
 	end
 	return self.m_pText:GetText()
 end
-gui.register("WITabbedPanelTab", gui.WITabbedPanelTab)
+gui.register("tabbed_panel_tab", gui.WITabbedPanelTab)
 
 ---------------
 
@@ -87,7 +87,7 @@ function gui.WITabbedPanel:FindTab(name)
 	return self.m_tabIdentifierToTab[name]
 end
 function gui.WITabbedPanel:AddTab(name)
-	local t = gui.create("WITabbedPanelTab", self)
+	local t = gui.create("tabbed_panel_tab", self)
 	t:SetTitle(name)
 	t:AddCallback("OnSelected", function(t, b)
 		if b == false or self:IsValid() == false then
@@ -147,4 +147,4 @@ end
 function gui.WITabbedPanel:OnSizeChanged(w, h)
 	self:Update()
 end
-gui.register("WITabbedPanel", gui.WITabbedPanel)
+gui.register("tabbed_panel", gui.WITabbedPanel)

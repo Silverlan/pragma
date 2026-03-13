@@ -35,10 +35,10 @@ function gui.WIViewport:OnInitialize()
 	pBg:SetColor(Color.Black)
 	pBg:SetAutoAlignToParent(true)
 
-	local pGrid = gui.create("WIGridView", self)
+	local pGrid = gui.create("grid_view", self)
 	pGrid:SetAutoAlignToParent(true)
 
-	local pOrtho = gui.create("WIOrthoView", self)
+	local pOrtho = gui.create("ortho_view", self)
 	pOrtho:SetAutoAlignToParent(true)
 	local pTex = pOrtho:GetTextureElement()
 	if util.is_valid(pTex) == true then
@@ -472,4 +472,4 @@ function gui.WIViewport:Update()
 	self.m_pOrtho:SetRegion(startPos, endPos)
 	self:RenderGeometry()
 end
-gui.register("WIViewport", gui.WIViewport)
+gui.register("viewport", gui.WIViewport)

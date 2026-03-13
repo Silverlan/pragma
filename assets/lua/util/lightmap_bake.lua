@@ -98,7 +98,7 @@ util.load_baked_lightmap_uvs = function(lightmapCachePath, tEnts)
 end
 
 util.bake_lightmaps = function(preview, lightIntensityFactor)
-	include("/pfm/unirender.lua")
+	include("/pfm/rendering/unirender.lua")
 	if pfm.load_unirender() == false then
 		log.msg(
 			"Cannot bake lightmaps: Unable to load unirender library!",

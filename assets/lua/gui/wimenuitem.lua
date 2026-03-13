@@ -161,4 +161,4 @@ function gui.WIMenuItem:SizeToContents()
 	self.m_pText:SetX(border)
 	self.m_pText:SetY(self:GetHeight() * 0.5 - self.m_pText:GetHeight() * 0.5)
 end
-gui.register("WIMenuItem", gui.WIMenuItem)
+gui.register("menu_item", gui.WIMenuItem)

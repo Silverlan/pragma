@@ -24,7 +24,7 @@ function gui.WIToolBar:SelectTool(identifier)
 	tool:Select()
 end
 function gui.WIToolBar:AddTool(identifier, x, y, w, h)
-	local el = gui.create("WIToolBarTool", self)
+	local el = gui.create("tool_bar_tool", self)
 	if el == nil then
 		return
 	end
@@ -63,7 +63,7 @@ function gui.WIToolBar:Update()
 		end
 	end
 end
-gui.register("WIToolBar", gui.WIToolBar)
+gui.register("tool_bar", gui.WIToolBar)
 
 --------------------------------
 
@@ -174,4 +174,4 @@ function gui.WIToolBarTool:MouseCallback(mouseButton, keyState, modifier)
 		self:Select()
 	end
 end
-gui.register("WIToolBarTool", gui.WIToolBarTool)
+gui.register("tool_bar_tool", gui.WIToolBarTool)

@@ -307,7 +307,7 @@ skin["serverbrowser"] = {
 		["wisilkicon"] = {
 			Initialize = function(GUI, pElement)
 				local pCell = pElement:GetParent()
-				if pCell:IsValid() and pCell:GetClass() == "witablecell" then
+				if pCell:IsValid() and pCell:IsType(gui.TYPE_WITABLECELL) then
 					pElement:SetY(pCell:GetHeight() * 0.5 - pElement:GetHeight() * 0.5)
 					pElement:SetX(GUI.TABLE_TEXT_OFFSET_X)
 				end
@@ -426,7 +426,7 @@ skin["table_row"] = {
 				local pCell = pElement:GetParent()
 				if
 					not pCell:IsValid()
-					or (pCell:GetClass() ~= "widropdownmenu" and pCell:GetClass() ~= "witextentrybase")
+					or (not pCell:IsType(gui.TYPE_WIDROPDOWNMENU) and not pCell:IsType(gui.TYPE_WITEXTENTRYBASE))
 				then
 					pElement:SetColorRGB(Color(255, 255, 255, 255))
 				end
@@ -442,7 +442,7 @@ skin["table_row_offset"] = {
 				local pCell = pElement:GetParent()
 				if pCell:IsValid() then
 					local childIdx = pCell:FindChildIndex(pElement)
-					if childIdx == 0 and pCell:GetClass() == "witablecell" then
+					if childIdx == 0 and pCell:IsType(gui.TYPE_WITABLECELL) then
 						local fcSetSize = function()
 							if pElement:IsValid() == false then
 								return
@@ -604,7 +604,7 @@ skin["window_frame"] = {
 				local pParent = pElement:GetParent()
 				if
 					not pParent:IsValid()
-					or (pParent:GetClass() ~= "widropdownmenu" and pParent:GetClass() ~= "witextentrybase")
+					or (not pParent:IsType(gui.TYPE_WIDROPDOWNMENU) and not pParent:IsType(gui.TYPE_WITEXTENTRYBASE))
 				then
 					pElement:SetColorRGB(Color.White)
 				end

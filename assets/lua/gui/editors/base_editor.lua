@@ -4,8 +4,8 @@
 include("/gui/wimenubar.lua")
 include("/gui/witoolbar.lua")
 include("/gui/wifiledialog.lua")
-include("/gui/pfm/infobar.lua")
-include("/gui/pfm/frame.lua")
+include("/gui/pfm/layout/info_bar.lua")
+include("/gui/pfm/containers/frame.lua")
 
 util.register_class("gui.WIBaseEditor", gui.Base)
 function gui.WIBaseEditor:__init()
@@ -39,7 +39,7 @@ function gui.WIBaseEditor:OnInitialize()
 
 	self.m_menuBarContainer = gui.create("WIBase", self)
 
-	self.m_menuBar = gui.create("WIMenuBar", self.m_menuBarContainer)
+	self.m_menuBar = gui.create("menu_bar", self.m_menuBarContainer)
 	self.m_menuBar:SetName("menu_bar")
 	self.m_menuBar:AddCallback("OnClose", function(pMenuBar)
 		if util.is_valid(self) then
@@ -54,7 +54,7 @@ function gui.WIBaseEditor:OnInitialize()
 	self.m_menuBar:SetSize(self.m_menuBarContainer:GetSize())
 	self.m_menuBar:SetAnchor(0, 0, 1, 1)
 
-	local pInfoBar = gui.create("WIPFMInfobar", self)
+	local pInfoBar = gui.create("pfm_info_bar", self)
 	pInfoBar:SetName("info_bar")
 	pInfoBar:SetWidth(self:GetWidth())
 	pInfoBar:SetY(self:GetHeight() - pInfoBar:GetHeight())
@@ -134,7 +134,7 @@ end
 
 function gui.WIBaseEditor:InitializeGenericLayout()
 	self.m_contents = gui.create(
-		"WIHBox",
+		"hbox",
 		self,
 		0,
 		self.m_menuBar:GetHeight(),
@@ -319,7 +319,7 @@ function gui.WIBaseEditor:AddFrame(parent)
 	if util.is_valid(parent) == false then
 		return
 	end
-	local frame = gui.create("WIPFMFrame", parent)
+	local frame = gui.create("pfm_frame", parent)
 	if frame == nil then
 		return
 	end
@@ -365,11 +365,11 @@ function gui.WIBaseEditor:SetBackgroundColor(col)
 	self.m_pMain:SetColor(col)
 end
 function gui.WIBaseEditor:CreateWindow(class)
-	local pFrame = gui.create("WIFrame")
+	local pFrame = gui.create("frame")
 	if pFrame == nil then
 		return
 	end
-	local p = gui.create(class or "WIEditorWindow", pFrame)
+	local p = gui.create(class or "editor_window", pFrame)
 	if p == nil then
 		pFrame:Remove()
 		return

@@ -992,9 +992,9 @@ static luabind::object register_class(lua::State *l, const std::string &pclassNa
 					auto *classInfo = game->GetLuaClassManager().FindClassInfo(fullClassName);
 					if(classInfo) {
 						// Re-register base classes for this class, in case they have been changed
-						classInfo->regFunc.push(l); /* 1 */
-						fRegisterBaseClasses();
-						Lua::Pop(l, 1); /* 0 */
+						//classInfo->regFunc.push(l); /* 1 */
+						//fRegisterBaseClasses();
+						//Lua::Pop(l, 1); /* 0 */
 						return classInfo->classObject;
 					}
 					return {};
@@ -1013,9 +1013,9 @@ static luabind::object register_class(lua::State *l, const std::string &pclassNa
 			auto *classInfo = game->GetLuaClassManager().FindClassInfo(fullClassName);
 			if(classInfo) {
 				// Re-register base classes for this class, in case they have been changed
-				classInfo->regFunc.push(l); /* 1 */
-				fRegisterBaseClasses();
-				Lua::Pop(l, 1); /* 0 */
+				//classInfo->regFunc.push(l); /* 1 */
+				//fRegisterBaseClasses();
+				//Lua::Pop(l, 1); /* 0 */
 				return classInfo->classObject;
 			}
 			return {};

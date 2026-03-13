@@ -34,11 +34,11 @@ static std::ostream &operator<<(std::ostream &out, const CallbackHandle &hCallba
 }
 
 namespace pragma::util {
-    static std::ostream &operator<<(std::ostream &out, const HSV &hsv)
-    {
-        out << hsv.h << ' ' << hsv.s << ' ' << hsv.v;
-        return out;
-    }
+	static std::ostream &operator<<(std::ostream &out, const HSV &hsv)
+	{
+		out << hsv.h << ' ' << hsv.s << ' ' << hsv.v;
+		return out;
+	}
 }
 
 static void call_callback(CallbackHandle &cb, std::initializer_list<luabind::object> args)
@@ -142,9 +142,9 @@ static int32_t parse_math_expression(lua::State *l)
 		Lua::PushString(l, pTok.GetIdent()); /* 4 */
 		Lua::SetTableValue(l, tToken);       /* 2 */
 
-		Lua::PushString(l, "code");                          /* 3 */
+		Lua::PushString(l, "code");                                 /* 3 */
 		Lua::PushInt(l, pragma::math::to_integral(pTok.GetCode())); /* 4 */
-		Lua::SetTableValue(l, tToken);                       /* 2 */
+		Lua::SetTableValue(l, tToken);                              /* 2 */
 
 		Lua::SetTableValue(l, t); /* 0 */
 	}
@@ -242,6 +242,20 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		    uvec::calc_spherical_stereo_transform(pr, dr, metres_to_units(0.065f), metres_to_units(30.0f * 0.065f));
 		    return std::pair<Vector3, Vector3> {pr, dr};
 	    }))];
+
+	modVec[(luabind::def("min", +[](const Vector2 &v0, const Vector2 &v1) { return glm::min(v0, v1); }))];
+	modVec[(luabind::def("min", +[](const Vector2i &v0, const Vector2i &v1) { return glm::min(v0, v1); }))];
+	modVec[(luabind::def("min", +[](const Vector3 &v0, const Vector3 &v1) { return glm::min(v0, v1); }))];
+	modVec[(luabind::def("min", +[](const Vector3i &v0, const Vector3i &v1) { return glm::min(v0, v1); }))];
+	modVec[(luabind::def("min", +[](const Vector4 &v0, const Vector4 &v1) { return glm::min(v0, v1); }))];
+	modVec[(luabind::def("min", +[](const Vector4i &v0, const Vector4i &v1) { return glm::min(v0, v1); }))];
+
+	modVec[(luabind::def("max", +[](const Vector2 &v0, const Vector2 &v1) { return glm::max(v0, v1); }))];
+	modVec[(luabind::def("max", +[](const Vector2i &v0, const Vector2i &v1) { return glm::max(v0, v1); }))];
+	modVec[(luabind::def("max", +[](const Vector3 &v0, const Vector3 &v1) { return glm::max(v0, v1); }))];
+	modVec[(luabind::def("max", +[](const Vector3i &v0, const Vector3i &v1) { return glm::max(v0, v1); }))];
+	modVec[(luabind::def("max", +[](const Vector4 &v0, const Vector4 &v1) { return glm::max(v0, v1); }))];
+	modVec[(luabind::def("max", +[](const Vector4i &v0, const Vector4i &v1) { return glm::max(v0, v1); }))];
 
 	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "ORIGIN", uvec::PRM_ORIGIN);
 	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "FORWARD", uvec::PRM_FORWARD);
@@ -1536,9 +1550,9 @@ void pragma::Game::RegisterLuaLibraries()
 	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, geometry::ModelMesh &, luabind::object &, luabind::object &, bool)>(
 	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, geometry::ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, geometry::ModelMesh &, luabind::object &, luabind::object &)>([](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, geometry::ModelMesh &mesh, luabind::object &r0, luabind::object &r1) {
-		  return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1);
-	  }),
+	  luabind::def("line_with_mesh",
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, geometry::ModelMesh &, luabind::object &, luabind::object &)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, geometry::ModelMesh &mesh, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1); }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, asset::Model &, uint32_t, luabind::object &, luabind::object &, bool, const math::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),

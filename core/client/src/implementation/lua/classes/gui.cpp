@@ -2063,6 +2063,8 @@ void Lua::WITransformable::register_class(luabind::class_<pragma::gui::types::WI
 	classDef.def("AddSnapTarget", &pragma::gui::types::WITransformable::AddSnapTarget);
 	classDef.def("StartDrag", &pragma::gui::types::WITransformable::StartDrag);
 	classDef.def("EndDrag", &pragma::gui::types::WITransformable::EndDrag);
+	classDef.def("SetMovementPadding", &pragma::gui::types::WITransformable::SetMovementPadding);
+	classDef.def("GetMovementPadding", &pragma::gui::types::WITransformable::GetMovementPadding);
 }
 
 ////////////////////////////////////

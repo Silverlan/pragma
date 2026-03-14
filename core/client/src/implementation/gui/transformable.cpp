@@ -190,6 +190,54 @@ void pragma::gui::types::WITransformable::Close()
 		SetVisible(false);
 	CallCallbacks<void>("OnClose");
 }
+void pragma::gui::types::WITransformable::SetMovementPadding(int32_t padding) { m_movementPadding = padding; }
+int32_t pragma::gui::types::WITransformable::GetMovementPadding() const { return m_movementPadding; }
+void pragma::gui::types::WITransformable::ClampDragBounds(int &x, int &y) const
+{
+	if(m_movementPadding <= 0)
+		return;
+	auto wParent = 0;
+	auto hParent = 0;
+	auto *parent = GetParent();
+	if(parent) {
+		wParent = parent->GetWidth();
+		hParent = parent->GetHeight();
+	}
+	auto minX = -GetWidth() + m_movementPadding;
+	auto minY = -GetHeight() + m_movementPadding;
+	auto maxX = wParent - m_movementPadding;
+	auto maxY = hParent - m_movementPadding;
+
+	auto *dragArea = GetDragArea();
+	if(dragArea) {
+		minX = math::max(minX, -dragArea->GetRight() + math::min(dragArea->GetWidth(), m_movementPadding));
+		minY = math::max(minY, -dragArea->GetBottom() + math::min(dragArea->GetHeight(), m_movementPadding));
+
+		maxX = math::min(maxX, (wParent - dragArea->GetLeft()) - math::min(dragArea->GetWidth(), m_movementPadding));
+		maxY = math::min(maxY, (hParent - dragArea->GetTop()) - math::min(dragArea->GetHeight(), m_movementPadding));
+	}
+	x = math::clamp(x, minX, maxX);
+	y = math::clamp(y, minY, maxY);
+}
+void pragma::gui::types::WITransformable::ClampResizeBounds(int &w, int &h) const
+{
+	if(m_movementPadding <= 0)
+		return;
+	int minW = math::max(m_movementPadding, m_movementPadding - GetX());
+	int minH = math::max(m_movementPadding, m_movementPadding - GetY());
+
+	auto *dragArea = GetDragArea();
+	if(dragArea) {
+		int requiredDragWidth = dragArea->GetLeft() + math::min(dragArea->GetWidth(), m_movementPadding);
+		int requiredDragHeight = dragArea->GetTop() + math::min(dragArea->GetHeight(), m_movementPadding);
+
+		minW = math::max(minW, requiredDragWidth);
+		minH = math::max(minH, requiredDragHeight);
+	}
+
+	w = math::max(w, minW);
+	h = math::max(h, minH);
+}
 pragma::gui::types::WIBase *pragma::gui::types::WITransformable::GetDragArea() const { return const_cast<WIBase *>(m_hMoveRect.get()); }
 void pragma::gui::types::WITransformable::Initialize()
 {
@@ -380,6 +428,11 @@ void pragma::gui::types::WITransformable::Think(const std::shared_ptr<prosper::I
 			}
 		}
 
+		if(bChangePos)
+			ClampDragBounds(pos.x, pos.y);
+		if(bChangeSize)
+			ClampResizeBounds(size.x, size.y);
+
 		if(bChangeSize == true || bChangePos == true) {
 			if(bChangeSize == true && IsResizeRatioLocked()) {
 				if(m_resizeMode == ResizeMode::ns || m_resizeMode == ResizeMode::sn)
@@ -407,6 +460,7 @@ void pragma::gui::types::WITransformable::Think(const std::shared_ptr<prosper::I
 		auto curPos = GetPos();
 		curPos.x = math::clamp(curPos.x, m_minDrag.x, m_maxDrag.x);
 		curPos.y = math::clamp(curPos.y, m_minDrag.y, m_maxDrag.y);
+		ClampDragBounds(curPos.x, curPos.y);
 		SetPos(curPos);
 		curPos = GetPos();
 

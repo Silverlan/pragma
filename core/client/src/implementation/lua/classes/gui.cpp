@@ -517,6 +517,9 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetFileDropInputEnabled", &pragma::gui::types::WIBase::SetFileDropInputEnabled);
 	classDef.def("SetAnchorEdgeEnabled", &pragma::gui::types::WIBase::SetAnchorEdgeEnabled);
 	classDef.def("IsAnchorEdgeEnabled", &pragma::gui::types::WIBase::IsAnchorEdgeEnabled);
+	classDef.def("SetAutoCenterToParentX", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoCenterToParentX));
+	classDef.def("SetAutoCenterToParentY", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoCenterToParentY));
+	classDef.def("SetAutoCenterToParent", &pragma::gui::types::WIBase::SetAutoCenterToParent);
 
 	auto defDrawInfo = luabind::class_<pragma::gui::DrawInfo>("DrawInfo");
 	defDrawInfo.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::gui::DrawInfo::Flags::None));

@@ -280,6 +280,10 @@ if not no_build_networking:
 		subprocess.run([config.cmake_path, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-DTOOLSET=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
 	subprocess.run([config.cmake_path, "-DPRAGMA_BUILD_TOOLS_DIR=" +config.build_tools_dir, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", "cmake/fetch_clang.cmake"],check=True)
 
+clang_root_dir = str(Path(config.build_tools_dir) / "clang/bin") +"/"
+if not Path(clang_root_dir).exists():
+	clang_root_dir = "" # Use system clang
+
 import shutil
 import subprocess
 import re
@@ -294,10 +298,10 @@ if platform == "win32":
 		#from third_party import clang
 		#clang.main()
 
-		clang_dir = str(Path(config.build_tools_dir) / "clang/bin/")
+		clang_dir = clang_root_dir
 		config.toolsetArgs = [
-			"-DCMAKE_C_COMPILER=" +str(Path(clang_dir) / "clang.exe"),
-			"-DCMAKE_CXX_COMPILER=" +str(Path(clang_dir) / "clang++.exe"),
+			"-DCMAKE_C_COMPILER=" +str(clang_dir +"clang.exe"),
+			"-DCMAKE_CXX_COMPILER=" +str(clang_dir +"clang++.exe"),
 			"-DCMAKE_MAKE_PROGRAM=ninja.exe"
 		]
 		config.toolsetCFlags = ["-fexceptions", "-fcxx-exceptions", "--target=x86_64-pc-windows-msvc"]
@@ -308,14 +312,14 @@ if platform == "win32":
 			use_custom_cmake = True
 			fetch_cmake()
 	elif toolset == "clang-cl":
-		clang_dir = str(Path(config.build_tools_dir) / "clang/bin")
+		clang_dir = clang_root_dir
 		
 		config.toolsetArgs = [
-			"-DCMAKE_C_COMPILER=" +clang_dir +"/clang-cl.exe",
-			"-DCMAKE_CXX_COMPILER=" +clang_dir +"/clang-cl.exe",
-			"-DCMAKE_CXX_COMPILER_AR=" +clang_dir +"/llvm-ar.exe",
-			"-DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=" +clang_dir +"/clang-scan-deps.exe",
-			"-DCMAKE_CXX_COMPILER_RANLIB=" +clang_dir +"/llvm-ranlib.exe"
+			"-DCMAKE_C_COMPILER=" +clang_dir +"clang-cl.exe",
+			"-DCMAKE_CXX_COMPILER=" +clang_dir +"clang-cl.exe",
+			"-DCMAKE_CXX_COMPILER_AR=" +clang_dir +"llvm-ar.exe",
+			"-DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=" +clang_dir +"clang-scan-deps.exe",
+			"-DCMAKE_CXX_COMPILER_RANLIB=" +clang_dir +"llvm-ranlib.exe"
 		]
 		config.toolsetCFlags = ["-Wno-error", "-Wno-unused-command-line-argument", "-Wno-enum-constexpr-conversion", "-fexceptions", "-fcxx-exceptions"]
 		print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
@@ -334,16 +338,11 @@ if platform == "win32":
 			else:
 				print_msg("--ignore-warnings has been enabled, continuing...")
 elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-22"):
-	# Due to a compiler bug with C++20 Modules in clang, we need the
-	# very latest version of clang, which is not available in package managers yet.
-	# We'll use our own prebuilt version for now.
-	# from third_party import clang
-	# clang.main()
-	clang_staging_path = Path(config.build_tools_dir) / "clang/"
+	clang_staging_path = clang_root_dir
 	if c_compiler == "clang-22":
-		c_compiler = str(clang_staging_path / "bin/clang")
+		c_compiler = clang_staging_path +"clang"
 	if cxx_compiler == "clang++-22":
-		cxx_compiler = str(clang_staging_path / "bin/clang++")
+		cxx_compiler = clang_staging_path +"clang++"
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
 

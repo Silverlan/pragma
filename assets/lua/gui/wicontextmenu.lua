@@ -12,6 +12,8 @@ gui.impl.contextMenu = gui.impl.contextMenu or {
 	menues = {},
 }
 
+local MAX_HEIGHT = 512
+
 function gui.WIContextMenu:OnRemove()
 	gui.impl.contextMenu.activeMenuCount = gui.impl.contextMenu.activeMenuCount - 1
 	if gui.impl.contextMenu.activeMenuCount == 0 and util.is_valid(gui.impl.cbMouseInput) == true then
@@ -22,7 +24,7 @@ function gui.WIContextMenu:OnInitialize()
 	gui.impl.contextMenu.activeMenuCount = gui.impl.contextMenu.activeMenuCount + 1
 	gui.Base.OnInitialize(self)
 
-	self:SetSize(64, 128)
+	self:SetSize(64, 1)
 
 	self.m_tItems = {}
 	self.m_subMenues = {}
@@ -71,6 +73,10 @@ function gui.WIContextMenu:OnInitialize()
 				item:SetWidth(el:GetWidth())
 			end
 		end
+		
+		if(self.m_updateHeightOnContainerChange) then
+			self:UpdateCompactHeight()
+		end
 	end)
 	contents:AddCallback("OnUpdated", function(el)
 		self.m_scrollContainer:ScheduleUpdate()
@@ -78,6 +84,15 @@ function gui.WIContextMenu:OnInitialize()
 	self.m_contents = contents
 
 	self:AddStyleClass("context_menu")
+	self:SetHeight(0) -- Hide the element initially to avoid flickering
+end
+function gui.WIContextMenu:UpdateCompactHeight(h, dontApply)
+	h = h or self.m_contents:GetHeight()
+	if self.m_contents:GetHeight() <= MAX_HEIGHT and self.m_contents:GetHeight() ~= self:GetHeight() then
+		h = self.m_contents:GetHeight()
+		if(dontApply ~= false) then self:SetHeight(h) end
+	end
+	return h
 end
 function gui.WIContextMenu:IsPopulated()
 	return self:GetItemCount() > 0
@@ -152,9 +167,8 @@ function gui.WIContextMenu:OnUpdate()
 		end
 	end
 	w = w + 20
-	if self.m_contents:GetHeight() <= 128 and self.m_contents:GetHeight() ~= self:GetHeight() then
-		h = self.m_contents:GetHeight()
-	end
+	h = self:UpdateCompactHeight(h, true)
+	self.m_updateHeightOnContainerChange = true
 	self:SetSize(w, h)
 
 	for _, item in ipairs(updateItems) do

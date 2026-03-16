@@ -523,7 +523,7 @@ if platform == "linux":
 				# vcpkg
 				packages += ["base-devel git curl zip unzip tar cmake ninja"]
 
-			commands.append("pacman -S " +" ".join(packages))
+			commands.append("pacman -Sy --needed " +" ".join(packages))
 		else: # Ubuntu / apt
 			packages = [
 				"cmake",

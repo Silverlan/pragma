@@ -520,6 +520,9 @@ if platform == "linux":
 				# cycles
 				packages.append("git-lfs")
 
+				# libdecor
+				packages.append("wayland-protocols")
+
 				# vcpkg
 				packages += ["base-devel git curl zip unzip tar cmake ninja"]
 

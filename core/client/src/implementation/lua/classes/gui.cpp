@@ -520,6 +520,11 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetAutoCenterToParentX", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoCenterToParentX));
 	classDef.def("SetAutoCenterToParentY", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoCenterToParentY));
 	classDef.def("SetAutoCenterToParent", &pragma::gui::types::WIBase::SetAutoCenterToParent);
+	classDef.def("SetPivot", static_cast<void (pragma::gui::types::WIBase::*)(const ::Vector2 &)>(&pragma::gui::types::WIBase::SetPivot));
+	classDef.def("SetPivot", static_cast<void (pragma::gui::types::WIBase::*)(float, float)>(&pragma::gui::types::WIBase::SetPivot));
+	classDef.def("GetPivot", &pragma::gui::types::WIBase::GetPivot);
+	classDef.def("SetPivotPos", &pragma::gui::types::WIBase::SetPivotPos);
+	classDef.def("GetPivotPos", static_cast<::Vector2 (pragma::gui::types::WIBase::*)() const>(&pragma::gui::types::WIBase::GetPivotPos));
 
 	auto defDrawInfo = luabind::class_<pragma::gui::DrawInfo>("DrawInfo");
 	defDrawInfo.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::gui::DrawInfo::Flags::None));
@@ -919,6 +924,8 @@ void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pra
 	classDef.def("AreTagsEnabled", &pragma::gui::types::WIText::AreTagsEnabled);
 	classDef.def("PopFrontLine", &pragma::gui::types::WIText::PopFrontLine);
 	classDef.def("PopBackLine", &pragma::gui::types::WIText::PopBackLine);
+	classDef.def("SetAutoSizeToText", &pragma::gui::types::WIText::SetAutoSizeToText);
+	classDef.def("ShouldAutoSizeToText", &pragma::gui::types::WIText::ShouldAutoSizeToText);
 	classDef.def("RemoveText", static_cast<bool (pragma::gui::types::WIBase::*)(pragma::string::LineIndex, pragma::string::CharOffset, pragma::string::TextLength)>(&pragma::gui::types::WIText::RemoveText));
 	classDef.def("RemoveText", static_cast<bool (pragma::gui::types::WIBase::*)(pragma::string::TextOffset, pragma::string::TextLength)>(&pragma::gui::types::WIText::RemoveText));
 	classDef.def("RemoveLine", &pragma::gui::types::WIText::RemoveLine);

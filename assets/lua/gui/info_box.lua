@@ -82,7 +82,6 @@ function InfoBox:GetText()
 end
 function InfoBox:SetText(text)
 	self.m_text:SetText(text)
-	self:SizeToContents()
 end
 function InfoBox:GetTextElement()
 	return self.m_text

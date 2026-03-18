@@ -45,7 +45,6 @@ function gui.WIMenuItem:SetRightText(text)
 		self.m_pTextRight = pText
 	end
 	self.m_pTextRight:SetText(text)
-	self.m_pTextRight:SizeToContents()
 	self:UpdateRightText()
 end
 function gui.WIMenuItem:OpenContextMenu()
@@ -136,7 +135,6 @@ function gui.WIMenuItem:SetTitle(title)
 		return
 	end
 	self.m_pText:SetText(title)
-	self.m_pText:SizeToContents()
 end
 local border = 8
 function gui.WIMenuItem:UpdateRightText()

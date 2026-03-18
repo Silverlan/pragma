@@ -39,7 +39,6 @@ function gui.ZenHUD:OnHealthChanged(oldHealth, newHealth)
 		return
 	end
 	self.m_pHealth:SetText(newHealth .. " / " .. healthComponent:GetMaxHealth())
-	self.m_pHealth:SizeToContents()
 end
 function gui.ZenHUD:OnPrimaryClipSizeChanged(oldSize, newSize)
 	gui.BaseHUD.OnPrimaryClipSizeChanged(self, oldSize, newSize)
@@ -48,7 +47,6 @@ function gui.ZenHUD:OnPrimaryClipSizeChanged(oldSize, newSize)
 	end
 	local wep = self:GetWeapon()
 	self.m_pAmmo:SetText(wep:GetPrimaryClipSize() .. " / " .. wep:GetMaxPrimaryClipSize())
-	self.m_pAmmo:SizeToContents()
 end
 function gui.ZenHUD:OnSecondaryClipSizeChanged(oldSize, newSize)
 	gui.BaseHUD.OnSecondaryClipSizeChanged(self, oldSize, newSize)
@@ -57,7 +55,6 @@ function gui.ZenHUD:OnSecondaryClipSizeChanged(oldSize, newSize)
 	end
 	local wep = self:GetWeapon()
 	self.m_pAmmo2:SetText(wep:GetSecondaryClipSize() .. " / " .. wep:GetMaxSecondaryClipSize())
-	self.m_pAmmo2:SizeToContents()
 end
 function gui.ZenHUD:OnWeaponChanged(weapon)
 	gui.BaseHUD.OnWeaponChanged(self, weapon)

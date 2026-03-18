@@ -27,7 +27,6 @@ function TabbedPanelTab:OnInitialize()
 
 	local pText = gui.create("WIText", pTab)
 	pText:AddStyleClass("tab_title")
-	pText:SizeToContents()
 	pText:SetAutoCenterToParent(true)
 	self.m_pText = pText
 
@@ -72,9 +71,7 @@ function TabbedPanelTab:SetTitle(title)
 	end
 	local margin = 5
 	self.m_pText:SetText(title)
-	self.m_pText:SizeToContents()
 	self:SetSize(self.m_pText:GetWidth() + margin * 2, TAB_HEIGHT + margin * 2)
-	self.m_pText:CenterToParent()
 end
 function TabbedPanelTab:GetTitle()
 	if util.is_valid(self.m_pText) == false then

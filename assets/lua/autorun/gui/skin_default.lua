@@ -259,7 +259,6 @@ skin["wibutton"] = {
 
 				pElement:SetColorRGB(Color(255, 255, 255, 255))
 				pElement:SetText(pElement:GetText():upper())
-				pElement:SizeToContents()
 			end,
 			Release = clear_element,
 		},
@@ -495,7 +494,6 @@ skin["wimainmenuelement"] = {
 			pText:SetFont(GUI:MENU_ITEM_FONT())
 			pText:SetText(pText:GetText())
 			pText:SetColorRGB(GUI.MENU_ITEM_COLOR)
-			pText:SizeToContents()
 
 			pElement:AddCallback("Select", function()
 				local index = pElement:GetParent():FindChildIndex(pElement)
@@ -616,7 +614,6 @@ skin["window_frame"] = {
 skin["credits_text"] = {
 	Initialize = function(GUI, pElement)
 		pElement:SetFont(GUI:CREDITS_FONT())
-		pElement:SizeToContents()
 		pElement:SetX(pElement:GetParent():GetWidth() / 2 - pElement:GetWidth() / 2)
 		pElement:SetColor(Color(200, 200, 200))
 	end,
@@ -630,14 +627,12 @@ skin["credits_logo"] = {
 skin["header"] = {
 	Initialize = function(GUI, pElement)
 		pElement:SetFont(GUI:HEADER_FONT())
-		pElement:SizeToContents()
 		pElement:SetX(pElement:GetParent():GetWidth() / 2 - pElement:GetWidth() / 2)
 	end,
 }
 skin["header2"] = {
 	Initialize = function(GUI, pElement)
 		pElement:SetFont(GUI:HEADER2_FONT())
-		pElement:SizeToContents()
 		pElement:SetX(pElement:GetParent():GetWidth() / 2 - pElement:GetWidth() / 2)
 	end,
 }

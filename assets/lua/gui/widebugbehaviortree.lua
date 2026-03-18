@@ -347,13 +347,10 @@ function gui.WIDebugBehaviorTreeNode:SetNode(node)
 	self.m_name = node.name
 	self.m_pText:SetFont("default")
 	self.m_pText:SetText(node.name)
-	self.m_pText:SizeToContents()
 	if self.m_pText:GetWidth() > self:GetWidth() then
 		self.m_pText:SetFont("default_small")
-		self.m_pText:SizeToContents()
 		if self.m_pText:GetWidth() > self:GetWidth() then
 			self.m_pText:SetFont("default_tiny")
-			self.m_pText:SizeToContents()
 		end
 	end
 	self.m_pText:SetPos(

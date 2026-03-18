@@ -121,9 +121,6 @@ function gui.WIMenuBar:UpdateItem(item)
 
 	local elText = item:GetTextElement()
 	if util.is_valid(elText) then
-		elText:SizeToContents()
-		elText:CenterToParent()
-
 		item:SetWidth(elText:GetWidth() + 10)
 	end
 
@@ -146,12 +143,10 @@ function gui.WIMenuBar:OnUpdate()
 			item:SetHeight(self:GetHeight())
 
 			local elText = item:GetTextElement()
-			elText:SizeToContents()
 
 			item:SetWidth(elText:GetWidth() + 20)
 			item:Update()
 
-			elText:CenterToParent()
 			x = x + item:GetWidth()
 		end
 	end

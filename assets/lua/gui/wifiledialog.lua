@@ -42,7 +42,6 @@ function gui.WIFileDialog:OnInitialize()
 
 	local pLbFileName = gui.create("WIText", self)
 	pLbFileName:SetText(locale.get_text("file_name") .. ":")
-	pLbFileName:SizeToContents()
 	self.m_pLbFileName = pLbFileName
 
 	local pFileName = gui.create("WITextEntry", self)
@@ -55,7 +54,6 @@ function gui.WIFileDialog:OnInitialize()
 			return
 		end
 		self.m_pPath:SetText(path)
-		self.m_pPath:SizeToContents()
 
 		self:CallCallbacks("OnPathChanged", path)
 	end)

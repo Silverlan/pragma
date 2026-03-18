@@ -130,9 +130,8 @@ function gui.DebugRenderStats:InitializeUiElements()
 		pHeader:SetColor(Color(35, 35, 35))
 		local pHeaderText = gui.create("WIText", pHeader)
 		pHeaderText:SetColor(Color(152, 152, 152))
-		pHeaderText:SetFont("pfm_medium")
+		pHeaderText:AddStyleClass("font_medium")
 		pHeaderText:SetText(text)
-		pHeaderText:SizeToContents()
 		pHeader:AddCallback("SetSize", function()
 			if pHeaderText:IsValid() == false then
 				return
@@ -415,7 +414,6 @@ function gui.DebugRenderStats:AddSlider(cat, label, f, timer)
 
 	--[[local elLbl = gui.create("WIText",self.m_labelBox)
 	elLbl:SetText(label)
-	elLbl:SizeToContents()
 
 	local el = gui.create("WIProgressBar",self.m_sliderBox)
 	el:SetRange(0.0,1.0,0.01)

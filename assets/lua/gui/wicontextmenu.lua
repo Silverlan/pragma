@@ -406,8 +406,8 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 	self.m_itemToSubMenu[pItem] = pSubMenu
 
 	local pIcon = gui.create("wiarrow", pItem)
+	pIcon:SetAutoCenterToParentY(true)
 	local function updateIcon()
-		pIcon:CenterToParentY()
 		pIcon:SetX(pItem:GetWidth() - pIcon:GetWidth() - 5)
 	end
 	updateIcon()

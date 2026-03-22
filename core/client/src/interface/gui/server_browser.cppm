@@ -30,7 +30,6 @@ export namespace pragma::gui::types {
 		virtual ~WIServerBrowser() override;
 		virtual void Initialize() override;
 		virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
-		virtual void SetSize(int x, int y) override;
 		void Refresh();
 	  protected:
 		struct ServerData {

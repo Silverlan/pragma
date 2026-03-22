@@ -11,7 +11,6 @@ export namespace pragma::gui::types {
 		WIProgressBar();
 		virtual ~WIProgressBar() override;
 		virtual void Initialize() override;
-		virtual void SetSize(int x, int y) override;
 		void SetProgress(float progress);
 		float GetProgress() const;
 		const util::PFloatProperty &GetProgressProperty() const;
@@ -43,5 +42,6 @@ export namespace pragma::gui::types {
 		void UpdateOptions();
 		void OnProgressChanged(float oldValue, float value);
 		void SetRange(float min, float max, float stepSize, bool bEraseOptions);
+		virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
 	};
 };

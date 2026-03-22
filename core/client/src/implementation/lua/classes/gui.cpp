@@ -252,6 +252,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetPos", static_cast<const ::Vector2i &(pragma::gui::types::WIBase::*)() const>(&pragma::gui::types::WIBase::GetPos), luabind::copy_policy<0> {});
 	classDef.def("SetPos", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, ::Vector2)>(&SetPos));
 	classDef.def("SetPos", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, float, float)>(&SetPos));
+	classDef.def("ApplyPos", static_cast<void (pragma::gui::types::WIBase::*)(const ::Vector2i &)>(&pragma::gui::types::WIBase::ApplyPos));
+	classDef.def("ApplyPos", static_cast<void (pragma::gui::types::WIBase::*)(int, int)>(&pragma::gui::types::WIBase::ApplyPos));
 	classDef.def("GetAbsolutePos", static_cast<::Vector2 (pragma::gui::types::WIBase::*)(bool) const>(&pragma::gui::types::WIBase::GetAbsolutePos));
 	classDef.def("GetAbsolutePos", static_cast<::Vector2 (pragma::gui::types::WIBase::*)(bool) const>(&pragma::gui::types::WIBase::GetAbsolutePos), luabind::default_parameter_policy<2, true> {});
 	classDef.def("GetAbsolutePos", static_cast<::Vector2 (pragma::gui::types::WIBase::*)(const ::Vector2 &, bool) const>(&pragma::gui::types::WIBase::GetAbsolutePos));
@@ -264,8 +266,6 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetColorProperty", &pragma::gui::types::WIBase::GetColorProperty);
 	classDef.def("GetFocusProperty", &pragma::gui::types::WIBase::GetFocusProperty);
 	classDef.def("GetVisibilityProperty", &pragma::gui::types::WIBase::GetVisibilityProperty);
-	classDef.def("GetPosProperty", &pragma::gui::types::WIBase::GetPosProperty);
-	classDef.def("GetSizeProperty", &pragma::gui::types::WIBase::GetSizeProperty);
 	classDef.def("GetMouseInBoundsProperty", &pragma::gui::types::WIBase::GetMouseInBoundsProperty);
 	classDef.def("SetColor", &SetColor);
 	classDef.def("SetColorRGB", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, const ::Color &)>([](lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Color &color) {
@@ -280,6 +280,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetSize", static_cast<const ::Vector2i &(pragma::gui::types::WIBase::*)() const>(&pragma::gui::types::WIBase::GetSize), luabind::copy_policy<0> {});
 	classDef.def("SetSize", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, ::Vector2)>(&SetSize));
 	classDef.def("SetSize", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, float, float)>(&SetSize));
+	classDef.def("ApplySize", static_cast<void (pragma::gui::types::WIBase::*)(const ::Vector2i &)>(&pragma::gui::types::WIBase::ApplySize));
+	classDef.def("ApplySize", static_cast<void (pragma::gui::types::WIBase::*)(int, int)>(&pragma::gui::types::WIBase::ApplySize));
 	classDef.def("Wrap", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, const std::string &)>(&Wrap));
 	classDef.def("Wrap", static_cast<bool (pragma::gui::types::WIBase::*)(pragma::gui::types::WIBase &)>(&pragma::gui::types::WIBase::Wrap));
 	classDef.def("AnchorWithMargin", static_cast<void (pragma::gui::types::WIBase::*)(uint32_t, uint32_t, uint32_t, uint32_t)>(&pragma::gui::types::WIBase::AnchorWithMargin));
@@ -321,11 +323,16 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetY", &GetY);
 	classDef.def("SetX", &SetX);
 	classDef.def("SetY", &SetY);
+	classDef.def("ApplyX", &pragma::gui::types::WIBase::ApplyX);
+	classDef.def("ApplyY", &pragma::gui::types::WIBase::ApplyY);
 	classDef.def("SetWidth", &SetWidth);
 	classDef.def("SetHeight", &SetHeight);
-	classDef.def("SizeToContents", &pragma::gui::types::WIBase::SizeToContents);
-	classDef.def("SizeToContents", &pragma::gui::types::WIBase::SizeToContents, luabind::default_parameter_policy<3, true> {});
-	classDef.def("SizeToContents", &pragma::gui::types::WIBase::SizeToContents, luabind::meta::join<luabind::default_parameter_policy<2, true>, luabind::default_parameter_policy<3, true>>::type {});
+	classDef.def("ApplyWidth", &pragma::gui::types::WIBase::ApplyWidth);
+	classDef.def("ApplyHeight", &pragma::gui::types::WIBase::ApplyHeight);
+	classDef.def("SizeToContents", +[](pragma::gui::types::WIBase &el, bool x, bool y, pragma::gui::ChangeSource changeSource) { el.SizeToContents(x, y, changeSource); });
+	classDef.def("SizeToContents", +[](pragma::gui::types::WIBase &el, bool x, bool y) { el.SizeToContents(x, y); });
+	classDef.def("SizeToContents", +[](pragma::gui::types::WIBase &el, bool x) { el.SizeToContents(x); });
+	classDef.def("SizeToContents", +[](pragma::gui::types::WIBase &el) { el.SizeToContents(); });
 	classDef.def("AddCallback", &AddCallback);
 	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, std::string)>(&CallCallbacks));
 	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, std::string, luabind::object)>(&CallCallbacks));
@@ -459,11 +466,27 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetAnchor", static_cast<void (pragma::gui::types::WIBase::*)(float, float, float, float, uint32_t, uint32_t)>(&pragma::gui::types::WIBase::SetAnchor));
 	classDef.def("SetAnchor", static_cast<void (*)(pragma::gui::types::WIBase &, float, float, float, float)>([](pragma::gui::types::WIBase &el, float left, float top, float right, float bottom) { el.SetAnchor(left, top, right, bottom); }));
 	classDef.def("SetAnchor", static_cast<void (pragma::gui::types::WIBase::*)(pragma::gui::Anchor::Edge, float)>(&pragma::gui::types::WIBase::SetAnchor));
+	classDef.def("SetAnchorHorizontal", &pragma::gui::types::WIBase::SetAnchorHorizontal);
+	classDef.def("SetAnchorVertical", &pragma::gui::types::WIBase::SetAnchorVertical);
+	classDef.def("SetAnchorCenter", &pragma::gui::types::WIBase::SetAnchorCenter, luabind::meta::join<luabind::default_parameter_policy<2, 0>, luabind::default_parameter_policy<3, 0>>::type {});
+	classDef.def("SetAnchorCenter", &pragma::gui::types::WIBase::SetAnchorCenter, luabind::default_parameter_policy<2, 0> {});
+	classDef.def("SetAnchorCenter", &pragma::gui::types::WIBase::SetAnchorCenter);
+	classDef.def("SetAnchorHorizontalCenter", &pragma::gui::types::WIBase::SetAnchorHorizontalCenter, luabind::default_parameter_policy<2, 0> {});
+	classDef.def("SetAnchorHorizontalCenter", &pragma::gui::types::WIBase::SetAnchorHorizontalCenter);
+	classDef.def("SetAnchorVerticalCenter", &pragma::gui::types::WIBase::SetAnchorVerticalCenter, luabind::default_parameter_policy<2, 0> {});
+	classDef.def("SetAnchorVerticalCenter", &pragma::gui::types::WIBase::SetAnchorVerticalCenter);
 	classDef.def("ClearAnchor", &pragma::gui::types::WIBase::ClearAnchor);
 	classDef.def(
 	  "GetAnchor", +[](pragma::gui::types::WIBase &el) -> std::optional<std::tuple<float, float, float, float>> {
 		  float left, top, right, bottom;
 		  if(!el.GetAnchor(left, top, right, bottom))
+			  return {};
+		  return std::tuple<float, float, float, float> {left, top, right, bottom};
+	  });
+	classDef.def(
+	  "GetAnchorPixelOffsets", +[](pragma::gui::types::WIBase &el) -> std::optional<std::tuple<float, float, float, float>> {
+		  float left, top, right, bottom;
+		  if(!el.GetAnchorPixelOffsets(left, top, right, bottom))
 			  return {};
 		  return std::tuple<float, float, float, float> {left, top, right, bottom};
 	  });
@@ -520,11 +543,6 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetAutoCenterToParentX", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoCenterToParentX));
 	classDef.def("SetAutoCenterToParentY", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoCenterToParentY));
 	classDef.def("SetAutoCenterToParent", &pragma::gui::types::WIBase::SetAutoCenterToParent);
-	classDef.def("SetPivot", static_cast<void (pragma::gui::types::WIBase::*)(const ::Vector2 &)>(&pragma::gui::types::WIBase::SetPivot));
-	classDef.def("SetPivot", static_cast<void (pragma::gui::types::WIBase::*)(float, float)>(&pragma::gui::types::WIBase::SetPivot));
-	classDef.def("GetPivot", &pragma::gui::types::WIBase::GetPivot);
-	classDef.def("SetPivotPos", &pragma::gui::types::WIBase::SetPivotPos);
-	classDef.def("GetPivotPos", static_cast<::Vector2 (pragma::gui::types::WIBase::*)() const>(&pragma::gui::types::WIBase::GetPivotPos));
 
 	auto defDrawInfo = luabind::class_<pragma::gui::DrawInfo>("DrawInfo");
 	defDrawInfo.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::gui::DrawInfo::Flags::None));

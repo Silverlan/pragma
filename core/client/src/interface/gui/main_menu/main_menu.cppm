@@ -12,7 +12,6 @@ export namespace pragma::gui::types {
 		WIMainMenu();
 		virtual ~WIMainMenu() override;
 		virtual void Initialize() override;
-		virtual void SetSize(int x, int y) override;
 		void SetContinueMenu();
 		void SetNewGameMenu();
 		virtual void OnFocusGained() override;

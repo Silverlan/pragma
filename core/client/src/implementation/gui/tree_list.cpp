@@ -224,7 +224,6 @@ pragma::util::EventReply pragma::gui::types::WITreeList::MouseCallback(platform:
 	RequestFocus();
 	return util::EventReply::Handled;
 }
-void pragma::gui::types::WITreeList::SetSize(int x, int y) { WITable::SetSize(x, y); }
 pragma::gui::types::WITableRow *pragma::gui::types::WITreeList::AddRow() { return WITable::AddRow<WITreeListElement>(); }
 void pragma::gui::types::WITreeList::ExpandAll()
 {

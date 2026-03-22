@@ -40,18 +40,17 @@ export namespace pragma::gui::types {
 	};
 
 	class DLLCLIENT WITreeList : public WITable {
-	  protected:
-		virtual void DoUpdate() override;
-		WIHandle m_pRoot;
 	  public:
 		WITreeList();
 		virtual void Initialize() override;
-		virtual void SetSize(int x, int y) override;
 		virtual util::EventReply MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods) override;
 		virtual WITableRow *AddRow() override;
 		WITreeListElement *AddItem(const std::string &text, const std::function<void(WITreeListElement &)> &fPopulate = nullptr);
 		WITreeListElement *GetRootItem() const;
 		void ExpandAll();
 		void CollapseAll();
+	  protected:
+		virtual void DoUpdate() override;
+		WIHandle m_pRoot;
 	};
 };

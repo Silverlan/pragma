@@ -10,24 +10,10 @@ export import :gui.table;
 
 export namespace pragma::gui::types {
 	class DLLCLIENT WIOptionsList : public WIBase {
-	  private:
-		WIHandle m_hTable;
-		WIHandle m_hHeaderRow;
-		uint32_t m_maxHeight = 512;
-		std::unordered_map<std::string, std::string> m_updateCvars;
-		std::unordered_map<std::string, platform::Key> m_keyBindingsAdd[2];
-		std::unordered_map<std::string, platform::Key> m_keyBindingsErase[2];
-		std::unordered_map<std::string, WIHandle> m_rows;
-		template<class T>
-		WIChoiceList *AddChoiceList(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIChoiceList *)> &initializer, const std::optional<std::string> &optRowIdent = {});
-		template<class T>
-		WIDropDownMenu *AddDropDownMenu(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIDropDownMenu *)> &initializer);
-		virtual void DoUpdate() override;
 	  public:
 		WIOptionsList();
 		virtual ~WIOptionsList() override;
 		virtual void Initialize() override;
-		virtual void SetSize(int x, int y) override;
 		void SetMaxHeight(uint32_t h);
 		WITableRow *AddRow(const std::optional<std::string> &identifier = {});
 		WITableRow *AddHeaderRow();
@@ -44,11 +30,25 @@ export namespace pragma::gui::types {
 		WISlider *AddSlider(const std::string &name, const std::function<void(WISlider *)> &initializer, const std::string &cvarName = "");
 		void AddKeyBinding(const std::string &keyName, const std::string &cvarName);
 		WITextEntry *AddTextEntry(const std::string &name, const std::string &cvarName = "");
-		virtual void SizeToContents(bool x = true, bool y = true) override;
+		virtual void SizeToContents(bool x = true, bool y = true, ChangeSource changeSource = ChangeSource::User) override;
 		void SetTitle(const std::string &title);
 		void SetUpdateConVar(const std::string &cvar, const std::string &value);
 		void RunUpdateConVars(bool bClear = true);
 		WITableRow *GetRow(const std::string &identifier) const;
 		std::unordered_map<std::string, std::string> &GetUpdateConVars();
+	  private:
+		WIHandle m_hTable;
+		WIHandle m_hHeaderRow;
+		uint32_t m_maxHeight = 512;
+		std::unordered_map<std::string, std::string> m_updateCvars;
+		std::unordered_map<std::string, platform::Key> m_keyBindingsAdd[2];
+		std::unordered_map<std::string, platform::Key> m_keyBindingsErase[2];
+		std::unordered_map<std::string, WIHandle> m_rows;
+		template<class T>
+		WIChoiceList *AddChoiceList(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIChoiceList *)> &initializer, const std::optional<std::string> &optRowIdent = {});
+		template<class T>
+		WIDropDownMenu *AddDropDownMenu(const std::string &name, T list, const std::string &cvarName, const std::function<void(WIDropDownMenu *)> &initializer);
+		virtual void DoUpdate() override;
+	    virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
 	};
 };

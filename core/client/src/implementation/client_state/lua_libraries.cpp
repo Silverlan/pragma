@@ -268,6 +268,14 @@ static void register_gui(Lua::Interface &lua)
 	luabind::globals(l)["gui"]["ANCHOR_EDGE_RIGHT"] = pragma::gui::Anchor::Edge::Right;
 	luabind::globals(l)["gui"]["ANCHOR_EDGE_TOP"] = pragma::gui::Anchor::Edge::Top;
 	luabind::globals(l)["gui"]["ANCHOR_EDGE_BOTTOM"] = pragma::gui::Anchor::Edge::Bottom;
+	luabind::globals(l)["gui"]["ANCHOR_EDGE_HORIZONTAL_CENTER"] = pragma::gui::Anchor::Edge::HorizontalCenter;
+	luabind::globals(l)["gui"]["ANCHOR_EDGE_VERTICAL_CENTER"] = pragma::gui::Anchor::Edge::VerticalCenter;
+	static_assert(pragma::math::to_integral(pragma::gui::Anchor::Edge::Count) == 6, "Update enum registration when new enum values are added!");
+
+	luabind::globals(l)["gui"]["CHANGE_SOURCE_LAYOUT"] = pragma::gui::ChangeSource::Layout;
+	luabind::globals(l)["gui"]["CHANGE_SOURCE_USER"] = pragma::gui::ChangeSource::User;
+	luabind::globals(l)["gui"]["CHANGE_SOURCE_CONTENT"] = pragma::gui::ChangeSource::Content;
+	static_assert(pragma::math::to_integral(pragma::gui::ChangeSource::Count) == 3, "Update enum registration when new enum values are added!");
 
 	//
 	auto videoModeDef = luabind::class_<pragma::platform::Monitor::VideoMode>("VideoMode");
@@ -323,7 +331,7 @@ static void register_gui(Lua::Interface &lua)
 	wiBaseWIElement.def("ScrollCallback", &pragma::gui::types::WILuaBase::Lua_ScrollCallback, &pragma::gui::types::WILuaBase::default_ScrollCallback);
 	wiBaseWIElement.def("OnUpdate", &pragma::gui::types::WILuaBase::Lua_OnUpdate, &pragma::gui::types::WILuaBase::default_OnUpdate);
 	wiBaseWIElement.def("OnVisibilityChanged", &pragma::gui::types::WILuaBase::Lua_OnSetVisible, &pragma::gui::types::WILuaBase::default_OnSetVisible);
-	wiBaseWIElement.def("OnSizeChanged", &pragma::gui::types::WILuaBase::Lua_OnSetSize, &pragma::gui::types::WILuaBase::default_OnSetSize);
+	wiBaseWIElement.def("OnSizeChanged", &pragma::gui::types::WILuaBase::Lua_OnSizeChanged, &pragma::gui::types::WILuaBase::default_OnSizeChanged);
 	wiBaseWIElement.def("OnColorChanged", &pragma::gui::types::WILuaBase::Lua_OnSetColor, &pragma::gui::types::WILuaBase::default_OnSetColor);
 	wiBaseWIElement.def("OnAlphaChanged", &pragma::gui::types::WILuaBase::Lua_OnSetAlpha, &pragma::gui::types::WILuaBase::default_OnSetAlpha);
 	wiBaseWIElement.def("CheckPosInBounds", &pragma::gui::types::WILuaBase::Lua_CheckPosInBounds, &pragma::gui::types::WILuaBase::default_CheckPosInBounds);

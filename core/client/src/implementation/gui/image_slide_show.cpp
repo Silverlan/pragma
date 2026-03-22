@@ -38,9 +38,8 @@ void pragma::gui::types::WIImageSlideShow::DoUpdate()
 	//m_blurTexture.Initialize(*WGUI::GetContext(),m_texture,GetWidth(),GetHeight());
 }
 
-void pragma::gui::types::WIImageSlideShow::SetSize(int x, int y)
+void pragma::gui::types::WIImageSlideShow::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetSize(x, y);
 	ScheduleUpdate();
 }
 

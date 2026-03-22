@@ -236,13 +236,11 @@ void pragma::gui::types::WINetGraph::UpdateGraph()
 		m_hDataGraph.get<WILineGraph>()->Update();
 }
 
-void pragma::gui::types::WINetGraph::SetSize(int x, int y)
+void pragma::gui::types::WINetGraph::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetSize(x, y);
-
 	if(!m_hPacketGraph.IsValid())
 		return;
-	m_hPacketGraph->SetX(x - m_hPacketGraph->GetWidth());
+	m_hPacketGraph->SetX(GetWidth() - m_hPacketGraph->GetWidth());
 
 	if(m_hDataGraph.IsValid())
 		m_hDataGraph->SetPos(m_hPacketGraph->GetX(), m_hPacketGraph->GetY() + m_hPacketGraph->GetHeight());

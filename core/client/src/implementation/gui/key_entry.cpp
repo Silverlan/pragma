@@ -48,9 +48,8 @@ void pragma::gui::types::WIKeyEntry::Initialize()
 	ApplyKey(static_cast<platform::Key>(-1));
 }
 
-void pragma::gui::types::WIKeyEntry::SetSize(int x, int y)
+void pragma::gui::types::WIKeyEntry::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WITextEntryBase::SetSize(x, y);
 	if(!m_hText.IsValid())
 		return;
 	WIText *t = static_cast<WIText *>(m_hText.get());

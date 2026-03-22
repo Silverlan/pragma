@@ -74,9 +74,8 @@ void pragma::gui::types::WIMainMenuCredits::Initialize()
 	}));
 }
 
-void pragma::gui::types::WIMainMenuCredits::SetSize(int x, int y)
+void pragma::gui::types::WIMainMenuCredits::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIMainMenuBase::SetSize(x, y);
 	ScheduleUpdate();
 }
 

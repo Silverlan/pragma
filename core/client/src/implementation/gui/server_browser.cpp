@@ -314,8 +314,6 @@ void pragma::gui::types::WIServerBrowser::DoRefresh()
 
 void pragma::gui::types::WIServerBrowser::Refresh() { m_bRefreshScheduled = true; }
 
-void pragma::gui::types::WIServerBrowser::SetSize(int x, int y) { WIFrame::SetSize(x, y); }
-
 void pragma::gui::types::WIServerBrowser::AddServer(const networking::MasterServerQueryResult &queryResult)
 {
 	if(!m_hServerList.IsValid())

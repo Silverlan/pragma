@@ -142,25 +142,26 @@ void pragma::gui::types::WIFrame::SetDetachButtonEnabled(bool b)
 		return;
 	m_hDetachButton->SetVisible(b);
 }
-void pragma::gui::types::WIFrame::SetSize(int x, int y)
+void pragma::gui::types::WIFrame::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WITransformable::SetSize(x, y);
+	auto w = GetWidth();
+	auto h = GetHeight();
 	if(m_hMoveRect.IsValid())
-		m_hMoveRect->SetWidth(x);
+		m_hMoveRect->SetWidth(w);
 	Vector2i minSize = m_minSize;
-	if(x < minSize.x || y < minSize.y) {
-		if(x < minSize.x)
-			minSize.x = x;
-		if(y < minSize.y)
-			minSize.y = y;
+	if(w < minSize.x || h < minSize.y) {
+		if(w < minSize.x)
+			minSize.x = w;
+		if(h < minSize.y)
+			minSize.y = h;
 		SetMinSize(minSize);
 	}
 	Vector2i maxSize = m_maxSize;
-	if((x > maxSize.x && maxSize.x != -1) || (y > maxSize.y && maxSize.y != -1)) {
-		if(x > maxSize.x && maxSize.x != -1)
-			maxSize.x = x;
-		if(y > maxSize.y && maxSize.y != -1)
-			maxSize.y = y;
+	if((w > maxSize.x && maxSize.x != -1) || (h > maxSize.y && maxSize.y != -1)) {
+		if(w > maxSize.x && maxSize.x != -1)
+			maxSize.x = w;
+		if(h > maxSize.y && maxSize.y != -1)
+			maxSize.y = h;
 		SetMaxSize(maxSize);
 	}
 }

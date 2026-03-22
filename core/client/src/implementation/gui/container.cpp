@@ -60,10 +60,10 @@ void pragma::gui::types::WIContainer::SetPadding(Padding paddingType, int32_t pa
 		break;
 	}
 }
-void pragma::gui::types::WIContainer::SizeToContents(bool x, bool y)
+void pragma::gui::types::WIContainer::SizeToContents(bool x, bool y, ChangeSource changeSource)
 {
-	WIBase::SizeToContents(x, y);
-	SetSize(GetWidth() + GetPaddingLeft() + GetPaddingRight(), GetHeight() + GetPaddingTop() + GetPaddingBottom());
+	WIBase::SizeToContents(x, y, changeSource);
+	SetSize(GetWidth() + GetPaddingLeft() + GetPaddingRight(), GetHeight() + GetPaddingTop() + GetPaddingBottom(), changeSource);
 }
 void pragma::gui::types::WIContainer::DoUpdate()
 {

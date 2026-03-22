@@ -47,11 +47,10 @@ void pragma::gui::types::WIOptionsList::SetTitle(const std::string &title)
 	pRow->SetValue(0, title);
 }
 
-void pragma::gui::types::WIOptionsList::SetSize(int x, int y)
+void pragma::gui::types::WIOptionsList::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetSize(x, y);
 	if(m_hTable.IsValid())
-		m_hTable->SetWidth(x);
+		m_hTable->SetWidth(GetWidth());
 	if(math::is_flag_set(m_stateFlags, StateFlags::IsBeingUpdated) == false)
 		ScheduleUpdate();
 }
@@ -71,16 +70,16 @@ void pragma::gui::types::WIOptionsList::SetMaxHeight(uint32_t h)
 		SetHeight(h);
 }
 
-void pragma::gui::types::WIOptionsList::SizeToContents(bool x, bool y)
+void pragma::gui::types::WIOptionsList::SizeToContents(bool x, bool y, ChangeSource changeSource)
 {
 	if(m_hTable.IsValid()) {
 		auto *pTable = m_hTable.get<WITable>();
-		pTable->SizeToContents();
+		pTable->SizeToContents(x, y, changeSource);
 		auto h = pTable->GetHeight();
 		if(h > m_maxHeight)
 			h = m_maxHeight;
-		pTable->SetSize(GetWidth(), h);
-		SetHeight(h);
+		pTable->SetSize(GetWidth(), h, changeSource);
+		SetHeight(h, false, changeSource);
 	}
 }
 

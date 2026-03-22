@@ -20,11 +20,10 @@ void pragma::gui::types::WILineGraph::Initialize()
 	pOutline->SetAutoAlignToParent(true, false);
 }
 
-void pragma::gui::types::WILineGraph::SetSize(int x, int y)
+void pragma::gui::types::WILineGraph::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetSize(x, y);
 	if(m_hOutline.IsValid())
-		m_hOutline->SetY(y - 1);
+		m_hOutline->SetY(GetHeight() - 1);
 }
 
 void pragma::gui::types::WILineGraph::DoUpdate()

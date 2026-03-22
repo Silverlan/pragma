@@ -279,12 +279,12 @@ void pragma::gui::types::WIConsole::Initialize()
 	pLogBg->SetAnchor(0, 0, 1, 1);
 
 	pLog->SetSize(pLogBg->GetSize());
-	pLog->AddCallback("SetSize", FunctionCallback<void>::Create([pLog, hScrollContainer]() mutable {
+	pLog->AddCallback("OnSizeChanged", FunctionCallback<void>::Create([pLog, hScrollContainer]() mutable {
 		if(hScrollContainer.IsValid() == false)
 			return;
 		static_cast<WIScrollContainer *>(hScrollContainer.get())->Update();
 	}));
-	pLogBg->AddCallback("SetSize", FunctionCallback<void>::Create([hLog, pLogBg]() mutable {
+	pLogBg->AddCallback("OnSizeChanged", FunctionCallback<void>::Create([hLog, pLogBg]() mutable {
 		if(hLog.IsValid())
 			hLog.get()->SetWidth(pLogBg->GetWidth());
 	}));

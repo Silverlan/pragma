@@ -196,7 +196,7 @@ void pragma::gui::types::WIScrollContainer::OnWrapperChildAdded(WIBase *child)
 	std::unordered_map<WIBase *, std::vector<CallbackHandle>>::iterator it = m_childCallbackHandles.insert(std::unordered_map<WIBase *, std::vector<CallbackHandle>>::value_type(child, std::vector<CallbackHandle>())).first;
 	CallbackHandle hCallbackOnRemove = child->AddCallback("OnRemove", FunctionCallback<>::Create(std::bind(&WIScrollContainer::OnChildReleased, child)));
 	it->second.push_back(hCallbackOnRemove);
-	CallbackHandle hCallbackSetSize = child->AddCallback("SetSize", FunctionCallback<>::Create(std::bind(&WIScrollContainer::OnChildSetSize, child)));
+	CallbackHandle hCallbackSetSize = child->AddCallback("OnSizeChanged", FunctionCallback<>::Create(std::bind(&WIScrollContainer::OnChildSetSize, child)));
 	it->second.push_back(hCallbackSetSize);
 	Update();
 }

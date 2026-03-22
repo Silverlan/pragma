@@ -46,7 +46,7 @@ void pragma::gui::types::WIFrame::Initialize()
 		pTitleBar->AddStyleClass("frame_titlebar");
 		pTitleBar->SetAutoAlignToParent(true);
 		auto hFrame = GetHandle();
-		pTitleBar->AddCallback("SetSize", FunctionCallback<>::Create([hFrame]() mutable {
+		pTitleBar->AddCallback("OnSizeChanged", FunctionCallback<>::Create([hFrame]() mutable {
 			if(!hFrame.IsValid())
 				return;
 			auto *pFrame = static_cast<WIFrame *>(hFrame.get());

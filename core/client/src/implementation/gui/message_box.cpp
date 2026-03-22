@@ -155,7 +155,7 @@ void pragma::gui::types::WIMessageBox::Initialize()
 	pMessage->SetWidth(512);
 	pMessage->SetCloseButtonEnabled(false);
 	auto hMessageBox = GetHandle();
-	pMessage->AddCallback("SetSize", FunctionCallback<>::Create([hMessageBox]() mutable {
+	pMessage->AddCallback("OnSizeChanged", FunctionCallback<>::Create([hMessageBox]() mutable {
 		if(!hMessageBox.IsValid())
 			return;
 		auto *pMessageBox = hMessageBox.get<WIMessageBox>();

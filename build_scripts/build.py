@@ -225,7 +225,7 @@ mkpath(tools)
 
 config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 
-def check_cmake(min_version):
+def check_cmake(min_version, max_version):
 	cmake_path = shutil.which("cmake")
 	if not cmake_path:
 		# CMake not found
@@ -247,7 +247,7 @@ def check_cmake(min_version):
 		version_str = match.group(1)
 		current_version = tuple(map(int, version_str.split(".")))
 
-		if current_version >= min_version:
+		if current_version >= min_version and current_version <= max_version:
 			return True
 		else:
 			# CMake is too old
@@ -268,8 +268,9 @@ def fetch_cmake():
 
 # At least CMake 4.2.0 is needed, which is still very new and not available in the package managers of
 # most distros yet. If the detected CMake version is too old (or none was found), we'll download it here.
+# Version 4.3.0 is currently not supported due to: https://gitlab.kitware.com/cmake/cmake/-/issues/27600
 use_custom_cmake = False
-if not no_build_networking and not check_cmake((4, 2, 0)):
+if not no_build_networking and not check_cmake((4, 2, 0), (4, 2, 3)):
 	use_custom_cmake = True
 	fetch_cmake()
 

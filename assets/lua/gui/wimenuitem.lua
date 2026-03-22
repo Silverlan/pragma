@@ -139,8 +139,8 @@ end
 local border = 8
 function gui.WIMenuItem:UpdateRightText()
 	--[[if(util.is_valid(self.m_pTextRight) == false) then return end
-	self.m_pTextRight:SetX(self:GetWidth() -self.m_pTextRight:GetWidth() -border)
-	self.m_pTextRight:SetY(self:GetHeight() *0.5 -self.m_pTextRight:GetHeight() *0.5)]]
+	self.m_pTextRight:ApplyX(self:GetWidth() -self.m_pTextRight:GetWidth() -border)
+	self.m_pTextRight:ApplyY(self:GetHeight() *0.5 -self.m_pTextRight:GetHeight() *0.5)]]
 end
 function gui.WIMenuItem:OnSizeChanged(width, height)
 	self:UpdateRightText()

@@ -204,42 +204,42 @@ function gui.WIFileDialog:OnSizeChanged(w, h)
 		return
 	end
 	local wButton = 80
-	self.m_pButtonCancel:SetWidth(wButton)
-	self.m_pButtonCancel:SetPos(w - margin - wButton, h - 50)
+	self.m_pButtonCancel:ApplyWidth(wButton)
+	self.m_pButtonCancel:ApplyPos(w - margin - wButton, h - 50)
 
 	if util.is_valid(self.m_pButtonOpen) == false then
 		return
 	end
-	self.m_pButtonOpen:SetPos(w - 170, h - 50)
+	self.m_pButtonOpen:ApplyPos(w - 170, h - 50)
 	if util.is_valid(self.m_pPath) == false then
 		return
 	end
-	self.m_pPath:SetSize(256, 24)
-	self.m_pPath:SetPos(margin, 5)
+	self.m_pPath:ApplySize(256, 24)
+	self.m_pPath:ApplyPos(margin, 5)
 
 	local wFileList = w - margin * 2
 	self.m_pOptions:Update()
 	self.m_pOptions:SizeToContents()
-	self.m_pOptions:SetWidth(wFileList)
+	self.m_pOptions:ApplyWidth(wFileList)
 
 	if util.is_valid(self.m_pFileList) == false then
 		return
 	end
-	self.m_pFileList:SetPos(margin, self.m_pPath:GetY() + self.m_pPath:GetHeight())
-	self.m_pFileList:SetSize(wFileList, h - 100 - self.m_pOptions:GetHeight())
+	self.m_pFileList:ApplyPos(margin, self.m_pPath:GetY() + self.m_pPath:GetHeight())
+	self.m_pFileList:ApplySize(wFileList, h - 100 - self.m_pOptions:GetHeight())
 
-	self.m_pOptions:SetPos(self.m_pFileList:GetLeft(), self.m_pFileList:GetBottom() + 10)
+	self.m_pOptions:ApplyPos(self.m_pFileList:GetLeft(), self.m_pFileList:GetBottom() + 10)
 
 	if util.is_valid(self.m_pLbFileName) == false then
 		return
 	end
-	self.m_pLbFileName:SetPos(margin, h - 47)
+	self.m_pLbFileName:ApplyPos(margin, h - 47)
 	if util.is_valid(self.m_pFileName) == false then
 		return
 	end
 	local xOffset = self.m_pLbFileName:GetX() + self.m_pLbFileName:GetWidth()
-	self.m_pFileName:SetPos(xOffset + margin, self.m_pLbFileName:GetY() - 1)
-	self.m_pFileName:SetSize(self.m_pButtonOpen:GetX() - xOffset - margin * 2, 24)
+	self.m_pFileName:ApplyPos(xOffset + margin, self.m_pLbFileName:GetY() - 1)
+	self.m_pFileName:ApplySize(self.m_pButtonOpen:GetX() - xOffset - margin * 2, 24)
 end
 gui.register("file_dialog", gui.WIFileDialog)
 

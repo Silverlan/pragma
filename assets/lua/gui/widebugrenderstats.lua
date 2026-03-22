@@ -132,7 +132,7 @@ function gui.DebugRenderStats:InitializeUiElements()
 		pHeaderText:SetColor(Color(152, 152, 152))
 		pHeaderText:AddStyleClass("font_medium")
 		pHeaderText:SetText(text)
-		pHeader:AddCallback("SetSize", function()
+		pHeader:AddCallback("OnSizeChanged", function()
 			if pHeaderText:IsValid() == false then
 				return
 			end
@@ -148,7 +148,7 @@ function gui.DebugRenderStats:InitializeUiElements()
 	-- Tree
 	local treeScrollContainerBg = gui.create("WIBase", treeVBox, 0, 0, 64, 128)
 	local treeScrollContainer = gui.create("WIScrollContainer", treeScrollContainerBg, 0, 0, 64, 128, 0, 0, 1, 1)
-	treeScrollContainerBg:AddCallback("SetSize", function(el)
+	treeScrollContainerBg:AddCallback("OnSizeChanged", function(el)
 		if self:IsValid() and util.is_valid(self.m_tree) then
 			self.m_tree:SetWidth(el:GetWidth())
 		end
@@ -166,7 +166,7 @@ function gui.DebugRenderStats:InitializeUiElements()
 	-- Data
 	local dataScrollContainerBg = gui.create("WIBase", dataVBox, 0, 0, 64, 128)
 	local dataScrollContainer = gui.create("WIScrollContainer", dataScrollContainerBg, 0, 0, 64, 128, 0, 0, 1, 1)
-	dataScrollContainerBg:AddCallback("SetSize", function(el)
+	dataScrollContainerBg:AddCallback("OnSizeChanged", function(el)
 		if self:IsValid() and util.is_valid(self.m_data) then
 			self.m_data:SetWidth(el:GetWidth())
 		end

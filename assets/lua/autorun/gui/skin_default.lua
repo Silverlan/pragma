@@ -237,7 +237,7 @@ skin["wibutton"] = {
 				)
 			end
 		end
-		local cbSetSize = pElement:AddCallback("SetSize", fcSetSize)
+		local cbSetSize = pElement:AddCallback("OnSizeChanged", fcSetSize)
 		fcSetSize()
 		add_skin_element(pElement, cbSetSize)
 	end,
@@ -245,7 +245,7 @@ skin["wibutton"] = {
 	children = {
 		["witext"] = {
 			Initialize = function(GUI, pElement)
-				local cbSetSize = pElement:AddCallback("SetSize", function()
+				local cbSetSize = pElement:AddCallback("OnSizeChanged", function()
 					local p = pElement:GetParent()
 					if not p:IsValid() then
 						return
@@ -354,7 +354,7 @@ skin["table_row_header"] = {
 						c:SetX(sz.x * 0.5 - c:GetWidth() * 0.5)
 					end
 				end
-				local cbSetSize = pElement:AddCallback("SetSize", fcSetSize)
+				local cbSetSize = pElement:AddCallback("OnSizeChanged", fcSetSize)
 				add_skin_element(pElement, cbSetSize)
 				fcSetSize()
 			end,
@@ -450,7 +450,7 @@ skin["table_row_offset"] = {
 							pElement:SetY(pCell:GetHeight() * 0.5 - pElement:GetHeight() * 0.5)
 							pElement:SetX(GUI.TABLE_TEXT_OFFSET_X)
 						end
-						local cbSetSize = pCell:AddCallback("SetSize", fcSetSize)
+						local cbSetSize = pCell:AddCallback("OnSizeChanged", fcSetSize)
 						add_skin_element(pElement, cbSetSize)
 						fcSetSize()
 					end
@@ -557,7 +557,7 @@ skin["witooltip"] = {
 
 			pText:SetZPos(1)
 		end
-		local cbSize = pText:AddCallback("SetSize", function(pText)
+		local cbSize = pText:AddCallback("OnSizeChanged", function(pText)
 			local sz = pText:GetSize()
 			pText:SetPos(10, 5)
 

@@ -135,13 +135,13 @@ function TabbedPanel:UpdateLayout()
 			if elTab:IsSelected() == true then
 				bGotSelected = true
 			end
-			elTab:SetPos(xOffset, 0)
+			elTab:ApplyPos(xOffset, 0)
 			xOffset = xOffset + elTab:GetWidth()
 		end
 		local elBase = tabData.panel
 		if elBase:IsValid() == true then
-			elBase:SetPos(0, elTab:GetY() + elTab:GetHeight())
-			elBase:SetSize(sz.x, sz.y - elBase:GetY())
+			elBase:ApplyPos(0, elTab:GetY() + elTab:GetHeight())
+			elBase:ApplySize(sz.x, sz.y - elBase:GetY())
 		end
 	end
 	if bGotSelected == false and #self.m_tTabs > 0 then

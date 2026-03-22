@@ -144,8 +144,8 @@ function gui.WIToolBarTool:OnSizeChanged(w, h)
 	if util.is_valid(self.m_pMain) == true then
 		local wIcon = w * 0.8
 		local hIcon = h * 0.8
-		self.m_pMain:SetSize(wIcon, hIcon)
-		self.m_pMain:SetPos((w - wIcon) * 0.5, (h - hIcon) * 0.5)
+		self.m_pMain:ApplySize(wIcon, hIcon)
+		self.m_pMain:ApplyPos((w - wIcon) * 0.5, (h - hIcon) * 0.5)
 	end
 end
 function gui.WIToolBarTool:SetBackgroundColor(col)

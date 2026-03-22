@@ -36,7 +36,7 @@ function InfoBox:OnInitialize()
 	text:SetAutoBreakMode(gui.Text.AUTO_BREAK_WHITESPACE)
 	text:SetTagsEnabled(true)
 	self.m_text = text
-	contents:AddCallback("SetSize", function()
+	contents:AddCallback("OnSizeChanged", function()
 		text:SetSize(contents:GetSize())
 	end)
 
@@ -97,7 +97,7 @@ gui.create_info_box = function(parent, text, type)
 	infoBox:SetType(type or gui.InfoBox.TYPE_INFO)
 	infoBox:SetText(text)
 	infoBox:SizeToContents()
-	parent:AddCallback("SetSize", function()
+	parent:AddCallback("OnSizeChanged", function()
 		if infoBox:IsValid() then
 			infoBox:SizeToContents()
 		end

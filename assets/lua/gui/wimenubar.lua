@@ -139,12 +139,12 @@ function gui.WIMenuBar:OnUpdate()
 	local x = 0
 	for _, item in ipairs(self.m_tItems) do
 		if item:IsValid() then
-			item:SetX(x)
-			item:SetHeight(self:GetHeight())
+			item:ApplyX(x)
+			item:ApplyHeight(self:GetHeight())
 
 			local elText = item:GetTextElement()
 
-			item:SetWidth(elText:GetWidth() + 20)
+			item:ApplyWidth(elText:GetWidth() + 20)
 			item:Update()
 
 			x = x + item:GetWidth()
@@ -160,6 +160,7 @@ function gui.WIMenuBar:AddItem(name, fcContextCallback, identifier)
 		return
 	end
 	pItem:SetTitle(name)
+	pItem:GetTextElement():SetAutoCenterToParent(true)
 	pItem:SetContextMenuHandler(fcContextCallback)
 	pItem:AddCallback("OnSelectionChanged", function(el, selected)
 		if self:IsValid() == false or self:IsContextMenuOpen() == false then

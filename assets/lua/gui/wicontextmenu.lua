@@ -59,7 +59,7 @@ function gui.WIContextMenu:OnInitialize()
 	end
 
 	local scrollContainer = gui.create("WIScrollContainer", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
-	scrollContainer:AddCallback("SetSize", function(el)
+	scrollContainer:AddCallback("OnSizeChanged", function(el)
 		self.m_contents:SetWidth(el:GetWidth())
 	end)
 	scrollContainer:GetVerticalScrollBar():SetScrollAmount(1)
@@ -67,7 +67,7 @@ function gui.WIContextMenu:OnInitialize()
 
 	local contents = gui.create("vbox", scrollContainer, 0, 0, self:GetWidth(), self:GetHeight())
 	contents:SetFixedWidth(true)
-	contents:AddCallback("SetSize", function(el)
+	contents:AddCallback("OnSizeChanged", function(el)
 		for _, item in ipairs(self.m_tItems) do
 			if item:IsValid() then
 				item:SetWidth(el:GetWidth())
@@ -169,7 +169,7 @@ function gui.WIContextMenu:OnUpdate()
 	w = w + 20
 	h = self:UpdateCompactHeight(h, true)
 	self.m_updateHeightOnContainerChange = true
-	self:SetSize(w, h)
+	self:ApplySize(w, h)
 
 	for _, item in ipairs(updateItems) do
 		item:Update()
@@ -411,7 +411,7 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 		pIcon:SetX(pItem:GetWidth() - pIcon:GetWidth() - 5)
 	end
 	updateIcon()
-	pItem:AddCallback("SetSize", updateIcon)
+	pItem:AddCallback("OnSizeChanged", updateIcon)
 	pIcon:SetDirection(gui.Arrow.DIRECTION_RIGHT)
 	pIcon:AddStyleClass("context_menu_arrow")
 

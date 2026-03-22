@@ -87,8 +87,8 @@ function gui.WIBaseEditor:OnSizeChanged(w, h)
 	if util.is_valid(self.m_infoBar) == false or util.is_valid(self.m_menuBar) == false then
 		return
 	end
-	self.m_pMain:SetSize(w, h - self.m_menuBar:GetHeight() - self.m_infoBar:GetHeight())
-	self.m_pMain:SetY(self.m_menuBar:GetHeight())
+	self.m_pMain:ApplySize(w, h - self.m_menuBar:GetHeight() - self.m_infoBar:GetHeight())
+	self.m_pMain:ApplyY(self.m_menuBar:GetHeight())
 end
 
 function gui.WIBaseEditor:GetInfoBar()

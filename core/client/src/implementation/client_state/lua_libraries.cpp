@@ -299,6 +299,40 @@ static void register_gui(Lua::Interface &lua)
 	Lua::WIBase::register_class(wiElementClassDef);
 	guiMod[wiElementClassDef];
 
+	auto locDef = luabind::class_<pragma::gui::Loc>("Loc");
+	locDef.def_readwrite("key", &pragma::gui::Loc::key);
+	locDef.def("Resolve", &pragma::gui::Loc::Resolve);
+	locDef.def("IsValid", &pragma::gui::Loc::IsValid);
+	guiMod[locDef];
+	pragma::LuaCore::define_custom_constructor<pragma::gui::Loc, +[](const std::string &key) -> pragma::gui::Loc { return pragma::gui::Loc {key}; }, const std::string &>(lua.GetState());
+	pragma::LuaCore::define_custom_constructor<pragma::gui::Loc,
+	  +[](const std::string &key, const luabind::tableT<void> &args) -> pragma::gui::Loc {
+	  	std::vector<pragma::gui::Loc::FormatArg> locArgs;
+	  	for(luabind::iterator it {args}, end; it != end; ++it) {
+	  		auto val = *it;
+
+	  		auto *utf8Str = luabind::object_cast<pragma::string::Utf8String *>(val);
+	  		if(utf8Str) {
+	  			locArgs.push_back(*utf8Str);
+	  			continue;
+	  		}
+
+	  		auto *str = luabind::object_cast<std::string *>(val);
+	  		if(str) {
+	  			locArgs.push_back(pragma::string::Utf8String {*str});
+	  			continue;
+	  		}
+
+	  		auto *loc = luabind::object_cast<pragma::gui::Loc *>(val);
+	  		if(loc) {
+	  			locArgs.push_back(*loc);
+	  			continue;
+	  		}
+	  	}
+	  	return pragma::gui::Loc {key, locArgs};
+	},
+	const std::string &, const luabind::tableT<void> &>(lua.GetState());
+
 	luabind::object oLogger = luabind::globals(l)["gui"];
 	oLogger = oLogger["Element"];
 	Lua::logging::add_log_func<spdlog::level::trace, &log>(l, oLogger, "LogTrace");

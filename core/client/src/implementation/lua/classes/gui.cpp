@@ -847,8 +847,10 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<pragma::gui::types::WID
 	classDef.def("GetText", +[](const pragma::gui::types::WIDropDownMenu &menu) { return menu.GetText().cpp_str(); });
 	classDef.def("SetText", +[](pragma::gui::types::WIDropDownMenu &menu, const std::string &text) { return menu.SetText(text); });
 	classDef.def("GetOptionCount", &pragma::gui::types::WIDropDownMenu::GetOptionCount);
-	classDef.def("AddOption", static_cast<pragma::gui::types::WIDropDownMenuOption *(pragma::gui::types::WIDropDownMenu::*)(const std::string &, const std::string &)>(&pragma::gui::types::WIDropDownMenu::AddOption));
-	classDef.def("AddOption", static_cast<pragma::gui::types::WIDropDownMenuOption *(pragma::gui::types::WIDropDownMenu::*)(const std::string &)>(&pragma::gui::types::WIDropDownMenu::AddOption));
+	classDef.def("AddOption", +[](pragma::gui::types::WIDropDownMenu &el, const std::string &option) -> pragma::gui::types::WIDropDownMenuOption * { return el.AddOption(option); });
+	classDef.def("AddOption", +[](pragma::gui::types::WIDropDownMenu &el, const std::string &option, const std::string &value) -> pragma::gui::types::WIDropDownMenuOption * { return el.AddOption(option, value); });
+	classDef.def("AddOption", +[](pragma::gui::types::WIDropDownMenu &el, const pragma::gui::Loc &option) -> pragma::gui::types::WIDropDownMenuOption * { return el.AddOption(option); });
+	classDef.def("AddOption", +[](pragma::gui::types::WIDropDownMenu &el, const pragma::gui::Loc &option, const std::string &value) -> pragma::gui::types::WIDropDownMenuOption * { return el.AddOption(option, value); });
 	classDef.def("OpenMenu", &pragma::gui::types::WIDropDownMenu::OpenMenu);
 	classDef.def("CloseMenu", &pragma::gui::types::WIDropDownMenu::CloseMenu);
 	classDef.def("ToggleMenu", &pragma::gui::types::WIDropDownMenu::ToggleMenu);
@@ -866,6 +868,7 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<pragma::gui::types::WID
 void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pragma::gui::types::WIBase> &classDef)
 {
 	classDef.def("SetText", static_cast<void (*)(lua::State *, pragma::gui::types::WIText &, const std::string &)>([](lua::State *l, pragma::gui::types::WIText &hPanel, const std::string &text) { hPanel.SetText(text); }));
+	classDef.def("SetText", static_cast<void (pragma::gui::types::WIText::*)(const pragma::gui::LocalizedString &)>(&pragma::gui::types::WIText::SetText));
 	classDef.def("GetText", +[](const pragma::gui::types::WIText &text) { return text.GetText().cpp_str(); });
 	classDef.def("GetTextHeight", &pragma::gui::types::WIText::GetTextHeight);
 	classDef.def("CalcTextSize", &pragma::gui::types::WIText::CalcTextSize);

@@ -27,6 +27,7 @@ export namespace pragma::locale {
 
 	DLLNETWORK LoadResult load(const std::string &file, bool bReload = false);
 	DLLNETWORK void set_language(std::string lan);
+	DLLNETWORK void set_on_language_change_callback(const std::function<void(const std::string &)> &callback);
 	DLLNETWORK void reload_files();
 	DLLNETWORK bool get_raw_text(const std::string &id, std::string &outText);
 	DLLNETWORK bool get_raw_text(const std::string &id, string::Utf8String &outText);

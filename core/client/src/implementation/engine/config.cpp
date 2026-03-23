@@ -4,6 +4,7 @@
 module pragma.client;
 
 import :engine;
+import pragma.gui;
 import pragma.string.unicode;
 
 void pragma::CEngine::SaveClientConfig()
@@ -100,6 +101,9 @@ void pragma::CEngine::PreloadConfig(NwStateType type, const std::string &configN
 	locale::load("components.txt");
 	locale::load("prompts.txt");
 	locale::load("shader_materials.txt");
+
+	// Update GUI text elements when changing language
+	locale::set_on_language_change_callback([](const std::string &newLan) { gui::WGUI::GetInstance().RefreshLocale(); });
 
 	constexpr auto numBts = math::to_integral(debug::MessageBoxButton::Count);
 	std::array<std::string, numBts> labels;

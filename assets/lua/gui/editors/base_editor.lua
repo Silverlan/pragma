@@ -104,15 +104,15 @@ end
 
 function gui.WIBaseEditor:AddWindowsMenuBarItem(fcView)
 	self.m_menuBar
-		:AddItem(locale.get_text("view"), function(pContext)
-			local pItem, pSubMenu = pContext:AddSubMenu(locale.get_text("windows"))
+		:AddItem(gui.Loc("view"), function(pContext)
+			local pItem, pSubMenu = pContext:AddSubMenu(gui.Loc("windows"))
 			pItem:SetName("windows")
 			local windows = {}
 			for identifier, data in pairs(self.m_windowFactories) do
 				table.insert(windows, { data.title, identifier })
 			end
 			table.sort(windows, function(a, b)
-				return a[1] < b[1]
+				return pfm.util.get_ui_text(a[1]) < pfm.util.get_ui_text(b[1])
 			end)
 			for _, wdata in ipairs(windows) do
 				local pSubItem = pSubMenu:AddItem(wdata[1], function(pItem)
@@ -337,7 +337,7 @@ function gui.WIBaseEditor:AddFrame(parent)
 			end
 		end
 		table.sort(windows, function(a, b)
-			return a[1] < b[1]
+			return pfm.util.get_ui_text(a[1]) < pfm.util.get_ui_text(b[1])
 		end)
 		for _, wdata in ipairs(windows) do
 			pContext

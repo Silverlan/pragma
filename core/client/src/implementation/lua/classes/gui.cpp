@@ -406,7 +406,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetCursor", &pragma::gui::types::WIBase::GetCursor);
 	classDef.def("RemoveElementOnRemoval", &pragma::gui::types::WIBase::RemoveOnRemoval);
 	classDef.def("GetTooltip", &pragma::gui::types::WIBase::GetTooltip);
-	classDef.def("SetTooltip", &pragma::gui::types::WIBase::SetTooltip);
+	classDef.def("SetTooltip", +[](pragma::gui::types::WIBase &el, const std::string &tooltip) { el.SetTooltip(tooltip); });
+	classDef.def("SetTooltip", static_cast<void (pragma::gui::types::WIBase::*)(const pragma::gui::LocalizedString &)>(&pragma::gui::types::WIBase::SetTooltip));
 	classDef.def("HasTooltip", &pragma::gui::types::WIBase::HasTooltip);
 	classDef.def("GetLeft", &pragma::gui::types::WIBase::GetLeft);
 	classDef.def("GetTop", &pragma::gui::types::WIBase::GetTop);
@@ -870,6 +871,10 @@ void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pra
 	classDef.def("SetText", static_cast<void (*)(lua::State *, pragma::gui::types::WIText &, const std::string &)>([](lua::State *l, pragma::gui::types::WIText &hPanel, const std::string &text) { hPanel.SetText(text); }));
 	classDef.def("SetText", static_cast<void (pragma::gui::types::WIText::*)(const pragma::gui::LocalizedString &)>(&pragma::gui::types::WIText::SetText));
 	classDef.def("GetText", +[](const pragma::gui::types::WIText &text) { return text.GetText().cpp_str(); });
+	classDef.def("SetPrefixText", &pragma::gui::types::WIText::SetPrefixText);
+	classDef.def("GetPrefixText", &pragma::gui::types::WIText::GetPrefixText);
+	classDef.def("SetSuffixText", &pragma::gui::types::WIText::SetSuffixText);
+	classDef.def("GetSuffixText", &pragma::gui::types::WIText::GetSuffixText);
 	classDef.def("GetTextHeight", &pragma::gui::types::WIText::GetTextHeight);
 	classDef.def("CalcTextSize", &pragma::gui::types::WIText::CalcTextSize);
 	classDef.def("GetTextWidth", &pragma::gui::types::WIText::GetTextWidth);

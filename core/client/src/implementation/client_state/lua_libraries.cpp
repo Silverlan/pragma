@@ -307,31 +307,26 @@ static void register_gui(Lua::Interface &lua)
 	pragma::LuaCore::define_custom_constructor<pragma::gui::Loc, +[](const std::string &key) -> pragma::gui::Loc { return pragma::gui::Loc {key}; }, const std::string &>(lua.GetState());
 	pragma::LuaCore::define_custom_constructor<pragma::gui::Loc,
 	  +[](const std::string &key, const luabind::tableT<void> &args) -> pragma::gui::Loc {
-	  	std::vector<pragma::gui::Loc::FormatArg> locArgs;
-	  	for(luabind::iterator it {args}, end; it != end; ++it) {
-	  		auto val = *it;
+		  std::vector<pragma::gui::Loc::FormatArg> locArgs;
+		  for(luabind::iterator it {args}, end; it != end; ++it) {
+			  auto val = *it;
 
-	  		auto *utf8Str = luabind::object_cast<pragma::string::Utf8String *>(val);
-	  		if(utf8Str) {
-	  			locArgs.push_back(*utf8Str);
-	  			continue;
-	  		}
+			  if(auto *utf8Str = luabind::object_cast_nothrow<pragma::string::Utf8String *>(val, static_cast<pragma::string::Utf8String *>(nullptr))) {
+				  locArgs.push_back(*utf8Str);
+				  continue;
+			  }
 
-	  		auto *str = luabind::object_cast<std::string *>(val);
-	  		if(str) {
-	  			locArgs.push_back(pragma::string::Utf8String {*str});
-	  			continue;
-	  		}
+			  if(auto *loc = luabind::object_cast_nothrow<pragma::gui::Loc *>(val, static_cast<pragma::gui::Loc *>(nullptr))) {
+				  locArgs.push_back(*loc);
+				  continue;
+			  }
 
-	  		auto *loc = luabind::object_cast<pragma::gui::Loc *>(val);
-	  		if(loc) {
-	  			locArgs.push_back(*loc);
-	  			continue;
-	  		}
-	  	}
-	  	return pragma::gui::Loc {key, locArgs};
-	},
-	const std::string &, const luabind::tableT<void> &>(lua.GetState());
+			  auto str = luabind::to_string(val);
+			  locArgs.push_back(pragma::string::Utf8String {str});
+		  }
+		  return pragma::gui::Loc {key, locArgs};
+	  },
+	  const std::string &, const luabind::tableT<void> &>(lua.GetState());
 
 	luabind::object oLogger = luabind::globals(l)["gui"];
 	oLogger = oLogger["Element"];

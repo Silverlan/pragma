@@ -1,7 +1,7 @@
 -- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 -- SPDX-License-Identifier: MIT
 
-include("/shaders/pfm/pfm_wireframe_line.lua")
+include("/shaders/pfm/wireframe_line.lua")
 
 util.register_class("ents.WireframeCameraComponent", BaseEntityComponent)
 local Component = ents.WireframeCameraComponent

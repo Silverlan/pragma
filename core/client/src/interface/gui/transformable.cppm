@@ -15,13 +15,11 @@ export namespace pragma::gui::types {
 		WITransformable();
 		virtual ~WITransformable() override;
 		virtual void Initialize() override;
-		using WIBase::SetSize;
-		virtual void SetSize(int x, int y) override;
-		using WIBase::SetPos;
-		virtual void SetPos(int x, int y) override;
 		virtual void SetParent(WIBase *base, std::optional<uint32_t> childIndex = {}) override;
 		virtual void SetZPos(int zpos) override;
 		virtual void SetVisible(bool b) override;
+		void SetMovementPadding(int32_t padding = -1);
+		int32_t GetMovementPadding() const;
 		WIBase *GetDragArea() const;
 		void SetDraggable(bool b);
 		void SetResizable(bool b);
@@ -62,6 +60,10 @@ export namespace pragma::gui::types {
 		void StartDrag();
 		void EndDrag();
 	  protected:
+		void ClampDragBounds(int &x, int &y) const;
+		void ClampResizeBounds(int &w, int &h) const;
+		virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
+		virtual void OnPosChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
 		virtual void DoUpdate() override;
 		enum class ResizeMode { none = -1, ew = 1, we = 2, ns = 3, sn = 4, nwse = 5, nesw = 6, senw = 7, swne = 8 };
 		WIHandle m_hMoveRect = {};
@@ -82,6 +84,7 @@ export namespace pragma::gui::types {
 		Vector2i m_minSize = {};
 		Vector2i m_maxSize = {-1, -1};
 		float m_resizeRatio = 0.f;
+		int32_t m_movementPadding = 40;
 
 		Vector2i m_minDrag = {std::numeric_limits<int32_t>::lowest(), std::numeric_limits<int32_t>::lowest()};
 		Vector2i m_maxDrag = {std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max()};

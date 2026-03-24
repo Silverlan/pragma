@@ -1,6 +1,9 @@
 from scripts.shared import *
 
 def main():
+	# Requires zlib
+	zlib_info = build_third_party_library("zlib")
+
 	build_config_tp = config.build_config_tp
 	deps_dir = config.deps_dir
 	generator = config.generator
@@ -19,6 +22,13 @@ def main():
 		print_msg("Building cpptrace...")
 		mkdir("build",cd=True)
 		cpptrace_cmake_args = ["-DBUILD_SHARED_LIBS=ON"]
+
+		cpptrace_cmake_args += [
+			"-DZLIB_ROOT=" +get_library_root_dir("zlib"),
+			"-DZLIB_INCLUDE_DIR=" +get_library_include_dir("zlib"),
+			"-DZLIB_LIBRARY=" +str(Path(get_library_lib_dir("zlib")) / "libz.so")
+		]
+
 		cmake_configure_def_toolset("..",generator,cpptrace_cmake_args)
 		cmake_build(build_config_tp)
 		if platform == "linux":
@@ -31,7 +41,10 @@ def main():
 		copy_prebuilt_headers(cpptrace_root +"/include/", "cpptrace")
 
 	return {
-		"buildDir": cpptrace_root
+		"buildDir": cpptrace_root,
+		"subLibs": {
+			"zlib": zlib_info
+		}
 	}
 
 if __name__ == "__main__":

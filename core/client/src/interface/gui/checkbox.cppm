@@ -7,10 +7,6 @@ export import pragma.gui;
 
 export namespace pragma::gui::types {
 	class DLLCLIENT WICheckbox : public WIRect {
-	  protected:
-		WIHandle m_hOutline;
-		WIHandle m_hTick;
-		bool m_bChecked;
 	  public:
 		WICheckbox();
 		virtual ~WICheckbox() override;
@@ -19,6 +15,11 @@ export namespace pragma::gui::types {
 		bool IsChecked();
 		void Toggle();
 		virtual util::EventReply MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods) override;
-		virtual void SetSize(int x, int y) override;
+	  protected:
+		virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
+
+		WIHandle m_hOutline;
+		WIHandle m_hTick;
+		bool m_bChecked;
 	};
 };

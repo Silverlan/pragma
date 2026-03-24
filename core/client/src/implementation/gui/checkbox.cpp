@@ -47,11 +47,10 @@ pragma::util::EventReply pragma::gui::types::WICheckbox::MouseCallback(platform:
 		Toggle();
 	return util::EventReply::Handled;
 }
-void pragma::gui::types::WICheckbox::SetSize(int x, int y)
+void pragma::gui::types::WICheckbox::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIRect::SetSize(x, y);
 	if(m_hOutline.IsValid()) {
 		WIOutlinedRect *pOutline = m_hOutline.get<WIOutlinedRect>();
-		pOutline->SetSize(x, y);
+		pOutline->SetSize(GetWidth(), GetHeight());
 	}
 }

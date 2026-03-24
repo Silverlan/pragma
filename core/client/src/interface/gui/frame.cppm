@@ -15,10 +15,7 @@ export namespace pragma::gui::types {
 		WIFrame();
 		virtual ~WIFrame() override;
 		virtual void Initialize() override;
-		virtual void SetSize(int x, int y) override;
 		WIBase *GetContents();
-		// using WITransformable::SetSize; // This causes a compiler error on MSVC on the latest version (25-08-29)
-		void SetSize(const Vector2i &size) { WITransformable::SetSize(size); }
 		void SetTitle(std::string title);
 		const string::Utf8String &GetTitle() const;
 		void SetCloseButtonEnabled(bool b);
@@ -36,5 +33,6 @@ export namespace pragma::gui::types {
 		WIHandle m_hDetachButton;
 		WIHandle m_hContents;
 		void OnDetachButtonPressed();
+	    virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
 	};
 };

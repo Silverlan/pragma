@@ -4,8 +4,8 @@
 include("/gui/wimenubar.lua")
 include("/gui/witoolbar.lua")
 include("/gui/wifiledialog.lua")
-include("/gui/pfm/infobar.lua")
-include("/gui/pfm/frame.lua")
+include("/gui/pfm/layout/info_bar.lua")
+include("/gui/pfm/containers/frame.lua")
 
 util.register_class("gui.WIBaseEditor", gui.Base)
 function gui.WIBaseEditor:__init()
@@ -39,7 +39,7 @@ function gui.WIBaseEditor:OnInitialize()
 
 	self.m_menuBarContainer = gui.create("WIBase", self)
 
-	self.m_menuBar = gui.create("WIMenuBar", self.m_menuBarContainer)
+	self.m_menuBar = gui.create("menu_bar", self.m_menuBarContainer)
 	self.m_menuBar:SetName("menu_bar")
 	self.m_menuBar:AddCallback("OnClose", function(pMenuBar)
 		if util.is_valid(self) then
@@ -54,7 +54,7 @@ function gui.WIBaseEditor:OnInitialize()
 	self.m_menuBar:SetSize(self.m_menuBarContainer:GetSize())
 	self.m_menuBar:SetAnchor(0, 0, 1, 1)
 
-	local pInfoBar = gui.create("WIPFMInfobar", self)
+	local pInfoBar = gui.create("pfm_info_bar", self)
 	pInfoBar:SetName("info_bar")
 	pInfoBar:SetWidth(self:GetWidth())
 	pInfoBar:SetY(self:GetHeight() - pInfoBar:GetHeight())
@@ -87,8 +87,8 @@ function gui.WIBaseEditor:OnSizeChanged(w, h)
 	if util.is_valid(self.m_infoBar) == false or util.is_valid(self.m_menuBar) == false then
 		return
 	end
-	self.m_pMain:SetSize(w, h - self.m_menuBar:GetHeight() - self.m_infoBar:GetHeight())
-	self.m_pMain:SetY(self.m_menuBar:GetHeight())
+	self.m_pMain:ApplySize(w, h - self.m_menuBar:GetHeight() - self.m_infoBar:GetHeight())
+	self.m_pMain:ApplyY(self.m_menuBar:GetHeight())
 end
 
 function gui.WIBaseEditor:GetInfoBar()
@@ -104,15 +104,15 @@ end
 
 function gui.WIBaseEditor:AddWindowsMenuBarItem(fcView)
 	self.m_menuBar
-		:AddItem(locale.get_text("view"), function(pContext)
-			local pItem, pSubMenu = pContext:AddSubMenu(locale.get_text("windows"))
+		:AddItem(gui.Loc("view"), function(pContext)
+			local pItem, pSubMenu = pContext:AddSubMenu(gui.Loc("windows"))
 			pItem:SetName("windows")
 			local windows = {}
 			for identifier, data in pairs(self.m_windowFactories) do
 				table.insert(windows, { data.title, identifier })
 			end
 			table.sort(windows, function(a, b)
-				return a[1] < b[1]
+				return pfm.util.get_ui_text(a[1]) < pfm.util.get_ui_text(b[1])
 			end)
 			for _, wdata in ipairs(windows) do
 				local pSubItem = pSubMenu:AddItem(wdata[1], function(pItem)
@@ -134,7 +134,7 @@ end
 
 function gui.WIBaseEditor:InitializeGenericLayout()
 	self.m_contents = gui.create(
-		"WIHBox",
+		"hbox",
 		self,
 		0,
 		self.m_menuBar:GetHeight(),
@@ -319,7 +319,7 @@ function gui.WIBaseEditor:AddFrame(parent)
 	if util.is_valid(parent) == false then
 		return
 	end
-	local frame = gui.create("WIPFMFrame", parent)
+	local frame = gui.create("pfm_frame", parent)
 	if frame == nil then
 		return
 	end
@@ -337,7 +337,7 @@ function gui.WIBaseEditor:AddFrame(parent)
 			end
 		end
 		table.sort(windows, function(a, b)
-			return a[1] < b[1]
+			return pfm.util.get_ui_text(a[1]) < pfm.util.get_ui_text(b[1])
 		end)
 		for _, wdata in ipairs(windows) do
 			pContext
@@ -365,11 +365,11 @@ function gui.WIBaseEditor:SetBackgroundColor(col)
 	self.m_pMain:SetColor(col)
 end
 function gui.WIBaseEditor:CreateWindow(class)
-	local pFrame = gui.create("WIFrame")
+	local pFrame = gui.create("frame")
 	if pFrame == nil then
 		return
 	end
-	local p = gui.create(class or "WIEditorWindow", pFrame)
+	local p = gui.create(class or "editor_window", pFrame)
 	if p == nil then
 		pFrame:Remove()
 		return

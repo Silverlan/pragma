@@ -227,7 +227,7 @@ bool PanimaComponent::SetPropertyFlag(const std::string &propName, PropertyFlags
 {
 	panima::ChannelPath channelPath {propName};
 	auto normalizedPath = channelPath.ToUri(false);
-	auto *cnorm = register_global_string(normalizedPath);
+	auto *cnorm = util::register_global_string(normalizedPath);
 	if(!enabled)
 		return UnsetPropertyFlags(cnorm, flag);
 	auto it = m_propertyFlags.find(cnorm);
@@ -244,7 +244,7 @@ bool PanimaComponent::IsPropertyFlagSet(const std::string &propName, PropertyFla
 {
 	panima::ChannelPath channelPath {propName};
 	auto normalizedPath = channelPath.ToUri(false);
-	auto it = m_propertyFlags.find(register_global_string(normalizedPath));
+	auto it = m_propertyFlags.find(util::register_global_string(normalizedPath));
 	return it != m_propertyFlags.end() && math::is_flag_set(it->second, flag);
 }
 

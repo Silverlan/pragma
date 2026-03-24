@@ -49,15 +49,15 @@ void pragma::gui::types::WITable::RemoveRow(uint32_t rowIdx)
 	Resize();
 }
 
-void pragma::gui::types::WITable::SizeToContents(bool x, bool y)
+void pragma::gui::types::WITable::SizeToContents(bool x, bool y, ChangeSource changeSource)
 {
 	if(m_bScrollable == true && m_hScrollContainer.IsValid()) {
-		m_hScrollContainer->SizeToContents(x, y);
+		m_hScrollContainer->SizeToContents(x, y, changeSource);
 		//auto sz = m_hScrollContainer.get()->GetSize();
 		//SetSize(sz.x,sz.y);
 		//return;
 	}
-	WIBase::SizeToContents(x, y);
+	WIBase::SizeToContents(x, y, changeSource);
 }
 
 void pragma::gui::types::WITable::OnChildAdded(WIBase *child)
@@ -557,11 +557,7 @@ float pragma::gui::types::WITable::UpdateRowHeights(float yOffset, float defHeig
 	return yOffset;
 }
 
-void pragma::gui::types::WITable::SetSize(int x, int y)
-{
-	WIBase::SetSize(x, y);
-	UpdateTableBounds();
-}
+void pragma::gui::types::WITable::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) { UpdateTableBounds(); }
 
 ///////////////////////////
 
@@ -699,10 +695,8 @@ void pragma::gui::types::WITableRow::SetCellCount(unsigned int numCells)
 	ScheduleUpdate();
 }
 void pragma::gui::types::WITableRow::Initialize() { WIBase::Initialize(); }
-void pragma::gui::types::WITableRow::SetSize(int x, int y)
+void pragma::gui::types::WITableRow::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetSize(x, y);
-
 	auto numCells = m_cells.size();
 	std::vector<int> widths(numCells);
 	std::fill(widths.begin(), widths.end(), -1);
@@ -718,7 +712,7 @@ void pragma::gui::types::WITableRow::SetSize(int x, int y)
 	}
 	float widthLeft = 0;
 	if(numUsed < widths.size()) {
-		widthLeft = float(x - widthTotal) / float(widths.size() - numUsed);
+		widthLeft = float(GetWidth() - widthTotal) / float(widths.size() - numUsed);
 		if(widthLeft < 0)
 			widthLeft = 0;
 	}
@@ -741,7 +735,7 @@ void pragma::gui::types::WITableRow::SetSize(int x, int y)
 		for(auto j = decltype(colSpan) {0}; j < colSpan; ++j)
 			width += widths[i + j];
 
-		cell->SetSize(width, y);
+		cell->SetSize(width, GetHeight());
 		cell->SetPos(math::round(offset.x), math::round(offset.y));
 		offset.x += width;
 	}
@@ -810,7 +804,6 @@ void pragma::gui::types::WITableCell::OnChildAdded(WIBase *child)
 	WIBase::OnChildAdded(child);
 	ScheduleUpdate();
 }
-void pragma::gui::types::WITableCell::SetSize(int x, int y) { WIBase::SetSize(x, y); }
 pragma::gui::types::WIBase *pragma::gui::types::WITableCell::GetFirstElement()
 {
 	if(m_children.empty())

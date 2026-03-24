@@ -405,7 +405,7 @@ int32_t pragma::asset::Model::GetBodyGroupId(const std::string &name)
 {
 	for(auto i = decltype(m_bodyGroups.size()) {0}; i < m_bodyGroups.size(); ++i) {
 		auto &bg = m_bodyGroups[i];
-		if(bg.name == name)
+		if(string::compare(bg.name, name, false))
 			return static_cast<int32_t>(i);
 	}
 	return -1;

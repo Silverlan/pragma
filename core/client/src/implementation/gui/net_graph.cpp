@@ -161,7 +161,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 			}
 			std::sort(m_netData.messages.begin(), m_netData.messages.end(), [](const std::pair<uint32_t, NetData::MessageInfo> &a, const std::pair<uint32_t, NetData::MessageInfo> &b) { return a.second.size > b.second.size; });
 			auto *map = networking::get_client_message_map();
-			util::StringMap<unsigned int> *netmessages;
+			string::StringMap<unsigned int> *netmessages;
 			map->GetNetMessages(&netmessages);
 			uint32_t idx = 0;
 			for(auto &p : m_netData.messages) {
@@ -236,13 +236,11 @@ void pragma::gui::types::WINetGraph::UpdateGraph()
 		m_hDataGraph.get<WILineGraph>()->Update();
 }
 
-void pragma::gui::types::WINetGraph::SetSize(int x, int y)
+void pragma::gui::types::WINetGraph::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetSize(x, y);
-
 	if(!m_hPacketGraph.IsValid())
 		return;
-	m_hPacketGraph->SetX(x - m_hPacketGraph->GetWidth());
+	m_hPacketGraph->SetX(GetWidth() - m_hPacketGraph->GetWidth());
 
 	if(m_hDataGraph.IsValid())
 		m_hDataGraph->SetPos(m_hPacketGraph->GetX(), m_hPacketGraph->GetY() + m_hPacketGraph->GetHeight());

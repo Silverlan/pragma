@@ -1,7 +1,7 @@
 -- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 -- SPDX-License-Identifier: MIT
 
-include("hbox.lua")
+include("/gui/layout/hbox.lua")
 include("wicontextmenu.lua")
 
 util.register_class("gui.WIMenuBar", gui.HBox)
@@ -121,9 +121,6 @@ function gui.WIMenuBar:UpdateItem(item)
 
 	local elText = item:GetTextElement()
 	if util.is_valid(elText) then
-		elText:SizeToContents()
-		elText:CenterToParent()
-
 		item:SetWidth(elText:GetWidth() + 10)
 	end
 
@@ -142,16 +139,14 @@ function gui.WIMenuBar:OnUpdate()
 	local x = 0
 	for _, item in ipairs(self.m_tItems) do
 		if item:IsValid() then
-			item:SetX(x)
-			item:SetHeight(self:GetHeight())
+			item:ApplyX(x)
+			item:ApplyHeight(self:GetHeight())
 
 			local elText = item:GetTextElement()
-			elText:SizeToContents()
 
-			item:SetWidth(elText:GetWidth() + 20)
+			item:ApplyWidth(elText:GetWidth() + 20)
 			item:Update()
 
-			elText:CenterToParent()
 			x = x + item:GetWidth()
 		end
 	end
@@ -160,11 +155,12 @@ function gui.WIMenuBar:FindItemByIdentifier(identifier)
 	return self.m_idToItem[identifier]
 end
 function gui.WIMenuBar:AddItem(name, fcContextCallback, identifier)
-	local pItem = gui.create("WIMenuItem", self)
+	local pItem = gui.create("menu_item", self)
 	if util.is_valid(pItem) == false then
 		return
 	end
 	pItem:SetTitle(name)
+	pItem:GetTextElement():SetAutoCenterToParent(true)
 	pItem:SetContextMenuHandler(fcContextCallback)
 	pItem:AddCallback("OnSelectionChanged", function(el, selected)
 		if self:IsValid() == false or self:IsContextMenuOpen() == false then
@@ -181,7 +177,7 @@ function gui.WIMenuBar:AddItem(name, fcContextCallback, identifier)
 	end
 	return pItem
 end
-gui.register("WIMenuBar", gui.WIMenuBar)
+gui.register("menu_bar", gui.WIMenuBar)
 
 get_event = function()
 	local events = {

@@ -106,6 +106,9 @@ void pragma::locale::reload_files()
 		load(f, true);
 }
 
+static std::function<void(const std::string &)> g_onChangeCallback;
+void pragma::locale::set_on_language_change_callback(const std::function<void(const std::string &)> &callback) { g_onChangeCallback = callback; }
+
 void pragma::locale::set_language(std::string lan)
 {
 	LOGGER.debug("Changing global language to '{}'...", lan);
@@ -129,6 +132,8 @@ void pragma::locale::set_language(std::string lan)
 	}
 	catch(const std::runtime_error &err) {
 	}
+	if(g_onChangeCallback)
+		g_onChangeCallback(lan);
 }
 const std::string &pragma::locale::get_language() { return g_language; }
 const pragma::locale::LanguageInfo *pragma::locale::get_language_info()

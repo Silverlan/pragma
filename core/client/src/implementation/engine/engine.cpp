@@ -997,6 +997,14 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	auto &fontSet = GetDefaultFontSet();
 	auto &gui = gui::WGUI::Open(GetRenderContext(), matManager);
 	RegisterUiElementTypes();
+	gui.SetLocaleResolver([](const std::string &key, const std::vector<string::Utf8String> &args) -> string::Utf8String {
+		// get_text currently doesn't support Utf8String args, so we'll convert to std::string for now
+		std::vector<std::string> normArgs;
+		normArgs.reserve(args.size());
+		for(auto &arg : args)
+			normArgs.push_back(arg);
+		return locale::get_text(key, normArgs);
+	});
 	gui.SetMaterialLoadHandler([this](const std::string &path) -> material::Material * { return GetClientState()->LoadMaterial(path); });
 	auto *fontData = fontSet.FindFontFileCandidate(FontSetFlag::Sans | FontSetFlag::Bold);
 	if(!fontData) {
@@ -1174,7 +1182,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		for(auto &[name, mat] : cache.GetShaderMaterials()) {
 			auto nodeName = name;
 			nodeName = "sm_" + nodeName;
-			auto node = pragma::util::make_shared<rendering::shader_graph::ShaderMaterialNode>(GString {nodeName}, *mat);
+			auto node = pragma::util::make_shared<rendering::shader_graph::ShaderMaterialNode>(util::GString {nodeName}, *mat);
 			regScene->RegisterNode(node);
 		}
 

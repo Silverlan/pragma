@@ -367,9 +367,3 @@ void pragma::gui::types::WIMainMenu::SetNewGameMenu()
 	menu->RemoveMenuItem(1);
 	menu->RemoveMenuItem(0);
 }
-
-void pragma::gui::types::WIMainMenu::SetSize(int x, int y)
-{
-	WIBase::SetSize(x, y);
-	uint32_t logoYBottom = 50;
-}

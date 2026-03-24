@@ -8,14 +8,10 @@ export import :gui.container;
 export namespace pragma::gui::types {
 	class WITableRow;
 	class DLLCLIENT WITableCell : public WIContainer {
-	  private:
-		std::pair<int32_t, int32_t> m_span;
-		WITableRow *GetRow() const;
 	  public:
 		WITableCell();
 		virtual ~WITableCell() override;
 		virtual void Initialize() override;
-		virtual void SetSize(int x, int y) override;
 		virtual void OnChildAdded(WIBase *child) override;
 		virtual void DoUpdate() override;
 		WIBase *GetFirstElement();
@@ -24,6 +20,9 @@ export namespace pragma::gui::types {
 		void SetColSpan(int32_t span);
 		int32_t GetRowSpan() const;
 		int32_t GetColSpan() const;
+	  private:
+		std::pair<int32_t, int32_t> m_span;
+		WITableRow *GetRow() const;
 	};
 
 	class DLLCLIENT WITable : public WIContainer {
@@ -41,7 +40,6 @@ export namespace pragma::gui::types {
 		void MoveRow(WITableRow *a, WITableRow *pos, bool bAfter = true);
 		void SelectRow(WITableRow &row);
 		unsigned int GetRowCount() const;
-		virtual void SetSize(int x, int y) override;
 		uint32_t GetRowIndex(WITableRow *pRow) const;
 		void RemoveRow(uint32_t rowIdx);
 		void SetSortable(bool b);
@@ -61,7 +59,7 @@ export namespace pragma::gui::types {
 		WITableRow *GetRow(unsigned int id) const;
 		const std::vector<WIHandle> &GetSelectedRows() const;
 		WIHandle GetFirstSelectedRow() const;
-		virtual void SizeToContents(bool x = true, bool y = true) override;
+		virtual void SizeToContents(bool x = true, bool y = true, ChangeSource changeSource = ChangeSource::User) override;
 	  protected:
 		struct SortData {
 			SortData(WITable *t, bool bAsc, unsigned int col);
@@ -86,6 +84,7 @@ export namespace pragma::gui::types {
 		void UpdateTableBounds();
 		void OnRowSelected(WITableRow *row);
 		std::vector<WIHandle> m_selectedRows;
+		virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
 		static bool SortRows(bool bAsc, unsigned int col, const WIHandle &a, const WIHandle &b);
 		void Sort(bool bAsc, unsigned int col = 0);
 		virtual void DoUpdate() override;
@@ -117,20 +116,10 @@ export namespace pragma::gui::types {
 
 	class WITableCell;
 	class DLLCLIENT WITableRow : public WIContainer {
-	  protected:
-		std::vector<WIHandle> m_cells;
-		bool m_bSelected;
-		std::unordered_map<unsigned int, int> m_cellWidths;
-		void SetCellCount(unsigned int numCells);
-		void UpdateCell(const WITableCell &cell);
-		friend void WITable::UpdateCell(const WITableCell &cell);
-		friend void WITableCell::SetRowSpan(int32_t span);
-		friend void WITableCell::SetColSpan(int32_t span);
 	  public:
 		WITableRow();
 		virtual ~WITableRow() override;
 		virtual void Initialize() override;
-		virtual void SetSize(int x, int y) override;
 		virtual void OnChildAdded(WIBase *child) override;
 		void SetCellWidth(unsigned int col, int width);
 		WIHandle SetValue(unsigned int col, std::string val);
@@ -148,5 +137,15 @@ export namespace pragma::gui::types {
 		unsigned int GetCellCount() const;
 		WITableCell *GetCell(unsigned int id) const;
 		WITable *GetTable();
+	  protected:
+		std::vector<WIHandle> m_cells;
+		bool m_bSelected;
+		std::unordered_map<unsigned int, int> m_cellWidths;
+		void SetCellCount(unsigned int numCells);
+		void UpdateCell(const WITableCell &cell);
+		friend void WITable::UpdateCell(const WITableCell &cell);
+		friend void WITableCell::SetRowSpan(int32_t span);
+		friend void WITableCell::SetColSpan(int32_t span);
+		virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
 	};
 };

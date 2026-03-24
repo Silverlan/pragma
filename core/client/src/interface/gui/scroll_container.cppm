@@ -16,9 +16,8 @@ export namespace pragma::gui::types {
 		WIScrollContainer();
 		virtual ~WIScrollContainer() override;
 		virtual void Initialize() override;
-		virtual void SetSize(int x, int y) override;
 		virtual util::EventReply ScrollCallback(Vector2 offset, bool offsetAsPixels = false) override;
-		virtual void SizeToContents(bool x = true, bool y = true) override;
+		virtual void SizeToContents(bool x = true, bool y = true, ChangeSource changeSource = ChangeSource::User) override;
 		WIScrollBar *GetHorizontalScrollBar();
 		WIScrollBar *GetVerticalScrollBar();
 		int GetScrollBarWidthV();
@@ -45,6 +44,7 @@ export namespace pragma::gui::types {
 		bool IsContentsHeightFixed() const;
 	  protected:
 		virtual void DoUpdate() override;
+	    virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
 		StateFlags m_scFlags = StateFlags::None;
 		WIHandle m_hScrollBarH = {};
 		WIHandle m_hScrollBarV = {};

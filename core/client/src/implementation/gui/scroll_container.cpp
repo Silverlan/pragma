@@ -27,13 +27,13 @@ pragma::gui::types::WIScrollContainer::~WIScrollContainer()
 	}
 }
 
-void pragma::gui::types::WIScrollContainer::SizeToContents(bool x, bool y)
+void pragma::gui::types::WIScrollContainer::SizeToContents(bool x, bool y, ChangeSource changeSource)
 {
 	if(m_hWrapper.IsValid() == false)
 		return;
-	m_hWrapper->SizeToContents(x, y);
+	m_hWrapper->SizeToContents(x, y, changeSource);
 	auto sz = m_hWrapper.get()->GetSize();
-	SetSize(sz.x, sz.y);
+	SetSize(sz.x, sz.y, changeSource);
 }
 
 int pragma::gui::types::WIScrollContainer::GetContentWidth()
@@ -170,9 +170,8 @@ pragma::util::EventReply pragma::gui::types::WIScrollContainer::ScrollCallback(V
 }
 pragma::gui::types::WIScrollBar *pragma::gui::types::WIScrollContainer::GetHorizontalScrollBar() { return static_cast<WIScrollBar *>(m_hScrollBarH.get()); }
 pragma::gui::types::WIScrollBar *pragma::gui::types::WIScrollContainer::GetVerticalScrollBar() { return static_cast<WIScrollBar *>(m_hScrollBarV.get()); }
-void pragma::gui::types::WIScrollContainer::SetSize(int x, int y)
+void pragma::gui::types::WIScrollContainer::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetSize(x, y);
 	ScheduleUpdate();
 }
 void pragma::gui::types::WIScrollContainer::OnChildReleased(WIBase *child)
@@ -197,7 +196,7 @@ void pragma::gui::types::WIScrollContainer::OnWrapperChildAdded(WIBase *child)
 	std::unordered_map<WIBase *, std::vector<CallbackHandle>>::iterator it = m_childCallbackHandles.insert(std::unordered_map<WIBase *, std::vector<CallbackHandle>>::value_type(child, std::vector<CallbackHandle>())).first;
 	CallbackHandle hCallbackOnRemove = child->AddCallback("OnRemove", FunctionCallback<>::Create(std::bind(&WIScrollContainer::OnChildReleased, child)));
 	it->second.push_back(hCallbackOnRemove);
-	CallbackHandle hCallbackSetSize = child->AddCallback("SetSize", FunctionCallback<>::Create(std::bind(&WIScrollContainer::OnChildSetSize, child)));
+	CallbackHandle hCallbackSetSize = child->AddCallback("OnSizeChanged", FunctionCallback<>::Create(std::bind(&WIScrollContainer::OnChildSetSize, child)));
 	it->second.push_back(hCallbackSetSize);
 	Update();
 }

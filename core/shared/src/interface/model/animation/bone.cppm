@@ -6,16 +6,16 @@ module;
 
 export module pragma.shared:model.animation.bone;
 
-export import :util.global_string_table;
-
 export import :model.animation.enums;
+
+export import pragma.util;
 
 export {
 	namespace pragma::animation {
 		struct DLLNETWORK Bone : public std::enable_shared_from_this<Bone> {
 			Bone();
 			Bone(const Bone &other); // Parent has to be updated by caller!
-			GString name;
+			util::GString name;
 			std::unordered_map<BoneId, std::shared_ptr<Bone>> children;
 			std::weak_ptr<Bone> parent;
 			BoneId ID;

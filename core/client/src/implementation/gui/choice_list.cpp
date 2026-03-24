@@ -49,17 +49,16 @@ void pragma::gui::types::WIChoiceList::UpdateButtons()
 		m_buttonNext->SetVisible((m_selected < (m_choices.size() - 1)) ? true : false);
 }
 
-void pragma::gui::types::WIChoiceList::SetSize(int x, int y)
+void pragma::gui::types::WIChoiceList::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetSize(x, y);
 	if(m_buttonPrev.IsValid()) {
 		auto *buttonPrev = static_cast<WIButton *>(m_buttonPrev.get());
-		buttonPrev->SetSize(y, y);
+		buttonPrev->SetSize(GetHeight(), GetHeight());
 	}
 	if(m_buttonNext.IsValid()) {
 		auto *buttonNext = static_cast<WIButton *>(m_buttonNext.get());
-		buttonNext->SetSize(y, y);
-		buttonNext->SetX(x - buttonNext->GetWidth());
+		buttonNext->SetSize(GetHeight(), GetHeight());
+		buttonNext->SetX(GetWidth() - buttonNext->GetWidth());
 	}
 }
 

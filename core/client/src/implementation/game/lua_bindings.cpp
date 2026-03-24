@@ -514,6 +514,8 @@ void pragma::CGame::RegisterLua()
 void pragma::CGame::InitializeLua()
 {
 	Game::InitializeLua();
+	Lua::gui::initialize_gui_type_lua_enums(GetLuaState());
+
 	CallCallbacks<void, lua::State *>("OnLuaInitialized", GetLuaState());
 }
 

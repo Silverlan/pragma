@@ -205,4 +205,4 @@ function gui.WIOrthoView:OnInitialize()
 	end)
 	self:SetRegion(Vector(), Vector())
 end
-gui.register("WIOrthoView", gui.WIOrthoView)
+gui.register("ortho_view", gui.WIOrthoView)

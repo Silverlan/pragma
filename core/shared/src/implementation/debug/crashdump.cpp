@@ -319,6 +319,11 @@ bool CrashHandler::GenerateCrashDump() const
 		backtraceStr = buffer;
 		free(symbols);
 	}
+	
+	if(backtraceStr) {
+		std::cout << "Backtrace:" << std::endl;
+		std::cout << *backtraceStr << std::endl;
+	}
 #endif
 
 	auto success = false;

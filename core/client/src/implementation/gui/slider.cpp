@@ -18,8 +18,6 @@ void pragma::gui::types::WISlider::Initialize()
 	EnableThinking();
 }
 
-void pragma::gui::types::WISlider::SetSize(int x, int y) { WIProgressBar::SetSize(x, y); }
-
 void pragma::gui::types::WISlider::Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
 {
 	WIProgressBar::Think(drawCmd);

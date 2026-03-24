@@ -51,12 +51,11 @@ void pragma::gui::types::WIProgressBar::UpdateTextPosition()
 
 void pragma::gui::types::WIProgressBar::SetValueTranslator(const std::function<std::string(float)> &translator) { m_valueTranslator = translator; }
 
-void pragma::gui::types::WIProgressBar::SetSize(int x, int y)
+void pragma::gui::types::WIProgressBar::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetSize(x, y);
 	if(m_hProgress.IsValid()) {
 		auto *pProgress = m_hProgress.get<WIRect>();
-		pProgress->SetHeight(y);
+		pProgress->SetHeight(GetHeight());
 	}
 	OnProgressChanged(GetValue(), GetValue());
 	UpdateTextPosition();

@@ -8,6 +8,7 @@ import :scripting.lua.gui_manager;
 void LuaGUIManager::RegisterGUIElement(std::string className, luabind::object &o)
 {
 	pragma::string::to_lower(className);
+	const_cast<pragma::gui::TypeFactory &>(pragma::gui::WGUI::GetInstance().GetTypeFactory()).PreRegisterClass(className);
 	m_guiElements[className] = o;
 	//m_guiElements.insert(std::unordered_map<std::string,luabind::object>::value_type(className,o));
 }

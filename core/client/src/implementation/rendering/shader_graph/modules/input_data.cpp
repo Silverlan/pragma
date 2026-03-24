@@ -33,7 +33,7 @@ void InputDataModule::InitializeShaderResources()
 			continue;
 		auto texVarName = node->GetTextureVariableName(*graphNode);
 		string::to_upper(texVarName);
-		bindings.push_back({register_global_string(texVarName), prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit});
+		bindings.push_back({util::register_global_string(texVarName), prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit});
 		if(m_imageTextureNodes.size() == m_imageTextureNodes.capacity())
 			m_imageTextureNodes.reserve(m_imageTextureNodes.size() * 2 + 10);
 		m_imageTextureNodes.push_back(graphNode.get());

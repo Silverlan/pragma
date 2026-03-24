@@ -347,7 +347,7 @@ std::string ShaderMaterial::ToGlslStruct() const
 	return ss.str();
 }
 
-ShaderMaterial::ShaderMaterial(const GString &name) : ShaderInputDescriptor {name}
+ShaderMaterial::ShaderMaterial(const util::GString &name) : ShaderInputDescriptor {name}
 {
 	properties.reserve(PREDEFINED_PROPERTY_COUNT);
 

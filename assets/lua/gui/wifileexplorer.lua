@@ -281,4 +281,4 @@ function gui.WIFileExplorer:ListFiles()
 	t:Sort()
 	t:SetSize(self:GetSize())
 end
-gui.register("WIFileExplorer", gui.WIFileExplorer)
+gui.register("file_explorer", gui.WIFileExplorer)

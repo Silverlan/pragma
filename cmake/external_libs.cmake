@@ -5,7 +5,22 @@ function(pr_fetch_external_lib IDENTIFIER GIT_URL GIT_SHA)
 		return()
 	endif()
 
-    pr_fetch_repository(${IDENTIFIER} ${GIT_URL} ${GIT_SHA} "external_libs/${IDENTIFIER}")
+	if(NOT PRAGMA_DISABLE_BUILD_FETCH)
+		pr_fetch_repository(${IDENTIFIER} ${GIT_URL} ${GIT_SHA} "external_libs/${IDENTIFIER}")
+	else()
+		add_subdirectory(
+			"${CMAKE_SOURCE_DIR}/external_libs/${IDENTIFIER}"
+			"${CMAKE_BINARY_DIR}/external_libs/${IDENTIFIER}"
+		)
+	endif()
+
+	get_property(_sources GLOBAL PROPERTY PR_FLATPAK_SOURCES)
+	string(APPEND _sources "
+      - type: git
+        url: ${GIT_URL}
+        commit: ${GIT_SHA}
+        dest: 'pragma/external_libs/${IDENTIFIER}'")
+	set_property(GLOBAL PROPERTY PR_FLATPAK_SOURCES "${_sources}")
 
 	if(IDENTIFIER MATCHES "util_*")
 		set_target_properties(${IDENTIFIER} PROPERTIES FOLDER external_libs/util)
@@ -23,9 +38,9 @@ pr_fetch_external_lib("materialsystem"          "https://github.com/Silverlan/ma
 pr_fetch_external_lib("mathutil"                "https://github.com/Silverlan/mathutil"               "27fa92ba59e79f619f8bb29d8e62b53d1607f4d4")
 pr_fetch_external_lib("networkmanager"          "https://github.com/Silverlan/networkmanager"         "307e83426280669624ee25f8e3058af96e4e0db3")
 pr_fetch_external_lib("oskit"                   "https://github.com/Silverlan/oskit"                  "2c13e0963ef719d8c3a806f5c4ea0e151db58367")
-pr_fetch_external_lib("panima"                  "https://github.com/Silverlan/panima"                 "8faebe12b47542657adaec8afc95baff327f452f")
+pr_fetch_external_lib("panima"                  "https://github.com/Silverlan/panima"                 "33816fd14ac7996f930587918b17f349992a3f24")
 pr_fetch_external_lib("prosper"                 "https://github.com/Silverlan/prosper"                "d9e4fe85af77ef9967540e44d9ba6fa540bb6cf2")
-pr_fetch_external_lib("sharedutils"             "https://github.com/Silverlan/sharedutils"            "caea3e3c4cdcf54455906395aec8f0eec3690849")
+pr_fetch_external_lib("sharedutils"             "https://github.com/Silverlan/sharedutils"            "f0bd7c2e69a8b823d8980f533f11fc52a3faeff9")
 pr_fetch_external_lib("util_bsp"                "https://github.com/Silverlan/util_bsp"               "9eeb876a6fafe1b92966bb8f0fe6bd93ebb7b41f")
 pr_fetch_external_lib("util_formatted_text"     "https://github.com/Silverlan/util_formatted_text"    "50bd69695d55a61d9ecab8c3453a88fd8bc17a99")
 pr_fetch_external_lib("util_image"              "https://github.com/Silverlan/util_image"             "61a4b1ebbf98c57cf9cee88c2c3f4cd91165c21e")
@@ -34,15 +49,15 @@ pr_fetch_external_lib("util_pragma_doc"         "https://github.com/Silverlan/ut
 pr_fetch_external_lib("util_smdmodel"           "https://github.com/Silverlan/util_smdmodel"          "d56004a9920e1477a19d45bdfc76ccfa605caaf0")
 pr_fetch_external_lib("util_sound"              "https://github.com/Silverlan/util_sound"             "e1652c5b4bb8a18b9cc545862810959f42f90d13")
 pr_fetch_external_lib("util_source2"            "https://github.com/Silverlan/util_source2"           "2a5c5218dd6551ad91557adac2add0aa168e27c7")
-pr_fetch_external_lib("util_string"             "https://github.com/Silverlan/util_string"            "bd9d2f22e01ae68bef47d8efd8dc719a089f3a60")
+pr_fetch_external_lib("util_string"             "https://github.com/Silverlan/util_string"            "50abcced35a5936d7fae2e3fc8962d860f272313")
 pr_fetch_external_lib("util_source_script"      "https://github.com/Silverlan/util_source_script"     "82e7537a2b562d036492568bc61be3e93507c380")
 pr_fetch_external_lib("util_timeline_scene"     "https://github.com/Silverlan/util_timeline_scene"    "6092f5ebeef6be95dc9553fe32dd424cc9af92b6")
-pr_fetch_external_lib("util_udm"                "https://github.com/Silverlan/util_udm"               "c5c6ed3d258d074a076ae1e0d2cf97c6ead02929")
+pr_fetch_external_lib("util_udm"                "https://github.com/Silverlan/util_udm"               "3383a555f2ce2fe84103bbcdf6bc24d5113dd50c")
 pr_fetch_external_lib("util_versioned_archive"  "https://github.com/Silverlan/util_versioned_archive" "0b0e419a112f654c2fdc27e0660309afc4c581b8")
 pr_fetch_external_lib("util_vmf"                "https://github.com/Silverlan/util_vmf"               "346aaeb9446349371010423e9a39a31c7cd35afc")
 pr_fetch_external_lib("util_zip"                "https://github.com/Silverlan/util_zip"               "a8b0b3e1e126849b929ea04f4fe9afeb2b40cdc7")
-pr_fetch_external_lib("util_shadergraph"        "https://github.com/Silverlan/util_shadergraph"       "5a7ff01fb4e51bc599eeae5126098e8cd826a0b5")
+pr_fetch_external_lib("util_shadergraph"        "https://github.com/Silverlan/util_shadergraph"       "f6b39f3d067fb022cc456a979cef6bfe2c031fd4")
 pr_fetch_external_lib("vfilesystem"             "https://github.com/Silverlan/vfilesystem"            "9a135bde2c2032f3bd919c1d9637eb9383336c50")
-pr_fetch_external_lib("wgui"                    "https://github.com/Silverlan/wgui"                   "d697f5e2d6d82e1d6a5a8ec4ed9949e97d58948a")
-pr_fetch_external_lib("util_unicode"            "https://github.com/Silverlan/util_unicode"           "5f0519049aecfd52e02ffbabeb84d735d027d9f0")
+pr_fetch_external_lib("wgui"                    "https://github.com/Silverlan/wgui"                   "f87bcf60322bf76ad0827c1f13a65b2b1c13d9f7")
+pr_fetch_external_lib("util_unicode"            "https://github.com/Silverlan/util_unicode"           "355003f2679e8f80e52026bfd8d3b7e4cb57d982")
 pr_fetch_external_lib("cppbezierfit"            "https://github.com/Silverlan/cppbezierfit"           "63dbcaeddba39c80b885fd7eadbbbad560bc1791")

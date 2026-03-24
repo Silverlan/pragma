@@ -14,7 +14,7 @@ static int log(lua::State *l, spdlog::level::level_enum logLevel)
 {
 	auto &el = Lua::Check<pragma::gui::types::WIBase>(l, 1);
 	const char *msg = Lua::CheckString(l, 2);
-	std::string loggerName = "ui_" + el.GetClass();
+	std::string loggerName = "ui_" + static_cast<std::string>(el.GetClass());
 	int32_t argOffset = 2;
 	auto n = lua::get_top(l) - argOffset; /* number of arguments */
 	switch(n) {
@@ -193,7 +193,7 @@ static void register_gui(Lua::Interface &lua)
 		  uint32_t idx = 1;
 		  std::function<void(pragma::gui::types::WIBase &)> fIterateChildren = nullptr;
 		  fIterateChildren = [l, &fIterateChildren, &className, &t, &idx](pragma::gui::types::WIBase &el) mutable {
-			  if(pragma::string::compare(el.GetClass(), className, false))
+			  if(pragma::string::compare(el.GetClass().c_str(), className.c_str(), false))
 				  t[idx++] = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
 			  for(auto &hChild : *el.GetChildren()) {
 				  if(hChild.IsValid() == false)
@@ -264,6 +264,19 @@ static void register_gui(Lua::Interface &lua)
 	    })
 		)];
 
+	luabind::globals(l)["gui"]["ANCHOR_EDGE_LEFT"] = pragma::gui::Anchor::Edge::Left;
+	luabind::globals(l)["gui"]["ANCHOR_EDGE_RIGHT"] = pragma::gui::Anchor::Edge::Right;
+	luabind::globals(l)["gui"]["ANCHOR_EDGE_TOP"] = pragma::gui::Anchor::Edge::Top;
+	luabind::globals(l)["gui"]["ANCHOR_EDGE_BOTTOM"] = pragma::gui::Anchor::Edge::Bottom;
+	luabind::globals(l)["gui"]["ANCHOR_EDGE_HORIZONTAL_CENTER"] = pragma::gui::Anchor::Edge::HorizontalCenter;
+	luabind::globals(l)["gui"]["ANCHOR_EDGE_VERTICAL_CENTER"] = pragma::gui::Anchor::Edge::VerticalCenter;
+	static_assert(pragma::math::to_integral(pragma::gui::Anchor::Edge::Count) == 6, "Update enum registration when new enum values are added!");
+
+	luabind::globals(l)["gui"]["CHANGE_SOURCE_LAYOUT"] = pragma::gui::ChangeSource::Layout;
+	luabind::globals(l)["gui"]["CHANGE_SOURCE_USER"] = pragma::gui::ChangeSource::User;
+	luabind::globals(l)["gui"]["CHANGE_SOURCE_CONTENT"] = pragma::gui::ChangeSource::Content;
+	static_assert(pragma::math::to_integral(pragma::gui::ChangeSource::Count) == 3, "Update enum registration when new enum values are added!");
+
 	//
 	auto videoModeDef = luabind::class_<pragma::platform::Monitor::VideoMode>("VideoMode");
 	videoModeDef.def(
@@ -285,6 +298,35 @@ static void register_gui(Lua::Interface &lua)
 	auto wiElementClassDef = luabind::class_<pragma::gui::types::WIBase>("Element");
 	Lua::WIBase::register_class(wiElementClassDef);
 	guiMod[wiElementClassDef];
+
+	auto locDef = luabind::class_<pragma::gui::Loc>("Loc");
+	locDef.def_readwrite("key", &pragma::gui::Loc::key);
+	locDef.def("Resolve", &pragma::gui::Loc::Resolve);
+	locDef.def("IsValid", &pragma::gui::Loc::IsValid);
+	guiMod[locDef];
+	pragma::LuaCore::define_custom_constructor<pragma::gui::Loc, +[](const std::string &key) -> pragma::gui::Loc { return pragma::gui::Loc {key}; }, const std::string &>(lua.GetState());
+	pragma::LuaCore::define_custom_constructor<pragma::gui::Loc,
+	  +[](const std::string &key, const luabind::tableT<void> &args) -> pragma::gui::Loc {
+		  std::vector<pragma::gui::Loc::FormatArg> locArgs;
+		  for(luabind::iterator it {args}, end; it != end; ++it) {
+			  auto val = *it;
+
+			  if(auto *utf8Str = luabind::object_cast_nothrow<pragma::string::Utf8String *>(val, static_cast<pragma::string::Utf8String *>(nullptr))) {
+				  locArgs.push_back(*utf8Str);
+				  continue;
+			  }
+
+			  if(auto *loc = luabind::object_cast_nothrow<pragma::gui::Loc *>(val, static_cast<pragma::gui::Loc *>(nullptr))) {
+				  locArgs.push_back(*loc);
+				  continue;
+			  }
+
+			  auto str = luabind::to_string(val);
+			  locArgs.push_back(pragma::string::Utf8String {str});
+		  }
+		  return pragma::gui::Loc {key, locArgs};
+	  },
+	  const std::string &, const luabind::tableT<void> &>(lua.GetState());
 
 	luabind::object oLogger = luabind::globals(l)["gui"];
 	oLogger = oLogger["Element"];
@@ -318,7 +360,7 @@ static void register_gui(Lua::Interface &lua)
 	wiBaseWIElement.def("ScrollCallback", &pragma::gui::types::WILuaBase::Lua_ScrollCallback, &pragma::gui::types::WILuaBase::default_ScrollCallback);
 	wiBaseWIElement.def("OnUpdate", &pragma::gui::types::WILuaBase::Lua_OnUpdate, &pragma::gui::types::WILuaBase::default_OnUpdate);
 	wiBaseWIElement.def("OnVisibilityChanged", &pragma::gui::types::WILuaBase::Lua_OnSetVisible, &pragma::gui::types::WILuaBase::default_OnSetVisible);
-	wiBaseWIElement.def("OnSizeChanged", &pragma::gui::types::WILuaBase::Lua_OnSetSize, &pragma::gui::types::WILuaBase::default_OnSetSize);
+	wiBaseWIElement.def("OnSizeChanged", &pragma::gui::types::WILuaBase::Lua_OnSizeChanged, &pragma::gui::types::WILuaBase::default_OnSizeChanged);
 	wiBaseWIElement.def("OnColorChanged", &pragma::gui::types::WILuaBase::Lua_OnSetColor, &pragma::gui::types::WILuaBase::default_OnSetColor);
 	wiBaseWIElement.def("OnAlphaChanged", &pragma::gui::types::WILuaBase::Lua_OnSetAlpha, &pragma::gui::types::WILuaBase::default_OnSetAlpha);
 	wiBaseWIElement.def("CheckPosInBounds", &pragma::gui::types::WILuaBase::Lua_CheckPosInBounds, &pragma::gui::types::WILuaBase::default_CheckPosInBounds);
@@ -489,10 +531,29 @@ static void register_gui(Lua::Interface &lua)
 	wiWIContentWrapper.def("SetPaddingTopBottom", &pragma::gui::types::WIContentWrapper::SetPaddingTopBottom);
 	guiMod[wiWIContentWrapper];
 
+	auto wiNineSliceRectSegment = luabind::class_<pragma::gui::types::WI9SliceRectSegment, luabind::bases<pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>>("NineSliceRectSegment");
+	wiNineSliceRectSegment.def("SetRenderImageOffset", &pragma::gui::types::WI9SliceRectSegment::SetRenderImageOffset);
+	wiNineSliceRectSegment.def("SetRenderImageScale", &pragma::gui::types::WI9SliceRectSegment::SetRenderImageScale);
+	wiNineSliceRectSegment.def("GetRenderImageOffset", &pragma::gui::types::WI9SliceRectSegment::GetRenderImageOffset);
+	wiNineSliceRectSegment.def("GetRenderImageScale", &pragma::gui::types::WI9SliceRectSegment::GetRenderImageScale);
+	guiMod[wiNineSliceRectSegment];
+
 	auto wiNineSliceRect = luabind::class_<pragma::gui::types::WI9SliceRect, pragma::gui::types::WIBase>("NineSliceRect");
 	wiNineSliceRect.def("SetMaterial", static_cast<void (pragma::gui::types::WI9SliceRect ::*)(const std::string &)>(&pragma::gui::types::WI9SliceRect::SetMaterial));
 	wiNineSliceRect.def("SetMaterial", static_cast<void (pragma::gui::types::WI9SliceRect ::*)(pragma::material::Material &)>(&pragma::gui::types::WI9SliceRect::SetMaterial));
 	wiNineSliceRect.def("GetMaterial", &pragma::gui::types::WI9SliceRect::GetMaterial);
+	wiNineSliceRect.def("GetSegmentSize", static_cast<std::pair<int32_t, int32_t> (pragma::gui::types::WI9SliceRect ::*)(pragma::gui::types::WI9SliceRect::Segment) const>(&pragma::gui::types::WI9SliceRect::GetSegmentSize));
+	wiNineSliceRect.def("GetSegmentOffset", static_cast<std::pair<int32_t, int32_t> (pragma::gui::types::WI9SliceRect ::*)(pragma::gui::types::WI9SliceRect::Segment) const>(&pragma::gui::types::WI9SliceRect::GetSegmentSize));
+	wiNineSliceRect.add_static_constant("SEGMENT_TOP_LEFT_CORNER", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::TopLeftCorner));
+	wiNineSliceRect.add_static_constant("SEGMENT_TOP_RIGHT_CORNER", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::TopRightCorner));
+	wiNineSliceRect.add_static_constant("SEGMENT_BOTTOM_LEFT_CORNER", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::BottomLeftCorner));
+	wiNineSliceRect.add_static_constant("SEGMENT_BOTTOM_RIGHT_CORNER", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::BottomRightCorner));
+	wiNineSliceRect.add_static_constant("SEGMENT_TOP_EDGE", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::TopEdge));
+	wiNineSliceRect.add_static_constant("SEGMENT_BOTTOM_EDGE", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::BottomEdge));
+	wiNineSliceRect.add_static_constant("SEGMENT_LEFT_EDGE", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::LeftEdge));
+	wiNineSliceRect.add_static_constant("SEGMENT_RIGHT_EDGE", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::RightEdge));
+	wiNineSliceRect.add_static_constant("SEGMENT_CENTER", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::Center));
+	wiNineSliceRect.add_static_constant("SEGMENT_COUNT", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::Count));
 	guiMod[wiNineSliceRect];
 
 	auto wiRoundedTexturedRect = luabind::class_<pragma::gui::types::WIRoundedTexturedRect, luabind::bases<pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>>("RoundedTexturedRect");

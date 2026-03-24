@@ -37,10 +37,6 @@ export namespace pragma::gui::types {
 	};
 
 	class DLLCLIENT WIMainMenuElement : public WIBase {
-	  protected:
-		WIHandle m_hBackground;
-		WIHandle m_hText;
-		bool m_bSelected;
 	  public:
 		WIMainMenuElement();
 		virtual ~WIMainMenuElement() override;
@@ -52,12 +48,15 @@ export namespace pragma::gui::types {
 		virtual void OnCursorEntered() override;
 		virtual void OnCursorExited() override;
 		void Activate();
-		virtual void SetSize(int x, int y) override;
 		Vector4 GetBackgroundColor();
 		void SetBackgroundColor(float r, float g, float b, float a = 1.f);
 
 		CallbackHandle onActivated;
 		CallbackHandle onSelected;
 		CallbackHandle onDeselected;
+	  protected:
+		WIHandle m_hBackground;
+		WIHandle m_hText;
+		bool m_bSelected;
 	};
 };

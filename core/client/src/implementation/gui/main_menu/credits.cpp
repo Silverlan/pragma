@@ -14,7 +14,7 @@ pragma::gui::types::WIMainMenuCredits::~WIMainMenuCredits() {}
 void pragma::gui::types::WIMainMenuCredits::AddCreditsElement(WIBase &el)
 {
 	auto hThis = GetHandle();
-	el.AddCallback("SetSize", FunctionCallback<void>::Create([hThis]() mutable {
+	el.AddCallback("OnSizeChanged", FunctionCallback<void>::Create([hThis]() mutable {
 		if(hThis.IsValid() == false)
 			return;
 		hThis.get()->ScheduleUpdate();
@@ -74,9 +74,8 @@ void pragma::gui::types::WIMainMenuCredits::Initialize()
 	}));
 }
 
-void pragma::gui::types::WIMainMenuCredits::SetSize(int x, int y)
+void pragma::gui::types::WIMainMenuCredits::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIMainMenuBase::SetSize(x, y);
 	ScheduleUpdate();
 }
 

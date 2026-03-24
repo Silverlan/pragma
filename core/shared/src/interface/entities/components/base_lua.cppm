@@ -150,8 +150,8 @@ export {
 				MemberInfo &operator=(const MemberInfo &other);
 				MemberInfo &operator=(MemberInfo &&other);
 
-				GString functionName;
-				GString memberName;
+				util::GString functionName;
+				util::GString memberName;
 				size_t memberNameHash;
 				std::string memberVariableName;
 				ents::EntityMemberType type;
@@ -300,7 +300,7 @@ export {
 			std::vector<MemberInfo> m_members = {};
 			std::vector<DynamicMemberInfo> m_dynamicMembers;
 			uint32_t m_dynamicMemberStartOffset = 0;
-			std::unordered_map<GString, size_t> m_memberNameToIndex = {};
+			std::unordered_map<util::GString, size_t> m_memberNameToIndex = {};
 			uint32_t m_classMemberIndex = std::numeric_limits<uint32_t>::max();
 			bool m_bShouldTransmitNetData = false;
 			bool m_bShouldTransmitSnapshotData = false;

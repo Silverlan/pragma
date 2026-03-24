@@ -155,7 +155,7 @@ void pragma::gui::types::WIMessageBox::Initialize()
 	pMessage->SetWidth(512);
 	pMessage->SetCloseButtonEnabled(false);
 	auto hMessageBox = GetHandle();
-	pMessage->AddCallback("SetSize", FunctionCallback<>::Create([hMessageBox]() mutable {
+	pMessage->AddCallback("OnSizeChanged", FunctionCallback<>::Create([hMessageBox]() mutable {
 		if(!hMessageBox.IsValid())
 			return;
 		auto *pMessageBox = hMessageBox.get<WIMessageBox>();
@@ -198,13 +198,11 @@ void pragma::gui::types::WIMessageBox::Initialize()
 		}
 	}));
 }
-void pragma::gui::types::WIMessageBox::SetSize(int x, int y)
+void pragma::gui::types::WIMessageBox::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetSize(x, y);
-
 	if(m_hMessage.IsValid()) {
 		auto *pMessage = m_hMessage.get<WIFrame>();
-		pMessage->SetPos(CInt32(CFloat(x) * 0.5f - CFloat(pMessage->GetWidth()) * 0.5f), CInt32(CFloat(y) * 0.5f - CFloat(pMessage->GetHeight()) * 0.5f));
+		pMessage->SetPos(CInt32(CFloat(GetWidth()) * 0.5f - CFloat(pMessage->GetWidth()) * 0.5f), CInt32(CFloat(GetHeight()) * 0.5f - CFloat(pMessage->GetHeight()) * 0.5f));
 	}
 }
 

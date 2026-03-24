@@ -1182,7 +1182,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		for(auto &[name, mat] : cache.GetShaderMaterials()) {
 			auto nodeName = name;
 			nodeName = "sm_" + nodeName;
-			auto node = pragma::util::make_shared<rendering::shader_graph::ShaderMaterialNode>(GString {nodeName}, *mat);
+			auto node = pragma::util::make_shared<rendering::shader_graph::ShaderMaterialNode>(util::GString {nodeName}, *mat);
 			regScene->RegisterNode(node);
 		}
 

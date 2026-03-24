@@ -192,19 +192,19 @@ std::optional<pragma::ik::RigConfig> pragma::ik::RigConfig::load_from_udm_data(u
 
 pragma::ik::RigConfig::RigConfig() {}
 
-std::vector<pragma::ik::PRigConfigBone>::iterator pragma::ik::RigConfig::FindBoneIt(const GString &name)
+std::vector<pragma::ik::PRigConfigBone>::iterator pragma::ik::RigConfig::FindBoneIt(const util::GString &name)
 {
 	return std::find_if(m_bones.begin(), m_bones.end(), [&name](const PRigConfigBone &bone) { return bone->name == name; });
 }
-const std::vector<pragma::ik::PRigConfigBone>::iterator pragma::ik::RigConfig::FindBoneIt(const GString &name) const { return const_cast<RigConfig *>(this)->FindBoneIt(name); }
+const std::vector<pragma::ik::PRigConfigBone>::iterator pragma::ik::RigConfig::FindBoneIt(const util::GString &name) const { return const_cast<RigConfig *>(this)->FindBoneIt(name); }
 
-std::vector<pragma::ik::PRigConfigControl>::iterator pragma::ik::RigConfig::FindControlIt(const GString &name)
+std::vector<pragma::ik::PRigConfigControl>::iterator pragma::ik::RigConfig::FindControlIt(const util::GString &name)
 {
 	return std::find_if(m_controls.begin(), m_controls.end(), [&name](const PRigConfigControl &ctrl) { return ctrl->bone == name; });
 }
-const std::vector<pragma::ik::PRigConfigControl>::iterator pragma::ik::RigConfig::FindControlIt(const GString &name) const { return const_cast<RigConfig *>(this)->FindControlIt(name); }
+const std::vector<pragma::ik::PRigConfigControl>::iterator pragma::ik::RigConfig::FindControlIt(const util::GString &name) const { return const_cast<RigConfig *>(this)->FindControlIt(name); }
 
-pragma::ik::PRigConfigBone pragma::ik::RigConfig::FindBone(const GString &name)
+pragma::ik::PRigConfigBone pragma::ik::RigConfig::FindBone(const util::GString &name)
 {
 	auto it = FindBoneIt(name);
 	if(it == m_bones.end())
@@ -212,7 +212,7 @@ pragma::ik::PRigConfigBone pragma::ik::RigConfig::FindBone(const GString &name)
 	return *it;
 }
 
-pragma::ik::PRigConfigBone pragma::ik::RigConfig::AddBone(const GString &name)
+pragma::ik::PRigConfigBone pragma::ik::RigConfig::AddBone(const util::GString &name)
 {
 	auto bone = FindBone(name);
 	if(bone)
@@ -223,7 +223,7 @@ pragma::ik::PRigConfigBone pragma::ik::RigConfig::AddBone(const GString &name)
 	return bone;
 }
 
-void pragma::ik::RigConfig::RemoveBone(const GString &name)
+void pragma::ik::RigConfig::RemoveBone(const util::GString &name)
 {
 	auto it = FindBoneIt(name);
 	if(it == m_bones.end())
@@ -231,15 +231,15 @@ void pragma::ik::RigConfig::RemoveBone(const GString &name)
 	RemoveConstraints((*it)->name);
 	m_bones.erase(it);
 }
-bool pragma::ik::RigConfig::HasBone(const GString &name) const { return FindBoneIt(name) != m_bones.end(); }
-bool pragma::ik::RigConfig::IsBoneLocked(const GString &name) const
+bool pragma::ik::RigConfig::HasBone(const util::GString &name) const { return FindBoneIt(name) != m_bones.end(); }
+bool pragma::ik::RigConfig::IsBoneLocked(const util::GString &name) const
 {
 	auto it = FindBoneIt(name);
 	if(it == m_bones.end())
 		return false;
 	return (*it)->locked;
 }
-void pragma::ik::RigConfig::SetBoneLocked(const GString &name, bool locked)
+void pragma::ik::RigConfig::SetBoneLocked(const util::GString &name, bool locked)
 {
 	auto it = FindBoneIt(name);
 	if(it == m_bones.end())
@@ -247,16 +247,16 @@ void pragma::ik::RigConfig::SetBoneLocked(const GString &name, bool locked)
 	(*it)->locked = locked;
 }
 
-void pragma::ik::RigConfig::RemoveControl(const GString &name)
+void pragma::ik::RigConfig::RemoveControl(const util::GString &name)
 {
 	auto it = FindControlIt(name);
 	if(it == m_controls.end())
 		return;
 	m_controls.erase(it);
 }
-bool pragma::ik::RigConfig::HasControl(const GString &name) const { return FindControlIt(name) != m_controls.end(); }
+bool pragma::ik::RigConfig::HasControl(const util::GString &name) const { return FindControlIt(name) != m_controls.end(); }
 
-pragma::ik::PRigConfigControl pragma::ik::RigConfig::AddControl(const GString &bone, RigConfigControl::Type type, float rigidity)
+pragma::ik::PRigConfigControl pragma::ik::RigConfig::AddControl(const util::GString &bone, RigConfigControl::Type type, float rigidity)
 {
 	RemoveControl(bone);
 	m_controls.push_back(pragma::util::make_shared<RigConfigControl>());
@@ -267,7 +267,7 @@ pragma::ik::PRigConfigControl pragma::ik::RigConfig::AddControl(const GString &b
 	return ctrl;
 }
 
-void pragma::ik::RigConfig::RemoveJoints(const GString &bone)
+void pragma::ik::RigConfig::RemoveJoints(const util::GString &bone)
 {
 	for(auto it = m_joints.begin(); it != m_joints.end();) {
 		auto &c = *it;
@@ -277,7 +277,7 @@ void pragma::ik::RigConfig::RemoveJoints(const GString &bone)
 			++it;
 	}
 }
-void pragma::ik::RigConfig::RemoveJoints(const GString &bone0, const GString &bone1)
+void pragma::ik::RigConfig::RemoveJoints(const util::GString &bone0, const util::GString &bone1)
 {
 	for(auto it = m_joints.begin(); it != m_joints.end();) {
 		auto &c = *it;
@@ -294,7 +294,7 @@ void pragma::ik::RigConfig::RemoveJoint(const RigConfigJoint &joint)
 		return;
 	m_joints.erase(it);
 }
-pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddBallSocketJoint(const GString &bone0, const GString &bone1, const Vector3 &anchorPosition, float rigidity)
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddBallSocketJoint(const util::GString &bone0, const util::GString &bone1, const Vector3 &anchorPosition, float rigidity)
 {
 	m_joints.push_back(pragma::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
@@ -305,7 +305,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddBallSocketJoint(const GStr
 	j->anchorPosition = anchorPosition;
 	return j;
 }
-pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddSwingLimit(const GString &bone0, const GString &bone1, const Vector3 &axisA, const Vector3 &axisB, math::Degree maxAngle, float rigidity)
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddSwingLimit(const util::GString &bone0, const util::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, math::Degree maxAngle, float rigidity)
 {
 	m_joints.push_back(pragma::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
@@ -318,7 +318,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddSwingLimit(const GString &
 	j->rigidity = rigidity;
 	return j;
 }
-pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddTwistLimit(const GString &bone0, const GString &bone1, const Vector3 &axisA, const Vector3 &axisB, math::Degree maxAngle, float rigidity, const std::optional<Vector3> &measurementAxisA)
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddTwistLimit(const util::GString &bone0, const util::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, math::Degree maxAngle, float rigidity, const std::optional<Vector3> &measurementAxisA)
 {
 	m_joints.push_back(pragma::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
@@ -332,7 +332,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddTwistLimit(const GString &
 	j->measurementAxisA = measurementAxisA;
 	return j;
 }
-pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddSwivelHingeJoint(const GString &bone0, const GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity)
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddSwivelHingeJoint(const util::GString &bone0, const util::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity)
 {
 	m_joints.push_back(pragma::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
@@ -344,7 +344,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddSwivelHingeJoint(const GSt
 	j->type = RigConfigJoint::Type::SwivelHingeJoint;
 	return j;
 }
-pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddTwistJoint(const GString &bone0, const GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity)
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddTwistJoint(const util::GString &bone0, const util::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity)
 {
 	m_joints.push_back(pragma::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
@@ -356,7 +356,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddTwistJoint(const GString &
 	j->type = RigConfigJoint::Type::TwistJoint;
 	return j;
 }
-pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddDistanceJoint(const GString &bone0, const GString &bone1, float rigidity)
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddDistanceJoint(const util::GString &bone0, const util::GString &bone1, float rigidity)
 {
 	m_joints.push_back(pragma::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
@@ -366,7 +366,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddDistanceJoint(const GStrin
 	j->type = RigConfigJoint::Type::DistanceJoint;
 	return j;
 }
-pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddAngularJoint(const GString &bone0, const GString &bone1, float rigidity)
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddAngularJoint(const util::GString &bone0, const util::GString &bone1, float rigidity)
 {
 	m_joints.push_back(pragma::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
@@ -376,7 +376,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddAngularJoint(const GString
 	j->type = RigConfigJoint::Type::AngularJoint;
 	return j;
 }
-pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddParentJoint(const GString &bone0, const GString &bone1)
+pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddParentJoint(const util::GString &bone0, const util::GString &bone1)
 {
 	m_joints.push_back(pragma::util::make_shared<RigConfigJoint>());
 	auto &j = m_joints.back();
@@ -386,7 +386,7 @@ pragma::ik::PRigConfigJoint pragma::ik::RigConfig::AddParentJoint(const GString 
 	return j;
 }
 
-void pragma::ik::RigConfig::RemoveConstraints(const GString &bone)
+void pragma::ik::RigConfig::RemoveConstraints(const util::GString &bone)
 {
 	for(auto it = m_constraints.begin(); it != m_constraints.end();) {
 		auto &c = *it;
@@ -397,7 +397,7 @@ void pragma::ik::RigConfig::RemoveConstraints(const GString &bone)
 	}
 }
 
-void pragma::ik::RigConfig::RemoveConstraints(const GString &bone0, const GString &bone1)
+void pragma::ik::RigConfig::RemoveConstraints(const util::GString &bone0, const util::GString &bone1)
 {
 	for(auto it = m_constraints.begin(); it != m_constraints.end();) {
 		auto &c = *it;
@@ -431,7 +431,7 @@ void pragma::ik::RigConfig::RemoveBone(const RigConfigBone &bone)
 	m_bones.erase(it);
 }
 
-pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddFixedConstraint(const GString &bone0, const GString &bone1)
+pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddFixedConstraint(const util::GString &bone0, const util::GString &bone1)
 {
 	m_constraints.push_back(pragma::util::make_shared<RigConfigConstraint>());
 	auto &c = m_constraints.back();
@@ -440,7 +440,7 @@ pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddFixedConstraint(const
 	c->type = RigConfigConstraint::Type::Fixed;
 	return c;
 }
-pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddHingeConstraint(const GString &bone0, const GString &bone1, math::Degree minAngle, math::Degree maxAngle, const Quat &offsetRotation)
+pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddHingeConstraint(const util::GString &bone0, const util::GString &bone1, math::Degree minAngle, math::Degree maxAngle, const Quat &offsetRotation)
 {
 	m_constraints.push_back(pragma::util::make_shared<RigConfigConstraint>());
 	auto &c = m_constraints.back();
@@ -452,7 +452,7 @@ pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddHingeConstraint(const
 	c->offsetPose.SetRotation(offsetRotation);
 	return c;
 }
-pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddBallSocketConstraint(const GString &bone0, const GString &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, SignedAxis axis)
+pragma::ik::PRigConfigConstraint pragma::ik::RigConfig::AddBallSocketConstraint(const util::GString &bone0, const util::GString &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, SignedAxis axis)
 {
 	m_constraints.push_back(pragma::util::make_shared<RigConfigConstraint>());
 	auto &c = m_constraints.back();

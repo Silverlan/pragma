@@ -6,7 +6,7 @@ module pragma.shared;
 
 import :model.animation.meta_rig;
 
-pragma::animation::BoneId pragma::animation::MetaRig::GetBoneId(const GString &type) const
+pragma::animation::BoneId pragma::animation::MetaRig::GetBoneId(const util::GString &type) const
 {
 	auto eType = get_meta_rig_bone_type_enum(type);
 	if(!eType)

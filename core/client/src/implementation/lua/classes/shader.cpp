@@ -10,13 +10,13 @@ prosper::ShaderBindState *LuaShaderRecordTarget::GetBindState() const { return l
 prosper::util::PreparedCommandBuffer *LuaShaderRecordTarget::GetPcb() const { return luabind::object_cast_nothrow<prosper::util::PreparedCommandBuffer *>(target, static_cast<prosper::util::PreparedCommandBuffer *>(nullptr)); }
 uint32_t Lua::Shader::AttachDescriptorSetInfo(lua::State *l, pragma::LuaShaderWrapperBase &shader, pragma::LuaDescriptorSetInfo &descSetInfo)
 {
-	prosper::DescriptorSetInfo shaderDescSetInfo {pragma::register_global_string(descSetInfo.name), {}};
+	prosper::DescriptorSetInfo shaderDescSetInfo {pragma::util::register_global_string(descSetInfo.name), {}};
 	shaderDescSetInfo.bindings.reserve(descSetInfo.bindings.size());
 	auto bindingIdx = 0u;
 	for(auto &lBinding : descSetInfo.bindings) {
 		shaderDescSetInfo.bindings.push_back({});
 		auto &binding = shaderDescSetInfo.bindings.back();
-		binding.name = pragma::register_global_string(lBinding.name);
+		binding.name = pragma::util::register_global_string(lBinding.name);
 		binding.type = lBinding.type;
 		binding.shaderStages = lBinding.shaderStages;
 		binding.descriptorArraySize = lBinding.descriptorArraySize;

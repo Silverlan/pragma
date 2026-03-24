@@ -448,7 +448,7 @@ static void get_descriptor_set_layout_bindings(lua::State *l, std::vector<prospe
 		uint32_t arrayCount = 1;
 		::Lua::get_table_value<ptrdiff_t, decltype(arrayCount)>(l, "arrayCount", tBinding, arrayCount, [](lua::State *l, int32_t idx) { return static_cast<ptrdiff_t>(Lua::CheckInt(l, idx)); });
 
-		prosper::DescriptorSetInfo::Binding binding {pragma::register_global_string(name), type, shaderStages, arrayCount};
+		prosper::DescriptorSetInfo::Binding binding {pragma::util::register_global_string(name), type, shaderStages, arrayCount};
 		bindings.push_back(binding);
 
 		Lua::Pop(l, 1); /* 0 */

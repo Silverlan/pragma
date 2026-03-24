@@ -22,8 +22,6 @@ export import :physics.enums;
 export import :scripting.lua.base_lua_handle;
 export import :types;
 
-export import :util.global_string_table;
-
 export {
 	namespace pragma {
 		namespace ents {
@@ -64,7 +62,7 @@ export {
 
 			static void RegisterEvents(EntityComponentManager &componentManager);
 
-			virtual GString GetClass() const;
+			virtual util::GString GetClass() const;
 			BaseEntity();
 			void Construct(unsigned int idx);
 			EntityHandle GetHandle() const;
@@ -277,7 +275,7 @@ export {
 		  protected:
 			uint32_t m_spawnFlags = 0u;
 
-			GString m_className = "BaseEntity";
+			util::GString m_className = "BaseEntity";
 			util::Uuid m_uuid {};
 			EntityIndex m_index = 0u;
 			virtual void DoSpawn();

@@ -14,7 +14,7 @@ static int log(lua::State *l, spdlog::level::level_enum logLevel)
 {
 	auto &el = Lua::Check<pragma::gui::types::WIBase>(l, 1);
 	const char *msg = Lua::CheckString(l, 2);
-	std::string loggerName = "ui_" + el.GetClass();
+	std::string loggerName = "ui_" + static_cast<std::string>(el.GetClass());
 	int32_t argOffset = 2;
 	auto n = lua::get_top(l) - argOffset; /* number of arguments */
 	switch(n) {
@@ -193,7 +193,7 @@ static void register_gui(Lua::Interface &lua)
 		  uint32_t idx = 1;
 		  std::function<void(pragma::gui::types::WIBase &)> fIterateChildren = nullptr;
 		  fIterateChildren = [l, &fIterateChildren, &className, &t, &idx](pragma::gui::types::WIBase &el) mutable {
-			  if(pragma::string::compare(el.GetClass(), className, false))
+			  if(pragma::string::compare(el.GetClass().c_str(), className.c_str(), false))
 				  t[idx++] = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
 			  for(auto &hChild : *el.GetChildren()) {
 				  if(hChild.IsValid() == false)

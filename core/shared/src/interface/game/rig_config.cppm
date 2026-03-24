@@ -7,7 +7,6 @@ module;
 export module pragma.shared:game.rig_config;
 
 export import :game.coordinate_system;
-export import :util.global_string_table;
 export import pragma.udm;
 
 export {
@@ -20,7 +19,7 @@ export {
 		constexpr double REFERENCE_META_RIG_SCALE = 0.0782465711;
 
 		struct DLLNETWORK RigConfigBone {
-			GString name;
+			util::GString name;
 			bool locked = false;
 			// TODO: What units are these? Meters?
 			float length = 1.f;
@@ -41,15 +40,15 @@ export {
 				PoleTarget,
 				Count,
 			};
-			GString bone;
+			util::GString bone;
 			Type type = Type::Drag;
 			float maxForce = -1.f;
 			float rigidity = 1.f;
 			std::optional<Vector3> initialPos {};
 			std::optional<Quat> initialRot {};
 
-			GString poleTargetBaseBone;
-			GString poleTargetEffectorBone;
+			util::GString poleTargetBaseBone;
+			util::GString poleTargetEffectorBone;
 			math::Degree poleAngle = 0.f;
 		};
 
@@ -60,8 +59,8 @@ export {
 				BallSocket,
 				Count,
 			};
-			GString bone0;
-			GString bone1;
+			util::GString bone0;
+			util::GString bone1;
 			Type type = Type::Fixed;
 			SignedAxis axis = SignedAxis::Z;
 			EulerAngles minLimits;
@@ -85,8 +84,8 @@ export {
 
 				Count,
 			};
-			GString bone0;
-			GString bone1;
+			util::GString bone0;
+			util::GString bone1;
 			Type type = Type::BallSocketJoint;
 			std::optional<Vector3> axisA {};
 			std::optional<Vector3> axisB {};
@@ -117,38 +116,38 @@ export {
 			void DebugPrint() const;
 			void ToUdmData(udm::LinkedPropertyWrapper &udmData) const;
 
-			PRigConfigBone AddBone(const GString &name);
-			PRigConfigBone FindBone(const GString &name);
-			void RemoveBone(const GString &name);
-			bool HasBone(const GString &name) const;
-			bool IsBoneLocked(const GString &name) const;
-			void SetBoneLocked(const GString &name, bool locked);
+			PRigConfigBone AddBone(const util::GString &name);
+			PRigConfigBone FindBone(const util::GString &name);
+			void RemoveBone(const util::GString &name);
+			bool HasBone(const util::GString &name) const;
+			bool IsBoneLocked(const util::GString &name) const;
+			void SetBoneLocked(const util::GString &name, bool locked);
 
-			void RemoveControl(const GString &name);
-			bool HasControl(const GString &name) const;
+			void RemoveControl(const util::GString &name);
+			bool HasControl(const util::GString &name) const;
 
-			PRigConfigControl AddControl(const GString &bone, RigConfigControl::Type type, float rigidity = 1.f);
+			PRigConfigControl AddControl(const util::GString &bone, RigConfigControl::Type type, float rigidity = 1.f);
 
-			void RemoveJoints(const GString &bone);
-			void RemoveJoints(const GString &bone0, const GString &bone1);
+			void RemoveJoints(const util::GString &bone);
+			void RemoveJoints(const util::GString &bone0, const util::GString &bone1);
 			void RemoveJoint(const RigConfigJoint &joint);
-			PRigConfigJoint AddBallSocketJoint(const GString &bone0, const GString &bone1, const Vector3 &anchorPosition, float rigidity = 1.f);
-			PRigConfigJoint AddSwingLimit(const GString &bone0, const GString &bone1, const Vector3 &axisA, const Vector3 &axisB, math::Degree maxAngle, float rigidity = 1.f);
-			PRigConfigJoint AddTwistLimit(const GString &bone0, const GString &bone1, const Vector3 &axisA, const Vector3 &axisB, math::Degree maxAngle, float rigidity = 1.f, const std::optional<Vector3> &measurementAxisA = {});
-			PRigConfigJoint AddSwivelHingeJoint(const GString &bone0, const GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity = 1.f);
-			PRigConfigJoint AddTwistJoint(const GString &bone0, const GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity);
-			PRigConfigJoint AddDistanceJoint(const GString &bone0, const GString &bone1, float rigidity = 1.f);
-			PRigConfigJoint AddAngularJoint(const GString &bone0, const GString &bone1, float rigidity = 1.f);
-			PRigConfigJoint AddParentJoint(const GString &bone0, const GString &bone1);
+			PRigConfigJoint AddBallSocketJoint(const util::GString &bone0, const util::GString &bone1, const Vector3 &anchorPosition, float rigidity = 1.f);
+			PRigConfigJoint AddSwingLimit(const util::GString &bone0, const util::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, math::Degree maxAngle, float rigidity = 1.f);
+			PRigConfigJoint AddTwistLimit(const util::GString &bone0, const util::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, math::Degree maxAngle, float rigidity = 1.f, const std::optional<Vector3> &measurementAxisA = {});
+			PRigConfigJoint AddSwivelHingeJoint(const util::GString &bone0, const util::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity = 1.f);
+			PRigConfigJoint AddTwistJoint(const util::GString &bone0, const util::GString &bone1, const Vector3 &axisA, const Vector3 &axisB, float rigidity);
+			PRigConfigJoint AddDistanceJoint(const util::GString &bone0, const util::GString &bone1, float rigidity = 1.f);
+			PRigConfigJoint AddAngularJoint(const util::GString &bone0, const util::GString &bone1, float rigidity = 1.f);
+			PRigConfigJoint AddParentJoint(const util::GString &bone0, const util::GString &bone1);
 
-			void RemoveConstraints(const GString &bone);
-			void RemoveConstraints(const GString &bone0, const GString &bone1);
+			void RemoveConstraints(const util::GString &bone);
+			void RemoveConstraints(const util::GString &bone0, const util::GString &bone1);
 			void RemoveConstraint(const RigConfigConstraint &constraint);
 			void RemoveControl(const RigConfigControl &control);
 			void RemoveBone(const RigConfigBone &bone);
-			PRigConfigConstraint AddFixedConstraint(const GString &bone0, const GString &bone1);
-			PRigConfigConstraint AddHingeConstraint(const GString &bone0, const GString &bone1, math::Degree minAngle, math::Degree maxAngle, const Quat &offsetRotation = uquat::identity());
-			PRigConfigConstraint AddBallSocketConstraint(const GString &bone0, const GString &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, SignedAxis axis = SignedAxis::Z);
+			PRigConfigConstraint AddFixedConstraint(const util::GString &bone0, const util::GString &bone1);
+			PRigConfigConstraint AddHingeConstraint(const util::GString &bone0, const util::GString &bone1, math::Degree minAngle, math::Degree maxAngle, const Quat &offsetRotation = uquat::identity());
+			PRigConfigConstraint AddBallSocketConstraint(const util::GString &bone0, const util::GString &bone1, const EulerAngles &minAngles, const EulerAngles &maxAngles, SignedAxis axis = SignedAxis::Z);
 
 			const std::vector<PRigConfigBone> &GetBones() const { return m_bones; }
 			const std::vector<PRigConfigControl> &GetControls() const { return m_controls; }
@@ -163,11 +162,11 @@ export {
 
 			bool Save(const std::string &fileName);
 		  private:
-			std::vector<PRigConfigBone>::iterator FindBoneIt(const GString &name);
-			const std::vector<PRigConfigBone>::iterator FindBoneIt(const GString &name) const;
+			std::vector<PRigConfigBone>::iterator FindBoneIt(const util::GString &name);
+			const std::vector<PRigConfigBone>::iterator FindBoneIt(const util::GString &name) const;
 
-			std::vector<PRigConfigControl>::iterator FindControlIt(const GString &name);
-			const std::vector<PRigConfigControl>::iterator FindControlIt(const GString &name) const;
+			std::vector<PRigConfigControl>::iterator FindControlIt(const util::GString &name);
+			const std::vector<PRigConfigControl>::iterator FindControlIt(const util::GString &name) const;
 
 			std::optional<std::string> m_rootBone {};
 			std::vector<PRigConfigBone> m_bones;

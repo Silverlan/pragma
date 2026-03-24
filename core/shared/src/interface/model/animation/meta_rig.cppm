@@ -236,7 +236,7 @@ export {
 			const MetaRigBone *GetBone(MetaRigBoneType type) const;
 			const MetaRigBlendShape *GetBlendShape(BlendShape blendShape) const;
 			std::optional<MetaRigBoneType> FindMetaBoneType(BoneId boneId) const;
-			BoneId GetBoneId(const GString &type) const;
+			BoneId GetBoneId(const util::GString &type) const;
 			BoneId GetBoneId(MetaRigBoneType type) const;
 			RigType rigType = RigType::Biped;
 			Quat forwardFacingRotationOffset = uquat::identity();

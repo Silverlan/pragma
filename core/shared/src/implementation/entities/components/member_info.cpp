@@ -167,7 +167,7 @@ void ComponentMemberInfo::SetFlags(ComponentMemberFlags flags) { m_flags = flags
 ComponentMemberFlags ComponentMemberInfo::GetFlags() const { return m_flags; }
 bool ComponentMemberInfo::HasFlag(ComponentMemberFlags flag) const { return math::is_flag_set(m_flags, flag); }
 void ComponentMemberInfo::SetFlag(ComponentMemberFlags flag, bool set) { math::set_flag(m_flags, flag, set); }
-void ComponentMemberInfo::SetName(const GString &name)
+void ComponentMemberInfo::SetName(const util::GString &name)
 {
 	m_name = name;
 	m_nameHash = get_component_member_name_hash(*name);
@@ -176,12 +176,12 @@ void ComponentMemberInfo::SetName(const char *name)
 {
 	std::string normName = name;
 	string::to_lower(normName);
-	SetName(GString{normName});
+	SetName(util::GString{normName});
 }
 
 //////////////
 
-ComponentRegInfo::ComponentRegInfo(GString category, Flags flags) : categoryPath {category}, flags {flags} {}
+ComponentRegInfo::ComponentRegInfo(util::GString category, Flags flags) : categoryPath {category}, flags {flags} {}
 ComponentRegInfo::ComponentRegInfo(Flags flags) : ComponentRegInfo {"internal", flags} {}
 
 ComponentInfo::ComponentInfo(const ComponentInfo &other) { operator=(other); }
@@ -593,4 +593,4 @@ ComponentMemberInfo::ComponentMemberInfo(const char *name, ents::EntityMemberTyp
     : m_name {name}, m_nameHash {get_component_member_name_hash(*m_name)}, type {type}, setterFunction {applyFunc}, getterFunction {getFunc}
 {
 }
-ComponentMemberInfo::ComponentMemberInfo(const std::string &name, ents::EntityMemberType type, const ApplyFunction &applyFunc, const GetFunction &getFunc) : ComponentMemberInfo {register_global_string(name), type, applyFunc, getFunc} {}
+ComponentMemberInfo::ComponentMemberInfo(const std::string &name, ents::EntityMemberType type, const ApplyFunction &applyFunc, const GetFunction &getFunc) : ComponentMemberInfo {util::register_global_string(name), type, applyFunc, getFunc} {}

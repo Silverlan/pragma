@@ -7,7 +7,6 @@ module;
 module pragma.shared;
 
 import :entities.base_entity;
-import :util.global_string_table;
 
 pragma::Game &pragma::ecs::BaseEntity::GetGame() const { return *GetNetworkState()->GetGameState(); }
 pragma::ecs::BaseEntity *pragma::ecs::BaseEntity::CreateChild(const std::string &className)
@@ -226,7 +225,7 @@ void pragma::ecs::BaseEntity::Initialize()
 	AddComponent("entity");
 }
 
-pragma::GString pragma::ecs::BaseEntity::GetClass() const { return m_className; }
+pragma::util::GString pragma::ecs::BaseEntity::GetClass() const { return m_className; }
 
 void pragma::ecs::BaseEntity::SetPose(const math::Transform &outTransform, CoordinateSpace space)
 {
@@ -425,4 +424,4 @@ std::ostream &operator<<(std::ostream &os, const EntityHandle ent)
 	return os;
 }
 
-const char *pragma::ents::register_class_name(const std::string &className) { return register_global_string(className); }
+const char *pragma::ents::register_class_name(const std::string &className) { return util::register_global_string(className); }

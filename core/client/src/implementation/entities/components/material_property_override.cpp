@@ -520,8 +520,8 @@ void CMaterialPropertyOverrideComponent::AddMaterialTexturePropertyMember(const 
 	std::string name {tex.name};
 	auto propName = propPath + name;
 	auto propNameEnabled = propName + "_enabled";
-	auto *cPropName = register_global_string(name);
-	auto *cPropNameEnabled = register_global_string(propNameEnabled);
+	auto *cPropName = util::register_global_string(name);
+	auto *cPropNameEnabled = util::register_global_string(propNameEnabled);
 
 	uint32_t idx;
 	if(!m_freePropertyInfoIndices.empty()) {
@@ -581,8 +581,8 @@ void CMaterialPropertyOverrideComponent::AddMaterialPropertyMember(const renderi
 	auto propName = propPath + name;
 	auto propNameEnabled = propName + "_enabled";
 
-	auto *cPropNameEnabled = register_global_string(propNameEnabled);
-	auto *cPropName = register_global_string(name);
+	auto *cPropNameEnabled = util::register_global_string(propNameEnabled);
+	auto *cPropName = util::register_global_string(name);
 	uint32_t idx;
 	if(!m_freePropertyInfoIndices.empty()) {
 		idx = m_freePropertyInfoIndices.front();
@@ -701,8 +701,8 @@ void CMaterialPropertyOverrideComponent::PopulateProperties(std::string matName,
 		auto shaderPropName = matPropName + "shader";
 		auto shaderPropNameEnabled = shaderPropName + "_enabled";
 
-		auto *cPropName = register_global_string(shaderPropName);
-		auto *cPropNameEnabled = register_global_string(shaderPropNameEnabled);
+		auto *cPropName = util::register_global_string(shaderPropName);
+		auto *cPropNameEnabled = util::register_global_string(shaderPropNameEnabled);
 
 		auto memberInfo = ComponentMemberInfo::CreateDummy();
 

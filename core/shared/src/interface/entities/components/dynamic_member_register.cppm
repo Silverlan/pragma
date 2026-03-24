@@ -8,7 +8,6 @@ export module pragma.shared:entities.components.dynamic_member_register;
 
 export import :entities.enums;
 export import :entities.member_info;
-export import :util.global_string_table;
 
 export namespace pragma {
 	class BaseEntityComponentSystem;
@@ -20,7 +19,7 @@ export namespace pragma {
 		const ComponentMemberInfo *GetMemberInfo(ComponentMemberIndex idx) const;
 
 		const std::vector<ComponentMemberInfo> &GetMembers() const { return m_members; }
-		const std::unordered_map<GString, ComponentMemberIndex> &GetMemberIndexMap() const { return m_memberNameToIndex; }
+		const std::unordered_map<util::GString, ComponentMemberIndex> &GetMemberIndexMap() const { return m_memberNameToIndex; }
 	  protected:
 		friend BaseEntityComponentSystem;
 		virtual void OnMemberRegistered(const ComponentMemberInfo &memberInfo, ComponentMemberIndex index) {}
@@ -35,6 +34,6 @@ export namespace pragma {
 		void UpdateMemberNameMap();
 	  private:
 		std::vector<ComponentMemberInfo> m_members = {};
-		std::unordered_map<GString, ComponentMemberIndex> m_memberNameToIndex = {};
+		std::unordered_map<util::GString, ComponentMemberIndex> m_memberNameToIndex = {};
 	};
 };

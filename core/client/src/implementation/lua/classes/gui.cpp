@@ -1366,7 +1366,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		});
 	}
 	else if(name == "ontextchanged") {
-		if(pragma::string::compare(panel.GetClass(), std::string {"witext"}, false)) {
+		if(pragma::string::compare(panel.GetClass().c_str(), "witext", false)) {
 			hCallback = FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>>::Create([l, hPanel, o](std::reference_wrapper<const pragma::string::Utf8String> text) mutable {
 				if(!hPanel.IsValid())
 					return;

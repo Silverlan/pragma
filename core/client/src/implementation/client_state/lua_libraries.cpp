@@ -614,7 +614,7 @@ void pragma::ClientState::RegisterSharedLuaLibraries(Lua::Interface &lua, bool b
 	  luabind::def(
 	    "get_cursor_pos", +[]() -> Vector2 { return get_cengine()->GetWindow()->GetCursorPos(); }),
 	  luabind::def(
-	    "set_cursor_pos", +[](const Vector2 &pos) { get_cengine()->GetWindow()->SetCursorPos(pos); }),
+	    "set_cursor_pos", +[](const Vector2 &pos) -> bool { return get_cengine()->GetWindow()->SetCursorPos(pos); }),
 	  luabind::def(
 	    "is_ctrl_key_down", +[]() -> bool { return get_cengine()->GetWindow()->GetKeyState(platform::Key::LeftControl) != platform::KeyState::Release || get_cengine()->GetWindow()->GetKeyState(platform::Key::RightControl) != platform::KeyState::Release; }),
 	  luabind::def(

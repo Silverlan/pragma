@@ -1471,6 +1471,10 @@ void pragma::Game::RegisterLuaClasses()
 	// Entity
 	auto &modUtil = GetLuaInterface().RegisterLibrary("util");
 	LuaCore::register_thread_pool(GetLuaState(), modUtil);
+
+	modUtil[luabind::def("get_peak_rss_memory_usage", &pragma::util::get_peak_rss_memory_usage)];
+	modUtil[luabind::def("get_current_rss_memory_usage", &pragma::util::get_current_rss_memory_usage)];
+
 	auto entDef = luabind::class_<LEntityProperty, LBasePropertyWrapper>("EntityProperty");
 	//Lua::Property::add_generic_methods<LEntityProperty,EntityHandle,luabind::class_<LEntityProperty,LBasePropertyWrapper>>(entDef);
 	entDef.def(luabind::constructor<>());

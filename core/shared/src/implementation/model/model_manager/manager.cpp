@@ -70,7 +70,7 @@ bool pragma::asset::ModelProcessor::Finalize()
 	// Data copying has to be performed on main thread due to the use of a primary
 	// command buffer.
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("load_model_update_buffers");
+	debug::get_domain().BeginTask("load_model_update_buffers");
 #endif
 	auto &assetManager = static_cast<ModelManager &>(handler->GetAssetManager());
 	auto &includes = model->GetMetaInfo().includes;
@@ -87,7 +87,7 @@ bool pragma::asset::ModelProcessor::Finalize()
 	}
 	model->Update(ModelUpdateFlags::UpdateBuffers | ModelUpdateFlags::UpdateChildren);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	return true;
 }

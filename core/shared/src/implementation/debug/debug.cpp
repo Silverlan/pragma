@@ -17,13 +17,13 @@ import :locale;
 void pragma::debug::start_profiling_task(const char *taskName)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask(taskName);
+	debug::get_domain().BeginTask(taskName);
 #endif
 }
 void pragma::debug::end_profiling_task()
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 }
 

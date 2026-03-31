@@ -233,12 +233,12 @@ void CModelComponent::UpdateRenderBufferList()
 			}
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-			::debug::get_domain().BeginTask("init_mat_desc_set");
+			debug::get_domain().BeginTask("init_mat_desc_set");
 #endif
 			if(!shader->InitializeMaterialDescriptorSet(*mat))
 				mat = nullptr;
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-			::debug::get_domain().EndTask();
+			debug::get_domain().EndTask();
 #endif
 		}
 		m_lodMeshRenderBufferData.push_back({});

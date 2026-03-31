@@ -467,7 +467,7 @@ void CRenderComponent::ReceiveData(NetPacket &packet) { m_renderFlags = packet->
 std::optional<math::intersection::LineMeshResult> CRenderComponent::CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise) const
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("render_component_calc_ray_intersection");
+	debug::get_domain().BeginTask("render_component_calc_ray_intersection");
 	pragma::util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
 #endif
 	auto &lodMeshes = GetLODMeshes();

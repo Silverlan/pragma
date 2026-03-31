@@ -119,7 +119,7 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 #endif
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::open_domain();
+	debug::open_domain();
 #endif
 
 	debug::set_lua_backtrace_function([this]() -> std::string {
@@ -793,8 +793,8 @@ void pragma::Engine::InitializeAssetManager(util::FileAssetManager &assetManager
 	assetManager.SetLogHandler(&log);
 	assetManager.SetExternalSourceFileImportHandler([this, &assetManager](const std::string &path, const std::string &outputPath) -> std::optional<std::string> {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-		::debug::get_domain().BeginTask("import_asset_file");
-		pragma::util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
+		debug::get_domain().BeginTask("import_asset_file");
+		pragma::util::ScopeGuard sg {[]() { debug::get_domain().EndTask(); }};
 #endif
 		auto *nw = GetClientState();
 		if(!nw || !nw->IsGameActive()) {
@@ -1235,7 +1235,7 @@ pragma::Engine::~Engine()
 	if(math::is_flag_set(m_stateFlags, StateFlags::Running))
 		throw std::runtime_error("Engine has to be closed before it can be destroyed!");
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::close_domain();
+	debug::close_domain();
 #endif
 
 	debug::set_lua_backtrace_function(nullptr);

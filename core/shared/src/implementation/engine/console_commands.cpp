@@ -611,7 +611,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  std::string name = "cmd";
 		  if(!argv.empty())
 			  name = argv.front();
-		  ::debug::get_domain().BeginTask(name);
+		  debug::get_domain().BeginTask(name);
 	  },
 	  pragma::console::ConVarFlags::None, "Start the VTune profiler.");
 	conVarMap.RegisterConCommand("debug_vtune_prof_end", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ::debug::get_domain().EndTask(); }, pragma::console::ConVarFlags::None, "End the VTune profiler.");

@@ -81,6 +81,7 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 		imgCreateInfo.width = width;
 		imgCreateInfo.height = height;
 		imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit;
+		imgCreateInfo.debugName = "prepass_normals";
 		auto imgNormals = context.CreateImage(imgCreateInfo);
 
 		prosper::util::TextureCreateInfo texCreateInfo {};
@@ -93,8 +94,9 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 		textureNormals = context.CreateTexture(texCreateInfo, *imgNormals, imgViewCreateInfo, samplerCreateInfo);
 
 		auto &imgDepth = textureDepth->GetImage();
-		renderTarget = context.CreateRenderTarget({textureNormals, textureDepth}, shaderPrepass->GetRenderPass()); //pragma::math::to_integral(pipelineType)));
-		renderTarget->SetDebugName("prepass_depth_normal_rt");
+		prosper::util::RenderTargetCreateInfo rtCreateInfo {};
+		rtCreateInfo.debugName = "prepass_depth_normal_rt";
+		renderTarget = context.CreateRenderTarget({textureNormals, textureDepth}, shaderPrepass->GetRenderPass(), rtCreateInfo); //pragma::math::to_integral(pipelineType)));
 		m_clearValues = {
 		  prosper::ClearValue {prosper::ClearColorValue {}},             // Unused, but required
 		  prosper::ClearValue {prosper::ClearDepthStencilValue {1.f, 0}} // Clear depth
@@ -104,8 +106,9 @@ void pragma::rendering::Prepass::SetUseExtendedPrepass(bool b, bool bForceReload
 	{
 		textureNormals = nullptr;
 
-		renderTarget = context.CreateRenderTarget({textureDepth},shaderPrepassDepth->GetRenderPass(pragma::math::to_integral(pipelineType)));
-		renderTarget->SetDebugName("prepass_depth_rt");
+		prosper::util::RenderTargetCreateInfo rtCreateInfo {};
+		rtCreateInfo.debugName = "prepass_depth_rt";
+		renderTarget = context.CreateRenderTarget({textureDepth},shaderPrepassDepth->GetRenderPass(pragma::math::to_integral(pipelineType)),rtCreateInfo);
 		m_clearValues = {
 			prosper::ClearValue{prosper::ClearDepthStencilValue{1.f,0}} // Clear depth
 		};

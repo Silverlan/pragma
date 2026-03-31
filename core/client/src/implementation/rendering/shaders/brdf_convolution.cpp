@@ -30,6 +30,7 @@ std::shared_ptr<prosper::Texture> ShaderBRDFConvolution::CreateBRDFConvolutionMa
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.tiling = prosper::ImageTiling::Optimal;
 	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit;
+	createInfo.debugName = "brdf_convolution_map";
 	auto img = get_cengine()->GetRenderContext().CreateImage(createInfo);
 
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};

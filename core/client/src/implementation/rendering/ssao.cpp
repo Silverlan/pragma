@@ -26,19 +26,23 @@ bool pragma::rendering::SSAOInfo::Initialize(prosper::IPrContext &context, uint3
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit;
 	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+	imgCreateInfo.debugName = "ssao";
 	auto img = context.CreateImage(imgCreateInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	auto tex = context.CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
 	auto rp = prosper::ShaderGraphics::GetRenderPass<ShaderSSAO>(get_cengine()->GetRenderContext());
-	renderTarget = context.CreateRenderTarget({tex}, rp);
-	renderTarget->SetDebugName("ssao_rt");
+	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
+	rtCreateInfo.debugName = "ssao_rt";
+	renderTarget = context.CreateRenderTarget({tex}, rp, rtCreateInfo);
 
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+	imgCreateInfo.debugName = "ssao_blur";
 	auto imgBlur = context.CreateImage(imgCreateInfo);
 	auto texBlur = context.CreateTexture({}, *imgBlur, imgViewCreateInfo, samplerCreateInfo);
-	renderTargetBlur = context.CreateRenderTarget({texBlur}, rp);
-	renderTargetBlur->SetDebugName("ssao_blur_rt");
+	rtCreateInfo = {};
+	rtCreateInfo.debugName = "ssao_blur_rt";
+	renderTargetBlur = context.CreateRenderTarget({texBlur}, rp, rtCreateInfo);
 	descSetGroupPrepass = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderSSAO::DESCRIPTOR_SET_PREPASS);
 	auto &descSetPrepass = *descSetGroupPrepass->GetDescriptorSet();
 	descSetPrepass.SetBindingTexture(*texNorm, math::to_integral(ShaderSSAO::PrepassBinding::NormalBuffer));

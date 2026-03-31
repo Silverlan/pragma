@@ -51,6 +51,7 @@ std::shared_ptr<prosper::IImage> pragma::ShaderComposeRMA::ComposeRMA(prosper::I
 
 	imgCreateInfo.width = extents.width;
 	imgCreateInfo.height = extents.height;
+	imgCreateInfo.debugName = "compose_rma";
 
 	auto imgRMA = context.CreateImage(imgCreateInfo);
 

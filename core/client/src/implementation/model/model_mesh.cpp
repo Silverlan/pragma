@@ -61,8 +61,8 @@ void pragma::geometry::CModelSubMesh::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
+	createInfo.debugName = "mesh_vertex_data_buf";
 	s_vertexBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.05f);
-	s_vertexBuffer->SetDebugName("mesh_vertex_data_buf");
 	s_vertexBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
 	// Initialize global vertex weight buffer
@@ -71,8 +71,8 @@ void pragma::geometry::CModelSubMesh::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
+	createInfo.debugName = "mesh_vertex_weight_data_buf";
 	s_vertexWeightBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.025f);
-	s_vertexWeightBuffer->SetDebugName("mesh_vertex_weight_data_buf");
 	s_vertexWeightBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
 	// Initialize global alpha buffer
@@ -81,8 +81,8 @@ void pragma::geometry::CModelSubMesh::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
+	createInfo.debugName = "mesh_alpha_data_buf";
 	s_alphaBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.025f);
-	s_alphaBuffer->SetDebugName("mesh_alpha_data_buf");
 	s_alphaBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
 	// Initialize global index buffer
@@ -91,8 +91,8 @@ void pragma::geometry::CModelSubMesh::InitializeBuffers()
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
+	createInfo.debugName = "mesh_index_data_buf";
 	s_indexBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.025f);
-	s_indexBuffer->SetDebugName("mesh_index_data_buf");
 	s_indexBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 }
 void pragma::geometry::CModelSubMesh::ClearBuffers()

@@ -299,6 +299,7 @@ std::shared_ptr<prosper::Texture> CPBRConverterComponent::ConvertSpecularMapToRo
 	createInfoRoughness.format = prosper::Format::R8G8B8A8_UNorm;
 	createInfoRoughness.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
 	createInfoRoughness.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
+	createInfoRoughness.debugName = "specular_to_roughness_roughness_map";
 	auto roughnessMap = get_cengine()->GetRenderContext().CreateImage(createInfoRoughness);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};

@@ -63,9 +63,9 @@ void ShadowDataBufferManager::DoInitialize()
 
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = m_maxCount * shadowDataSize;
+	createInfo.debugName = "light_shadow_data_buf";
 
 	m_masterBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, shadowDataSize, createInfo.size, 0.05f, nullptr, alignment);
-	m_masterBuffer->SetDebugName("light_shadow_data_buf");
 
 	m_bufferIndexToLightSource.resize(m_maxCount, nullptr);
 }
@@ -124,8 +124,8 @@ void LightDataBufferManager::DoInitialize()
 		}
 	}
 
+	createInfo.debugName = "light_data_buf";
 	m_masterBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, lightDataSize, createInfo.size, 0.05f, initialLightBufferData.data(), alignment);
-	m_masterBuffer->SetDebugName("light_data_buf");
 
 	m_bufferIndexToLightSource.resize(m_maxCount, nullptr);
 }

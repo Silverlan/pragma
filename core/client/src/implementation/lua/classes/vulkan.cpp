@@ -287,19 +287,19 @@ namespace pragma::platform {
 
 std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::IPrContext &context, prosper::util::BufferCreateInfo &bufCreateInfo, pragma::util::DataStream &ds)
 {
+	bufCreateInfo.debugName = "lua_buf";
 	auto buf = context.CreateBuffer(bufCreateInfo, ds->GetData());
 	if(buf == nullptr)
 		return 0;
-	buf->SetDebugName("lua_buf");
 	return buf;
 }
 
 std::shared_ptr<prosper::IBuffer> Lua::Vulkan::create_buffer(prosper::IPrContext &context, prosper::util::BufferCreateInfo &bufCreateInfo)
 {
+	bufCreateInfo.debugName = "lua_buf";
 	auto buf = context.CreateBuffer(bufCreateInfo);
 	if(buf == nullptr)
 		return 0;
-	buf->SetDebugName("lua_buf");
 	return buf;
 }
 
@@ -349,84 +349,42 @@ prosper::util::ImageCreateInfo Lua::Vulkan::create_image_create_info(const pragm
 
 prosper::util::ImageCreateInfo Lua::Vulkan::create_image_create_info(const pragma::image::ImageBuffer &imgBuf) { return prosper::util::get_image_create_info(imgBuf, false); }
 
-std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(pragma::image::ImageBuffer &imgBuffer, const prosper::util::ImageCreateInfo &imgCreateInfo)
-{
-	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(imgBuffer, imgCreateInfo);
-	if(img)
-		img->SetDebugName("lua_img");
-	return img;
-}
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(pragma::image::ImageBuffer &imgBuffer, const prosper::util::ImageCreateInfo &imgCreateInfo) { return pragma::get_cengine()->GetRenderContext().CreateImage(imgBuffer, imgCreateInfo); }
 
-std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(pragma::image::ImageBuffer &imgBuffer)
-{
-	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(imgBuffer);
-	if(img)
-		img->SetDebugName("lua_img");
-	return img;
-}
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(pragma::image::ImageBuffer &imgBuffer) { return pragma::get_cengine()->GetRenderContext().CreateImage(imgBuffer); }
 
 std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const std::array<std::shared_ptr<pragma::image::ImageBuffer>, 6> &imgBuffers, const prosper::util::ImageCreateInfo &imgCreateInfo)
 {
 	// TODO: Parameter for CreateCubemap should be const
-	auto img = pragma::get_cengine()->GetRenderContext().CreateCubemap(const_cast<std::array<std::shared_ptr<pragma::image::ImageBuffer>, 6> &>(imgBuffers), imgCreateInfo);
-	if(img)
-		img->SetDebugName("lua_img");
-	return img;
+	return pragma::get_cengine()->GetRenderContext().CreateCubemap(const_cast<std::array<std::shared_ptr<pragma::image::ImageBuffer>, 6> &>(imgBuffers), imgCreateInfo);
 }
 
 std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const std::array<std::shared_ptr<pragma::image::ImageBuffer>, 6> &imgBuffers)
 {
 	// TODO: Parameter for CreateCubemap should be const
-	auto img = pragma::get_cengine()->GetRenderContext().CreateCubemap(const_cast<std::array<std::shared_ptr<pragma::image::ImageBuffer>, 6> &>(imgBuffers));
-	if(img)
-		img->SetDebugName("lua_img");
-	return img;
+	return pragma::get_cengine()->GetRenderContext().CreateCubemap(const_cast<std::array<std::shared_ptr<pragma::image::ImageBuffer>, 6> &>(imgBuffers));
 }
 
-std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const prosper::util::ImageCreateInfo &imgCreateInfo)
-{
-	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(imgCreateInfo);
-	if(img)
-		img->SetDebugName("lua_img");
-	return img;
-}
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const prosper::util::ImageCreateInfo &imgCreateInfo) { return pragma::get_cengine()->GetRenderContext().CreateImage(imgCreateInfo); }
 
-std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const prosper::util::ImageCreateInfo &imgCreateInfo, pragma::util::DataStream &ds)
-{
-	auto img = pragma::get_cengine()->GetRenderContext().CreateImage(imgCreateInfo, ds->GetData());
-	if(img)
-		img->SetDebugName("lua_img");
-	return img;
-}
+std::shared_ptr<prosper::IImage> Lua::Vulkan::create_image(const prosper::util::ImageCreateInfo &imgCreateInfo, pragma::util::DataStream &ds) { return pragma::get_cengine()->GetRenderContext().CreateImage(imgCreateInfo, ds->GetData()); }
 
 std::shared_ptr<prosper::Texture> Lua::Vulkan::create_texture(prosper::IImage &img, const prosper::util::TextureCreateInfo &texCreateInfo, const prosper::util::ImageViewCreateInfo &imgViewCreateInfo, const prosper::util::SamplerCreateInfo &samplerCreateInfo)
 {
-	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, img, imgViewCreateInfo, samplerCreateInfo);
-	if(tex == nullptr)
-		return nullptr;
-	tex->SetDebugName("lua_tex");
-	return tex;
+	return pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, img, imgViewCreateInfo, samplerCreateInfo);
 }
 
 std::shared_ptr<prosper::Texture> Lua::Vulkan::create_texture(prosper::IImage &img, const prosper::util::TextureCreateInfo &texCreateInfo, const prosper::util::ImageViewCreateInfo &imgViewCreateInfo)
 {
 	std::optional<prosper::util::SamplerCreateInfo> samplerCreateInfo {};
-	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, img, imgViewCreateInfo, samplerCreateInfo);
-	if(tex == nullptr)
-		return nullptr;
-	tex->SetDebugName("lua_tex");
-	return tex;
+	return pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, img, imgViewCreateInfo, samplerCreateInfo);
 }
 
 std::shared_ptr<prosper::Texture> Lua::Vulkan::create_texture(prosper::IImage &img, const prosper::util::TextureCreateInfo &texCreateInfo)
 {
 	std::optional<prosper::util::ImageViewCreateInfo> imgViewCreateInfo {};
 	std::optional<prosper::util::SamplerCreateInfo> samplerCreateInfo {};
-	auto tex = pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, img, imgViewCreateInfo, samplerCreateInfo);
-	if(tex == nullptr)
-		return nullptr;
-	tex->SetDebugName("lua_tex");
-	return tex;
+	return pragma::get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, img, imgViewCreateInfo, samplerCreateInfo);
 }
 
 std::shared_ptr<prosper::IFramebuffer> Lua::Vulkan::create_framebuffer(uint32_t width, uint32_t height, const std::vector<prosper::IImageView *> &attachments, uint32_t layers)
@@ -448,37 +406,18 @@ std::shared_ptr<prosper::IRenderPass> Lua::Vulkan::create_render_pass(const pros
 	return rp;
 }
 
-std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, prosper::Texture &texture)
-{
-	auto rt = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({texture.shared_from_this()}, nullptr, rtCreateInfo);
-	if(rt == nullptr)
-		return nullptr;
-	rt->SetDebugName("lua_rt");
-	return rt;
-}
+std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, prosper::Texture &texture) { return pragma::get_cengine()->GetRenderContext().CreateRenderTarget({texture.shared_from_this()}, nullptr, rtCreateInfo); }
 std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, prosper::Texture &texture, RenderPass &renderPass)
 {
-	auto rt = pragma::get_cengine()->GetRenderContext().CreateRenderTarget({texture.shared_from_this()}, renderPass.shared_from_this(), rtCreateInfo);
-	if(rt == nullptr)
-		return nullptr;
-	rt->SetDebugName("lua_rt");
-	return rt;
+	return pragma::get_cengine()->GetRenderContext().CreateRenderTarget({texture.shared_from_this()}, renderPass.shared_from_this(), rtCreateInfo);
 }
 std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, const std::vector<std::shared_ptr<prosper::Texture>> &textures, RenderPass &renderPass)
 {
-	auto rt = pragma::get_cengine()->GetRenderContext().CreateRenderTarget(textures, renderPass.shared_from_this(), rtCreateInfo);
-	if(rt == nullptr)
-		return nullptr;
-	rt->SetDebugName("lua_rt");
-	return rt;
+	return pragma::get_cengine()->GetRenderContext().CreateRenderTarget(textures, renderPass.shared_from_this(), rtCreateInfo);
 }
 std::shared_ptr<prosper::RenderTarget> Lua::Vulkan::create_render_target(const prosper::util::RenderTargetCreateInfo &rtCreateInfo, const std::vector<std::shared_ptr<prosper::Texture>> &textures)
 {
-	auto rt = pragma::get_cengine()->GetRenderContext().CreateRenderTarget(textures, nullptr, rtCreateInfo);
-	if(rt == nullptr)
-		return nullptr;
-	rt->SetDebugName("lua_rt");
-	return rt;
+	return pragma::get_cengine()->GetRenderContext().CreateRenderTarget(textures, nullptr, rtCreateInfo);
 }
 std::shared_ptr<prosper::IFence> Lua::Vulkan::create_fence(bool createSignalled) { return pragma::get_cengine()->GetRenderContext().CreateFence(createSignalled); }
 std::shared_ptr<prosper::IFence> Lua::Vulkan::create_fence() { return create_fence(false); }
@@ -523,6 +462,7 @@ Lua::var<prosper::Texture, Lua::mult<bool, std::string>> Lua::Vulkan::blur_textu
 	createInfo.height = srcImg.GetHeight();
 	createInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+	createInfo.debugName = "img_slideshow";
 
 	auto img = context.CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
@@ -530,8 +470,9 @@ Lua::var<prosper::Texture, Lua::mult<bool, std::string>> Lua::Vulkan::blur_textu
 	auto tex = context.CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
 	prosper::util::RenderPassCreateInfo rpInfo {{img->GetFormat()}};
 	auto rp = context.CreateRenderPass(rpInfo);
-	auto rt = context.CreateRenderTarget({tex}, rp);
-	rt->SetDebugName("img_slideshow_rt");
+	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
+	rtCreateInfo.debugName = "img_slideshow_rt";
+	auto rt = context.CreateRenderTarget({tex}, rp, rtCreateInfo);
 
 	auto blurSet = prosper::BlurSet::Create(context, rt);
 	if(!blurSet)
@@ -566,13 +507,15 @@ std::shared_ptr<prosper::Texture> Lua::Vulkan::create_gradient_texture(lua::Stat
 	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	createInfo.debugName = "lua_gradient";
 	auto &context = pragma::get_cengine()->GetRenderContext();
 	auto img = context.CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	auto texture = context.CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
-	auto rt = context.CreateRenderTarget({texture}, static_cast<prosper::ShaderGraphics &>(*whShader.get()).GetRenderPass());
-	rt->SetDebugName("lua_gradient");
+	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
+	rtCreateInfo.debugName = "lua_gradient";
+	auto rt = context.CreateRenderTarget({texture}, static_cast<prosper::ShaderGraphics &>(*whShader.get()).GetRenderPass(), rtCreateInfo);
 
 	auto &setupCmd = context.GetSetupCommandBuffer();
 	pragma::record_draw_gradient(context, setupCmd, *rt, dir, nodes);
@@ -1216,6 +1159,12 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 #endif
 
 	auto defBufferCreateInfo = luabind::class_<prosper::util::BufferCreateInfo>("BufferCreateInfo");
+	defBufferCreateInfo.property(
+	  "debugName", +[](const prosper::util::ImageCreateInfo &imgCreateInfo) -> std::string { return std::string {imgCreateInfo.debugName}; },
+	  +[](lua::State *l, prosper::util::ImageCreateInfo &imgCreateInfo, const std::string &name) {
+		  auto gname = util::register_global_string(name);
+		  imgCreateInfo.debugName = gname;
+	  });
 	defBufferCreateInfo.def(luabind::constructor<>());
 	defBufferCreateInfo.def_readwrite("size", &prosper::util::BufferCreateInfo::size);
 	defBufferCreateInfo.def_readwrite("queueFamilyMask", reinterpret_cast<uint32_t prosper::util::BufferCreateInfo::*>(&prosper::util::BufferCreateInfo::queueFamilyMask));
@@ -1228,11 +1177,20 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defBufferCreateInfo.add_static_constant("FLAG_SPARSE_BIT", math::to_integral(prosper::util::BufferCreateInfo::Flags::Sparse));
 	defBufferCreateInfo.add_static_constant("FLAG_SPARSE_ALIASED_RESIDENCY_BIT", math::to_integral(prosper::util::BufferCreateInfo::Flags::SparseAliasedResidency));
 	prosperMod[defBufferCreateInfo];
+	pragma::LuaCore::define_custom_constructor<prosper::util::BufferCreateInfo, +[]() -> prosper::util::BufferCreateInfo {
+		prosper::util::BufferCreateInfo bufCreateInfo {};
+		bufCreateInfo.debugName = "lua_buf";
+		return bufCreateInfo;
+	}>(lua.GetState());
 
 	auto defRenderTargetCreateInfo = luabind::class_<prosper::util::RenderTargetCreateInfo>("RenderTargetCreateInfo");
-	defRenderTargetCreateInfo.def(luabind::constructor<>());
 	defRenderTargetCreateInfo.def_readwrite("useLayerFramebuffers", &prosper::util::RenderTargetCreateInfo::useLayerFramebuffers);
 	prosperMod[defRenderTargetCreateInfo];
+	pragma::LuaCore::define_custom_constructor<prosper::util::RenderTargetCreateInfo, +[]() -> prosper::util::RenderTargetCreateInfo {
+		prosper::util::RenderTargetCreateInfo rtCreateInfo {};
+		rtCreateInfo.debugName = "lua_rt";
+		return rtCreateInfo;
+	}>(lua.GetState());
 
 	auto defSamplerCreateInfo = luabind::class_<prosper::util::SamplerCreateInfo>("SamplerCreateInfo");
 	defSamplerCreateInfo.def(luabind::constructor<>());
@@ -1253,7 +1211,6 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	prosperMod[defSamplerCreateInfo];
 
 	auto defTextureCreateInfo = luabind::class_<prosper::util::TextureCreateInfo>("TextureCreateInfo");
-	defTextureCreateInfo.def(luabind::constructor<>());
 	defTextureCreateInfo.def_readwrite("flags", reinterpret_cast<uint32_t prosper::util::TextureCreateInfo::*>(&prosper::util::TextureCreateInfo::flags));
 	defTextureCreateInfo.def_readwrite("sampler", &prosper::util::TextureCreateInfo::sampler);
 	defTextureCreateInfo.def_readwrite("imageView", &prosper::util::TextureCreateInfo::imageView);
@@ -1261,9 +1218,19 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defTextureCreateInfo.add_static_constant("FLAG_RESOLVABLE", math::to_integral(prosper::util::TextureCreateInfo::Flags::Resolvable));
 	defTextureCreateInfo.add_static_constant("FLAG_CREATE_IMAGE_VIEW_FOR_EACH_LAYER", math::to_integral(prosper::util::TextureCreateInfo::Flags::CreateImageViewForEachLayer));
 	prosperMod[defTextureCreateInfo];
+	pragma::LuaCore::define_custom_constructor<prosper::util::TextureCreateInfo, +[]() -> prosper::util::TextureCreateInfo {
+		prosper::util::TextureCreateInfo texCreateInfo {};
+		texCreateInfo.debugName = "lua_tex";
+		return texCreateInfo;
+	}>(lua.GetState());
 
 	auto defImageCreateInfo = luabind::class_<prosper::util::ImageCreateInfo>("ImageCreateInfo");
-	defImageCreateInfo.def(luabind::constructor<>());
+	defImageCreateInfo.property(
+	  "debugName", +[](const prosper::util::ImageCreateInfo &imgCreateInfo) -> std::string { return std::string {imgCreateInfo.debugName}; },
+	  +[](lua::State *l, prosper::util::ImageCreateInfo &imgCreateInfo, const std::string &name) {
+		  auto gname = util::register_global_string(name);
+		  imgCreateInfo.debugName = gname;
+	  });
 	defImageCreateInfo.def_readwrite("type", reinterpret_cast<uint32_t prosper::util::ImageCreateInfo::*>(&prosper::util::ImageCreateInfo::type));
 	defImageCreateInfo.def_readwrite("width", &prosper::util::ImageCreateInfo::width);
 	defImageCreateInfo.def_readwrite("height", &prosper::util::ImageCreateInfo::height);
@@ -1288,6 +1255,11 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 	defImageCreateInfo.add_static_constant("FLAG_SRGB_BIT", math::to_integral(prosper::util::ImageCreateInfo::Flags::Srgb));
 	defImageCreateInfo.add_static_constant("FLAG_NORMAL_MAP_BIT", math::to_integral(prosper::util::ImageCreateInfo::Flags::NormalMap));
 	prosperMod[defImageCreateInfo];
+	pragma::LuaCore::define_custom_constructor<prosper::util::ImageCreateInfo, +[]() -> prosper::util::ImageCreateInfo {
+		prosper::util::ImageCreateInfo imgCreateInfo {};
+		imgCreateInfo.debugName = "lua_img";
+		return imgCreateInfo;
+	}>(lua.GetState());
 
 	auto defImageViewCreateInfo = luabind::class_<prosper::util::ImageViewCreateInfo>("ImageViewCreateInfo");
 	defImageViewCreateInfo.def(luabind::constructor<>());

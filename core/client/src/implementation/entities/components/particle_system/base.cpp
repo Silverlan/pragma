@@ -651,8 +651,8 @@ void ecs::CParticleSystemComponent::InitializeBuffers()
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 		createInfo.size = instanceSize * maxInstanceCount;
 		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::StorageBufferBit;
+		createInfo.debugName = "particle_instance_buf";
 		s_particleBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, instanceSize * maxInstanceCount, 0.05f);
-		s_particleBuffer->SetDebugName("particle_instance_buf");
 	}
 	if(s_animStartBuffer == nullptr) {
 		auto instanceCount = 524'288ull;
@@ -662,8 +662,8 @@ void ecs::CParticleSystemComponent::InitializeBuffers()
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 		createInfo.size = instanceSize * maxInstanceCount;
 		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+		createInfo.debugName = "particle_anim_start_buf";
 		s_animStartBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, instanceSize * maxInstanceCount, 0.01f);
-		s_animStartBuffer->SetDebugName("particle_anim_start_buf");
 	}
 	if(s_animBuffer == nullptr) {
 		auto instanceCount = 4'096u;
@@ -673,8 +673,8 @@ void ecs::CParticleSystemComponent::InitializeBuffers()
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 		createInfo.size = instanceSize * maxInstanceCount;
 		createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+		createInfo.debugName = "particle_anim_data_buf";
 		s_animBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, instanceSize * maxInstanceCount, 0.01f);
-		s_animBuffer->SetDebugName("particle_anim_data_buf");
 	}
 }
 void ecs::CParticleSystemComponent::ClearBuffers()

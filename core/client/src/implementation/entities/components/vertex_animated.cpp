@@ -35,8 +35,8 @@ void pragma::initialize_vertex_animation_buffer()
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
 
+	createInfo.debugName = "entity_vertex_anim_bone_buf";
 	g_vertexAnimationBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 5 /* 5 MiB */, 0.05f);
-	g_vertexAnimationBuffer->SetDebugName("entity_vertex_anim_bone_buf");
 	g_vertexAnimationBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
 	assert(g_vertexAnimationBuffer->GetAlignment() == 0 || (sizeof(CVertexAnimatedComponent::VertexAnimationData) % g_vertexAnimationBuffer->GetAlignment()) == 0);
 }

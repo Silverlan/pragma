@@ -81,6 +81,7 @@ void pragma::gui::types::WIImageSlideShow::DisplayPreloadedImage()
 	createInfo.height = extents.height;
 	createInfo.format = imgPreload.GetFormat();
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+	createInfo.debugName = "img_slideshow";
 
 	auto img = context.CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
@@ -88,8 +89,9 @@ void pragma::gui::types::WIImageSlideShow::DisplayPreloadedImage()
 	auto tex = context.CreateTexture({}, *img, imgViewCreateInfo, samplerCreateInfo);
 	prosper::util::RenderPassCreateInfo rpInfo {{img->GetFormat()}};
 	auto rp = context.CreateRenderPass(rpInfo);
-	auto rt = context.CreateRenderTarget({tex}, rp);
-	rt->SetDebugName("img_slideshow_rt");
+	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
+	rtCreateInfo.debugName = "img_slideshow_rt";
+	auto rt = context.CreateRenderTarget({tex}, rp, rtCreateInfo);
 
 	m_blurSet = prosper::BlurSet::Create(context, rt, texPreload);
 	if(m_blurSet == nullptr)

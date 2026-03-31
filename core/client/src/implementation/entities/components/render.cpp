@@ -81,8 +81,8 @@ void CRenderComponent::InitializeBuffers()
 	auto internalAlignment = get_cengine()->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit);
 	if(internalAlignment > alignment)
 		throw std::runtime_error {"Unsupported minimum uniform buffer alignment (" + std::to_string(internalAlignment) + "!"};
+	createInfo.debugName = "entity_instance_data_buf";
 	s_instanceBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.1f, nullptr, alignment);
-	s_instanceBuffer->SetDebugName("entity_instance_data_buf");
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
 		s_instanceBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
 

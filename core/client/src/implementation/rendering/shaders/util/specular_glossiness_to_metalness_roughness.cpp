@@ -47,11 +47,13 @@ std::optional<pragma::ShaderSpecularGlossinessToMetalnessRoughness::MetalnessRou
 	auto extents = imgDiffuse.GetExtents();
 	imgCreateInfo.width = extents.width;
 	imgCreateInfo.height = extents.height;
+	imgCreateInfo.debugName = "specular_glossiness_to_metalness_roughness_albedo";
 	auto imgAlbedo = context.CreateImage(imgCreateInfo);
 
 	extents = imgSpecularGlossiness.GetExtents();
 	imgCreateInfo.width = extents.width;
 	imgCreateInfo.height = extents.height;
+	imgCreateInfo.debugName = "specular_glossiness_to_metalness_roughness_rma";
 	auto imgRMA = context.CreateImage(imgCreateInfo);
 
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};

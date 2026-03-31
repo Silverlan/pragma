@@ -614,7 +614,7 @@ void pragma::Engine::RegisterConsoleCommands()
 		  debug::get_domain().BeginTask(name);
 	  },
 	  pragma::console::ConVarFlags::None, "Start the VTune profiler.");
-	conVarMap.RegisterConCommand("debug_vtune_prof_end", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ::debug::get_domain().EndTask(); }, pragma::console::ConVarFlags::None, "End the VTune profiler.");
+	conVarMap.RegisterConCommand("debug_vtune_prof_end", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { debug::get_domain().EndTask(); }, pragma::console::ConVarFlags::None, "End the VTune profiler.");
 #endif
 	conVarMap.RegisterConCommand(
 	  "log_level_console",

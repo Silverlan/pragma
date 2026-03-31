@@ -17,8 +17,8 @@ pragma::rendering::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferDat
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::TransferSrcBit;
 	createInfo.size = sizeof(ShaderGameWorldLightingPass::DebugData);
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	createInfo.debugName = "render_settings_debug_buf";
 	debugBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, &debugData);
-	debugBuffer->SetDebugName("render_settings_debug_buf");
 
 	ShaderGameWorldLightingPass::CSMData csmData {
 	  {umat::identity(), umat::identity(), umat::identity(), umat::identity()}, // View-projection matrices
@@ -26,14 +26,14 @@ pragma::rendering::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferDat
 	  0                                                                         // Cascade Count
 	};
 	createInfo.size = sizeof(ShaderGameWorldLightingPass::CSMData);
+	createInfo.debugName = "csm_data_buf";
 	csmBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, &csmData);
-	csmBuffer->SetDebugName("csm_data_buf");
 
 	ShaderGameWorldLightingPass::TimeData timeData {0.f, 0.f, 0.f, 0.f};
 	createInfo.size = sizeof(timeData);
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	createInfo.debugName = "time_data_buf";
 	timeBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, &timeData);
-	timeBuffer->SetDebugName("time_data_buf");
 
 	if(ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDER_SETTINGS.IsValid() == false)
 		return;
@@ -57,8 +57,8 @@ pragma::rendering::GlobalRenderSettingsBufferData::GlobalRenderSettingsBufferDat
 		createInfo.size = sizeof(DebugPrintData);
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
 		createInfo.flags = prosper::util::BufferCreateInfo::Flags::Persistent;
+		createInfo.debugName = "render_settings_debug_print_buf";
 		debugPrintBuffer = pragma::get_cengine()->GetRenderContext().CreateBuffer(createInfo, &initialDebugPrintData);
-		debugPrintBuffer->SetDebugName("render_settings_debug_print_buf");
 		debugPrintBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::ReadBit);
 		descSet.SetBindingStorageBuffer(*debugPrintBuffer, pragma::math::to_integral(pragma::ShaderScene::RenderSettingsBinding::DebugPrint));
 	}

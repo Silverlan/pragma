@@ -101,6 +101,7 @@ void CRendererPpMotionBlurComponent::ReloadVelocityTexture()
 	createInfo.height = rendererC->GetHeight();
 	createInfo.format = prosper::Format::R32G32B32A32_SFloat;
 	createInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
+	createInfo.debugName = "renderer_pp_motion_blur_render_target";
 
 	auto &context = get_cengine()->GetRenderContext();
 	auto img = context.CreateImage(createInfo);

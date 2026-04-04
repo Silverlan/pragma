@@ -42,8 +42,8 @@ export {
 			void GetNetMessages(std::unordered_map<unsigned int, T> **messages);
 			void GetNetMessages(string::StringMap<unsigned int> **messages);
 			T *GetNetMessage(unsigned int ID);
-			T *GetNetMessage(std::string identifier);
-			unsigned int GetNetMessageID(std::string identifier);
+			T *GetNetMessage(std::string_view identifier);
+			unsigned int GetNetMessageID(std::string_view identifier);
 
 			void RegisterNetMessage(const std::string_view &name) override;
 			void RegisterNetMessage(const std::string_view &name, const T::Handler &handler);
@@ -80,7 +80,7 @@ export {
 		}
 
 		template<class T>
-		T *NetMessageMap<T>::GetNetMessage(std::string identifier)
+		T *NetMessageMap<T>::GetNetMessage(std::string_view identifier)
 		{
 			unsigned int ID = GetNetMessageID(identifier);
 			if(ID == 0)
@@ -89,7 +89,7 @@ export {
 		}
 
 		template<class T>
-		unsigned int NetMessageMap<T>::GetNetMessageID(std::string identifier)
+		unsigned int NetMessageMap<T>::GetNetMessageID(std::string_view identifier)
 		{
 			typename string::StringMap<unsigned int>::iterator i = m_netMessageIDs.find(identifier);
 			if(i == m_netMessageIDs.end())

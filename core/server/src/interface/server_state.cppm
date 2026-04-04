@@ -16,11 +16,11 @@ namespace pragma {
 	export class DLLSERVER ServerState : public NetworkState {
 		// For internal use only! Not to be used directly!
 	  public:
-		virtual std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() override;
+		virtual string::StringMap<std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() override;
 		static console::ConVarHandle GetConVarHandle(std::string scvar);
 		//
 	  private:
-		std::unordered_map<std::string, console::ConCommand *> m_luaConCommands;
+		string::StringMap<console::ConCommand *> m_luaConCommands;
 		unsigned int m_conCommandID;
 		std::unique_ptr<networking::IServer> m_server;
 		std::shared_ptr<networking::IServerClient> m_localClient = {};
@@ -35,7 +35,7 @@ namespace pragma {
 		// We need to keep shared pointer references to all serverside sounds (Network state only keeps references)
 		std::vector<std::shared_ptr<audio::ALSound>> m_serverSounds;
 	  protected:
-		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const override;
+		virtual void implFindSimilarConVars(std::string_view input, std::vector<SimilarCmdInfo> &similarCmds) const override;
 		virtual material::Material *LoadMaterial(const std::string &path, bool precache, bool bReload) override;
 		virtual void InitializeResourceManager() override;
 		void ClearConCommands();
@@ -58,7 +58,7 @@ namespace pragma {
 		void SendRoughModel(const std::string &f);
 		void SendSoundSourceToClient(audio::SALSound &sound, bool sendFullUpdate, const networking::ClientRecipientFilter *rf = nullptr);
 		// ConVars
-		virtual console::ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
+		virtual SetConVarResult SetConVar(std::string_view scmd, const std::string &value, bool bApplyIfEqual = false) override;
 		// Sound
 		virtual std::shared_ptr<audio::ALSound> CreateSound(std::string snd, audio::ALSoundType type, audio::ALCreateFlags flags = audio::ALCreateFlags::None) override;
 		virtual std::shared_ptr<audio::ALSound> GetSoundByIndex(unsigned int idx) override;
@@ -105,7 +105,7 @@ namespace pragma {
 		networking::SVNetMessage *GetNetMessage(unsigned int ID);
 		unsigned int GetClientMessageID(std::string identifier);
 		virtual console::ConCommand *CreateConCommand(const std::string &scmd, LuaFunction fc, console::ConVarFlags flags = console::ConVarFlags::None, const std::string &help = "") override;
-		void GetLuaConCommands(std::unordered_map<std::string, console::ConCommand *> **cmds);
+		string::StringMap<console::ConCommand *> &GetLuaConCommands();
 
 		bool IsClientAuthenticationRequired() const;
 		void SetServerInterface(std::unique_ptr<networking::IServer> iserver);

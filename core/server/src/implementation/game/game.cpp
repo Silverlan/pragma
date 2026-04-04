@@ -562,9 +562,9 @@ void pragma::SGame::ReceiveUserInfo(networking::IServerClient &session, NetPacke
 	for(auto &name : netEventIds)
 		packetInf->WriteString(name);
 
-	std::unordered_map<std::string, unsigned int> &conCommandIds = ServerState::Get()->GetConCommandIDs();
+	auto &conCommandIds = ServerState::Get()->GetConCommandIDs();
 	packetInf->Write<unsigned int>(CUInt32(conCommandIds.size()));
-	std::unordered_map<std::string, unsigned int>::iterator it;
+	string::StringMap<unsigned int>::iterator it;
 	for(it = conCommandIds.begin(); it != conCommandIds.end(); it++) {
 		packetInf->WriteString(it->first);
 		packetInf->Write<unsigned int>(it->second);

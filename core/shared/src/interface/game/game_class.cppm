@@ -270,7 +270,7 @@ export {
 			float GetConVarFloat(const std::string &scmd);
 			bool GetConVarBool(const std::string &scmd);
 			console::ConVarFlags GetConVarFlags(const std::string &scmd);
-			const std::unordered_map<std::string, std::vector<console::CvarCallback>> &GetConVarCallbacks() const;
+			const string::StringMap<std::vector<console::CvarCallback>> &GetConVarCallbacks() const;
 
 			virtual Float GetFrictionScale() const = 0;
 			virtual Float GetRestitutionScale() const = 0;
@@ -309,9 +309,9 @@ export {
 			std::unique_ptr<LuaCore::ClassManager> m_luaClassManager;
 			std::unique_ptr<LuaDirectoryWatcherManager> m_scriptWatcher = nullptr;
 			std::unique_ptr<physics::SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
-			std::unordered_map<std::string, std::vector<console::CvarCallback>> m_cvarCallbacks;
+			string::StringMap<std::vector<console::CvarCallback>> m_cvarCallbacks;
 			std::vector<std::unique_ptr<Timer>> m_timers;
-			std::unordered_map<std::string, int> m_luaNetMessages;
+			string::StringMap<int> m_luaNetMessages;
 			std::vector<std::string> m_luaNetMessageIndex;
 			MapInfo m_mapInfo = {};
 			std::deque<unsigned int> m_entIndices;

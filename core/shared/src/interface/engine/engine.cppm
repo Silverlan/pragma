@@ -56,7 +56,7 @@ export {
 				std::unordered_map<std::string, ConVarArgs> m_cvarMap;
 			};
 
-			virtual std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() override;
+			virtual string::StringMap<std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() override;
 			static console::ConVarHandle GetConVarHandle(std::string scvar);
 			//
 			class DLLNETWORK StateInstance {
@@ -205,7 +205,7 @@ export {
 			virtual console::ConConf *GetConVar(const std::string &cv);
 			template<class T>
 			T *GetConVar(const std::string &cv);
-			virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
+			virtual console::ConCommandResult RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
 			// NetState
 			virtual NetworkState *GetActiveState();
 
@@ -268,13 +268,13 @@ export {
 			void AddTickEvent(const std::function<void()> &ev);
 
 			// For internal use only
-			void SetReplicatedConVar(const std::string &cvar, const std::string &val);
+			void SetReplicatedConVar(std::string_view cvar, const std::string &val);
 		  protected:
 			void UpdateParallelJobs();
-			bool RunEngineConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
+			console::ConCommandResult RunEngineConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
 			void WriteServerConfig(fs::VFilePtrReal f);
 			void WriteEngineConfig(fs::VFilePtrReal f);
-			void RestoreConVarsForUnknownCommands(fs::VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<console::ConConf>> &stateConVars);
+			void RestoreConVarsForUnknownCommands(fs::VFilePtrReal f, const ConVarInfoList &origCvarValues, const string::OrderedStringMap<std::shared_ptr<console::ConConf>> &stateConVars);
 			void RegisterSharedConsoleCommands(console::ConVarMap &map);
 			void RunTickEvents();
 			virtual uint32_t DoClearUnusedAssets(asset::Type type) const;

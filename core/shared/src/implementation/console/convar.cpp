@@ -9,6 +9,8 @@ module pragma.shared;
 
 import :console.convar;
 
+void pragma::console::ConVarConstraintRange::Apply(udm::DataValue *value, udm::Type type) {}
+
 pragma::console::ConConf::ConConf(ConVarFlags flags) : m_help(""), m_ID(0), m_type(ConType::Var), m_flags(flags) {}
 const std::string &pragma::console::ConConf::GetHelpText() const { return m_help; }
 const std::string &pragma::console::ConConf::GetUsageHelp() const { return m_usageHelp; }
@@ -78,12 +80,18 @@ pragma::console::ConVar::ConVar(udm::Type type, const void *value, ConVarFlags f
 	m_default = create_convar_value(type, value);
 	m_flags = flags;
 }
-void pragma::console::ConVar::SetValue(const std::string &val)
+bool pragma::console::ConVar::SetValue(const std::string &val, std::string &outErr)
 {
-	console::visit(m_varType, [this, &val](auto tag) {
+	if(!ValidateInput(val, outErr))
+		return false;
+	return console::visit(m_varType, [this, &val, &outErr](auto tag) {
 		using T = typename decltype(tag)::type;
-		if constexpr(udm::is_convertible<std::string, T>())
+		if constexpr(udm::is_convertible<std::string, T>()) {
 			*static_cast<T *>(m_value.get()) = udm::convert<std::string, T>(val);
+			return true;
+		}
+		outErr = "Unable to convert value to ConVar of type " + std::string {udm::enum_type_to_ascii(udm::type_to_enum<float>())};
+		return false;
 	});
 }
 std::string pragma::console::ConVar::GetString() const
@@ -131,7 +139,16 @@ bool pragma::console::ConVar::GetBool() const
 		return false;
 	});
 }
+void pragma::console::ConVar::AddConstraint(std::unique_ptr<ConVarConstraint> &&constraint) {m_constraints.push_back(std::move(constraint));}
 void pragma::console::ConVar::AddCallback(int function) { m_callbacks.push_back(function); }
+void pragma::console::ConVar::SetValidationFunction(const ValidationFunction &fun) { m_validationFunction = fun; }
+const pragma::console::ConVar::ValidationFunction &pragma::console::ConVar::GetValidationFunction() const { return m_validationFunction; }
+bool pragma::console::ConVar::ValidateInput(std::string_view input, std::string &outErr) const
+{
+	if(!m_validationFunction)
+		return true;
+	return m_validationFunction(input, outErr);
+}
 pragma::console::ConConf *pragma::console::ConVar::Copy()
 {
 	auto *cvar = new ConVar {m_varType, m_value.get(), m_flags, m_help, m_usageHelp};
@@ -221,8 +238,8 @@ static void initialize_convar_map(pragma::console::ConVarMap *&r)
 }
 
 #define cvar_newglobal(suffix, glname)                                                                                                                                                                                                                                                           \
-	DLLNETWORK pragma::console::ConVarMap *g_ConVars##suffix = nullptr;                                                                                                                                                                                                                                           \
-	bool pragma::console::glname::register_convar(const std::string &cvar, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help)                                                                                                                 \
+	DLLNETWORK pragma::console::ConVarMap *g_ConVars##suffix = nullptr;                                                                                                                                                                                                                          \
+	bool pragma::console::glname::register_convar(const std::string &cvar, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help)                                                                                                                \
 	{                                                                                                                                                                                                                                                                                            \
 		initialize_convar_map(g_ConVars##suffix);                                                                                                                                                                                                                                                \
 		udm::visit(type, [&cvar, type, &value, flags, &help](auto tag) {                                                                                                                                                                                                                         \
@@ -233,37 +250,37 @@ static void initialize_convar_map(pragma::console::ConVarMap *&r)
 		});                                                                                                                                                                                                                                                                                      \
 		return true;                                                                                                                                                                                                                                                                             \
 	}                                                                                                                                                                                                                                                                                            \
-	bool pragma::console::glname::register_convar_callback(const std::string &scvar, int)                                                                                                                                                                                                         \
+	bool pragma::console::glname::register_convar_callback(const std::string &scvar, int)                                                                                                                                                                                                        \
 	{                                                                                                                                                                                                                                                                                            \
 		initialize_convar_map(g_ConVars##suffix);                                                                                                                                                                                                                                                \
 		g_ConVars##suffix->PreRegisterConVarCallback(scvar);                                                                                                                                                                                                                                     \
 		return true;                                                                                                                                                                                                                                                                             \
 	}                                                                                                                                                                                                                                                                                            \
-	bool pragma::console::glname::register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, int, int))                                                                                                                                                  \
+	bool pragma::console::glname::register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, int, int))                                                                                                                        \
 	{                                                                                                                                                                                                                                                                                            \
 		initialize_convar_map(g_ConVars##suffix);                                                                                                                                                                                                                                                \
-		g_ConVars##suffix->RegisterConVarCallback(scvar, std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, int, int)>(function));                                                                                                                                                               \
+		g_ConVars##suffix->RegisterConVarCallback(scvar, std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, int, int)>(function));                                                                                                                                      \
 		return true;                                                                                                                                                                                                                                                                             \
 	}                                                                                                                                                                                                                                                                                            \
-	bool pragma::console::glname::register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string))                                                                                                                                  \
+	bool pragma::console::glname::register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string))                                                                                                        \
 	{                                                                                                                                                                                                                                                                                            \
 		initialize_convar_map(g_ConVars##suffix);                                                                                                                                                                                                                                                \
-		g_ConVars##suffix->RegisterConVarCallback(scvar, std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string)>(function));                                                                                                                                               \
+		g_ConVars##suffix->RegisterConVarCallback(scvar, std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string)>(function));                                                                                                                      \
 		return true;                                                                                                                                                                                                                                                                             \
 	}                                                                                                                                                                                                                                                                                            \
-	bool pragma::console::glname::register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, float, float))                                                                                                                                              \
+	bool pragma::console::glname::register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, float, float))                                                                                                                    \
 	{                                                                                                                                                                                                                                                                                            \
 		initialize_convar_map(g_ConVars##suffix);                                                                                                                                                                                                                                                \
-		g_ConVars##suffix->RegisterConVarCallback(scvar, std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, float, float)>(function));                                                                                                                                                           \
+		g_ConVars##suffix->RegisterConVarCallback(scvar, std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, float, float)>(function));                                                                                                                                  \
 		return true;                                                                                                                                                                                                                                                                             \
 	}                                                                                                                                                                                                                                                                                            \
-	bool pragma::console::glname::register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool))                                                                                                                                                \
+	bool pragma::console::glname::register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool))                                                                                                                      \
 	{                                                                                                                                                                                                                                                                                            \
 		initialize_convar_map(g_ConVars##suffix);                                                                                                                                                                                                                                                \
-		g_ConVars##suffix->RegisterConVarCallback(scvar, std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)>(function));                                                                                                                                                             \
+		g_ConVars##suffix->RegisterConVarCallback(scvar, std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool)>(function));                                                                                                                                    \
 		return true;                                                                                                                                                                                                                                                                             \
 	}                                                                                                                                                                                                                                                                                            \
-	static bool register_concommand_##glname(const std::string &cvar, const std::function<void(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &function, pragma::console::ConVarFlags flags, const std::string &help)                                        \
+	static bool register_concommand_##glname(const std::string &cvar, const std::function<void(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float)> &function, pragma::console::ConVarFlags flags, const std::string &help)                                \
 	{                                                                                                                                                                                                                                                                                            \
 		initialize_convar_map(g_ConVars##suffix);                                                                                                                                                                                                                                                \
 		if(function == nullptr)                                                                                                                                                                                                                                                                  \
@@ -272,20 +289,23 @@ static void initialize_convar_map(pragma::console::ConVarMap *&r)
 			g_ConVars##suffix->RegisterConCommand(cvar, function, flags, help);                                                                                                                                                                                                                  \
 		return true;                                                                                                                                                                                                                                                                             \
 	}                                                                                                                                                                                                                                                                                            \
-	bool pragma::console::glname::register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), pragma::console::ConVarFlags flags, const std::string &help)                                                   \
+	bool pragma::console::glname::register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), pragma::console::ConVarFlags flags, const std::string &help)                                          \
 	{                                                                                                                                                                                                                                                                                            \
 		return ::register_concommand_##glname(cvar, function, flags, help);                                                                                                                                                                                                                      \
 	}                                                                                                                                                                                                                                                                                            \
-	bool pragma::console::glname::register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), pragma::console::ConVarFlags flags, const std::string &help)                                                          \
+	bool pragma::console::glname::register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), pragma::console::ConVarFlags flags, const std::string &help)                                                 \
 	{                                                                                                                                                                                                                                                                                            \
 		return ::register_concommand_##glname(cvar, std::bind(function, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3), flags, help);                                                                                                                                      \
 	}                                                                                                                                                                                                                                                                                            \
-	bool pragma::console::glname::register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), const std::string &help)                                                                                       \
+	bool pragma::console::glname::register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), const std::string &help)                                                                              \
 	{                                                                                                                                                                                                                                                                                            \
 		return register_concommand(cvar, function, pragma::console::ConVarFlags::None, help);                                                                                                                                                                                                    \
 	}                                                                                                                                                                                                                                                                                            \
-	bool pragma::console::glname::register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), const std::string &help) { return register_concommand(cvar, function, pragma::console::ConVarFlags::None, help); }    \
-	pragma::console::ConVarMap *pragma::console::glname::get_convar_map()                                                                                                                                                                                                                                          \
+	bool pragma::console::glname::register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), const std::string &help)                                                                                     \
+	{                                                                                                                                                                                                                                                                                            \
+		return register_concommand(cvar, function, pragma::console::ConVarFlags::None, help);                                                                                                                                                                                                    \
+	}                                                                                                                                                                                                                                                                                            \
+	pragma::console::ConVarMap *pragma::console::glname::get_convar_map()                                                                                                                                                                                                                        \
 	{                                                                                                                                                                                                                                                                                            \
 		initialize_convar_map(g_ConVars##suffix);                                                                                                                                                                                                                                                \
 		return g_ConVars##suffix;                                                                                                                                                                                                                                                                \
@@ -324,7 +344,7 @@ std::shared_ptr<pragma::console::ConVar> pragma::console::ConVarMap::RegisterCon
 std::shared_ptr<pragma::console::ConVar> pragma::console::ConVarMap::RegisterConVar(const ConVarCreateInfo &createInfo) { return RegisterConVar(createInfo.name, createInfo.type, createInfo.defaultValue.get(), createInfo.flags, createInfo.helpText, createInfo.usageHelp); }
 
 template<class T>
-static CallbackHandle register_convar_callback(const std::string &scvar, const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, T, T)> &function, std::unordered_map<std::string, std::vector<pragma::console::CvarCallback>> &callbacks)
+static CallbackHandle register_convar_callback(std::string_view scvar, const std::function<void(pragma::NetworkState *, const pragma::console::ConVar &, T, T)> &function, pragma::string::StringMap<std::vector<pragma::console::CvarCallback>> &callbacks)
 {
 	auto f = [function](pragma::NetworkState *nw, const pragma::console::ConVar &cvar, const void *poldVal, const void *pnewVal) {
 		udm::visit(cvar.GetVarType(), [&function, nw, &cvar, poldVal, pnewVal](auto tag) {
@@ -337,7 +357,7 @@ static CallbackHandle register_convar_callback(const std::string &scvar, const s
 		});
 	};
 
-	auto lscvar = scvar;
+	std::string lscvar {scvar};
 	pragma::string::to_lower(lscvar);
 	auto it = callbacks.find(lscvar);
 	if(it == callbacks.end()) {
@@ -358,13 +378,13 @@ static CallbackHandle register_convar_callback(const std::string &scvar, const s
 	return it->second.back().GetFunction();
 }
 
-CallbackHandle pragma::console::ConVarMap::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, int, int)> &function) { return register_convar_callback<int>(scvar, function, m_conVarCallbacks); }
+CallbackHandle pragma::console::ConVarMap::RegisterConVarCallback(std::string_view scvar, const std::function<void(NetworkState *, const ConVar &, int, int)> &function) { return register_convar_callback<int>(scvar, function, m_conVarCallbacks); }
 
-CallbackHandle pragma::console::ConVarMap::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, std::string, std::string)> &function) { return register_convar_callback<std::string>(scvar, function, m_conVarCallbacks); }
+CallbackHandle pragma::console::ConVarMap::RegisterConVarCallback(std::string_view scvar, const std::function<void(NetworkState *, const ConVar &, std::string, std::string)> &function) { return register_convar_callback<std::string>(scvar, function, m_conVarCallbacks); }
 
-CallbackHandle pragma::console::ConVarMap::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, float, float)> &function) { return register_convar_callback<float>(scvar, function, m_conVarCallbacks); }
+CallbackHandle pragma::console::ConVarMap::RegisterConVarCallback(std::string_view scvar, const std::function<void(NetworkState *, const ConVar &, float, float)> &function) { return register_convar_callback<float>(scvar, function, m_conVarCallbacks); }
 
-CallbackHandle pragma::console::ConVarMap::RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, bool, bool)> &function) { return register_convar_callback<bool>(scvar, function, m_conVarCallbacks); }
+CallbackHandle pragma::console::ConVarMap::RegisterConVarCallback(std::string_view scvar, const std::function<void(NetworkState *, const ConVar &, bool, bool)> &function) { return register_convar_callback<bool>(scvar, function, m_conVarCallbacks); }
 
 std::shared_ptr<pragma::console::ConCommand> pragma::console::ConVarMap::PreRegisterConCommand(const std::string &scmd, ConVarFlags flags, const std::string &help)
 {
@@ -424,9 +444,9 @@ std::shared_ptr<pragma::console::ConCommand> pragma::console::ConVarMap::Registe
 
 std::shared_ptr<pragma::console::ConCommand> pragma::console::ConVarMap::RegisterConCommand(const ConCommandCreateInfo &createInfo) { return RegisterConCommand(createInfo.name, createInfo.callbackFunction, createInfo.flags, createInfo.helpText, createInfo.autoComplete); }
 
-std::shared_ptr<pragma::console::ConConf> pragma::console::ConVarMap::GetConVar(const std::string &scmd)
+std::shared_ptr<pragma::console::ConConf> pragma::console::ConVarMap::GetConVar(std::string_view scmd)
 {
-	auto lscmd = scmd;
+	std::string lscmd {scmd};
 	string::to_lower(lscmd);
 	auto it = m_conVars.find(lscmd);
 	if(it == m_conVars.end())
@@ -434,13 +454,13 @@ std::shared_ptr<pragma::console::ConConf> pragma::console::ConVarMap::GetConVar(
 	return it->second;
 }
 
-std::unordered_map<std::string, std::vector<pragma::console::CvarCallback>> &pragma::console::ConVarMap::GetConVarCallbacks() { return m_conVarCallbacks; }
+pragma::string::StringMap<std::vector<pragma::console::CvarCallback>> &pragma::console::ConVarMap::GetConVarCallbacks() { return m_conVarCallbacks; }
 
-std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &pragma::console::ConVarMap::GetConVars() { return m_conVars; }
+pragma::string::OrderedStringMap<std::shared_ptr<pragma::console::ConConf>> &pragma::console::ConVarMap::GetConVars() { return m_conVars; }
 
-unsigned int pragma::console::ConVarMap::GetConVarID(const std::string &scmd)
+unsigned int pragma::console::ConVarMap::GetConVarID(std::string_view scmd)
 {
-	auto lscmd = scmd;
+	std::string lscmd {scmd};
 	string::to_lower(lscmd);
 	auto it = m_conVarIDs.find(lscmd);
 	if(it == m_conVarIDs.end())

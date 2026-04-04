@@ -10,7 +10,7 @@ module pragma.shared;
 
 import :network_state;
 
-pragma::console::ConVarHandle pragma::NetworkState::GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &ptrs, std::string scvar) { return CVarHandler::GetConVarHandle(ptrs, scvar); }
+pragma::console::ConVarHandle pragma::NetworkState::GetConVarHandle(string::StringMap<std::shared_ptr<console::PtrConVar>> &ptrs, std::string_view scvar) { return CVarHandler::GetConVarHandle(ptrs, scvar); }
 
 UInt8 pragma::NetworkState::STATE_COUNT = 0;
 
@@ -335,30 +335,36 @@ bool pragma::NetworkState::IsServer() const { return false; }
 
 void pragma::NetworkState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<util::ResourceWatcherManager>(this); }
 
-pragma::console::ConVar *pragma::NetworkState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
+pragma::console::CVarHandler::SetConVarResult pragma::NetworkState::SetConVar(std::string_view scmd, const std::string &value, bool bApplyIfEqual)
 {
+	SetConVarResult result {};
 	auto *cv = GetConVar(scmd);
 	if(cv == nullptr)
-		return nullptr;
+		return result;
 	if(cv->GetType() != console::ConType::Var)
-		return nullptr;
+		return result;
 	auto *cvar = static_cast<console::ConVar *>(cv);
 	auto prev = cvar->GetString();
 	if(bApplyIfEqual == false && prev == value)
-		return nullptr;
-	std::array<const std::unordered_map<std::string, std::vector<console::CvarCallback>> *, 2> cvarCallbackList = {&m_cvarCallbacks, nullptr};
+		return result;
+	std::array<const string::StringMap<std::vector<console::CvarCallback>> *, 2> cvarCallbackList = {&m_cvarCallbacks, nullptr};
 	auto *game = GetGameState();
 	if(game != nullptr)
 		cvarCallbackList.at(1) = &game->GetConVarCallbacks();
-	udm::visit(cvar->GetVarType(), [this, &cvarCallbackList, &scmd, cvar, &value](auto tag) {
+	return udm::visit(cvar->GetVarType(), [this, &cvarCallbackList, &scmd, &result, cvar, &value](auto tag) -> SetConVarResult {
 		using T = typename decltype(tag)::type;
 		if constexpr(pragma::console::is_valid_convar_type_v<T>) {
 			auto &rawValPrev = cvar->GetRawValue();
 			auto prevVal = rawValPrev ? *static_cast<T *>(rawValPrev.get()) : T {};
-			cvar->SetValue(value);
+			std::string errMsg;
+			result.success = cvar->SetValue(value, errMsg);
+			if(!result.success && !errMsg.empty())
+				result.errorMessage = errMsg;
+			if(!result.success)
+				return result;
 			auto &rawValNew = cvar->GetRawValue();
 			if(!rawValNew)
-				return;
+				return result;
 			auto &newVal = *static_cast<T *>(rawValNew.get());
 			for(auto &cvList : cvarCallbackList) {
 				if(!cvList)
@@ -378,12 +384,15 @@ pragma::console::ConVar *pragma::NetworkState::SetConVar(std::string scmd, std::
 					}
 				}
 			}
+			return result;
 		}
+		result.success = false;
+		result.errorMessage = "Unable to convert value to CVar type " + std::string {udm::enum_type_to_ascii(udm::type_to_enum<T>())};
+		return result;
 	});
-	return cvar;
 }
 
-void pragma::NetworkState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
+void pragma::NetworkState::implFindSimilarConVars(std::string_view input, std::vector<SimilarCmdInfo> &similarCmds) const
 {
 	Engine::Get()->implFindSimilarConVars(input, similarCmds);
 	CVarHandler::implFindSimilarConVars(input, similarCmds);
@@ -406,7 +415,7 @@ void pragma::NetworkState::ClearConsoleCommandOverride(const std::string &src)
 }
 void pragma::NetworkState::ClearConsoleCommandOverrides() { m_conOverrides.clear(); }
 
-bool pragma::check_cheats(const std::string &scmd, NetworkState *state)
+bool pragma::check_cheats(std::string_view scmd, NetworkState *state)
 {
 	if(state->CheatsEnabled() == false) {
 		Con::COUT << "Can't use cheat cvar " << scmd << " in multiplayer, unless the server has sv_cheats set to 1." << Con::endl;
@@ -415,40 +424,52 @@ bool pragma::check_cheats(const std::string &scmd, NetworkState *state)
 	return true;
 }
 
-bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
+pragma::console::ConCommandResult pragma::NetworkState::RunConsoleCommand(std::string_view vcmd, std::vector<std::string> &argv, BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
 {
+	std::string scmd { vcmd };
 	TranslateConsoleCommand(scmd);
 	auto *cv = GetConVar(scmd);
 	auto bEngine = ((cv == nullptr) ? true : false);
 	if(bEngine == true)
 		cv = Engine::Get()->CVarHandler::GetConVar(scmd);
+	console::ConCommandResult result {};
 	if(cv == nullptr)
-		return false;
-	if(callback != nullptr && callback(cv, magnitude) == false)
-		return true;
+		return result;
+	if(callback != nullptr && callback(cv, magnitude) == false) {
+		result.success = true;
+		return result;
+	}
 
 	auto type = cv->GetType();
 	if(type == console::ConType::Var) {
 		auto *cvar = static_cast<console::ConVar *>(cv);
 		if(argv.empty()) {
 			cvar->Print(scmd);
-			return true;
+			result.success = true;
+			return result;
 		}
 		auto flags = cvar->GetFlags();
 		auto bReplicated = ((flags & console::ConVarFlags::Replicated) == console::ConVarFlags::Replicated) ? true : false;
 		if(IsClient()) {
 			if(bReplicated) {
 				Con::COUT << "Can't change replicated ConVar " << scmd << " from console of client, only server operator can change its value" << Con::endl;
-				return true;
+				result.success = true;
+				return result;
 			}
 		}
-		if((flags & console::ConVarFlags::Cheat) == console::ConVarFlags::Cheat && !check_cheats(scmd, this))
-			return true;
+		if((flags & console::ConVarFlags::Cheat) == console::ConVarFlags::Cheat && !check_cheats(scmd, this)) {
+			result.success = true;
+			return result;
+		}
+		SetConVarResult convarResult;
 		if(bEngine)
-			Engine::Get()->CVarHandler::SetConVar(scmd, argv[0]);
+			convarResult = Engine::Get()->CVarHandler::SetConVar(scmd, argv[0]);
 		else
-			SetConVar(scmd, argv[0]);
-		return true;
+			convarResult = SetConVar(scmd, argv[0]);
+		result.success = convarResult.success;
+		if(convarResult.errorMessage)
+			result.errorMessage = convarResult.errorMessage;
+		return result;
 	}
 	auto *cmd = static_cast<console::ConCommand *>(cv);
 	if(type == console::ConType::Cmd) {
@@ -457,11 +478,12 @@ bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::
 		if(scmd.empty() == false && scmd.front() == '-')
 			magnitude = 0.f;
 		func(this, pl, argv, magnitude);
-		return true;
+		result.success = true;
+		return result;
 	}
 	auto *game = GetGameState();
 	if(game == nullptr)
-		return false;
+		return result;
 	//auto *l = game->GetLuaState();
 	auto bJoystick = (cmd->GetFlags() & (console::ConVarFlags::JoystickAxisSingle | console::ConVarFlags::JoystickAxisContinuous)) != console::ConVarFlags::None;
 	LuaFunction func = nullptr;
@@ -483,7 +505,8 @@ bool pragma::NetworkState::RunConsoleCommand(std::string scmd, std::vector<std::
 		  return Lua::StatusCode::Ok;
 	  },
 	  0);
-	return true;
+	result.success = true;
+	return result;
 }
 
 std::shared_ptr<pragma::util::Library> pragma::NetworkState::LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories, std::string *err)
@@ -698,8 +721,10 @@ pragma::console::ConVar *pragma::NetworkState::RegisterConVar(const std::string 
 	if(cfg) {
 		// Use value from loaded config
 		auto *args = cfg->Find(scmd);
-		if(args && !args->empty())
-			cv->SetValue((*args)[0]);
+		if(args && !args->empty()) {
+			std::string err;
+			cv->SetValue((*args)[0], err);
+		}
 	}
 	return cv;
 }
@@ -713,7 +738,7 @@ pragma::console::ConVar *pragma::NetworkState::CreateConVar(const std::string &s
 	});
 }
 
-std::unordered_map<std::string, unsigned int> &pragma::NetworkState::GetConCommandIDs() { return m_conCommandIDs; }
+pragma::string::StringMap<unsigned int> &pragma::NetworkState::GetConCommandIDs() { return m_conCommandIDs; }
 
 pragma::console::ConCommand *pragma::NetworkState::CreateConCommand(const std::string &scmd, LuaFunction fc, console::ConVarFlags flags, const std::string &help)
 {

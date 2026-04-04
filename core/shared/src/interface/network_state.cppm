@@ -22,9 +22,9 @@ export namespace pragma {
 	class DLLNETWORK NetworkState : public util::CallbackHandler, public console::CVarHandler {
 		// For internal use only! Not to be used directly!
 	  protected:
-		static console::ConVarHandle GetConVarHandle(std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &ptrs, std::string scvar);
+		static console::ConVarHandle GetConVarHandle(string::StringMap<std::shared_ptr<console::PtrConVar>> &ptrs, std::string_view scvar);
 	  public:
-		virtual std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() = 0;
+		virtual string::StringMap<std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() = 0;
 	  public:
 		// Internal
 		std::vector<CallbackHandle> &GetLuaEnumRegisterCallbacks();
@@ -76,11 +76,11 @@ export namespace pragma {
 		std::shared_ptr<util::Library> LoadLibraryModule(const std::string &lib, const std::vector<std::string> &additionalSearchDirectories = {}, std::string *err = nullptr);
 		std::shared_ptr<util::Library> GetLibraryModule(const std::string &lib) const;
 
-		std::unordered_map<std::string, unsigned int> &GetConCommandIDs();
+		string::StringMap<unsigned int> &GetConCommandIDs();
 
 		// Sound
 		std::vector<audio::ALSoundRef> m_sounds;
-		std::unordered_map<std::string, std::shared_ptr<audio::SoundCacheInfo>> m_soundsPrecached;
+		string::StringMap<std::shared_ptr<audio::SoundCacheInfo>> m_soundsPrecached;
 		void UpdateSounds(std::vector<std::shared_ptr<audio::ALSound>> &sounds);
 	  public:
 		NetworkState();
@@ -126,8 +126,8 @@ export namespace pragma {
 
 		// ConVars
 		virtual console::ConVarMap *GetConVarMap() override;
-		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
-		virtual console::ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
+		virtual console::ConCommandResult RunConsoleCommand(std::string_view scmd, std::vector<std::string> &argv, BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
+		virtual SetConVarResult SetConVar(std::string_view scmd, const std::string &value, bool bApplyIfEqual = false) override;
 
 		void CallOnNextTick(const std::function<void()> &f);
 
@@ -145,7 +145,7 @@ export namespace pragma {
 		std::vector<CallbackHandle> m_luaEnumRegisterCallbacks;
 		std::unique_ptr<util::ResourceWatcherManager> m_resourceWatcher;
 
-		std::unordered_map<std::string, std::string> m_conOverrides;
+		string::StringMap<std::string> m_conOverrides;
 		ChronoTime m_ctReal;
 		double m_tReal;
 		double m_tDelta;
@@ -174,15 +174,15 @@ export namespace pragma {
 			bool loadedClientside = false;
 			bool WasLoadedInState(const NetworkState &nw) const { return (nw.IsClient() && loadedClientside) || (!nw.IsClient() && loadedServerside); }
 		};
-		static std::unordered_map<std::string, LibraryInfo> s_loadedLibraries;
+		static string::StringMap<LibraryInfo> s_loadedLibraries;
 		std::unordered_map<lua::State *, std::vector<std::shared_ptr<util::Library>>> m_initializedLibraries;
 
 		void InitializeDLLModule(lua::State *l, std::shared_ptr<util::Library> module);
 
 		virtual void InitializeResourceManager();
 		void ClearGameConVars();
-		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const override;
+		virtual void implFindSimilarConVars(std::string_view input, std::vector<SimilarCmdInfo> &similarCmds) const override;
 	};
 
-	DLLNETWORK bool check_cheats(const std::string &scmd, NetworkState *state);
+	DLLNETWORK bool check_cheats(std::string_view scmd, NetworkState *state);
 };

@@ -11,18 +11,18 @@ export import :console.enums;
 export import pragma.udm;
 
 #define cvar_newglobal_dec(glname)                                                                                                                                                                                                                                                               \
-	namespace glname {                                                                                                                                                                                                                                                                       \
-		DLLNETWORK ConVarMap *get_convar_map();                                                                                                                                                                                                                                              \
-		DLLNETWORK bool register_convar(const std::string &cvar, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help);                                                                                                                     \
-		DLLNETWORK bool register_convar_callback(const std::string &scvar, int i);                                                                                                                                                                                                           \
-		DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, int, int));                                                                                                                                                      \
-		DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string));                                                                                                                                      \
-		DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, float, float));                                                                                                                                                  \
-		DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool));                                                                                                                                                    \
-		DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), pragma::console::ConVarFlags flags, const std::string &help);                                                       \
-		DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), pragma::console::ConVarFlags flags, const std::string &help);                                                              \
-		DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), const std::string &help);                                                                                           \
-		DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), const std::string &help);                                                                                                  \
+	namespace glname {                                                                                                                                                                                                                                                                           \
+		DLLNETWORK ConVarMap *get_convar_map();                                                                                                                                                                                                                                                  \
+		DLLNETWORK bool register_convar(const std::string &cvar, udm::Type type, const std::string &value, pragma::console::ConVarFlags flags, const std::string &help);                                                                                                                         \
+		DLLNETWORK bool register_convar_callback(const std::string &scvar, int i);                                                                                                                                                                                                               \
+		DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, int, int));                                                                                                                                 \
+		DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, std::string, std::string));                                                                                                                 \
+		DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, float, float));                                                                                                                             \
+		DLLNETWORK bool register_convar_callback(const std::string &scvar, void (*function)(pragma::NetworkState *, const pragma::console::ConVar &, bool, bool));                                                                                                                               \
+		DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), pragma::console::ConVarFlags flags, const std::string &help);                                                   \
+		DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), pragma::console::ConVarFlags flags, const std::string &help);                                                          \
+		DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &, float), const std::string &help);                                                                                       \
+		DLLNETWORK bool register_concommand(const std::string &cvar, void (*function)(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vector<std::string> &), const std::string &help);                                                                                              \
 	};
 
 export namespace pragma {
@@ -70,10 +70,20 @@ export namespace pragma::console {
 		ConVarFlags GetFlags() const;
 	};
 
+	struct DLLNETWORK ConVarConstraint {
+		virtual ~ConVarConstraint() = default;
+		virtual void Apply(udm::DataValue * value, udm::Type type) = 0;
+	};
+
+	struct DLLNETWORK ConVarConstraintRange : ConVarConstraint {
+		void Apply(udm::DataValue *value, udm::Type type) override;
+	};
+
 	DLLNETWORK ConVarValue create_convar_value(udm::Type type, const void *value);
 	DLLNETWORK ConVarValue create_convar_value();
 	class DLLNETWORK ConVar : public ConConf {
 	  public:
+		using ValidationFunction = std::function<bool(std::string_view, std::string &)>;
 		friend CVarHandler;
 		friend NetworkState;
 		template<typename T>
@@ -81,13 +91,9 @@ export namespace pragma::console {
 		{
 			return std::shared_ptr<ConVar> {new ConVar {udm::type_to_enum<T>(), &value, flags, help, usageHelp}};
 		}
-	  private:
-		ConVarValue m_value {nullptr, [](void *) {}};
-		ConVarValue m_default {nullptr, [](void *) {}};
-		udm::Type m_varType = udm::Type::Invalid;
-	  protected:
-		std::vector<int> m_callbacks;
-		void SetValue(const std::string &val);
+		void SetValidationFunction(const ValidationFunction &fun);
+		const ValidationFunction &GetValidationFunction() const;
+		bool ValidateInput(std::string_view input, std::string &outErr) const;
 	  public:
 		ConVar(udm::Type type, const void *value, ConVarFlags flags, const std::string &help, const std::string &usageHelp);
 		std::string GetString() const;
@@ -99,8 +105,19 @@ export namespace pragma::console {
 		void AddCallback(int function);
 		ConConf *Copy();
 
+		void AddConstraint(std::unique_ptr<ConVarConstraint> &&constraint);
+
 		const ConVarValue &GetRawValue() const { return m_value; }
 		const ConVarValue &GetRawDefault() const { return m_default; }
+	  protected:
+		std::vector<int> m_callbacks;
+		bool SetValue(const std::string &val, std::string &outErr);
+	  private:
+		ConVarValue m_value {nullptr, [](void *) {}};
+		ConVarValue m_default {nullptr, [](void *) {}};
+		std::vector<std::unique_ptr<ConVarConstraint>> m_constraints;
+		ValidationFunction m_validationFunction;
+		udm::Type m_varType = udm::Type::Invalid;
 	};
 
 	class DLLNETWORK ConCommand : public ConConf {
@@ -156,15 +173,6 @@ export namespace pragma::console {
 	class DLLNETWORK ConVarMap {
 	  public:
 		ConVarMap();
-	  private:
-		std::map<std::string, std::shared_ptr<ConConf>> m_conVars;
-		std::unordered_map<std::string, unsigned int> m_conVarIDs;
-		std::unordered_map<unsigned int, std::string> m_conVarIdentifiers;
-		unsigned int m_conVarID;
-		std::unordered_map<std::string, std::vector<CvarCallback>> m_conVarCallbacks;
-
-		std::shared_ptr<ConVar> RegisterConVar(const std::string &scmd, udm::Type type, const void *value, ConVarFlags flags, const std::string &help = "", const std::optional<std::string> &usageHelp = {},
-		  std::function<void(const std::string &, std::vector<std::string> &, bool)> autoCompleteFunction = nullptr);
 	  public:
 		std::shared_ptr<ConCommand> PreRegisterConCommand(const std::string &scmd, ConVarFlags flags, const std::string &help = "");
 		void PreRegisterConVarCallback(const std::string &scvar);
@@ -187,16 +195,25 @@ export namespace pragma::console {
 		  const std::function<void(const std::string &, std::vector<std::string> &, bool)> &autoCompleteCallback = nullptr);
 		std::shared_ptr<ConCommand> RegisterConCommand(const ConCommandCreateInfo &createInfo);
 
-		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, int, int)> &function);
-		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, std::string, std::string)> &function);
-		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, float, float)> &function);
-		CallbackHandle RegisterConVarCallback(const std::string &scvar, const std::function<void(NetworkState *, const ConVar &, bool, bool)> &function);
-		std::shared_ptr<ConConf> GetConVar(const std::string &scmd);
-		std::map<std::string, std::shared_ptr<ConConf>> &GetConVars();
-		unsigned int GetConVarID(const std::string &scmd);
+		CallbackHandle RegisterConVarCallback(std::string_view scvar, const std::function<void(NetworkState *, const ConVar &, int, int)> &function);
+		CallbackHandle RegisterConVarCallback(std::string_view scvar, const std::function<void(NetworkState *, const ConVar &, std::string, std::string)> &function);
+		CallbackHandle RegisterConVarCallback(std::string_view scvar, const std::function<void(NetworkState *, const ConVar &, float, float)> &function);
+		CallbackHandle RegisterConVarCallback(std::string_view scvar, const std::function<void(NetworkState *, const ConVar &, bool, bool)> &function);
+		std::shared_ptr<ConConf> GetConVar(std::string_view scmd);
+		string::OrderedStringMap<std::shared_ptr<ConConf>> &GetConVars();
+		unsigned int GetConVarID(std::string_view scmd);
 		bool GetConVarIdentifier(unsigned int ID, std::string **str);
 		unsigned int GetConVarCount() { return m_conVarID - 1; }
-		std::unordered_map<std::string, std::vector<CvarCallback>> &GetConVarCallbacks();
+		string::StringMap<std::vector<CvarCallback>> &GetConVarCallbacks();
+	  private:
+		string::OrderedStringMap<std::shared_ptr<ConConf>> m_conVars;
+		string::StringMap<unsigned int> m_conVarIDs;
+		std::unordered_map<unsigned int, std::string> m_conVarIdentifiers;
+		unsigned int m_conVarID;
+		string::StringMap<std::vector<CvarCallback>> m_conVarCallbacks;
+
+		std::shared_ptr<ConVar> RegisterConVar(const std::string &scmd, udm::Type type, const void *value, ConVarFlags flags, const std::string &help = "", const std::optional<std::string> &usageHelp = {},
+		  std::function<void(const std::string &, std::vector<std::string> &, bool)> autoCompleteFunction = nullptr);
 	};
 #pragma warning(pop)
 

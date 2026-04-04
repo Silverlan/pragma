@@ -16,7 +16,7 @@ pragma::console::ConConf *pragma::CEngine::GetConVar(const std::string &cv)
 	return (stateCl != nullptr) ? stateCl->GetConVar(cv) : nullptr;
 }
 
-bool pragma::CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
+pragma::console::ConCommandResult pragma::CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
 {
 	string::to_lower(cmd);
 	auto *stateCl = static_cast<ClientState *>(GetClientState());
@@ -28,7 +28,10 @@ bool pragma::CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string
 	}
 	if(stateCl == nullptr)
 		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);
-	if(stateCl == nullptr || !stateCl->RunConsoleCommand(cmd, argv, pl, pressState, magnitude, callback)) {
+	console::ConCommandResult result {};
+	if(stateCl)
+		result = stateCl->RunConsoleCommand(cmd, argv, pl, pressState, magnitude, callback);
+	if(!result) {
 		Con::CWAR << "Unknown console command '" << cmd << "'!" << Con::endl;
 		auto similar = (stateCl != nullptr) ? stateCl->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
 		if(similar.empty() == true)
@@ -38,7 +41,8 @@ bool pragma::CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string
 			for(auto &sim : similar)
 				Con::COUT << "- " << sim << Con::endl;
 		}
-		return false;
+		return result;
 	}
-	return true;
+	result.success = true;
+	return result;
 }

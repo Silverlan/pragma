@@ -244,7 +244,7 @@ void pragma::gui::types::WIConsole::Initialize()
 		}
 
 		std::vector<std::pair<std::string_view, float>> bestCandidates(pEntry->GetAutoCompleteEntryLimit(), std::pair<std::string_view, float> {std::string_view {}, std::numeric_limits<float>::max()});
-		const auto fProcessConVars = [&cmd, &bestCandidates](const std::map<std::string, std::shared_ptr<console::ConConf>> &conVars) {
+		const auto fProcessConVars = [&cmd, &bestCandidates](const string::OrderedStringMap<std::shared_ptr<console::ConConf>> &conVars) {
 			for(auto &pair : conVars) {
 				auto percentage = string::calc_similarity(cmd, pair.first);
 				auto it = std::find_if(bestCandidates.begin(), bestCandidates.end(), [percentage](const std::pair<std::string_view, float> &pair) { return percentage < pair.second; });

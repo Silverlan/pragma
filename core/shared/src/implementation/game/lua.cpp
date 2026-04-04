@@ -245,7 +245,7 @@ CallbackHandle pragma::Game::AddConVarCallback(const std::string &cvar, LuaFunct
 	it->second.push_back(cb);
 	return cb.GetFunction();
 }
-const std::unordered_map<std::string, std::vector<pragma::console::CvarCallback>> &pragma::Game::GetConVarCallbacks() const { return m_cvarCallbacks; }
+const pragma::string::StringMap<std::vector<pragma::console::CvarCallback>> &pragma::Game::GetConVarCallbacks() const { return m_cvarCallbacks; }
 
 void pragma::Game::RegisterLua()
 {

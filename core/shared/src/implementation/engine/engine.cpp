@@ -60,13 +60,13 @@ void DLLNETWORK RunEngine(int argc, char *argv[])
 }
 }
 
-static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &get_convar_ptrs()
+static pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> &get_convar_ptrs()
 {
-	static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> ptrs;
+	static pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> ptrs;
 	return ptrs;
 }
 
-std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &pragma::Engine::GetConVarPtrs() { return get_convar_ptrs(); }
+pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> &pragma::Engine::GetConVarPtrs() { return get_convar_ptrs(); }
 pragma::console::ConVarHandle pragma::Engine::GetConVarHandle(std::string scvar) { return CVarHandler::GetConVarHandle(get_convar_ptrs(), scvar); }
 
 static pragma::Engine *g_engine = nullptr;
@@ -185,7 +185,7 @@ void pragma::Engine::SetConsoleType(ConsoleType type) { m_consoleType = type; }
 
 pragma::Engine::ConsoleType pragma::Engine::GetConsoleType() const { return (m_consoleInfo && m_consoleInfo->console) ? ConsoleType::Terminal : ConsoleType::None; }
 
-void pragma::Engine::SetReplicatedConVar(const std::string &cvar, const std::string &val)
+void pragma::Engine::SetReplicatedConVar(std::string_view cvar, const std::string &val)
 {
 	auto *client = GetClientState();
 	if(client == nullptr)
@@ -1138,7 +1138,7 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 
 	add_zip_file(zip, "git_info.txt", "git_info.txt");
 
-	auto fWriteConvars = [&zip](const std::map<std::string, std::shared_ptr<console::ConConf>> &cvarMap, const std::string &fileName) {
+	auto fWriteConvars = [&zip](const string::OrderedStringMap<std::shared_ptr<console::ConConf>> &cvarMap, const std::string &fileName) {
 		std::stringstream convars;
 		for(auto &pair : cvarMap) {
 			if(pair.second->GetType() != console::ConType::Variable)

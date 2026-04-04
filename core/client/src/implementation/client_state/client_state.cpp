@@ -21,12 +21,12 @@ import :util;
 
 #undef GetMessage
 
-static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> *conVarPtrs = nullptr;
-std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &pragma::ClientState::GetConVarPtrs() { return *conVarPtrs; }
-pragma::console::ConVarHandle pragma::ClientState::GetConVarHandle(std::string scvar)
+static pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> *conVarPtrs = nullptr;
+pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> &pragma::ClientState::GetConVarPtrs() { return *conVarPtrs; }
+pragma::console::ConVarHandle pragma::ClientState::GetConVarHandle(std::string_view scvar)
 {
 	if(conVarPtrs == nullptr) {
-		static std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> ptrs;
+		static pragma::string::StringMap<std::shared_ptr<console::PtrConVar>> ptrs;
 		conVarPtrs = &ptrs;
 	}
 	return NetworkState::GetConVarHandle(*conVarPtrs, scvar);
@@ -355,8 +355,8 @@ void pragma::ClientState::Close()
 	TerminateLuaModules(state);
 	m_luaGUI = nullptr;
 	DeregisterLuaModules(state, identifier); // Has to be called AFTER Lua instance has been released!
-	std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &conVarPtrs = GetConVarPtrs();
-	std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>>::iterator itHandles;
+	auto &conVarPtrs = GetConVarPtrs();
+	pragma::string::StringMap<std::shared_ptr<console::PtrConVar>>::iterator itHandles;
 	for(itHandles = conVarPtrs.begin(); itHandles != conVarPtrs.end(); itHandles++)
 		itHandles->second->set(nullptr);
 	StopSounds();
@@ -366,7 +366,7 @@ void pragma::ClientState::Close()
 	ecs::CParticleSystemComponent::ClearCache();
 }
 
-void pragma::ClientState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
+void pragma::ClientState::implFindSimilarConVars(std::string_view input, std::vector<SimilarCmdInfo> &similarCmds) const
 {
 	NetworkState::implFindSimilarConVars(input, similarCmds);
 
@@ -379,16 +379,17 @@ void pragma::ClientState::implFindSimilarConVars(const std::string &input, std::
 
 void pragma::ClientState::RegisterServerConVar(std::string scmd, unsigned int id)
 {
-	std::unordered_map<std::string, unsigned int>::iterator i = m_conCommandIDs.find(scmd);
+	pragma::string::StringMap<unsigned int>::iterator i = m_conCommandIDs.find(scmd);
 	if(i != m_conCommandIDs.end())
 		return;
-	m_conCommandIDs.insert(std::unordered_map<std::string, unsigned int>::value_type(scmd, id));
+	m_conCommandIDs.insert(pragma::string::StringMap<unsigned int>::value_type(scmd, id));
 }
 
-bool pragma::ClientState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
+pragma::console::ConCommandResult pragma::ClientState::RunConsoleCommand(std::string_view scmd, std::vector<std::string> &argv, BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
 {
 	auto *clMap = console::client::get_convar_map();
 	auto conVarCl = clMap->GetConVar(scmd);
+	console::ConCommandResult result {};
 	auto bUseClientside = (conVarCl != nullptr) ? (conVarCl->GetType() != console::ConType::Variable || argv.empty()) : false; // Console commands are ALWAYS executed clientside, if they exist clientside
 	if(bUseClientside == false) {
 		auto *svMap = console::server::get_convar_map();
@@ -398,8 +399,10 @@ bool pragma::ClientState::RunConsoleCommand(std::string scmd, std::vector<std::s
 			if(it == m_conCommandIDs.end()) // No serverside command exists
 				bUseClientside = true;
 		}
-		else if(callback != nullptr && callback(conVarSv.get(), magnitude) == false)
-			return true;
+		else if(callback != nullptr && callback(conVarSv.get(), magnitude) == false) {
+			result.success = true;
+			return result;
+		}
 	}
 	if(bUseClientside == true)
 		return NetworkState::RunConsoleCommand(scmd, argv, pl, pressState, magnitude, callback);
@@ -410,8 +413,9 @@ bool pragma::ClientState::RunConsoleCommand(std::string scmd, std::vector<std::s
 		// (if this is a locally hosted game)
 		auto *svState = get_cengine()->GetServerNetworkState();
 		if(svState)
-			svState->RunConsoleCommand(scmd, argv, nullptr, pressState, magnitude, nullptr);
-		return true;
+			return svState->RunConsoleCommand(scmd, argv, nullptr, pressState, magnitude, nullptr);
+		result.success = true;
+		return result;
 	}
 	NetPacket p;
 	p->WriteString(scmd);
@@ -421,14 +425,16 @@ bool pragma::ClientState::RunConsoleCommand(std::string scmd, std::vector<std::s
 	for(unsigned char i = 0; i < argv.size(); i++)
 		p->WriteString(argv[i]);
 	SendPacket(networking::net_messages::server::CMD_CALL, p, networking::Protocol::SlowReliable);
-	return true;
+	result.success = true;
+	return result;
 }
 
-pragma::console::ConVar *pragma::ClientState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
+pragma::console::CVarHandler::SetConVarResult pragma::ClientState::SetConVar(std::string_view scmd, const std::string &value, bool bApplyIfEqual)
 {
-	console::ConVar *cvar = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
-	if(cvar == nullptr)
-		return nullptr;
+	auto result = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
+	if(!result || !result.conVar)
+		return result;
+	auto *cvar = result.conVar;
 	auto flags = cvar->GetFlags();
 	if(((flags & console::ConVarFlags::Userinfo) == console::ConVarFlags::Userinfo)) {
 		NetPacket p;
@@ -436,7 +442,7 @@ pragma::console::ConVar *pragma::ClientState::SetConVar(std::string scmd, std::s
 		p->WriteString(cvar->GetString());
 		SendPacket(networking::net_messages::server::CVAR_SET, p, networking::Protocol::SlowReliable);
 	}
-	return cvar;
+	return result;
 }
 
 void pragma::ClientState::Draw(rendering::DrawSceneInfo &drawSceneInfo) //const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
@@ -824,13 +830,13 @@ void pragma::ClientState::InitializeGUIModule()
 #endif
 }
 
-unsigned int pragma::ClientState::GetServerMessageID(std::string identifier)
+unsigned int pragma::ClientState::GetServerMessageID(std::string_view identifier)
 {
 	auto *map = networking::get_server_message_map();
 	return map->GetNetMessageID(identifier);
 }
 
-unsigned int pragma::ClientState::GetServerConVarID(std::string scmd)
+unsigned int pragma::ClientState::GetServerConVarID(std::string_view scmd)
 {
 	auto *map = console::server::get_convar_map();
 	return map->GetConVarID(scmd);

@@ -14,12 +14,12 @@ import :networking;
 
 #undef GetMessage
 
-static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> *conVarPtrs = nullptr;
-std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &pragma::ServerState::GetConVarPtrs() { return *conVarPtrs; }
+static pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> *conVarPtrs = nullptr;
+pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> &pragma::ServerState::GetConVarPtrs() { return *conVarPtrs; }
 pragma::console::ConVarHandle pragma::ServerState::GetConVarHandle(std::string scvar)
 {
 	if(conVarPtrs == nullptr) {
-		static std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> ptrs;
+		static pragma::string::StringMap<std::shared_ptr<console::PtrConVar>> ptrs;
 		conVarPtrs = &ptrs;
 	}
 	return NetworkState::GetConVarHandle(*conVarPtrs, scvar);
@@ -239,7 +239,7 @@ void pragma::ServerState::Think()
 
 void pragma::ServerState::Tick() { NetworkState::Tick(); }
 
-void pragma::ServerState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
+void pragma::ServerState::implFindSimilarConVars(std::string_view input, std::vector<SimilarCmdInfo> &similarCmds) const
 {
 	NetworkState::implFindSimilarConVars(input, similarCmds);
 
@@ -333,25 +333,26 @@ void pragma::ServerState::ChangeLevel(const std::string &map)
 bool pragma::ServerState::IsMultiPlayer() const { return m_server && typeid(*m_server) != typeid(networking::LocalServer); }
 bool pragma::ServerState::IsSinglePlayer() const { return !IsMultiPlayer(); }
 
-pragma::console::ConVar *pragma::ServerState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
+pragma::console::CVarHandler::SetConVarResult pragma::ServerState::SetConVar(std::string_view scmd, const std::string &value, bool bApplyIfEqual)
 {
-	auto *cvar = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
-	if(cvar == nullptr)
-		return nullptr;
+	auto result = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
+	if(!result)
+		return result;
+	auto *cvar = result.conVar;
 	auto flags = cvar->GetFlags();
 	if(((flags & console::ConVarFlags::Replicated) == console::ConVarFlags::Replicated || (flags & console::ConVarFlags::Notify) == console::ConVarFlags::Notify)) {
 		auto *cl = Engine::Get()->GetClientState();
 		if(cl != nullptr) {
 			// This is a locally hosted game, just inform the client directly
 			Engine::Get()->SetReplicatedConVar(scmd, cvar->GetString());
-			return cvar;
+			return result;
 		}
 		NetPacket p;
 		p->WriteString(scmd);
 		p->WriteString(cvar->GetString());
 		SendPacket(networking::net_messages::client::CVAR_SET, p, networking::Protocol::SlowReliable);
 	}
-	return cvar;
+	return result;
 }
 
 pragma::SPlayerComponent *pragma::ServerState::GetPlayer(const networking::IServerClient &session) { return static_cast<SPlayerComponent *>(session.GetPlayer()); }
@@ -391,7 +392,7 @@ pragma::console::ConCommand *pragma::ServerState::CreateConCommand(const std::st
 }
 WMServerData &pragma::ServerState::GetServerData() { return m_serverData; }
 
-void pragma::ServerState::GetLuaConCommands(std::unordered_map<std::string, console::ConCommand *> **cmds) { *cmds = &m_luaConCommands; }
+pragma::string::StringMap<pragma::console::ConCommand *> &pragma::ServerState::GetLuaConCommands() { return m_luaConCommands; }
 
 pragma::material::Material *pragma::ServerState::LoadMaterial(const std::string &path, bool precache, bool bReload)
 {

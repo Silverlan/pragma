@@ -24,14 +24,30 @@ void CAnimatedComponent::RegisterEvents(EntityComponentManager &componentManager
 }
 void CAnimatedComponent::GetBaseTypeIndex(std::type_index &outTypeIndex) const { outTypeIndex = std::type_index(typeid(BaseAnimatedComponent)); }
 void CAnimatedComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
-static std::shared_ptr<prosper::IUniformResizableBuffer> s_instanceBoneBuffer = nullptr;
-const std::shared_ptr<prosper::IUniformResizableBuffer> &pragma::get_instance_bone_buffer() { return s_instanceBoneBuffer; }
+static std::shared_ptr<prosper::IDynamicResizableBuffer> s_instanceBoneBuffer = nullptr;
+const std::shared_ptr<prosper::IDynamicResizableBuffer> &pragma::get_instance_bone_buffer() { return s_instanceBoneBuffer; }
+constexpr size_t SIZEOF_BONE_BUFFER_BONE = sizeof(Mat4);
+// Note: This is not an absolute maximum, however if the buffer size is exceeded, the buffer will
+// automatically re-allocate, which can hurt runtime performance.
+constexpr uint32_t MAX_BASE_NUMBER_OF_BONES_PER_INSTANCE = 64;
+constexpr uint32_t MAX_BASE_NUMBER_OF_SKINNED_INSTANCES = 200;
+static prosper::BufferUsageFlags get_bone_buffer_usage_flags()
+{
+	prosper::BufferUsageFlags usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
+#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+	usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
+#endif
+	return usageFlags;
+}
+static size_t get_bone_buffer_base_size_per_instance() { return prosper::util::get_aligned_size(MAX_BASE_NUMBER_OF_BONES_PER_INSTANCE * SIZEOF_BONE_BUFFER_BONE, pragma::get_cengine()->GetRenderContext().CalcBufferAlignment(get_bone_buffer_usage_flags())); }
 void pragma::initialize_articulated_buffers()
 {
-	auto instanceSize = math::to_integral(GameLimits::MaxBones) * sizeof(Mat4);
-	auto instanceCount = 512u;
-	auto maxInstanceCount = instanceCount * 4u;
+	// Memory usage (approximately): MAX_BASE_NUMBER_OF_SKINNED_INSTANCES *MAX_BASE_NUMBER_OF_BONES_PER_INSTANCE *SIZEOF_BONE_BUFFER_BONE
+	// 200 *64 *64 = 800 KiB
+	// Depending on the device's alignment requirements, the actual memory usage may be larger.
+
 	prosper::util::BufferCreateInfo createInfo {};
+	createInfo.usageFlags = get_bone_buffer_usage_flags();
 
 	if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA) {
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
@@ -39,13 +55,9 @@ void pragma::initialize_articulated_buffers()
 	}
 	else
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
-	createInfo.size = instanceSize * maxInstanceCount;
-	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
-#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
-#endif
-	s_instanceBoneBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.05f);
-	s_instanceBoneBuffer->SetDebugName("entity_anim_bone_buf");
+	createInfo.size = MAX_BASE_NUMBER_OF_SKINNED_INSTANCES * get_bone_buffer_base_size_per_instance();
+	createInfo.debugName = "entity_anim_bone_buf";
+	s_instanceBoneBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo);
 
 	if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
 		s_instanceBoneBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
@@ -59,7 +71,6 @@ bool CAnimatedComponent::AreSkeletonUpdateCallbacksEnabled() const { return math
 void CAnimatedComponent::Initialize()
 {
 	BaseAnimatedComponent::Initialize();
-	InitializeBoneBuffer();
 
 	/*BindEventUnhandled(LogicComponent::EVENT_ON_TICK,[this](std::reference_wrapper<pragma::ComponentEvent> evData) {
 		auto pRenderComponent = GetEntity().GetComponent<CRenderComponent>();
@@ -143,9 +154,12 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<asset::Model> &mdl
 {
 	BaseAnimatedComponent::ResetAnimation(mdl);
 	m_boneMatrices.clear();
-	if(mdl == nullptr || GetBoneCount() == 0)
+	if(mdl == nullptr || GetBoneCount() == 0) {
+		InitializeBoneBuffer();
 		return;
+	}
 	m_boneMatrices.resize(mdl->GetBoneCount(), umat::identity());
+	InitializeBoneBuffer();
 	UpdateBoneMatricesMT();
 	SetBoneBufferDirty();
 
@@ -200,9 +214,19 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<asset::Model> &mdl
 const prosper::IBuffer *CAnimatedComponent::GetBoneBuffer() const { return m_boneBuffer.get(); }
 void CAnimatedComponent::InitializeBoneBuffer()
 {
-	if(m_boneBuffer != nullptr)
+	auto numBones = GetBoneCount();
+	auto reqSize = numBones * SIZEOF_BONE_BUFFER_BONE;
+	auto &context = get_cengine()->GetRenderContext();
+	if(m_boneBuffer) {
+		// Keep current buffer alive in case it's still in use.
+		context.KeepResourceAliveUntilPresentationComplete(m_boneBuffer);
+		m_boneBuffer = nullptr;
+	}
+	if(numBones == 0)
 		return;
-	m_boneBuffer = get_instance_bone_buffer()->AllocateBuffer();
+
+	m_boneBuffer = get_instance_bone_buffer()->AllocateBuffer(reqSize, context.CalcBufferAlignment(get_bone_buffer_usage_flags()), nullptr);
+	// TODO: On re-allocate, update descriptor sets
 
 	CEOnBoneBufferInitialized evData {m_boneBuffer};
 	BroadcastEvent(cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED, evData);
@@ -213,7 +237,7 @@ void CAnimatedComponent::UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &comman
 	if(m_boneBuffer && flagAsDirty && numBones > 0u && m_boneMatrices.empty() == false) {
 		constexpr auto pipelineStages = prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit | prosper::PipelineStageFlags::GeometryShaderBit;
 		commandBuffer.RecordBufferBarrier(*m_boneBuffer, pipelineStages, prosper::PipelineStageFlags::TransferBit, prosper::AccessFlags::UniformReadBit, prosper::AccessFlags::TransferWriteBit);
-		commandBuffer.RecordUpdateBuffer(*m_boneBuffer, 0ull, numBones * sizeof(Mat4), m_boneMatrices.data());
+		commandBuffer.RecordUpdateBuffer(*m_boneBuffer, 0ull, numBones * SIZEOF_BONE_BUFFER_BONE, m_boneMatrices.data());
 		commandBuffer.RecordBufferBarrier(*m_boneBuffer, prosper::PipelineStageFlags::TransferBit, pipelineStages, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::UniformReadBit);
 	}
 }

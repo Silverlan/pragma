@@ -41,7 +41,7 @@ decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_POSITION) ShaderGameWorld
 decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_UV) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_UV = {ShaderEntity::VERTEX_ATTRIBUTE_UV, VERTEX_BINDING_VERTEX};
 decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_NORMAL) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_NORMAL = {ShaderEntity::VERTEX_ATTRIBUTE_NORMAL, VERTEX_BINDING_VERTEX};
 decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_TANGENT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_TANGENT = {ShaderEntity::VERTEX_ATTRIBUTE_TANGENT, VERTEX_BINDING_VERTEX};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BI_TANGENT = {ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT, VERTEX_BINDING_VERTEX};
+// decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BI_TANGENT = {ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT, VERTEX_BINDING_VERTEX};
 
 decltype(ShaderGameWorldLightingPass::VERTEX_BINDING_LIGHTMAP) ShaderGameWorldLightingPass::VERTEX_BINDING_LIGHTMAP = {prosper::VertexInputRate::Vertex};
 decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_LIGHTMAP_UV = {ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV, VERTEX_BINDING_LIGHTMAP};
@@ -191,7 +191,7 @@ void ShaderGameWorldLightingPass::InitializeGfxPipelineVertexAttributes()
 	AddVertexAttribute(VERTEX_ATTRIBUTE_UV);
 	AddVertexAttribute(VERTEX_ATTRIBUTE_NORMAL);
 	AddVertexAttribute(VERTEX_ATTRIBUTE_TANGENT);
-	AddVertexAttribute(VERTEX_ATTRIBUTE_BI_TANGENT);
+	// AddVertexAttribute(VERTEX_ATTRIBUTE_BI_TANGENT);
 
 	AddVertexAttribute(VERTEX_ATTRIBUTE_LIGHTMAP_UV);
 

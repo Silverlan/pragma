@@ -148,7 +148,7 @@ export namespace pragma {
 		static VertexAttribute VERTEX_ATTRIBUTE_UV;
 		static VertexAttribute VERTEX_ATTRIBUTE_NORMAL;
 		static VertexAttribute VERTEX_ATTRIBUTE_TANGENT;
-		static VertexAttribute VERTEX_ATTRIBUTE_BI_TANGENT;
+		// static VertexAttribute VERTEX_ATTRIBUTE_BI_TANGENT;
 
 		static VertexBinding VERTEX_BINDING_LIGHTMAP;
 		static VertexAttribute VERTEX_ATTRIBUTE_LIGHTMAP_UV;

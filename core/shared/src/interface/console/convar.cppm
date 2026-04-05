@@ -70,30 +70,60 @@ export namespace pragma::console {
 		ConVarFlags GetFlags() const;
 	};
 
-	struct DLLNETWORK ConVarConstraint {
-		virtual ~ConVarConstraint() = default;
-		virtual void Apply(udm::DataValue * value, udm::Type type) = 0;
-	};
-
-	struct DLLNETWORK ConVarConstraintRange : ConVarConstraint {
-		void Apply(udm::DataValue *value, udm::Type type) override;
-	};
-
 	DLLNETWORK ConVarValue create_convar_value(udm::Type type, const void *value);
 	DLLNETWORK ConVarValue create_convar_value();
 	class DLLNETWORK ConVar : public ConConf {
 	  public:
-		using ValidationFunction = std::function<bool(std::string_view, std::string &)>;
+		template<typename T>
+		using ConstraintFunction = std::function<void(T &)>;
+		template<typename T>
+		using ValidationFunction = std::function<bool(const T &, std::string &)>;
 		friend CVarHandler;
 		friend NetworkState;
 		template<typename T>
+		    requires(console::is_valid_convar_type_v<T>)
 		static std::shared_ptr<ConVar> Create(const T &value, ConVarFlags flags, const std::string &help = "", const std::string &usageHelp = "")
 		{
 			return std::shared_ptr<ConVar> {new ConVar {udm::type_to_enum<T>(), &value, flags, help, usageHelp}};
 		}
-		void SetValidationFunction(const ValidationFunction &fun);
-		const ValidationFunction &GetValidationFunction() const;
-		bool ValidateInput(std::string_view input, std::string &outErr) const;
+		template<typename T>
+		    requires(console::is_valid_convar_type_v<T>)
+		void SetValidationFunction(const ValidationFunction<T> &fun)
+		{
+			if(udm::type_to_enum<T>() != m_varType)
+				throw std::invalid_argument {"Validation function type does not match ConVar type!"};
+			m_validationFunction = [fun](udm::ConstDataValue value, std::string &outErr) -> bool { return fun(*static_cast<const T *>(value), outErr); };
+		}
+
+		template<typename T>
+		    requires(console::is_valid_convar_type_v<T>)
+		void SetConstraintFunction(const ConstraintFunction<T> &fun)
+		{
+			if(udm::type_to_enum<T>() != m_varType)
+				throw std::invalid_argument {"Constraint function type does not match ConVar type!"};
+			m_constraintFunction = [fun](udm::DataValue value) { return fun(*static_cast<T *>(value)); };
+		}
+
+		template<typename T>
+		    requires(console::is_valid_convar_type_v<T>)
+		bool ValidateInput(const T &value, std::string &outErr) const
+		{
+			if(udm::type_to_enum<T>() != m_varType)
+				throw std::invalid_argument {"Input value type does not match ConVar type!"};
+			if(!m_validationFunction)
+				return true;
+			return m_validationFunction(&value, outErr);
+		}
+		template<typename T>
+		    requires(console::is_valid_convar_type_v<T>)
+		void ApplyConstraint(T &value) const
+		{
+			if(udm::type_to_enum<T>() != m_varType)
+				throw std::invalid_argument {"Input value type does not match ConVar type!"};
+			if(!m_constraintFunction)
+				return;
+			m_constraintFunction(&value);
+		}
 	  public:
 		ConVar(udm::Type type, const void *value, ConVarFlags flags, const std::string &help, const std::string &usageHelp);
 		std::string GetString() const;
@@ -105,18 +135,61 @@ export namespace pragma::console {
 		void AddCallback(int function);
 		ConConf *Copy();
 
-		void AddConstraint(std::unique_ptr<ConVarConstraint> &&constraint);
-
 		const ConVarValue &GetRawValue() const { return m_value; }
 		const ConVarValue &GetRawDefault() const { return m_default; }
+
+		template<typename T>
+		    requires(console::is_valid_convar_type_v<T>)
+		bool SetValue(const T &val, std::string &outErr)
+		{
+			return console::visit(m_varType, [this, &val, &outErr](auto tag) {
+				using TVar = typename decltype(tag)::type;
+				if constexpr(udm::is_convertible<T, TVar>()) {
+					auto newVal = udm::convert<T, TVar>(val);
+					if(!ValidateInput(newVal, outErr))
+						return false;
+					ApplyConstraint(newVal);
+					*static_cast<TVar *>(m_value.get()) = std::move(newVal);
+					return true;
+				}
+				outErr = "Unable to convert value of type " + std::string {udm::enum_type_to_ascii(udm::type_to_enum<T>())} + " to ConVar of type " + std::string {udm::enum_type_to_ascii(udm::type_to_enum<TVar>())};
+				return false;
+			});
+		}
+		template<typename T>
+		std::optional<T> GetValue(bool applyConstraint = false) const
+		{
+			if(!m_value)
+				return {};
+			return console::visit(m_varType, [this, applyConstraint](auto tag) -> std::optional<T> {
+				using TVar = typename decltype(tag)::type;
+				if constexpr(udm::is_convertible<TVar, T>()) {
+					auto val = udm::convert<TVar, T>(*static_cast<TVar *>(m_value.get()));
+					if(applyConstraint)
+						ApplyConstraint(val);
+					return val;
+				}
+				return {};
+			});
+		}
 	  protected:
+		using RawConstraintFunction = std::function<void(udm::DataValue)>;
+		using RawValidationFunction = std::function<bool(udm::ConstDataValue, std::string &)>;
+
 		std::vector<int> m_callbacks;
+
+		void SetValidationFunction(const RawValidationFunction &fun);
+		const RawValidationFunction &GetValidationFunction() const;
+
+		void SetConstraintFunction(const RawConstraintFunction &fun);
+		const RawConstraintFunction &GetConstraintFunction() const;
+
 		bool SetValue(const std::string &val, std::string &outErr);
 	  private:
 		ConVarValue m_value {nullptr, [](void *) {}};
 		ConVarValue m_default {nullptr, [](void *) {}};
-		std::vector<std::unique_ptr<ConVarConstraint>> m_constraints;
-		ValidationFunction m_validationFunction;
+		mutable RawConstraintFunction m_constraintFunction;
+		mutable RawValidationFunction m_validationFunction;
 		udm::Type m_varType = udm::Type::Invalid;
 	};
 

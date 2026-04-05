@@ -115,7 +115,7 @@ void NET_sv_RESOURCE_REQUEST(pragma::networking::IServerClient &session, NetPack
 void NET_sv_RESOURCE_BEGIN(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	session.SetInitialResourceTransferState(pragma::networking::IServerClient::TransferState::Started);
-	bool bSend = packet->Read<bool>() && pragma::ServerState::Get()->GetConVarBool("sv_allowdownload");
+	bool bSend = packet->Read<bool>() && pragma::ServerState::Get()->GetConVarValueOr<udm::Boolean>("sv_allowdownload");
 	if(bSend) {
 #if RESOURCE_TRANSFER_VERBOSE == 1
 		Con::CSV << "[ResourceManager] Sending next resource to client: " << session->GetIdentifier() << Con::endl;
@@ -297,7 +297,7 @@ void NET_sv_RCON(pragma::networking::IServerClient &session, NetPacket packet)
 		return;
 	std::string passCl = packet->ReadString();
 	std::string cvar = packet->ReadString();
-	std::string pass = pragma::ServerState::Get()->GetConVarString("rcon_password");
+	std::string pass = pragma::ServerState::Get()->GetConVarValueOr<udm::String>("rcon_password");
 	if(pass.empty() || pass != passCl) {
 		/*Game *game = pragma::ServerState::Get()->GetGameState();
 		Player *pl = game->GetPlayer(session);
@@ -314,7 +314,7 @@ void NET_sv_RCON(pragma::networking::IServerClient &session, NetPacket packet)
 void NET_sv_SERVERINFO_REQUEST(pragma::networking::IServerClient &session, NetPacket packet)
 {
 	std::string password = packet->ReadString();
-	std::string passSv = pragma::ServerState::Get()->GetConVarString("sv_password").c_str();
+	std::string passSv = pragma::ServerState::Get()->GetConVarValueOr<udm::String>("sv_password").c_str();
 	if(passSv.empty() == false && passSv != password && session.IsListenServerHost() == false) {
 		NetPacket p;
 		//pragma::ServerState::Get()->SendPacket("invalidpassword", p, pragma::networking::Protocol::SlowReliable, session);
@@ -384,9 +384,8 @@ void NET_sv_CVAR_SET(pragma::networking::IServerClient &session, NetPacket packe
 		return;
 	std::string cvar = packet->ReadString();
 	std::string val = packet->ReadString();
-	std::unordered_map<std::string, std::string> *cvars;
-	pl->GetConVars(&cvars);
-	(*cvars)[cvar] = val;
+	auto &cvars = pl->GetConVars();
+	cvars[cvar] = val;
 	game->OnClientConVarChanged(*pl, cvar, val);
 }
 

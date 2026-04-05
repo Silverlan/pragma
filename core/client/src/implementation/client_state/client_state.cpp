@@ -97,14 +97,14 @@ pragma::ClientState::~ClientState()
 void pragma::ClientState::UpdateGameWorldShaderSettings()
 {
 	auto oldSettings = m_worldShaderSettings;
-	m_worldShaderSettings.shadowQuality = static_cast<rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarInt("render_shadow_quality"));
-	m_worldShaderSettings.ssaoEnabled = GetConVarBool("cl_render_ssao");
-	m_worldShaderSettings.bloomEnabled = GetConVarBool("render_bloom_enabled");
-	m_worldShaderSettings.debugModeEnabled = GetConVarBool("render_debug_mode") || GetConVarBool("render_unlit");
-	m_worldShaderSettings.fxaaEnabled = static_cast<rendering::AntiAliasing>(GetConVarInt("cl_render_anti_aliasing")) == rendering::AntiAliasing::FXAA;
-	m_worldShaderSettings.iblEnabled = GetConVarBool("render_ibl_enabled");
-	m_worldShaderSettings.dynamicLightingEnabled = GetConVarBool("render_dynamic_lighting_enabled");
-	m_worldShaderSettings.dynamicShadowsEnabled = GetConVarBool("render_dynamic_shadows_enabled");
+	m_worldShaderSettings.shadowQuality = static_cast<rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarValueOr<udm::Int32>("render_shadow_quality"));
+	m_worldShaderSettings.ssaoEnabled = GetConVarValueOr<udm::Boolean>("cl_render_ssao");
+	m_worldShaderSettings.bloomEnabled = GetConVarValueOr<udm::Boolean>("render_bloom_enabled");
+	m_worldShaderSettings.debugModeEnabled = GetConVarValueOr<udm::Boolean>("render_debug_mode") || GetConVarValueOr<udm::Boolean>("render_unlit");
+	m_worldShaderSettings.fxaaEnabled = static_cast<rendering::AntiAliasing>(GetConVarValueOr<udm::Int32>("cl_render_anti_aliasing")) == rendering::AntiAliasing::FXAA;
+	m_worldShaderSettings.iblEnabled = GetConVarValueOr<udm::Boolean>("render_ibl_enabled");
+	m_worldShaderSettings.dynamicLightingEnabled = GetConVarValueOr<udm::Boolean>("render_dynamic_lighting_enabled");
+	m_worldShaderSettings.dynamicShadowsEnabled = GetConVarValueOr<udm::Boolean>("render_dynamic_shadows_enabled");
 	if(m_worldShaderSettings == oldSettings)
 		return;
 
@@ -125,7 +125,7 @@ void pragma::ClientState::InitializeGameClient(bool singlePlayerLocalGame)
 	//};
 	eventInterface.handlePacket = [this](NetPacket &packet) { HandlePacket(packet); };
 	if(singlePlayerLocalGame == false) {
-		auto netLibName = GetConVarString("net_library");
+		auto netLibName = GetConVarValueOr<udm::String>("net_library");
 		auto netModPath = networking::GetNetworkingModuleLocation(netLibName, false);
 		std::string err;
 		auto dllHandle = InitializeLibrary(netModPath, &err);
@@ -598,7 +598,7 @@ void pragma::ClientState::SendUserInfo()
 	else
 		packet->Write<unsigned char>((unsigned char)(0));
 
-	auto name = GetConVarString("playername");
+	auto name = GetConVarValueOr<udm::String>("playername");
 	auto libSteamworks = GetLibraryModule("steamworks/pr_steamworks");
 	if(libSteamworks) {
 		auto *fGetClientName = libSteamworks->FindSymbolAddress<void (*)(std::string &)>("pr_steamworks_get_client_steam_name");

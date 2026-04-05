@@ -182,7 +182,7 @@ void pragma::physics::PhysWaterSurfaceSimulator::SimulateWaves(double dt)
 	std::copy(m_threadParticleHeights.begin(), m_threadParticleHeights.end(), m_particleHeights.begin());
 	m_heightMutex.unlock();
 }
-uint8_t pragma::physics::PhysWaterSurfaceSimulator::GetEdgeIterationCount() const { return Engine::Get()->GetServerNetworkState()->GetConVarInt("sv_water_surface_simulation_edge_iteration_count"); }
+uint8_t pragma::physics::PhysWaterSurfaceSimulator::GetEdgeIterationCount() const { return Engine::Get()->GetServerNetworkState()->GetConVarValueOr<udm::Int32>("sv_water_surface_simulation_edge_iteration_count"); }
 Vector3 pragma::physics::PhysWaterSurfaceSimulator::CalcParticlePosition(const SurfaceInfo &surfInfo, const std::vector<float> &heights, std::size_t ptIdx) const
 {
 	auto c = GetParticleCoordinates(surfInfo, ptIdx);

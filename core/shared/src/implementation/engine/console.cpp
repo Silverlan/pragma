@@ -236,8 +236,9 @@ pragma::console::ConCommandResult pragma::Engine::RunEngineConsoleCommand(std::s
 	return result;
 }
 
-pragma::console::ConCommandResult pragma::Engine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
+pragma::console::ConCommandResult pragma::Engine::RunConsoleCommand(std::string_view svcmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
 {
+	std::string cmd {svcmd};
 	string::to_lower(cmd);
 	auto *stateSv = GetServerNetworkState();
 	if(stateSv == nullptr)

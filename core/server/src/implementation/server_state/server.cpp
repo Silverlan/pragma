@@ -26,17 +26,17 @@ void pragma::ServerState::RegisterServerInfo()
 		return;
 	auto *gameMode = SGame::Get()->GetGameMode();
 	m_serverData = WMServerData();
-	m_serverData.name = GetConVarString("sv_servername");
+	m_serverData.name = GetConVarValueOr<udm::String>("sv_servername");
 	m_serverData.map = SGame::Get()->GetMapName();
 	if(gameMode != nullptr)
 		m_serverData.gameMode = gameMode->name;
 	auto port = m_server->GetHostPort();
-	auto password = GetConVarString("password");
+	auto password = GetConVarValueOr<udm::String>("password");
 	m_serverData.players = SGame::Get()->GetPlayerCount();
 	m_serverData.tcpPort = port.has_value() ? *port : 0;
 	m_serverData.udpPort = port.has_value() ? *port : 0;
 	m_serverData.engineVersion = get_engine_version();
-	m_serverData.maxPlayers = GetConVarInt("sv_maxplayers");
+	m_serverData.maxPlayers = GetConVarValueOr<udm::Int32>("sv_maxplayers");
 	m_serverData.password = password.empty() == false;
 	//m_serverData.bots
 

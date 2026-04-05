@@ -64,17 +64,34 @@ export namespace pragma::console {
 			return static_cast<T *>(cv);
 		}
 		ConConf *GetConVar(std::string_view scmd);
+		const ConConf *GetConVar(std::string_view scmd) const;
 
-		int GetConVarInt(std::string_view scmd);
-		std::string GetConVarString(std::string_view scmd);
-		float GetConVarFloat(std::string_view scmd);
-		bool GetConVarBool(std::string_view scmd);
+		template<typename T>
+		    requires(is_valid_convar_type_v<T>)
+		T GetConVarValueOr(std::string_view cvarName, const T &defVal = {}, bool applyConstraint = false) const
+		{
+			auto *cv = GetConVar(cvarName);
+			if(cv == nullptr || cv->GetType() != ConType::Var)
+				return defVal;
+			auto *cvar = static_cast<const ConVar *>(cv);
+			auto val = cvar->GetValue<T>(applyConstraint);
+			if(!val)
+				return defVal;
+			return *val;
+		}
+
+		template<typename T>
+		    requires(is_valid_convar_type_v<T>)
+		std::optional<T> GetConVarValue(std::string_view cvarName, bool applyConstraint = false) const
+		{
+			auto *cv = GetConVar(cvarName);
+			if(cv == nullptr || cv->GetType() != ConType::Var)
+				return {};
+			auto *cvar = static_cast<const ConVar *>(cv);
+			return cvar->GetValue<T>(applyConstraint);
+		}
+
 		ConVarFlags GetConVarFlags(std::string_view scmd);
-
-		bool GetConVarInt(std::string_view scmd, int32_t &outVal);
-		bool GetConVarString(std::string_view scmd, std::string &outVal);
-		bool GetConVarFloat(std::string_view scmd, float &outVal);
-		bool GetConVarBool(std::string_view scmd, bool &outVal);
 		bool GetConVarFlags(std::string_view scmd, ConVarFlags &outVal);
 
 		virtual ConVarMap *GetConVarMap();

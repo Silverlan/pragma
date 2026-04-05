@@ -79,10 +79,10 @@ void pragma::ServerState::InitializeGameServer(bool singlePlayerLocalGame)
 	eventInterface.handlePacket = [this](networking::IServerClient &client, NetPacket &packet) { HandlePacket(client, packet); };
 
 	if(singlePlayerLocalGame == false) {
-		auto netLibName = GetConVarString("net_library");
+		auto netLibName = GetConVarValueOr<udm::String>("net_library");
 		auto netModPath = networking::GetNetworkingModuleLocation(netLibName, true);
-		auto port = GetConVarInt("sv_port_tcp");
-		auto usePeerToPeer = GetConVarBool("sv_use_p2p_if_available");
+		auto port = GetConVarValueOr<udm::Int32>("sv_port_tcp");
+		auto usePeerToPeer = GetConVarValueOr<udm::Boolean>("sv_use_p2p_if_available");
 		std::string err;
 		auto dllHandle = InitializeLibrary(netModPath, &err);
 		if(dllHandle) {
@@ -370,7 +370,7 @@ void pragma::ServerState::ClearConCommands()
 		m_conCommandID = map->GetConVarCount() + 1;
 }
 
-bool pragma::ServerState::IsClientAuthenticationRequired() const { return IsMultiPlayer() && Get()->GetConVarBool("sv_require_authentication"); }
+bool pragma::ServerState::IsClientAuthenticationRequired() const { return IsMultiPlayer() && Get()->GetConVarValueOr<udm::Boolean>("sv_require_authentication"); }
 
 pragma::console::ConCommand *pragma::ServerState::CreateConCommand(const std::string &scmd, LuaFunction fc, console::ConVarFlags flags, const std::string &help)
 {

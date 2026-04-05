@@ -1320,7 +1320,7 @@ void pragma::CEngine::RunLaunchCommands()
 	Engine::RunLaunchCommands();
 	auto *cl = GetClientState();
 	if(cl != nullptr)
-		SetHRTFEnabled(cl->GetConVarBool("cl_audio_hrtf_enabled"));
+		SetHRTFEnabled(cl->GetConVarValueOr<udm::Boolean>("cl_audio_hrtf_enabled"));
 }
 void pragma::CEngine::ClearConsole()
 {

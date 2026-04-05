@@ -107,7 +107,7 @@ pragma::gui::types::WICheckbox *pragma::gui::types::WIOptionsList::AddToggleChoi
 	row->SetValue(0, name);
 	auto hCheckbox = CreateChild<WICheckbox>();
 	auto *pCheckbox = hCheckbox.get<WICheckbox>();
-	if((translator2 == nullptr) ? get_cengine()->GetConVarBool(cvarName) : translator2(get_cengine()->GetConVarString(cvarName)))
+	if((translator2 == nullptr) ? get_cengine()->GetConVarValueOr<udm::Boolean>(cvarName) : translator2(get_cengine()->GetConVarValueOr<udm::String>(cvarName)))
 		pCheckbox->SetChecked(true);
 	auto hOptions = GetHandle();
 	pCheckbox->AddCallback("OnChange", FunctionCallback<void, bool>::Create([hOptions, cvarName, translator](bool bChecked) mutable {
@@ -139,7 +139,7 @@ pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceLi
 		initializer(pChoiceList);
 	auto hOptions = GetHandle();
 	if(cvarName.empty() == false) {
-		pChoiceList->SelectChoice(get_client_state()->GetConVarString(cvarName));
+		pChoiceList->SelectChoice(get_client_state()->GetConVarValueOr<udm::String>(cvarName));
 		pChoiceList->AddCallback("OnSelect", FunctionCallback<void, uint32_t, std::reference_wrapper<std::string>>::Create([hOptions, cvarName](uint32_t, std::reference_wrapper<std::string> value) mutable {
 			if(!hOptions.IsValid())
 				return;
@@ -177,7 +177,7 @@ pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDo
 		initializer(pDropDownMenu);
 	if(!cvarName.empty()) {
 		auto hOptions = GetHandle();
-		pDropDownMenu->SelectOption(get_client_state()->GetConVarString(cvarName));
+		pDropDownMenu->SelectOption(get_client_state()->GetConVarValueOr<udm::String>(cvarName));
 		pDropDownMenu->AddCallback("OnOptionSelected", FunctionCallback<void, uint32_t>::Create([hOptions, pDropDownMenu, cvarName](uint32_t optionIdx) mutable {
 			if(!hOptions.IsValid())
 				return;
@@ -238,7 +238,7 @@ pragma::gui::types::WITextEntry *pragma::gui::types::WIOptionsList::AddTextEntry
 	row->SetValue(0, name);
 	if(!cvarName.empty()) {
 		auto hOptions = GetHandle();
-		pTextEntry->SetText(get_client_state()->GetConVarString(cvarName));
+		pTextEntry->SetText(get_client_state()->GetConVarValueOr<udm::String>(cvarName));
 		pTextEntry->AddCallback("OnTextChanged", FunctionCallback<void, std::reference_wrapper<const string::Utf8String>, bool>::Create([hOptions, cvarName](std::reference_wrapper<const string::Utf8String> text, bool) mutable {
 			if(!hOptions.IsValid())
 				return;
@@ -263,7 +263,7 @@ pragma::gui::types::WISlider *pragma::gui::types::WIOptionsList::AddSlider(const
 		initializer(pSlider);
 	if(!cvarName.empty()) {
 		auto hOptions = GetHandle();
-		pSlider->SetValue(get_client_state()->GetConVarFloat(cvarName));
+		pSlider->SetValue(get_client_state()->GetConVarValueOr<udm::Float>(cvarName));
 		pSlider->AddCallback("OnChange", FunctionCallback<void, float, float>::Create([hOptions, cvarName](float, float value) mutable {
 			if(!hOptions.IsValid())
 				return;

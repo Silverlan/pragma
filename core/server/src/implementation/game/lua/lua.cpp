@@ -163,7 +163,7 @@ void pragma::SGame::SetupLua()
 	Game::SetupLua();
 	RunLuaFiles("autorun\\");
 	RunLuaFiles("autorun\\server\\");
-	SetGameMode(GetConVarString("sv_gamemode"));
+	SetGameMode(GetConVarValueOr<udm::String>("sv_gamemode"));
 	InitializeGameMode();
 	//for(auto &subDir : GetLuaEntityDirectories())
 	//	LoadLuaEntities(subDir);

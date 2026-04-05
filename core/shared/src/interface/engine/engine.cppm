@@ -198,14 +198,20 @@ export {
 			virtual void EndGame();
 			// Convars
 			virtual console::ConVarMap *GetConVarMap() override;
-			virtual std::string GetConVarString(const std::string &cv);
-			virtual int GetConVarInt(const std::string &cv);
-			virtual float GetConVarFloat(const std::string &cv);
-			virtual bool GetConVarBool(const std::string &cv);
-			virtual console::ConConf *GetConVar(const std::string &cv);
+			virtual console::ConConf *GetConVar(std::string_view cv);
+			const console::ConConf *GetConVar(std::string_view cv) const { return const_cast<Engine *>(this)->GetConVar(cv); }
+			template<typename T>
+			    requires(console::is_valid_convar_type_v<T>)
+			T GetConVarValueOr(std::string_view cvarName, const T &defVal = {}, bool applyConstraint = false) const;
+			template<typename T>
+			    requires(console::is_valid_convar_type_v<T>)
+			std::optional<T> GetConVarValue(std::string_view cvarName, bool applyConstraint = false) const;
+
 			template<class T>
-			T *GetConVar(const std::string &cv);
-			virtual console::ConCommandResult RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
+			T *GetConVar(std::string_view cv);
+			template<class T>
+			const T *GetConVar(std::string_view cv) const;
+			virtual console::ConCommandResult RunConsoleCommand(std::string_view cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
 			// NetState
 			virtual NetworkState *GetActiveState();
 
@@ -354,12 +360,39 @@ export {
 		DLLNETWORK NetworkState *get_server_state();
 
 		template<class T>
-		T *Engine::GetConVar(const std::string &scvar)
+		T *Engine::GetConVar(std::string_view scvar)
 		{
 			console::ConConf *cv = GetConVar(scvar);
 			if(cv == nullptr)
 				return nullptr;
 			return static_cast<T *>(cv);
+		}
+		template<class T>
+		const T *Engine::GetConVar(std::string_view scvar) const
+		{
+			return const_cast<Engine *>(this)->GetConVar(scvar);
+		}
+		template<typename T>
+		    requires(console::is_valid_convar_type_v<T>)
+		T Engine::GetConVarValueOr(std::string_view cvarName, const T &defVal, bool applyConstraint) const
+		{
+			auto *cvar = GetConVar(cvarName);
+			if(cvar == nullptr)
+				return defVal;
+			auto val = static_cast<const console::ConVar *>(cvar)->GetValue<T>(applyConstraint);
+			if(!val)
+				return defVal;
+			return *val;
+		}
+
+		template<typename T>
+		    requires(console::is_valid_convar_type_v<T>)
+		std::optional<T> Engine::GetConVarValue(std::string_view cvarName, bool applyConstraint) const
+		{
+			auto *cvar = GetConVar(cvarName);
+			if(cvar == nullptr)
+				return {};
+			return static_cast<const console::ConVar *>(cvar)->GetValue<T>(applyConstraint);
 		}
 	};
 };

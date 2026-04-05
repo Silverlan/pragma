@@ -48,7 +48,7 @@ void CMD_cl_rcon(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vec
 	auto *client = pragma::get_client_state();
 	if(!client->IsConnected() || argv.empty())
 		return;
-	std::string pass = pragma::get_cengine()->GetConVarString("rcon_password");
+	std::string pass = pragma::get_cengine()->GetConVarValueOr<udm::String>("rcon_password");
 	NetPacket p;
 	p->WriteString(pass);
 	p->WriteString(argv[0]);

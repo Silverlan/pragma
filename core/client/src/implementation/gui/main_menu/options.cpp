@@ -652,7 +652,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 			pMenu->AddOption(devInfo.deviceName,std::to_string(pragma::math::to_integral(devInfo.vendor)) +"," +std::to_string(devInfo.deviceId));
 
 		pMenu->SelectOption(0u);
-		pMenu->SelectOption(client->GetConVarString("cl_gpu_device"));
+		pMenu->SelectOption(client->GetConVarValueOr<udm::String>("cl_gpu_device"));
 	},"cl_gpu_device");
 #endif
 	//
@@ -719,14 +719,14 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 	auto *antiAlias = pList->AddChoiceList(locale::get_text("anti_aliasing"), aaChoices, "", "cl_render_anti_aliasing");
 	m_hAntiAliasing = antiAlias->GetHandle();
 	if(antiAlias != nullptr) {
-		auto antiAliasingType = static_cast<rendering::AntiAliasing>(get_client_state()->GetConVarInt("cl_render_anti_aliasing"));
+		auto antiAliasingType = static_cast<rendering::AntiAliasing>(get_client_state()->GetConVarValueOr<udm::Int32>("cl_render_anti_aliasing"));
 		switch(antiAliasingType) {
 		case rendering::AntiAliasing::FXAA:
 			antiAlias->SelectChoice("fxaa");
 			break;
 		case rendering::AntiAliasing::MSAA:
 			{
-				auto msaaSamples = get_client_state()->GetConVarInt("cl_render_msaa_samples");
+				auto msaaSamples = get_client_state()->GetConVarValueOr<udm::Int32>("cl_render_msaa_samples");
 				//antiAlias->SelectChoice("msaa" +std::to_string(static_cast<int32_t>(sqrt(msaaSamples))));
 				break;
 			}
@@ -976,7 +976,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 
 	InitializeOptionsList(pList);
 
-	if(get_client_state()->GetConVarInt("cl_render_preset") < 0) {
+	if(get_client_state()->GetConVarValueOr<udm::Int32>("cl_render_preset") < 0) {
 		pListPreset->SelectChoice(3);
 		if(m_hButtonApply.IsValid()) {
 			SetActiveMenu(m_hVideoSettings);

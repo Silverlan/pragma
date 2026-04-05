@@ -13,8 +13,7 @@ pragma::console::ConVar *Lua::console::CreateConVar(lua::State *l, const std::st
 		return 0;
 	auto cvar = ::udm::visit(type, [&def, flags, &help](auto tag) {
 		using T = typename decltype(tag)::type;
-		constexpr auto type = ::udm::type_to_enum<T>();
-		if constexpr(type == ::udm::Type::Element || ::udm::is_array_type(type))
+		if constexpr(!pragma::console::is_valid_convar_type_v<T>)
 			return std::shared_ptr<pragma::console::ConVar> {nullptr};
 		else {
 			auto v = luabind::object_cast<T>(def);

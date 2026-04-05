@@ -770,8 +770,8 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	if(!IsServerOnly())
 		LoadConfig();
 
-	auto cacheVersion = GetConVarInt("cache_version");
-	auto cacheVersionTarget = GetConVarInt("cache_version_target");
+	auto cacheVersion = GetConVarValueOr<udm::Int32>("cache_version");
+	auto cacheVersionTarget = GetConVarValueOr<udm::Int32>("cache_version_target");
 	if(cacheVersion != cacheVersionTarget) {
 		SetConVar("cache_version", std::to_string(cacheVersionTarget));
 		ClearCache();
@@ -781,9 +781,9 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	if(server != nullptr && IsServerOnly())
 		LoadConfig();
 
-	if(!GetConVarBool("asset_file_cache_enabled"))
+	if(!GetConVarValueOr<udm::Boolean>("asset_file_cache_enabled"))
 		fs::set_use_file_index_cache(false);
-	if(!GetConVarBool("asset_multithreading_enabled"))
+	if(!GetConVarValueOr<udm::Boolean>("asset_multithreading_enabled"))
 		SetAssetMultiThreadedLoadingEnabled(false);
 	return true;
 }

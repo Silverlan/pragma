@@ -509,13 +509,12 @@ void pragma::SGame::ReceiveUserInfo(networking::IServerClient &session, NetPacke
 		nameC->SetName(name);
 	plEnt->Spawn();
 	pl->SetAuthed(true);
-	std::unordered_map<std::string, std::string> *cvars;
-	pl->GetConVars(&cvars);
+	auto &cvars = pl->GetConVars();
 	unsigned int numUserInfo = packet->Read<unsigned int>();
 	for(unsigned int i = 0; i < numUserInfo; i++) {
 		std::string cmd = packet->ReadString();
 		std::string val = packet->ReadString();
-		(*cvars)[cmd] = val;
+		cvars[cmd] = val;
 		OnClientConVarChanged(*pl, cmd, val);
 	}
 

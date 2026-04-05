@@ -9,8 +9,6 @@ module pragma.shared;
 
 import :console.convar;
 
-void pragma::console::ConVarConstraintRange::Apply(udm::DataValue *value, udm::Type type) {}
-
 pragma::console::ConConf::ConConf(ConVarFlags flags) : m_help(""), m_ID(0), m_type(ConType::Var), m_flags(flags) {}
 const std::string &pragma::console::ConConf::GetHelpText() const { return m_help; }
 const std::string &pragma::console::ConConf::GetUsageHelp() const { return m_usageHelp; }
@@ -80,20 +78,7 @@ pragma::console::ConVar::ConVar(udm::Type type, const void *value, ConVarFlags f
 	m_default = create_convar_value(type, value);
 	m_flags = flags;
 }
-bool pragma::console::ConVar::SetValue(const std::string &val, std::string &outErr)
-{
-	if(!ValidateInput(val, outErr))
-		return false;
-	return console::visit(m_varType, [this, &val, &outErr](auto tag) {
-		using T = typename decltype(tag)::type;
-		if constexpr(udm::is_convertible<std::string, T>()) {
-			*static_cast<T *>(m_value.get()) = udm::convert<std::string, T>(val);
-			return true;
-		}
-		outErr = "Unable to convert value to ConVar of type " + std::string {udm::enum_type_to_ascii(udm::type_to_enum<float>())};
-		return false;
-	});
-}
+bool pragma::console::ConVar::SetValue(const std::string &val, std::string &outErr) { return SetValue<udm::String>(val, outErr); }
 std::string pragma::console::ConVar::GetString() const
 {
 	return console::visit(m_varType, [this](auto tag) {
@@ -139,16 +124,11 @@ bool pragma::console::ConVar::GetBool() const
 		return false;
 	});
 }
-void pragma::console::ConVar::AddConstraint(std::unique_ptr<ConVarConstraint> &&constraint) {m_constraints.push_back(std::move(constraint));}
 void pragma::console::ConVar::AddCallback(int function) { m_callbacks.push_back(function); }
-void pragma::console::ConVar::SetValidationFunction(const ValidationFunction &fun) { m_validationFunction = fun; }
-const pragma::console::ConVar::ValidationFunction &pragma::console::ConVar::GetValidationFunction() const { return m_validationFunction; }
-bool pragma::console::ConVar::ValidateInput(std::string_view input, std::string &outErr) const
-{
-	if(!m_validationFunction)
-		return true;
-	return m_validationFunction(input, outErr);
-}
+void pragma::console::ConVar::SetValidationFunction(const RawValidationFunction &fun) { m_validationFunction = fun; }
+const pragma::console::ConVar::RawValidationFunction &pragma::console::ConVar::GetValidationFunction() const { return m_validationFunction; }
+void pragma::console::ConVar::SetConstraintFunction(const RawConstraintFunction &fun) { m_constraintFunction = fun; }
+const pragma::console::ConVar::RawConstraintFunction &pragma::console::ConVar::GetConstraintFunction() const { return m_constraintFunction; }
 pragma::console::ConConf *pragma::console::ConVar::Copy()
 {
 	auto *cvar = new ConVar {m_varType, m_value.get(), m_flags, m_help, m_usageHelp};

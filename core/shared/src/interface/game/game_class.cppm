@@ -263,13 +263,17 @@ export {
 			void ClearTimers();
 			// ConVars
 			template<class T>
-			T *GetConVar(const std::string &scmd);
-			console::ConConf *GetConVar(const std::string &scmd);
-			int GetConVarInt(const std::string &scmd);
-			std::string GetConVarString(const std::string &scmd);
-			float GetConVarFloat(const std::string &scmd);
-			bool GetConVarBool(const std::string &scmd);
-			console::ConVarFlags GetConVarFlags(const std::string &scmd);
+			T *GetConVar(std::string_view scmd);
+			console::ConConf *GetConVar(std::string_view scmd);
+
+			template<typename T>
+			    requires(console::is_valid_convar_type_v<T>)
+			T GetConVarValueOr(std::string_view cvarName, const T &defVal = {}, bool applyConstraint = false) const;
+			template<typename T>
+			    requires(console::is_valid_convar_type_v<T>)
+			std::optional<T> GetConVarValue(std::string_view cvarName, bool applyConstraint = false) const;
+
+			console::ConVarFlags GetConVarFlags(std::string_view scmd);
 			const string::StringMap<std::vector<console::CvarCallback>> &GetConVarCallbacks() const;
 
 			virtual Float GetFrictionScale() const = 0;
@@ -293,6 +297,12 @@ export {
 			debug::ProfilingStageManager<debug::ProfilingStage> *GetProfilingStageManager();
 			bool StartProfilingStage(const char *stage);
 			bool StopProfilingStage();
+
+			// Internal use only
+			template<typename T>
+			T ImplGetConVarValueOr(std::string_view cvarName, const T &defVal = {}, bool applyConstraint = false) const;
+			template<typename T>
+			std::optional<T> ImplGetConVarValue(std::string_view cvarName, bool applyConstraint = false) const;
 		  protected:
 			virtual void UpdateTime();
 			void GetLuaRegisteredEntities(std::vector<std::string> &luaClasses) const;
@@ -382,7 +392,7 @@ export {
 	DLLNETWORK void IncludeLuaEntityBaseClasses(lua::State *l, int refEntities, int obj, int data);
 	namespace pragma {
 		template<class T>
-		T *Game::GetConVar(const std::string &scmd)
+		T *Game::GetConVar(std::string_view scmd)
 		{
 			console::ConConf *cv = GetConVar(scmd);
 			if(cv == nullptr)
@@ -467,6 +477,20 @@ export {
 				return nullptr;
 			}
 			return el;
+		}
+
+		template<typename T>
+		    requires(console::is_valid_convar_type_v<T>)
+		T Game::GetConVarValueOr(std::string_view cvarName, const T &defVal, bool applyConstraint) const
+		{
+			return ImplGetConVarValueOr<T>(cvarName, defVal, applyConstraint);
+		}
+
+		template<typename T>
+		    requires(console::is_valid_convar_type_v<T>)
+		std::optional<T> Game::GetConVarValue(std::string_view cvarName, bool applyConstraint) const
+		{
+			return ImplGetConVarValue<T>(cvarName, applyConstraint);
 		}
 	}
 

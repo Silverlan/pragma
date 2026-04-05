@@ -7,7 +7,7 @@ import :client_state;
 import :entities.components;
 import :engine;
 
-pragma::console::ConConf *pragma::CEngine::GetConVar(const std::string &cv)
+pragma::console::ConConf *pragma::CEngine::GetConVar(std::string_view cv)
 {
 	auto *cvar = Engine::GetConVar(cv);
 	if(cvar != nullptr)
@@ -16,8 +16,9 @@ pragma::console::ConConf *pragma::CEngine::GetConVar(const std::string &cv)
 	return (stateCl != nullptr) ? stateCl->GetConVar(cv) : nullptr;
 }
 
-pragma::console::ConCommandResult pragma::CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
+pragma::console::ConCommandResult pragma::CEngine::RunConsoleCommand(std::string_view svcmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
 {
+	std::string cmd {svcmd};
 	string::to_lower(cmd);
 	auto *stateCl = static_cast<ClientState *>(GetClientState());
 	BasePlayerComponent *pl = nullptr;

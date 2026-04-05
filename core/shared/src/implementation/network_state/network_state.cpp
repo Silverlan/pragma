@@ -183,7 +183,7 @@ bool pragma::NetworkState::CheatsEnabled() const
 {
 	if(!IsMultiPlayer())
 		return true;
-	return Engine::Get()->GetConVarBool("sv_cheats");
+	return Engine::Get()->GetConVarValueOr<udm::Boolean>("sv_cheats");
 }
 
 pragma::material::Material *pragma::NetworkState::PrecacheMaterial(const std::string &path) { return LoadMaterial(path, true, false); }

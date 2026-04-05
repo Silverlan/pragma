@@ -293,7 +293,7 @@ void NET_cl_RESOURCECOMPLETE(NetPacket packet)
 	auto *client = pragma::get_client_state();
 	auto *cl = client->GetClient();
 	if(cl != nullptr)
-		cl->SetTimeoutDuration(client->GetConVarFloat("sv_timeout_duration")); // Resource transfer complete; Reset timeout
+		cl->SetTimeoutDuration(client->GetConVarValueOr<udm::Float>("sv_timeout_duration")); // Resource transfer complete; Reset timeout
 
 	Con::CCL << "Requesting Game Info..." << Con::endl;
 	client->SendUserInfo();

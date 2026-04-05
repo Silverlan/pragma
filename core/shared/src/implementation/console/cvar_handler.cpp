@@ -183,42 +183,8 @@ pragma::console::ConConf *pragma::console::CVarHandler::GetConVar(std::string_vi
 	return it->second.get();
 }
 
-bool pragma::console::CVarHandler::GetConVarInt(std::string_view scmd, int32_t &outVal)
-{
-	ConConf *cv = GetConVar(scmd);
-	if(cv == nullptr || cv->GetType() != ConType::Var)
-		return false;
-	ConVar *cvar = static_cast<ConVar *>(cv);
-	outVal = cvar->GetInt();
-	return true;
-}
-bool pragma::console::CVarHandler::GetConVarString(std::string_view scmd, std::string &outVal)
-{
-	ConConf *cv = GetConVar(scmd);
-	if(cv == nullptr || cv->GetType() != ConType::Var)
-		return false;
-	ConVar *cvar = static_cast<ConVar *>(cv);
-	outVal = cvar->GetString();
-	return true;
-}
-bool pragma::console::CVarHandler::GetConVarFloat(std::string_view scmd, float &outVal)
-{
-	ConConf *cv = GetConVar(scmd);
-	if(cv == nullptr || cv->GetType() != ConType::Var)
-		return false;
-	ConVar *cvar = static_cast<ConVar *>(cv);
-	outVal = cvar->GetFloat();
-	return true;
-}
-bool pragma::console::CVarHandler::GetConVarBool(std::string_view scmd, bool &outVal)
-{
-	ConConf *cv = GetConVar(scmd);
-	if(cv == nullptr || cv->GetType() != ConType::Var)
-		return false;
-	ConVar *cvar = static_cast<ConVar *>(cv);
-	outVal = cvar->GetBool();
-	return true;
-}
+const pragma::console::ConConf *pragma::console::CVarHandler::GetConVar(std::string_view scmd) const { return const_cast<CVarHandler *>(this)->GetConVar(scmd); }
+
 bool pragma::console::CVarHandler::GetConVarFlags(std::string_view scmd, ConVarFlags &outVal)
 {
 	ConConf *cv = GetConVar(scmd);
@@ -229,30 +195,6 @@ bool pragma::console::CVarHandler::GetConVarFlags(std::string_view scmd, ConVarF
 	return true;
 }
 
-int pragma::console::CVarHandler::GetConVarInt(std::string_view scmd)
-{
-	auto val = 0;
-	GetConVarInt(scmd, val);
-	return val;
-}
-std::string pragma::console::CVarHandler::GetConVarString(std::string_view scmd)
-{
-	std::string val {};
-	GetConVarString(scmd, val);
-	return val;
-}
-float pragma::console::CVarHandler::GetConVarFloat(std::string_view scmd)
-{
-	auto val = 0.f;
-	GetConVarFloat(scmd, val);
-	return val;
-}
-bool pragma::console::CVarHandler::GetConVarBool(std::string_view scmd)
-{
-	auto val = false;
-	GetConVarBool(scmd, val);
-	return val;
-}
 pragma::console::ConVarFlags pragma::console::CVarHandler::GetConVarFlags(std::string_view scmd)
 {
 	auto val = ConVarFlags::None;

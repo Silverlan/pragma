@@ -443,7 +443,7 @@ void pragma::Game::InitializeGame()
 {
 	InitializeLua(); // Lua has to be initialized completely before any entites are created
 
-	auto physEngineName = GetConVarString("phys_engine");
+	auto physEngineName = GetConVarValueOr<udm::String>("phys_engine");
 	auto physEngineLibName = physics::IEnvironment::GetPhysicsEngineModuleLocation(physEngineName);
 	spdlog::info("Loading physics module '{}'...", physEngineLibName);
 	std::string err;
@@ -842,7 +842,7 @@ bool pragma::Game::PrecacheModel(const std::string &mdl)
 	auto r = GetNetworkState()->GetModelManager().PreloadAsset(mdl, std::move(loadInfo));
 	if(r.assetRequest) {
 		r.assetRequest->AddCallback([this](util::Asset *asset, util::AssetLoadResult result) {
-			if (result != util::AssetLoadResult::Succeeded)
+			if(result != util::AssetLoadResult::Succeeded)
 				return;
 			assert(asset != nullptr);
 			auto mdl = asset::ModelManager::GetAssetObject(*asset);
@@ -933,9 +933,52 @@ double &pragma::Game::DeltaTickTime() { return m_tDeltaTick; }
 float pragma::Game::GetTimeScale() { return 1.f; }
 void pragma::Game::SetTimeScale(float t) { m_stateNetwork->SetConVar("host_timescale", std::to_string(t)); }
 
-pragma::console::ConConf *pragma::Game::GetConVar(const std::string &scmd) { return m_stateNetwork->GetConVar(scmd); }
-int pragma::Game::GetConVarInt(const std::string &scmd) { return m_stateNetwork->GetConVarInt(scmd); }
-std::string pragma::Game::GetConVarString(const std::string &scmd) { return m_stateNetwork->GetConVarString(scmd); }
-float pragma::Game::GetConVarFloat(const std::string &scmd) { return m_stateNetwork->GetConVarFloat(scmd); }
-bool pragma::Game::GetConVarBool(const std::string &scmd) { return m_stateNetwork->GetConVarBool(scmd); }
-pragma::console::ConVarFlags pragma::Game::GetConVarFlags(const std::string &scmd) { return m_stateNetwork->GetConVarFlags(scmd); }
+pragma::console::ConConf *pragma::Game::GetConVar(std::string_view scmd) { return m_stateNetwork->GetConVar(scmd); }
+pragma::console::ConVarFlags pragma::Game::GetConVarFlags(std::string_view scmd) { return m_stateNetwork->GetConVarFlags(scmd); }
+
+template<typename T>
+T pragma::Game::ImplGetConVarValueOr(std::string_view cvarName, const T &defVal, bool applyConstraint) const
+{
+	return m_stateNetwork->GetConVarValueOr<T>(cvarName, defVal, applyConstraint);
+}
+
+template<typename T>
+std::optional<T> pragma::Game::ImplGetConVarValue(std::string_view cvarName, bool applyConstraint) const
+{
+	return m_stateNetwork->GetConVarValue<T>(cvarName, applyConstraint);
+}
+
+// HACK: We can't place the above template instantiation functions in the interface unit for the
+// game class because they have a dependency to NetworkState.
+// Usually we'd just put them into a different interface unit but that causes compiler errors with MSVC.
+// As a workaround, we force instantiate all possible function calls here.
+// The function is exported to prevent it from being optimized away.
+/*DLLNETWORK void __pragma_game_get_con_var_instantiation()
+{
+	udm::visit({}, [](auto tag) {
+		using T = typename decltype(tag)::type;
+		if constexpr(pragma::console::is_valid_convar_type_v<T>) {
+			auto *game = static_cast<pragma::Game *>(nullptr);
+			game->GetConVarValueOr<T>("", T {});
+			game->GetConVarValue<T>("");
+		}
+	});
+}*/
+#pragma clang optimize off
+DLLNETWORK void __pragma_game_get_con_var_instantiation()
+{
+	pragma::get_engine()->GetClientState()->GetGameState()->GetConVarValueOr<float>("", 5.f, true);
+	udm::visit({}, [](auto tag) {
+		using T = typename decltype(tag)::type;
+		if constexpr(pragma::console::is_valid_convar_type_v<T>) {
+			// Force instantiation by taking the address of the member functions.
+			// Using 'volatile' ensures the compiler cannot optimize these pointers away.
+			volatile auto ptr1 = &pragma::Game::ImplGetConVarValueOr<T>;
+			volatile auto ptr2 = &pragma::Game::ImplGetConVarValue<T>;
+
+			// Cast to void to suppress "unused variable" warnings
+			(void)ptr1;
+			(void)ptr2;
+		}
+	});
+}

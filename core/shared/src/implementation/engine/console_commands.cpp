@@ -669,7 +669,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  console::ConVarFlags::None, "Deletes all cache files.");
 
 	conVarMapEn.RegisterConVar<udm::String>("cache_version", "", console::ConVarFlags::Archive, "The engine version that the cache files are associated with. If this version doesn't match the current engine version, the cache will be cleared.");
-	conVarMapEn.RegisterConVar<udm::UInt32>("cache_version_target", 17, console::ConVarFlags::None, "If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
+	conVarMapEn.RegisterConVar<udm::UInt32>("cache_version_target", 18, console::ConVarFlags::None, "If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
 	conVarMapEn.RegisterConVar<udm::Boolean>("debug_profiling_enabled", false, console::ConVarFlags::None, "Enables profiling timers.");
 	conVarMapEn.RegisterConVar<udm::Boolean>("debug_disable_animation_updates", false, console::ConVarFlags::None, "Disables animation updates.");
 	conVarMapEn.RegisterConVar<udm::Boolean>("sh_mount_external_game_resources", true, console::ConVarFlags::Archive, "If set to 1, the game will attempt to load missing resources from external games.");

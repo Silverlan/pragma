@@ -9,6 +9,11 @@ export import :rendering.shaders.scene;
 export import pragma.shared;
 
 export namespace pragma::geometry {
+	constexpr std::string_view GLOBAL_MESH_VERTEX_BUFFER_DEFAULT_INITIAL_SIZE = "32MiB";
+	constexpr std::string_view GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_DEFAULT_INITIAL_SIZE = "8MiB";
+	constexpr std::string_view GLOBAL_MESH_ALPHA_BUFFER_DEFAULT_INITIAL_SIZE = "8MiB";
+	constexpr std::string_view GLOBAL_MESH_INDEX_BUFFER_DEFAULT_INITIAL_SIZE = "4MiB";
+
 	class DLLCLIENT CModelSubMesh : public ModelSubMesh {
 	  public:
 		CModelSubMesh();

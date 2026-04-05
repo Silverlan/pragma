@@ -57,7 +57,7 @@ export {
 			};
 
 			virtual string::StringMap<std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() override;
-			static console::ConVarHandle GetConVarHandle(std::string scvar);
+			static console::ConVarHandle GetConVarHandle(std::string_view scvar);
 			//
 			class DLLNETWORK StateInstance {
 			  public:

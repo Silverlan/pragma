@@ -67,7 +67,7 @@ static pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> &g
 }
 
 pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> &pragma::Engine::GetConVarPtrs() { return get_convar_ptrs(); }
-pragma::console::ConVarHandle pragma::Engine::GetConVarHandle(std::string scvar) { return CVarHandler::GetConVarHandle(get_convar_ptrs(), scvar); }
+pragma::console::ConVarHandle pragma::Engine::GetConVarHandle(std::string_view scvar) { return CVarHandler::GetConVarHandle(get_convar_ptrs(), scvar); }
 
 static pragma::Engine *g_engine = nullptr;
 

@@ -10,12 +10,6 @@ module pragma.client;
 import :model.mesh;
 import :engine;
 
-static constexpr uint64_t MEGABYTE = 1'024 * 1'024;
-static constexpr uint64_t GLOBAL_MESH_VERTEX_BUFFER_SIZE = MEGABYTE * 256;       // 13'107 instances per MiB
-static constexpr uint64_t GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_SIZE = MEGABYTE * 32; // 32'768 instances per MiB
-static constexpr uint64_t GLOBAL_MESH_ALPHA_BUFFER_SIZE = MEGABYTE * 16;         // 131'072 instances per MiB
-static constexpr uint64_t GLOBAL_MESH_INDEX_BUFFER_SIZE = MEGABYTE * 32;         // 524'288 instances per MiB
-
 pragma::geometry::CModelMesh::CModelMesh() : ModelMesh() {}
 std::shared_ptr<pragma::geometry::ModelMesh> pragma::geometry::CModelMesh::Copy() const { return pragma::util::make_shared<CModelMesh>(*this); }
 
@@ -55,45 +49,49 @@ void pragma::geometry::CModelSubMesh::InitializeBuffers()
 	// Initialize global vertex buffer
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
-	createInfo.size = GLOBAL_MESH_VERTEX_BUFFER_SIZE;
+	createInfo.size = console::get_con_var_value_bytes(*get_client_state(), "render_global_mesh_vertex_buffer_initial_capacity", GLOBAL_MESH_VERTEX_BUFFER_DEFAULT_INITIAL_SIZE);
 	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
 	createInfo.debugName = "mesh_vertex_data_buf";
-	s_vertexBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.05f);
+	s_vertexBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo);
 	s_vertexBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
+	s_vertexBuffer->SetReallocationBehavior(prosper::IResizableBuffer::ReallocationBehavior::SafelyFreeOldBuffer);
 
 	// Initialize global vertex weight buffer
-	createInfo.size = GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_SIZE;
+	createInfo.size = console::get_con_var_value_bytes(*get_client_state(), "render_global_mesh_vertex_weight_buffer_initial_capacity", GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_DEFAULT_INITIAL_SIZE);
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
 	createInfo.debugName = "mesh_vertex_weight_data_buf";
-	s_vertexWeightBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.025f);
+	s_vertexWeightBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo);
 	s_vertexWeightBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
+	s_vertexWeightBuffer->SetReallocationBehavior(prosper::IResizableBuffer::ReallocationBehavior::SafelyFreeOldBuffer);
 
 	// Initialize global alpha buffer
-	createInfo.size = GLOBAL_MESH_ALPHA_BUFFER_SIZE;
+	createInfo.size = console::get_con_var_value_bytes(*get_client_state(), "render_global_mesh_alpha_buffer_initial_capacity", GLOBAL_MESH_ALPHA_BUFFER_DEFAULT_INITIAL_SIZE);
 	createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
 	createInfo.debugName = "mesh_alpha_data_buf";
-	s_alphaBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.025f);
+	s_alphaBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo);
 	s_alphaBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
+	s_alphaBuffer->SetReallocationBehavior(prosper::IResizableBuffer::ReallocationBehavior::SafelyFreeOldBuffer);
 
 	// Initialize global index buffer
-	createInfo.size = GLOBAL_MESH_INDEX_BUFFER_SIZE;
+	createInfo.size = console::get_con_var_value_bytes(*get_client_state(), "render_global_mesh_index_buffer_initial_capacity", GLOBAL_MESH_INDEX_BUFFER_DEFAULT_INITIAL_SIZE);
 	createInfo.usageFlags = prosper::BufferUsageFlags::IndexBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
 	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 #endif
 	createInfo.debugName = "mesh_index_data_buf";
-	s_indexBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo, createInfo.size * 4u, 0.025f);
+	s_indexBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo);
 	s_indexBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
+	s_indexBuffer->SetReallocationBehavior(prosper::IResizableBuffer::ReallocationBehavior::SafelyFreeOldBuffer);
 }
 void pragma::geometry::CModelSubMesh::ClearBuffers()
 {
@@ -129,6 +127,10 @@ void pragma::geometry::CModelSubMesh::UpdateVertexBuffer()
 	if(vertexBuffer == nullptr || bufferSize != vertexBuffer->GetSize()) {
 		m_sceneMesh->SetVertexBuffer(nullptr); // Clear the old vertex buffer
 		vertexBuffer = s_vertexBuffer->AllocateBuffer(bufferSize, vertexBufferData.data());
+		if(!vertexBuffer) {
+			spdlog::error("Failed to allocate mesh vertex buffer of size {}", util::get_pretty_bytes(bufferSize));
+			return;
+		}
 	}
 	else
 		vertexBuffer->Write(0ull, bufferSize, vertexBufferData.data());

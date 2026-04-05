@@ -241,7 +241,7 @@ std::shared_ptr<prosper::IDynamicResizableBuffer> CLightMapComponent::GenerateLi
 
 	// Generate the lightmap uv buffer
 	bufCreateInfo.size = requiredBufferSize;
-	auto lightMapUvBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo, bufCreateInfo.size, 0.2f);
+	auto lightMapUvBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo);
 	if(!lightMapUvBuffer) {
 		LOGGER.error("Unable to create lightmap uv buffer!");
 		return nullptr;

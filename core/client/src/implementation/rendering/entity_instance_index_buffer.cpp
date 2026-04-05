@@ -20,7 +20,7 @@ rendering::EntityInstanceIndexBuffer::EntityInstanceIndexBuffer()
 	bufCreateInfo.size = math::to_integral(GameLimits::MaxEntityInstanceCount) * sizeof(RenderBufferIndex);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit;
 
-	m_buffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo, bufCreateInfo.size);
+	m_buffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(bufCreateInfo);
 	m_buffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 
 	auto id = SINGLE_INSTANCE_RENDER_BUFFER_INDEX;

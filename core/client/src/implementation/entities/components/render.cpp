@@ -59,8 +59,8 @@ CRenderComponent::CRenderComponent(ecs::BaseEntity &ent) : BaseRenderComponent(e
 void CRenderComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CRenderComponent::InitializeBuffers()
 {
-	auto instanceSize = sizeof(rendering::InstanceData);
-	auto instanceCount = 32'768u;
+	constexpr auto instanceSize = sizeof(rendering::InstanceData);
+	constexpr uint32_t instanceCount = 32'768u; // Not an absolute limit, but exceeding it will trigger re-allocation
 	prosper::util::BufferCreateInfo createInfo {};
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA) {
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;

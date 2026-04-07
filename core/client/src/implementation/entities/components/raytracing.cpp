@@ -25,8 +25,8 @@ bool CRaytracingComponent::InitializeBuffers()
 {
 	if(s_allResourcesInitialized)
 		return true;
-	auto instanceSize = sizeof(SubMeshRenderInfoBufferData);
-	auto instanceCount = 32'768;
+	constexpr auto instanceSize = sizeof(SubMeshRenderInfoBufferData);
+	constexpr uint32_t instanceCount = 32'768u; // Not an absolute limit, but exceeding it will trigger re-allocation
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = instanceSize * instanceCount;

@@ -63,11 +63,10 @@ static void initialize_material_settings_cache()
 	// does not happen automatically). TODO: Implement this? On the other hand, material data
 	// isn't that big to begin with, so maybe just make sure the buffer is large enough for all use cases?
 	constexpr auto matSize = rendering::shader_material::MAX_MATERIAL_SIZE;
-	constexpr size_t count = 128;
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	//bufCreateInfo.size = sizeof(ShaderGameWorldLightingPass::MaterialData) *2'048;
-	bufCreateInfo.size = matSize * count; // ~64 MiB
+	bufCreateInfo.size = pragma::console::get_con_var_value_bytes(*pragma::get_client_state(), "render_material_settings_buffer_initial_capacity", MATERIAL_SETTINGS_BUFFER_DEFAULT_INITIAL_SIZE);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	g_materialSettingsBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo, matSize);

@@ -644,34 +644,25 @@ Vector3 ecs::CParticleSystemComponent::DirectionToParticleSpace(const Vector3 &p
 void ecs::CParticleSystemComponent::InitializeBuffers()
 {
 	if(s_particleBuffer == nullptr) {
-		auto instanceCount = 32'768ull;
-		auto maxInstanceCount = instanceCount * 40u;
-		auto instanceSize = PARTICLE_BUFFER_INSTANCE_SIZE;
 		prosper::util::BufferCreateInfo createInfo {};
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-		createInfo.size = instanceSize * maxInstanceCount;
+		createInfo.size = console::get_con_var_value_bytes(*get_client_state(), "render_particle_buffer_initial_capacity", PARTICLE_BUFFER_DEFAULT_INITIAL_SIZE);
 		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::StorageBufferBit;
 		createInfo.debugName = "particle_instance_buf";
 		s_particleBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo);
 	}
 	if(s_animStartBuffer == nullptr) {
-		auto instanceCount = 524'288ull;
-		auto maxInstanceCount = instanceCount * 5u;
-		auto instanceSize = PARTICLE_ANIM_BUFFER_INSTANCE_SIZE;
 		prosper::util::BufferCreateInfo createInfo {};
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
-		createInfo.size = instanceSize * maxInstanceCount;
+		createInfo.size = console::get_con_var_value_bytes(*get_client_state(), "render_particle_animation_start_buffer_initial_capacity", PARTICLE_ANIMATION_START_BUFFER_DEFAULT_INITIAL_SIZE);
 		createInfo.usageFlags = prosper::BufferUsageFlags::VertexBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 		createInfo.debugName = "particle_anim_start_buf";
 		s_animStartBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo);
 	}
 	if(s_animBuffer == nullptr) {
-		auto instanceCount = 4'096u;
-		auto maxInstanceCount = instanceCount * 5u;
-		auto instanceSize = sizeof(ParticleAnimationData);
 		prosper::util::BufferCreateInfo createInfo {};
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
-		createInfo.size = instanceSize * maxInstanceCount;
+		createInfo.size = console::get_con_var_value_bytes(*get_client_state(), "render_particle_animation_buffer_initial_capacity", PARTICLE_ANIMATION_BUFFER_DEFAULT_INITIAL_SIZE);
 		createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferDstBit;
 		createInfo.debugName = "particle_anim_data_buf";
 		s_animBuffer = get_cengine()->GetRenderContext().CreateDynamicResizableBuffer(createInfo);

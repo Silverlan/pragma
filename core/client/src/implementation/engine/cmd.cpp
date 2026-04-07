@@ -218,6 +218,55 @@ void pragma::CEngine::RegisterConsoleCommands()
 	conVarMap.RegisterConVar<bool>("render_vsync_enabled", true, console::ConVarFlags::Archive, "Enables or disables vsync. OpenGL only.");
 	conVarMap.RegisterConVarCallback("render_vsync_enabled", std::function<void(NetworkState *, const console::ConVar &, bool, bool)> {[this](NetworkState *nw, const console::ConVar &cv, bool oldVal, bool newVal) -> void { GetRenderContext().GetWindow()->SetVSyncEnabled(newVal); }});
 
+	auto byteValidationFunc = +[](const udm::String &input, std::string &outErr) -> bool {
+		if(!util::parse_bytes(input)) {
+			outErr = "Invalid input format!";
+			return false;
+		}
+		return true;
+	};
+
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_global_mesh_vertex_buffer_initial_capacity", std::string {pragma::geometry::GLOBAL_MESH_VERTEX_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive, "Initial memory allocated for vertex data. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "1MiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_global_mesh_vertex_weight_buffer_initial_capacity", std::string {pragma::geometry::GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive, "Initial memory allocated for vertex weight data. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "500KiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_global_mesh_alpha_buffer_initial_capacity", std::string {pragma::geometry::GLOBAL_MESH_ALPHA_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive, "Initial memory allocated for vertex alpha. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "500KiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_global_mesh_index_buffer_initial_capacity", std::string {pragma::geometry::GLOBAL_MESH_INDEX_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive, "Initial memory allocated for vertex index data. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "500KiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_particle_buffer_initial_capacity", std::string {pragma::ecs::CParticleSystemComponent::PARTICLE_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive, "Initial memory allocated for particles. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "10KiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_particle_animation_start_buffer_initial_capacity", std::string {pragma::ecs::CParticleSystemComponent::PARTICLE_ANIMATION_START_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive, "Initial memory allocated for particle animation start data. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "10KiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_particle_animation_buffer_initial_capacity", std::string {pragma::ecs::CParticleSystemComponent::PARTICLE_ANIMATION_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive, "Initial memory allocated for particle animation data. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "10KiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_material_settings_buffer_initial_capacity", std::string {MATERIAL_SETTINGS_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive, "Initial memory allocated for material settings data. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "10KiB", "2GiB"); });
+	}
+
 	conVarMap.RegisterConVar<std::string>("audio_api", "fmod", console::ConVarFlags::Archive | console::ConVarFlags::Replicated, "The underlying audio API to use.", "<audioApi>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		auto audioAPIs = audio::get_available_audio_apis();
 		auto it = audioAPIs.begin();

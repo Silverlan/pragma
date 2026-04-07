@@ -61,6 +61,7 @@ export namespace pragma {
 		std::vector<PassTypeInfo> m_passTypeSpecializationToPipelineIdx;
 	};
 
+	constexpr std::string_view MATERIAL_SETTINGS_BUFFER_DEFAULT_INITIAL_SIZE = "512KiB";
 	class DLLCLIENT ShaderGameWorldLightingPass : public ShaderGameWorld, public ShaderSpecializationManager {
 	  public:
 		static ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;

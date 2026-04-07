@@ -531,17 +531,32 @@ static void register_gui(Lua::Interface &lua)
 	wiWIContentWrapper.def("SetPaddingTopBottom", &pragma::gui::types::WIContentWrapper::SetPaddingTopBottom);
 	guiMod[wiWIContentWrapper];
 
-	auto wiNineSliceRectSegment = luabind::class_<pragma::gui::types::WI9SliceRectSegment, luabind::bases<pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>>("NineSliceRectSegment");
-	wiNineSliceRectSegment.def("SetRenderImageOffset", &pragma::gui::types::WI9SliceRectSegment::SetRenderImageOffset);
-	wiNineSliceRectSegment.def("SetRenderImageScale", &pragma::gui::types::WI9SliceRectSegment::SetRenderImageScale);
-	wiNineSliceRectSegment.def("GetRenderImageOffset", &pragma::gui::types::WI9SliceRectSegment::GetRenderImageOffset);
-	wiNineSliceRectSegment.def("GetRenderImageScale", &pragma::gui::types::WI9SliceRectSegment::GetRenderImageScale);
-	guiMod[wiNineSliceRectSegment];
+	auto wiSegmentedRectSegment = luabind::class_<pragma::gui::types::WISegmentedRectSegment, luabind::bases<pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>>("SegmentedRectSegment");
+	wiSegmentedRectSegment.def("SetRenderImageOffset", &pragma::gui::types::WISegmentedRectSegment::SetRenderImageOffset);
+	wiSegmentedRectSegment.def("SetRenderImageScale", &pragma::gui::types::WISegmentedRectSegment::SetRenderImageScale);
+	wiSegmentedRectSegment.def("GetRenderImageOffset", &pragma::gui::types::WISegmentedRectSegment::GetRenderImageOffset);
+	wiSegmentedRectSegment.def("GetRenderImageScale", &pragma::gui::types::WISegmentedRectSegment::GetRenderImageScale);
+	guiMod[wiSegmentedRectSegment];
 
-	auto wiNineSliceRect = luabind::class_<pragma::gui::types::WI9SliceRect, pragma::gui::types::WIBase>("NineSliceRect");
-	wiNineSliceRect.def("SetMaterial", static_cast<void (pragma::gui::types::WI9SliceRect ::*)(const std::string &)>(&pragma::gui::types::WI9SliceRect::SetMaterial));
-	wiNineSliceRect.def("SetMaterial", static_cast<void (pragma::gui::types::WI9SliceRect ::*)(pragma::material::Material &)>(&pragma::gui::types::WI9SliceRect::SetMaterial));
-	wiNineSliceRect.def("GetMaterial", &pragma::gui::types::WI9SliceRect::GetMaterial);
+	auto wiSegmentedRect = luabind::class_<pragma::gui::types::WISegmentedRect, pragma::gui::types::WIBase>("SegmentedRect");
+	wiSegmentedRect.def("SetMaterial", static_cast<void (pragma::gui::types::WISegmentedRect ::*)(const std::string &)>(&pragma::gui::types::WISegmentedRect::SetMaterial));
+	wiSegmentedRect.def("SetMaterial", static_cast<void (pragma::gui::types::WISegmentedRect ::*)(pragma::material::Material &)>(&pragma::gui::types::WISegmentedRect::SetMaterial));
+	wiSegmentedRect.def("GetMaterial", &pragma::gui::types::WISegmentedRect::GetMaterial);
+	wiSegmentedRect.def("GetSegmentSize", static_cast<std::pair<int32_t, int32_t> (pragma::gui::types::WISegmentedRect ::*)(pragma::gui::types::WISegmentedRect::Segment) const>(&pragma::gui::types::WISegmentedRect::GetSegmentSize));
+	wiSegmentedRect.def("GetSegmentOffset", static_cast<std::pair<int32_t, int32_t> (pragma::gui::types::WISegmentedRect ::*)(pragma::gui::types::WISegmentedRect::Segment) const>(&pragma::gui::types::WISegmentedRect::GetSegmentSize));
+	wiSegmentedRect.add_static_constant("SEGMENT_TOP_LEFT_CORNER", pragma::math::to_integral(pragma::gui::types::WISegmentedRect::Segment::TopLeftCorner));
+	wiSegmentedRect.add_static_constant("SEGMENT_TOP_RIGHT_CORNER", pragma::math::to_integral(pragma::gui::types::WISegmentedRect::Segment::TopRightCorner));
+	wiSegmentedRect.add_static_constant("SEGMENT_BOTTOM_LEFT_CORNER", pragma::math::to_integral(pragma::gui::types::WISegmentedRect::Segment::BottomLeftCorner));
+	wiSegmentedRect.add_static_constant("SEGMENT_BOTTOM_RIGHT_CORNER", pragma::math::to_integral(pragma::gui::types::WISegmentedRect::Segment::BottomRightCorner));
+	wiSegmentedRect.add_static_constant("SEGMENT_TOP_EDGE", pragma::math::to_integral(pragma::gui::types::WISegmentedRect::Segment::TopEdge));
+	wiSegmentedRect.add_static_constant("SEGMENT_BOTTOM_EDGE", pragma::math::to_integral(pragma::gui::types::WISegmentedRect::Segment::BottomEdge));
+	wiSegmentedRect.add_static_constant("SEGMENT_LEFT_EDGE", pragma::math::to_integral(pragma::gui::types::WISegmentedRect::Segment::LeftEdge));
+	wiSegmentedRect.add_static_constant("SEGMENT_RIGHT_EDGE", pragma::math::to_integral(pragma::gui::types::WISegmentedRect::Segment::RightEdge));
+	wiSegmentedRect.add_static_constant("SEGMENT_CENTER", pragma::math::to_integral(pragma::gui::types::WISegmentedRect::Segment::Center));
+	wiSegmentedRect.add_static_constant("SEGMENT_COUNT", pragma::math::to_integral(pragma::gui::types::WISegmentedRect::Segment::Count));
+	guiMod[wiSegmentedRect];
+
+	auto wiNineSliceRect = luabind::class_<pragma::gui::types::WI9SliceRect, luabind::bases<pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>>("NineSliceRect");
 	wiNineSliceRect.def("GetSegmentSize", static_cast<std::pair<int32_t, int32_t> (pragma::gui::types::WI9SliceRect ::*)(pragma::gui::types::WI9SliceRect::Segment) const>(&pragma::gui::types::WI9SliceRect::GetSegmentSize));
 	wiNineSliceRect.def("GetSegmentOffset", static_cast<std::pair<int32_t, int32_t> (pragma::gui::types::WI9SliceRect ::*)(pragma::gui::types::WI9SliceRect::Segment) const>(&pragma::gui::types::WI9SliceRect::GetSegmentSize));
 	wiNineSliceRect.add_static_constant("SEGMENT_TOP_LEFT_CORNER", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::TopLeftCorner));

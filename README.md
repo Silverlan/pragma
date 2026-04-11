@@ -49,6 +49,7 @@ Build Requirements
 ------
 - [CMake](https://cmake.org/download/) 4.2.0 or newer *
 - [Ninja-build](https://ninja-build.org/)
+- [Python 3](https://www.python.org/downloads/)
 - At least 16 GiB of RAM
 - Recommended IDE: [CLion](https://www.jetbrains.com/clion/) **
 

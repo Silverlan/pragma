@@ -12,6 +12,18 @@ import :entities.components;
 import :game;
 import :rendering.render_apis;
 // import pragma.scripting.lua;
+static void clamp_bytes_value(std::string &value, std::string_view minVal, std::string_view maxVal)
+{
+	auto bytes = pragma::util::parse_bytes(value);
+	auto minValBytes = pragma::util::parse_bytes(minVal);
+	auto maxValBytes = pragma::util::parse_bytes(maxVal);
+	if(!bytes || !minValBytes || !maxValBytes)
+		return;
+	if(*bytes < *minValBytes)
+		value = *minValBytes;
+	if(*bytes > *maxValBytes)
+		value = *maxValBytes;
+}
 
 DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
 extern bool g_dumpRenderQueues;

@@ -93,6 +93,11 @@ function(pr_fetch_third_party_repository IDENTIFIER GIT_URL GIT_SHA)
     endif()
 endfunction()
 
+# Disable tests and docs globally
+set(BUILD_TESTS OFF CACHE BOOL OFF FORCE)
+set(ENABLE_TESTS OFF CACHE BOOL OFF FORCE)
+set(ENABLE_DOCS OFF CACHE BOOL OFF FORCE)
+
 # Misc
 pr_fetch_third_party_repository("bvh"                 "https://github.com/madmann91/bvh"                    "ac41ab8")
 pr_fetch_third_party_repository("exprtk"              "https://github.com/ArashPartow/exprtk"               "f46bffcd6966d38a09023fb37ba9335214c9b959")

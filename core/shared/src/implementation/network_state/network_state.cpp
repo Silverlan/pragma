@@ -466,7 +466,9 @@ pragma::console::ConCommandResult pragma::NetworkState::RunConsoleCommand(std::s
 			convarResult = Engine::Get()->CVarHandler::SetConVar(scmd, argv[0]);
 		else
 			convarResult = SetConVar(scmd, argv[0]);
-		result.success = convarResult.success;
+		// SetConVar only returns 'success' if the value was actually changed, but we
+		// only care about whether the convar exists, which we have already confirmed.
+		result.success = true; // convarResult.success;
 		if(convarResult.errorMessage)
 			result.errorMessage = convarResult.errorMessage;
 		return result;

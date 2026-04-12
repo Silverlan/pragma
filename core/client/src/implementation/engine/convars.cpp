@@ -16,7 +16,7 @@ pragma::console::ConConf *pragma::CEngine::GetConVar(std::string_view cv)
 	return (stateCl != nullptr) ? stateCl->GetConVar(cv) : nullptr;
 }
 
-pragma::console::ConCommandResult pragma::CEngine::RunConsoleCommand(std::string_view svcmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
+pragma::console::ConCommandResult pragma::CEngine::RunConsoleCommand(std::string_view svcmd, std::vector<std::string> &argv, const RunConCommandInfo &cmdInfo)
 {
 	std::string cmd {svcmd};
 	string::to_lower(cmd);
@@ -28,19 +28,21 @@ pragma::console::ConCommandResult pragma::CEngine::RunConsoleCommand(std::string
 			pl = game->GetLocalPlayer();
 	}
 	if(stateCl == nullptr)
-		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);
+		return RunEngineConsoleCommand(cmd, argv, cmdInfo);
 	console::ConCommandResult result {};
 	if(stateCl)
-		result = stateCl->RunConsoleCommand(cmd, argv, pl, pressState, magnitude, callback);
+		result = stateCl->RunConsoleCommand(cmd, argv, pl, cmdInfo.pressState, cmdInfo.magnitude, cmdInfo.callback);
 	if(!result) {
-		Con::CWAR << "Unknown console command '" << cmd << "'!" << Con::endl;
-		auto similar = (stateCl != nullptr) ? stateCl->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
-		if(similar.empty() == true)
-			Con::COUT << "No similar matches found!" << Con::endl;
-		else {
-			Con::COUT << "Were you looking for one of the following?" << Con::endl;
-			for(auto &sim : similar)
-				Con::COUT << "- " << sim << Con::endl;
+		if (!cmdInfo.suppressOutput) {
+			Con::CWAR << "Unknown console command '" << cmd << "'!" << Con::endl;
+			auto similar = (stateCl != nullptr) ? stateCl->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
+			if(similar.empty() == true)
+				Con::COUT << "No similar matches found!" << Con::endl;
+			else {
+				Con::COUT << "Were you looking for one of the following?" << Con::endl;
+				for(auto &sim : similar)
+					Con::COUT << "- " << sim << Con::endl;
+			}
 		}
 		return result;
 	}

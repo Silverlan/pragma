@@ -177,7 +177,7 @@ export namespace pragma {
 		virtual bool IsServerOnly() override;
 		// Convars
 		virtual console::ConConf *GetConVar(std::string_view cv) override;
-		virtual console::ConCommandResult RunConsoleCommand(std::string_view cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr) override;
+		virtual console::ConCommandResult RunConsoleCommand(std::string_view cmd, std::vector<std::string> &argv, const RunConCommandInfo &cmdInfo = {}) override;
 		// ClientState
 		virtual NetworkState *GetClientState() const override;
 		ClientState *OpenClientState();

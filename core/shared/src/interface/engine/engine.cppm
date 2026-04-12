@@ -31,6 +31,13 @@ export {
 #endif
 
 	namespace pragma {
+		struct DLLNETWORK RunConCommandInfo {
+			KeyState pressState = KeyState::Press;
+			float magnitude = 1.f;
+			bool suppressOutput = false;
+			std::function<bool(console::ConConf *, float &)> callback = nullptr;
+		};
+
 		class NetworkState;
 		class DLLNETWORK Engine : public console::CVarHandler, public util::CallbackHandler {
 		  public:
@@ -212,7 +219,7 @@ export {
 			T *GetConVar(std::string_view cv);
 			template<class T>
 			const T *GetConVar(std::string_view cv) const;
-			virtual console::ConCommandResult RunConsoleCommand(std::string_view cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
+			virtual console::ConCommandResult RunConsoleCommand(std::string_view cmd, std::vector<std::string> &argv, const RunConCommandInfo &cmdInfo = {});
 			// NetState
 			virtual NetworkState *GetActiveState();
 
@@ -278,7 +285,7 @@ export {
 			void SetReplicatedConVar(std::string_view cvar, const std::string &val);
 		  protected:
 			void UpdateParallelJobs();
-			console::ConCommandResult RunEngineConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr);
+			console::ConCommandResult RunEngineConsoleCommand(std::string cmd, std::vector<std::string> &argv, const RunConCommandInfo &cmdInfo);
 			void WriteServerConfig(fs::VFilePtrReal f);
 			void WriteEngineConfig(fs::VFilePtrReal f);
 			void RestoreConVarsForUnknownCommands(fs::VFilePtrReal f, const ConVarInfoList &origCvarValues, const string::OrderedStringMap<std::shared_ptr<console::ConConf>> &stateConVars);

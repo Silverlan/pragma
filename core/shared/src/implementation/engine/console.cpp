@@ -192,16 +192,17 @@ void pragma::Engine::ProcessConsoleInput(KeyState pressState)
 
 void pragma::Engine::ProcessConsoleInput(const std::string_view &line, KeyState pressState, float magnitude)
 {
-	string::get_sequence_commands(std::string {line}, [pressState, magnitude](std::string cmd, std::vector<std::string> &argv) { Get()->RunConsoleCommand(cmd, argv, pressState, magnitude); });
+	string::get_sequence_commands(std::string {line}, [pressState, magnitude](std::string cmd, std::vector<std::string> &argv) { Get()->RunConsoleCommand(cmd, argv, {.pressState = pressState, .magnitude = magnitude}); });
 }
 
-pragma::console::ConCommandResult pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
+pragma::console::ConCommandResult pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::string> &argv, const RunConCommandInfo &cmdInfo)
 {
 	console::ConCommandResult result {};
 	auto *cv = Get()->CVarHandler::GetConVar(scmd);
 	if(cv == nullptr)
 		return result;
-	if(callback != nullptr && callback(cv, magnitude) == false) {
+	auto magnitude = cmdInfo.magnitude;
+	if(cmdInfo.callback != nullptr && cmdInfo.callback(cv, magnitude) == false) {
 		result.success = true;
 		return result;
 	}
@@ -236,25 +237,27 @@ pragma::console::ConCommandResult pragma::Engine::RunEngineConsoleCommand(std::s
 	return result;
 }
 
-pragma::console::ConCommandResult pragma::Engine::RunConsoleCommand(std::string_view svcmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
+pragma::console::ConCommandResult pragma::Engine::RunConsoleCommand(std::string_view svcmd, std::vector<std::string> &argv, const RunConCommandInfo &cmdInfo)
 {
 	std::string cmd {svcmd};
 	string::to_lower(cmd);
 	auto *stateSv = GetServerNetworkState();
 	if(stateSv == nullptr)
-		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);
+		return RunEngineConsoleCommand(cmd, argv, cmdInfo);
 	console::ConCommandResult result {};
 	if(stateSv)
-		result = stateSv->RunConsoleCommand(cmd, argv, nullptr, pressState, magnitude, callback);
+		result = stateSv->RunConsoleCommand(cmd, argv, nullptr, cmdInfo.pressState, cmdInfo.magnitude, cmdInfo.callback);
 	if(!result) {
-		Con::CWAR << "Unknown console command '" << cmd << "'!" << Con::endl;
-		auto similar = (stateSv != nullptr) ? stateSv->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
-		if(similar.empty() == true)
-			Con::COUT << "No similar matches found!" << Con::endl;
-		else {
-			Con::COUT << "Were you looking for one of the following?" << Con::endl;
-			for(auto &sim : similar)
-				Con::COUT << "- " << sim << Con::endl;
+		if (!cmdInfo.suppressOutput) {
+			Con::CWAR << "Unknown console command '" << cmd << "'!" << Con::endl;
+			auto similar = (stateSv != nullptr) ? stateSv->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
+			if(similar.empty() == true)
+				Con::COUT << "No similar matches found!" << Con::endl;
+			else {
+				Con::COUT << "Were you looking for one of the following?" << Con::endl;
+				for(auto &sim : similar)
+					Con::COUT << "- " << sim << Con::endl;
+			}
 		}
 		return result;
 	}

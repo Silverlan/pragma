@@ -47,7 +47,7 @@ bool pragma::Engine::ExecConfig(const std::string &cfg, ConVarInfoList &infoList
 void pragma::Engine::ExecCommands(ConVarInfoList &cmds)
 {
 	for(auto &cmd : cmds.GetConVars())
-		RunConsoleCommand(cmd.cmd, cmd.args);
+		RunConsoleCommand(cmd.cmd, cmd.args, {.suppressOutput = true});
 }
 
 bool pragma::Engine::ExecConfig(const std::string &cfg, const std::function<void(std::string &, std::vector<std::string> &)> &callback)

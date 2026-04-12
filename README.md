@@ -51,11 +51,9 @@ Build Requirements
 - [Ninja-build](https://ninja-build.org/)
 - [Python 3](https://www.python.org/downloads/)
 - At least 16 GiB of RAM
-- Recommended IDE: [CLion](https://www.jetbrains.com/clion/) **
+- Recommended IDE: [CLion](https://www.jetbrains.com/clion/)
 
 <sub>\* CMake 4.3.x is currently not supported and will cause errors during configuration due to a [regression issue](https://gitlab.kitware.com/cmake/cmake/-/issues/27600).</sub>
-
-<sub>\** CLion currently ships with a slightly older version of CMake. If you want to use CLion, make sure you have a CMake version that meets the requirements and then set it up in the CLion settings under File > Settings... > Build, Execution, Deployment > Toolchains > CMake.</sub>
 
 ###### Linux (Recommended)
 - ~30 GiB of disk space
@@ -87,10 +85,10 @@ dnf install cmake ninja gcc g++ freetype-devel wayland-devel libxkbcommon-devel 
 
 ###### Windows
 - ~80 GiB of disk space
-- Visual Studio 2022 or newer *
+- Visual Studio 2022 *
 - Windows SDK 10.0.22000.0 or newer
 
-<sub>\* Generating a Visual Studio project is currently not supported, but you can still use the MSVC compiler.</sub>
+<sub>\* Generating a Visual Studio project is currently not supported, but you can still use the MSVC 2022 compiler. Please note that the MSVC 2026 compiler will *not* work.</sub>
 
 Build Instructions
 ------
@@ -99,11 +97,9 @@ To clone Pragma, run:
 git clone https://github.com/Silverlan/pragma.git
 ```
 
-Then use the build method of your choice below *. CMake will be used regardless of which build method you choose. The build files will be placed in "pragma/build", and Pragma will be installed to "pragma/build/install" by default. The default (and recommended) compiler (regardless of the os) is clang and the default build system is Ninja.
+Then use the build method of your choice below. CMake will be used regardless of which build method you choose. The build files will be placed in "pragma/build", and Pragma will be installed to "pragma/build/install" by default. The default (and recommended) compiler (regardless of the os) is clang and the default build system is Ninja.
 
 To cut down on disk space, Pragma uses prebuilt binaries for a lot of third-party dependencies by default. You can use the build script if you want to build those as well, but this will **significantly** increase the build time and disk space usage and is generally not recommended.
-
-<sub>\* :warning: On Windows only the [build script](#build-script) method is currently supported. Simply double-click "build.bat"/"build_full.bat" or execute it from a command-line window.</sub>
 
 ### CLion (Recommended)
 

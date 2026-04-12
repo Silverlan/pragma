@@ -383,6 +383,15 @@ pr_add_compile_definitions(
 
 		PUBLIC
 )
+if(PRAGMA_WITH_MIMALLOC)
+	pr_add_compile_definitions(
+			${PROJ_NAME}
+			-DPRAGMA_WITH_MIMALLOC=1
+
+			PUBLIC
+	)
+	target_link_libraries(${PROJ_NAME} PUBLIC mimalloc)
+endif()
 
 # Required by sound_ogg.cpp
 pr_add_dependency(${PROJ_NAME} vorbis TARGET)

@@ -415,3 +415,8 @@ set(BUILD_SHARED_LIBS
     ON
     CACHE BOOL ON FORCE)
 #
+
+# mimalloc
+if(PRAGMA_WITH_MIMALLOC)
+    pr_fetch_third_party_lib("mimalloc" "https://github.com/microsoft/mimalloc.git" "75d69f4ab736ad9f56cdd76c7eb883f60ac48869")
+endif()

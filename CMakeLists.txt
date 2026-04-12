@@ -108,6 +108,9 @@ option(PRAGMA_WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
 option(PRAGMA_WITH_COMMON_MODULES "Build with common modules?" ON)
 option(PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES "Build with essential client modules?" ON)
 
+# Disabled by default as it causes conflicts with chromium
+option(PRAGMA_WITH_MIMALLOC "Enable the mimalloc memory allocator?" OFF)
+
 option(PRAGMA_WITH_PFM "Build with Pragma Filmmaker?" OFF)
 option(PRAGMA_WITH_CORE_PFM_MODULES "Include essential PFM modules." ON)
 option(PRAGMA_WITH_ALL_PFM_MODULES "Include non-essential PFM modules (e.g. chromium and cycles)." ON)

@@ -28,6 +28,9 @@
 #include <iostream>
 #include <thread>
 #endif
+
+#ifdef PRAGMA_WITH_MIMALLOC
+#include "mimalloc-new-delete.h"
 #endif
 
 static std::string GetAppPath()

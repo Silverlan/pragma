@@ -4,12 +4,17 @@
 module;
 
 #include "pragma/console/helper.hpp"
+#include "pragma/tracy.hpp"
 #include <cassert>
 #ifdef _WIN32
 
 #include <dwmapi.h>
 #pragma comment(lib, "dwmapi.lib")
 
+#endif
+
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+#include "pragma/tracy.hpp"
 #endif
 
 module pragma.client;
@@ -696,6 +701,10 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	if(renderApi)
 		SetRenderAPI(*renderApi);
 
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("> Engine.Render.Init");
+	TracyPlotRSS();
+#endif
 	// Initialize Window context
 	try {
 		InitializeRenderAPI();
@@ -706,6 +715,10 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		Close();
 		return false;
 	}
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("< Engine.Render.Init");
+	TracyPlotRSS();
+#endif
 
 	auto windowRes = findCmdArg("cl_window_resolution");
 	prosper::IPrContext::CreateInfo contextCreateInfo {};
@@ -713,6 +726,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	contextCreateInfo.height = 1024;
 	contextCreateInfo.windowless = g_windowless;
 	contextCreateInfo.enableDiagnostics = IsGfxDiagnosticsModeEnabled();
+	contextCreateInfo.heapManager = &GetHeapManager();
 
 	std::shared_ptr<udm::Data> renderApiData {};
 	try {
@@ -912,7 +926,15 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	}
 	contextCreateInfo.presentMode = presentMode;
 
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("> RenderContext.Initialize");
+	TracyPlotRSS();
+#endif
 	GetRenderContext().Initialize(contextCreateInfo);
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("< RenderContext.Initialize");
+	TracyPlotRSS();
+#endif
 
 	auto &window = GetRenderContext().GetWindow();
 	if(g_titleBarColor.has_value())
@@ -950,7 +972,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	shaderManager.GetShader("blur_vertical");
 
 	// Initialize Client Instance
-	auto matManager = material::CMaterialManager::Create(GetRenderContext());
+	auto matManager = material::CMaterialManager::Create(GetRenderContext(), GetHeapManager().CreateHeap("material_manager"));
 	matManager->SetImportDirectory("addons/converted/");
 	InitializeAssetManager(*matManager);
 	pragma::asset::update_extension_cache(asset::Type::Material);
@@ -995,7 +1017,11 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	}
 
 	auto &fontSet = GetDefaultFontSet();
-	auto &gui = gui::WGUI::Open(GetRenderContext(), matManager);
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("> GUI.Init");
+	TracyPlotRSS();
+#endif
+	auto &gui = gui::WGUI::Open(GetRenderContext(), matManager, m_heapManager.get());
 	RegisterUiElementTypes();
 	gui.SetLocaleResolver([](const std::string &key, const std::vector<string::Utf8String> &args) -> string::Utf8String {
 		// get_text currently doesn't support Utf8String args, so we'll convert to std::string for now
@@ -1068,6 +1094,10 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		}
 		RunConsoleCommand(cmd, args);
 	});
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("< GUI.Init");
+	TracyPlotRSS();
+#endif
 
 	m_speedCam = 1600.0f;
 	m_speedCamMouse = 0.2f;
@@ -1085,7 +1115,10 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		auto &gpuProfiler = *m_gpuProfiler;
 		m_gpuProfilingStageManager->InitializeProfilingStageManager(gpuProfiler);
 	});
-
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("Engine.Audio.Init");
+	TracyPlotRSS();
+#endif
 	InitializeSoundEngine();
 
 	OpenClientState();
@@ -2022,9 +2055,11 @@ void pragma::CEngine::Think()
 		cl->Think(); // Draw?
 
 	StartProfilingStage("DrawFrame");
-
 	RenderContext::DrawFrame();
 	CallCallbacks("Draw");
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	FrameMark;
+#endif
 	StopProfilingStage();    // DrawFrame
 	platform::poll_events(); // Needs to be called AFTER rendering!
 	auto &windows = GetRenderContext().GetWindows();

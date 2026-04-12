@@ -109,7 +109,7 @@ export namespace pragma::asset {
 
 	class DLLNETWORK ModelManager : public util::TFileAssetManager<Model, ModelLoadInfo> {
 	  public:
-		ModelManager(NetworkState &nw);
+		ModelManager(NetworkState &nw, const util::Heap *heap = nullptr);
 		virtual ~ModelManager() = default;
 
 		using IAssetManager::FlagForRemoval;

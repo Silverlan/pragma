@@ -33,7 +33,7 @@ pragma::ServerState::ServerState() : NetworkState(), m_server(nullptr)
 	g_server = this;
 	m_soundScriptManager = std::make_unique<audio::SoundScriptManager>();
 
-	m_modelManager = std::make_unique<asset::SModelManager>(*this);
+	m_modelManager = std::make_unique<asset::SModelManager>(*this, pragma::get_engine()->GetHeapManager().CreateHeap("model_manager"));
 	Engine::Get()->InitializeAssetManager(*m_modelManager);
 	pragma::asset::update_extension_cache(asset::Type::Model);
 

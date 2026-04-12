@@ -1,6 +1,12 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+#include "pragma/tracy.hpp"
+#endif
+
 module pragma.client;
 
 import :engine;
@@ -8,6 +14,10 @@ import :client_state;
 
 pragma::ClientState *pragma::CEngine::OpenClientState()
 {
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("Engine.OpenClientState");
+	TracyPlotRSS();
+#endif
 	CloseClientState();
 	m_clInstance->state = std::make_unique<ClientState>();
 	auto *cl = GetClientState();

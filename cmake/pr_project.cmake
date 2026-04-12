@@ -222,6 +222,16 @@ function(pr_add_executable TARGET_NAME)
 endfunction()
 
 function(pr_init_main_application_executable TARGET_NAME)
+    if(PRAGMA_WITH_TRACY_PROFILING)
+        pr_add_compile_definitions(
+                ${TARGET_NAME}
+                -DPRAGMA_WITH_TRACY_PROFILING=1
+
+                PRIVATE
+        )
+        target_link_libraries(${TARGET_NAME} PUBLIC Tracy::TracyClient)
+    endif()
+
     if(PRAGMA_WITH_MIMALLOC)
         pr_add_compile_definitions(
                 ${TARGET_NAME}

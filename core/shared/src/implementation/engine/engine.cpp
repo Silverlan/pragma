@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "pragma/tracy.hpp"
 #include <cassert>
 #include <cstdlib>
 
@@ -79,9 +80,15 @@ extern pragma::util::LogSeverity g_lpLogLevelFile;
 extern bool g_lpManagedByPackageManager;
 extern bool g_lpSandboxed;
 
-pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
+pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}, m_heapManager {std::make_unique<util::HeapManager>()}
 {
 	g_engine = this;
+
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyPlotConfig("RSS", tracy::PlotFormatType::Memory, false, true, 0);
+	TracyMessageL("Engine::Engine");
+	TracyPlotRSS();
+#endif
 
 	static auto registeredGlobals = false;
 	if(!registeredGlobals) {
@@ -140,6 +147,10 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 		return {};
 	});
 
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("Engine.Locale.Init");
+	TracyPlotRSS();
+#endif
 	locale::init();
 	// OpenConsole();
 
@@ -176,6 +187,9 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 
 pragma::asset::AssetManager &pragma::Engine::GetAssetManager() { return *m_assetManager; }
 const pragma::asset::AssetManager &pragma::Engine::GetAssetManager() const { return const_cast<Engine *>(this)->GetAssetManager(); }
+
+pragma::util::HeapManager &pragma::Engine::GetHeapManager() { return *m_heapManager; }
+const pragma::util::HeapManager &pragma::Engine::GetHeapManager() const { return *m_heapManager; }
 
 bool pragma::Engine::IsProgramInFocus() const { return false; }
 
@@ -666,6 +680,14 @@ extern std::vector<std::string> g_lpResourceDirs;
 
 bool pragma::Engine::Initialize(int argc, char *argv[])
 {
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("> Engine.Init");
+	TracyPlotRSS();
+	util::ScopeGuard {[]() {
+		TracyMessageL("< Engine.Init");
+		TracyPlotRSS();
+	}};
+#endif
 	InitLaunchOptions(argc, argv);
 
 	if(g_lpManagedByPackageManager)
@@ -687,7 +709,8 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 
 		// TODO: File cache doesn't work with absolute paths at the moment
 		// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
-		fs::set_use_file_index_cache(true);
+		auto *heapGroup = m_heapManager->CreateHeapGroup("file_index_cache");
+		fs::set_use_file_index_cache(true, heapGroup);
 
 		if(!g_lpUserDataDir.empty()) {
 			// If we're using a custom user-data directory, we have to add the program path as an additional mount directory

@@ -125,6 +125,9 @@ export {
 			virtual void HandleOpenGLFallback() {};
 			void ClearCache();
 
+			util::HeapManager &GetHeapManager();
+			const util::HeapManager &GetHeapManager() const;
+
 			virtual bool IsProgramInFocus() const;
 
 			void SetRunUpdaterOnClose(bool run);
@@ -304,6 +307,7 @@ export {
 			};
 			std::unique_ptr<ConsoleInstance> m_consoleInfo = nullptr;
 			ConsoleType m_consoleType = ConsoleType::Terminal;
+			std::unique_ptr<util::HeapManager> m_heapManager;
 
 			struct ConsoleInputInfo {
 				std::string line;

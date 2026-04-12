@@ -383,6 +383,16 @@ pr_add_compile_definitions(
 
 		PUBLIC
 )
+if(PRAGMA_WITH_TRACY_PROFILING)
+	pr_add_compile_definitions(
+		${PROJ_NAME}
+			-DPRAGMA_WITH_TRACY_PROFILING=1
+
+			PUBLIC
+	)
+	target_link_libraries(${PROJ_NAME} PUBLIC Tracy::TracyClient)
+endif()
+
 if(PRAGMA_WITH_MIMALLOC)
 	pr_add_compile_definitions(
 			${PROJ_NAME}

@@ -6,6 +6,7 @@ module;
 #include "pragma/console/helper.hpp"
 //#include "shader.h" // prosper TODO
 //#include "shader_screen.h" // prosper TODO
+#include "pragma/tracy.hpp"
 
 module pragma.client;
 
@@ -119,6 +120,10 @@ void register_game_shaders()
 
 void pragma::CGame::InitShaders()
 {
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("Game.Render.InitShaders");
+	TracyPlotRSS();
+#endif
 	Con::COUT << "Loading shaders..." << Con::endl;
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING

@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "pragma/tracy.hpp"
 
 module pragma.shared;
 
@@ -517,7 +518,21 @@ std::shared_ptr<pragma::util::Library> pragma::NetworkState::LoadLibraryModule(c
 	if(it != cache.end())
 		return nullptr;
 
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	{
+		std::string msg = "> LoadLibrary: " + lib;
+		TracyMessage(msg.c_str(), msg.length());
+		TracyPlotRSS();
+	}
+#endif
 	auto libModule = util::load_library_module(lib, additionalSearchDirectories, {}, err);
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	{
+		std::string msg = "< LoadLibrary: " + lib;
+		TracyMessage(msg.c_str(), msg.length());
+		TracyPlotRSS();
+	}
+#endif
 	if(!libModule)
 		cache.insert(pathLib.GetString()); // Cache libraries we weren't able to load to avoid continuous error messages
 	return libModule;

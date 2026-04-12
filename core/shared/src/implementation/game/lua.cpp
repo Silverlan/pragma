@@ -3,6 +3,7 @@
 module;
 
 #include "definitions.hpp"
+#include "pragma/tracy.hpp"
 
 module pragma.shared;
 
@@ -13,6 +14,10 @@ lua::State *pragma::Game::GetLuaState() { return (m_lua != nullptr) ? m_lua->Get
 
 void pragma::Game::InitializeLua()
 {
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("Game.Scripting.Init");
+	TracyPlotRSS();
+#endif
 	m_luaIncludeStack.clear();
 	m_lua = pragma::util::make_shared<Lua::Interface>();
 	m_lua->Open();

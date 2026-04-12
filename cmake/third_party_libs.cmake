@@ -416,6 +416,12 @@ set(BUILD_SHARED_LIBS
     CACHE BOOL ON FORCE)
 #
 
+# tracy
+if(PRAGMA_WITH_TRACY_PROFILING)
+    pr_fetch_third_party_lib("TracyClient" "https://github.com/wolfpld/tracy.git" "e1143fd985973559aa678f04f6288efe9d7a8f17")
+endif()
+#
+
 # mimalloc
 if(PRAGMA_WITH_MIMALLOC)
     pr_fetch_third_party_lib("mimalloc" "https://github.com/microsoft/mimalloc.git" "75d69f4ab736ad9f56cdd76c7eb883f60ac48869")

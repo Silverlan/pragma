@@ -107,6 +107,7 @@ option(PRAGMA_WITH_NETWORKING "Build with networking support?" OFF)
 option(PRAGMA_WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
 option(PRAGMA_WITH_COMMON_MODULES "Build with common modules?" ON)
 option(PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES "Build with essential client modules?" ON)
+option(PRAGMA_WITH_TRACY_PROFILING "Enable the tracy profiler?" OFF)
 
 # Disabled by default as it causes conflicts with chromium
 option(PRAGMA_WITH_MIMALLOC "Enable the mimalloc memory allocator?" OFF)

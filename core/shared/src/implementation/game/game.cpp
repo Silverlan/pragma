@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include "pragma/tracy.hpp"
 #include <cassert>
 
 module pragma.shared;
@@ -134,6 +135,10 @@ void Lua::TableDump(lua::State *lua, int n)
 
 pragma::Game::Game(NetworkState *state)
 {
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("Game::Game");
+	TracyPlotRSS();
+#endif
 	m_stateNetwork = state;
 	m_mapInfo.name = "";
 	m_mapInfo.md5 = "";
@@ -443,6 +448,11 @@ void pragma::Game::InitializeGame()
 {
 	InitializeLua(); // Lua has to be initialized completely before any entites are created
 
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("Game.Physics.Init");
+	TracyPlotRSS();
+#endif
+
 	auto physEngineName = GetConVarValueOr<udm::String>("phys_engine");
 	auto physEngineLibName = physics::IEnvironment::GetPhysicsEngineModuleLocation(physEngineName);
 	spdlog::info("Loading physics module '{}'...", physEngineLibName);
@@ -565,6 +575,9 @@ void pragma::Game::UpdateAnimations(double dt) { m_animUpdateManager->UpdateAnim
 
 void pragma::Game::Tick()
 {
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyPlotRSS();
+#endif
 	StartProfilingStage("Tick");
 	if((m_flags & GameFlags::InitialTick) != GameFlags::None) {
 		m_flags &= ~GameFlags::InitialTick;
@@ -721,6 +734,10 @@ void pragma::Game::UpdatePackagePaths()
 bool pragma::Game::LoadSoundScripts(const char *file) { return m_stateNetwork->LoadSoundScripts(file, true); }
 bool pragma::Game::LoadMap(const std::string &map, const Vector3 &origin, std::vector<EntityHandle> *entities)
 {
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("Game.LoadMap");
+	TracyPlotRSS();
+#endif
 	auto normPath = pragma::asset::get_normalized_path(map, asset::Type::Map);
 	std::string format;
 	auto filePath = pragma::asset::find_file(normPath, asset::Type::Map, &format);

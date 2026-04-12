@@ -42,6 +42,11 @@ pr_install_binaries(cpptrace)
 # spdlog
 pr_install_targets(spdlog)
 
+# tracy
+if(PRAGMA_WITH_TRACY_PROFILING)
+    pr_install_targets(TracyClient)
+endif()
+
 # mimalloc
 if(PRAGMA_WITH_MIMALLOC)
     pr_install_targets(mimalloc)

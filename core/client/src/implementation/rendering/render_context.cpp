@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
+#include "pragma/tracy.hpp"
+
 module pragma.client;
 
 import :rendering.render_apis;
@@ -18,6 +22,14 @@ std::optional<std::string> g_customTitle;
 extern bool g_cpuRendering;
 void rendering::RenderContext::InitializeRenderAPI()
 {
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("> Engine.Render.Init");
+	TracyPlotRSS();
+	util::ScopeGuard {[]() {
+		TracyMessageL("< Engine.Render.Init");
+		TracyPlotRSS();
+	}};
+#endif
 	auto &renderAPI = GetRenderAPI();
 	auto getRenderApiPath = [](const std::string &renderAPI, std::string &outLocation, std::string &outModulePath) {
 		outLocation = get_graphics_api_module_location(renderAPI);

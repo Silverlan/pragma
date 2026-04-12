@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/console/helper.hpp"
+#include "pragma/tracy.hpp"
 
 module pragma.client;
 
@@ -42,7 +43,7 @@ pragma::ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo
 	g_client = this;
 	m_soundScriptManager = std::make_unique<audio::CSoundScriptManager>();
 
-	m_modelManager = std::make_unique<asset::CModelManager>(*this);
+	m_modelManager = std::make_unique<asset::CModelManager>(*this, pragma::get_engine()->GetHeapManager().CreateHeap("model_manager"));
 	// m_modelManager->SetVerbose(true);
 	get_cengine()->InitializeAssetManager(*m_modelManager);
 	pragma::asset::update_extension_cache(asset::Type::Model);

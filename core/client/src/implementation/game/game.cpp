@@ -4,6 +4,7 @@
 module;
 
 #include "pragma/console/helper.hpp"
+#include "pragma/tracy.hpp"
 
 //#include "shader_screen.h" // prosper TODO
 
@@ -545,6 +546,10 @@ void pragma::CGame::Initialize()
 	auto *client = get_client_state();
 	auto &materialManager = static_cast<material::CMaterialManager &>(client->GetMaterialManager());
 	materialManager.SetShaderHandler(&shader_handler);
+#ifdef PRAGMA_WITH_TRACY_PROFILING
+	TracyMessageL("Game.Render.InitBuffers");
+	TracyPlotRSS();
+#endif
 	CRenderComponent::InitializeBuffers();
 	CLightComponent::InitializeBuffers();
 	geometry::CModelSubMesh::InitializeBuffers();

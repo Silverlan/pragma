@@ -1104,6 +1104,14 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	}
 	zip.AddFile("engine.txt", engineInfo.str());
 
+	// Memory
+	{
+		std::stringstream memInfo;
+		memInfo << "Current RSS memory usage: " << util::get_pretty_bytes(util::get_current_rss_memory_usage()) << "\n";
+		memInfo << "Peak RSS memory usage: " << util::get_pretty_bytes(util::get_peak_rss_memory_usage()) << "\n";
+		zip.AddFile("memory_usage.txt", memInfo.str());
+	}
+
 	std::stringstream compilerInfo;
 #if defined(__clang__)
 

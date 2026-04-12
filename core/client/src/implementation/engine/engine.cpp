@@ -163,11 +163,27 @@ void pragma::CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	// Disabled because 'DumpMemoryBudget' can cause stack corruption?
 	//auto budget = renderContext.DumpMemoryBudget();
 	//if(budget.has_value())
-	//	zip.AddFile("mem_budget.txt",*budget);
+	//	zip.AddFile("gpu_mem_budget.txt",*budget);
 
 	auto stats = renderContext.DumpMemoryStats();
-	if(stats.has_value())
-		zip.AddFile("mem_stats.txt", *stats);
+	if(stats.has_value()) {
+		zip.AddFile("gpu_mem_stats.txt", *stats);
+
+		std::string err;
+		fs::create_path("temp");
+		const auto *memStatsFileName = "temp/gpu_mem_stats.txt";
+		const auto *memStatsImageFileName = "temp/gpu_mem_stats.png";
+		if(fs::write_file(memStatsFileName, *stats) && renderContext.DumpMemoryStatsImage(memStatsFileName, memStatsImageFileName, err)) {
+			auto f = fs::open_file(memStatsImageFileName, fs::FileMode::Read | fs::FileMode::Binary);
+			if(f) {
+				std::vector<uint8_t> data;
+				auto size = f->GetSize();
+				data.resize(size);
+				f->Read(data.data(), data.size());
+				zip.AddFile("gpu_mem_stats.png", data.data(), data.size());
+			}
+		}
+	}
 
 	auto printDeviceInfo = [](std::stringstream &ss, const prosper::util::VendorDeviceInfo &deviceInfo) {
 		ss << "Vulkan API Version: " << deviceInfo.apiVersion << "\n";

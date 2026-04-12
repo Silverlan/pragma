@@ -173,7 +173,7 @@ void pragma::CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 		fs::create_path("temp");
 		const auto *memStatsFileName = "temp/gpu_mem_stats.txt";
 		const auto *memStatsImageFileName = "temp/gpu_mem_stats.png";
-		if(fs::write_file(memStatsFileName, *stats) && renderContext.DumpMemoryStatsImage(memStatsFileName, memStatsImageFileName, err)) {
+		if(fs::write_file(memStatsFileName, *stats) && DumpMemoryStatsImage(memStatsFileName, memStatsImageFileName, err)) {
 			auto f = fs::open_file(memStatsImageFileName, fs::FileMode::Read | fs::FileMode::Binary);
 			if(f) {
 				std::vector<uint8_t> data;

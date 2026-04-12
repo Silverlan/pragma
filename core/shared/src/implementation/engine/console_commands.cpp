@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#ifdef PRAGMA_WITH_MIMALLOC
+#include <mimalloc.h>
+#endif
+
 #undef CreateFile
 
 module pragma.shared;
@@ -826,6 +830,48 @@ void pragma::Engine::RegisterConsoleCommands()
 	conVarMapEn.RegisterConCommand("debug_profiling_physics_start", debug_profiling_physics_start, console::ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
 	conVarMapEn.RegisterConCommand("debug_profiling_physics_end", debug_profiling_physics_end, console::ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
 	conVarMapEn.RegisterConCommand("debug_dump_scene_graph", static_cast<void (*)(NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float)>(debug_dump_scene_graph), console::ConVarFlags::None, "Prints the game scene graph.");
+
+	conVarMapEn.RegisterConCommand(
+	  "debug_memory_usage",
+	  [](NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float) {
+		  auto printLuaMemoryUsage = []() {
+			  auto &en = *pragma::get_engine();
+			  std::vector<std::pair<lua::State *, std::string>> luaStates;
+
+			  {
+				  auto *sv = en.GetServerNetworkState();
+				  auto *lua = sv ? sv->GetLuaState() : nullptr;
+				  if(lua)
+					  luaStates.push_back({lua, "Server"});
+			  }
+
+			  {
+				  auto *cl = en.GetServerNetworkState();
+				  auto *lua = cl ? cl->GetLuaState() : nullptr;
+				  if(lua)
+					  luaStates.push_back({lua, "Client"});
+			  }
+			  Con::COUT << "Lua Memory Usage:" << Con::endl;
+			  size_t total = 0;
+			  for(auto &[state, name] : luaStates) {
+				  auto memUsage = lua::get_memory_usage(state);
+				  Con::COUT << name << ": " << util::get_pretty_bytes(memUsage) << Con::endl;
+				  total += memUsage;
+			  }
+			  Con::COUT << "\nTotal: " << util::get_pretty_bytes(total) << Con::endl;
+		  };
+		  printLuaMemoryUsage();
+
+		  Con::COUT << "Current RSS memory usage: " << util::get_pretty_bytes(util::get_current_rss_memory_usage()) << Con::endl;
+		  Con::COUT << "Peak RSS memory usage: " << util::get_pretty_bytes(util::get_peak_rss_memory_usage()) << Con::endl;
+
+#ifdef PRAGMA_WITH_MIMALLOC
+		  Con::COUT << "mimalloc memory stats:" << Con::endl;
+		  mi_collect(true);
+		  mi_stats_print(nullptr);
+#endif
+	  },
+	  console::ConVarFlags::None, "Prints the current memory usage.");
 
 	conVarMap.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, const console::ConVar &, bool, bool)> {[this](NetworkState *nw, const console::ConVar &cv, bool oldVal, bool newVal) -> void {
 		if(Get() == nullptr)

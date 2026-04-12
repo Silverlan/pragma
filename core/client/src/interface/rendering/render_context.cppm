@@ -52,6 +52,8 @@ namespace pragma::rendering {
 
 		void SetValidationErrorDisabled(const std::string &id, bool disabled);
 		bool IsValidationErrorDisabled(const std::string &id) const;
+
+		bool DumpMemoryStatsImage(std::string_view memstatsFilepath, std::string_view outputFilename, std::string &outErr) const;
 	  protected:
 		virtual void OnClose();
 		virtual void DrawFrameCore();

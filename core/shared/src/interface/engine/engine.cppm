@@ -16,6 +16,7 @@ export import :debug.performance_profiler;
 export import :engine.enums;
 export import :engine.info;
 export import :engine.launch_para_map;
+export import :engine.memory;
 export import :engine.version;
 export import :input.enums;
 export import :util.server_state_interface;

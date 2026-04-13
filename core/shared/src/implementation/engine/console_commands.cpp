@@ -846,7 +846,7 @@ void pragma::Engine::RegisterConsoleCommands()
 			  }
 
 			  {
-				  auto *cl = en.GetServerNetworkState();
+				  auto *cl = en.GetClientState();
 				  auto *lua = cl ? cl->GetLuaState() : nullptr;
 				  if(lua)
 					  luaStates.push_back({lua, "Client"});

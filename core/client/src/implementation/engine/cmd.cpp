@@ -149,6 +149,11 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  return;
 		  }
 		  Con::COUT << *budget << Con::endl;
+
+		  fs::create_path("temp");
+		  const auto *budgetFilePath = "temp/gpu_memory_budget.json";
+		  if(fs::write_file(budgetFilePath, *budget))
+			  Con::COUT << "Written budget: " << budgetFilePath << "." << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Prints information about the current GPU memory budget.");
 	conVarMap.RegisterConCommand(
@@ -160,6 +165,19 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  return;
 		  }
 		  Con::COUT << *stats << Con::endl;
+
+		  fs::create_path("temp");
+		  const auto *statsFilePath = "temp/gpu_memory_stats.json";
+		  if(fs::write_file(statsFilePath, *stats)) {
+			  Con::COUT << "Written stats: " << statsFilePath << "." << Con::endl;
+
+			  std::string err;
+			  const auto *statsImageFilePath = "temp/gpu_memory_stats.png";
+			  if(DumpMemoryStatsImage(statsFilePath, statsImageFilePath, err))
+				  Con::COUT << "Written stats image: " << statsImageFilePath << Con::endl;
+			  else
+				  Con::CWAR << "Failed to write stats image: " << err << Con::endl;
+		  }
 	  },
 	  console::ConVarFlags::None, "Prints statistics about the current GPU memory usage.");
 	conVarMap.RegisterConCommand(

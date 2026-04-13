@@ -246,13 +246,15 @@ void CRendererPpMotionBlurComponent::DoUpdatePoses(const CMotionBlurDataComponen
 			if(it != motionBlurData.prevModelMatrices.end()) {
 				auto &bufferDst = *it->second.boneBuffer;
 				auto &bufferSrc = const_cast<prosper::IBuffer &>(*curBoneBuffer);
-				cmd.RecordBufferBarrier(bufferSrc, prosper::PipelineStageFlags::VertexShaderBit, prosper::PipelineStageFlags::TransferBit, prosper::AccessFlags::UniformReadBit, prosper::AccessFlags::TransferReadBit);
-				cmd.RecordBufferBarrier(bufferDst, prosper::PipelineStageFlags::VertexShaderBit, prosper::PipelineStageFlags::TransferBit, prosper::AccessFlags::UniformReadBit, prosper::AccessFlags::TransferWriteBit);
-				prosper::util::BufferCopy cpyInfo {};
-				cpyInfo.size = bufferSrc.GetSize();
-				cmd.RecordCopyBuffer(cpyInfo, bufferSrc, bufferDst);
-				cmd.RecordBufferBarrier(bufferSrc, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::VertexShaderBit, prosper::AccessFlags::TransferReadBit, prosper::AccessFlags::UniformReadBit);
-				cmd.RecordBufferBarrier(bufferDst, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::VertexShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::UniformReadBit);
+				if(bufferDst.GetSize() >= bufferSrc.GetSize()) {
+					cmd.RecordBufferBarrier(bufferSrc, prosper::PipelineStageFlags::VertexShaderBit, prosper::PipelineStageFlags::TransferBit, prosper::AccessFlags::UniformReadBit, prosper::AccessFlags::TransferReadBit);
+					cmd.RecordBufferBarrier(bufferDst, prosper::PipelineStageFlags::VertexShaderBit, prosper::PipelineStageFlags::TransferBit, prosper::AccessFlags::UniformReadBit, prosper::AccessFlags::TransferWriteBit);
+					prosper::util::BufferCopy cpyInfo {};
+					cpyInfo.size = bufferSrc.GetSize();
+					cmd.RecordCopyBuffer(cpyInfo, bufferSrc, bufferDst);
+					cmd.RecordBufferBarrier(bufferSrc, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::VertexShaderBit, prosper::AccessFlags::TransferReadBit, prosper::AccessFlags::UniformReadBit);
+					cmd.RecordBufferBarrier(bufferDst, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::VertexShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::UniformReadBit);
+				}
 			}
 		}
 	}

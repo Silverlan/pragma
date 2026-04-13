@@ -49,7 +49,7 @@ void CMotionBlurDataComponent::UpdateEntityPoses()
 
 	ecs::EntityIterator entIt {*get_cgame()};
 	entIt.AttachFilter<TEntityIteratorFilterComponent<CRenderComponent>>();
-	/*for(auto *ent : entIt) {
+	for(auto *ent : entIt) {
 		auto &r = *static_cast<ecs::CBaseEntity *>(ent)->GetRenderComponent();
 		auto curPose = r.GetTransformationMatrix();
 		auto it = m_motionBlurData.curModelMatrices.find(ent);
@@ -62,8 +62,19 @@ void CMotionBlurDataComponent::UpdateEntityPoses()
 			m_motionBlurData.prevModelMatrices[ent] = {curPose, ent->GetPose()};
 
 		if(curBoneBuffer) {
+			auto &oldBuf = m_motionBlurData.prevModelMatrices[ent].boneBuffer;
+			if(oldBuf && oldBuf->GetSize() != curBoneBuffer->GetSize()) {
+				// Buffer has changed, we need to re-allocate. Keep the old buffers alive in case they're still in use.
+				auto &oldDsg = m_motionBlurData.prevModelMatrices[ent].boneDsg;
+				auto &context = get_cengine()->GetRenderContext();
+				context.KeepResourceAliveUntilPresentationComplete(oldBuf);
+				context.KeepResourceAliveUntilPresentationComplete(oldDsg);
+				oldBuf = nullptr;
+				oldDsg = nullptr;
+			}
+
 			if(!m_motionBlurData.prevModelMatrices[ent].boneBuffer) {
-				auto boneBuffer = get_instance_bone_buffer()->AllocateBuffer();
+				auto boneBuffer = get_instance_bone_buffer()->AllocateBuffer(curBoneBuffer->GetSize());
 				m_motionBlurData.prevModelMatrices[ent].boneBuffer = boneBuffer;
 
 				auto dsg = velShader->CreateDescriptorSetGroup(ShaderVelocityBuffer::DESCRIPTOR_SET_BONE_BUFFER.setIndex);
@@ -73,5 +84,5 @@ void CMotionBlurDataComponent::UpdateEntityPoses()
 		}
 
 		m_motionBlurData.curModelMatrices[ent] = {curPose, ent->GetPose()};
-	}*/
+	}
 }

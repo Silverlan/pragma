@@ -226,7 +226,6 @@ void CAnimatedComponent::InitializeBoneBuffer()
 		return;
 
 	m_boneBuffer = get_instance_bone_buffer()->AllocateBuffer(reqSize, context.CalcBufferAlignment(get_bone_buffer_usage_flags()), nullptr);
-	// TODO: On re-allocate, update descriptor sets
 
 	CEOnBoneBufferInitialized evData {m_boneBuffer};
 	BroadcastEvent(cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED, evData);

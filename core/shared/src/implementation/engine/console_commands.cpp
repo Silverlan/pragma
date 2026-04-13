@@ -858,7 +858,7 @@ void pragma::Engine::RegisterConsoleCommands()
 				  Con::COUT << name << ": " << util::get_pretty_bytes(memUsage) << Con::endl;
 				  total += memUsage;
 			  }
-			  Con::COUT << "\nTotal: " << util::get_pretty_bytes(total) << Con::endl;
+			  Con::COUT << "Total: " << util::get_pretty_bytes(total) << Con::endl;
 		  };
 		  printLuaMemoryUsage();
 

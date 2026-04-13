@@ -47,7 +47,7 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_compile_definitions(${TARGET_NAME} PRIVATE "_WIN32_WINNT=0x0A00") # Windows 10
     endif()
 
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(CMAKE_LINKER_TYPE STREQUAL "GNU" OR CMAKE_LINKER_TYPE STREQUAL "LLD")
         target_link_options(${TARGET_NAME} PRIVATE "-Wl,--no-undefined")
     endif()
 

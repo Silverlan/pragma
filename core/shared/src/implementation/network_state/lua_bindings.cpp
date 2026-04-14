@@ -68,7 +68,7 @@ static void create_directory_change_listener(lua::State *l, const std::string &p
 {
 	Lua::CheckFunction(l, 2);
 	try {
-		auto listener = pragma::util::make_shared<pragma::fs::DirectoryWatcherCallback>(path, [callback](const std::string &fileName) mutable { callback(fileName); }, flags);
+		auto listener = pragma::util::make_shared<pragma::fs::DirectoryWatcherCallback>(path, [callback](const pragma::util::Path &basePath, const pragma::util::Path &filePath) mutable { callback(filePath.GetString()); }, flags);
 		Lua::Push(l, listener);
 	}
 	catch(const std::runtime_error &err) {

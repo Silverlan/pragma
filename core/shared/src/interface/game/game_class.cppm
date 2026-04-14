@@ -9,6 +9,7 @@ module;
 export module pragma.shared:game.game;
 
 export import :console.convar;
+export import :console.cvar_handler;
 export import :console.output;
 export import :core.addon_system;
 export import :debug.performance_profiler;
@@ -297,12 +298,6 @@ export {
 			debug::ProfilingStageManager<debug::ProfilingStage> *GetProfilingStageManager();
 			bool StartProfilingStage(const char *stage);
 			bool StopProfilingStage();
-
-			// Internal use only
-			template<typename T>
-			T ImplGetConVarValueOr(std::string_view cvarName, const T &defVal = {}, bool applyConstraint = false) const;
-			template<typename T>
-			std::optional<T> ImplGetConVarValue(std::string_view cvarName, bool applyConstraint = false) const;
 		  protected:
 			virtual void UpdateTime();
 			void GetLuaRegisteredEntities(std::vector<std::string> &luaClasses) const;
@@ -384,6 +379,11 @@ export {
 			void SetupEntity(ecs::BaseEntity *ent);
 			virtual void InitializeEntityComponents(EntityComponentManager &componentManager);
 			virtual void OnMapLoaded();
+		private:
+			// This just static casts our network state to a CVarHandler.
+			// This is needed as a workaround for a msvc linker bug and should
+			// not be used outside of that.
+			const console::CVarHandler *GetNetworkStateCVarHandler() const;
 		};
 		using namespace pragma::math::scoped_enum::bitwise;
 	}
@@ -483,14 +483,14 @@ export {
 		    requires(console::is_valid_convar_type_v<T>)
 		T Game::GetConVarValueOr(std::string_view cvarName, const T &defVal, bool applyConstraint) const
 		{
-			return ImplGetConVarValueOr<T>(cvarName, defVal, applyConstraint);
+			return GetNetworkStateCVarHandler()->GetConVarValueOr<T>(cvarName, defVal, applyConstraint);
 		}
 
 		template<typename T>
 		    requires(console::is_valid_convar_type_v<T>)
 		std::optional<T> Game::GetConVarValue(std::string_view cvarName, bool applyConstraint) const
 		{
-			return ImplGetConVarValue<T>(cvarName, applyConstraint);
+			return GetNetworkStateCVarHandler()->GetConVarValue<T>(cvarName, applyConstraint);
 		}
 	}
 

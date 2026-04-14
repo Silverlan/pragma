@@ -121,12 +121,13 @@ void pragma::locale::set_language(std::string lan)
 		load_file(fpath, lan);
 
 	try {
-		g_locFileWatcher = std::make_unique<fs::DirectoryWatcherCallback>(LOCALIZATION_ROOT_PATH + lan + '/', [](const util::Path &basePath, const util::Path &filePath) {
+		g_locFileWatcher = std::make_unique<fs::DirectoryWatcherCallback>(LOCALIZATION_ROOT_PATH + lan + '/', [](const std::string &str) {
+			auto filePath = util::Path::CreateFile(str);
 			auto it = std::find(g_loadedFiles.begin(), g_loadedFiles.end(), filePath.GetString());
 			if(it == g_loadedFiles.end())
 				return;
-			Con::COUT << "Reloading localization file '" << filePath.GetString() << "'..." << Con::endl;
-			load(filePath.GetString(), true);
+			Con::COUT << "Reloading localization file '" << str << "'..." << Con::endl;
+			load(str, true);
 		});
 	}
 	catch(const std::runtime_error &err) {

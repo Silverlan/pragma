@@ -53,9 +53,10 @@ void pragma::gui::types::WIDetachable::Detach()
 	settings.height = h;
 	settings.title = locale::get_text("console");
 	m_detachedWindow = std::unique_ptr<DetachedWindow> {new DetachedWindow {}};
-	m_detachedWindow->window = get_cengine()->CreateWindow(settings);
-	if(!m_detachedWindow->window)
+	auto res = get_cengine()->CreateWindow(settings);
+	if(!res)
 		return;
+	m_detachedWindow->window = res.value();
 	CallCallbacks("OnDetaching");
 	m_detachedWindow->reattachElement = frame->GetHandle();
 	m_detachedWindow->origPos = GetPos();

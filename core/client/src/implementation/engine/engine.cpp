@@ -712,14 +712,23 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	if(renderApi)
 		SetRenderAPI(*renderApi);
 
+	std::shared_ptr<material::CMaterialManager> matManager;
+	auto criticalFailure = [&](std::string_view message) {
+		spdlog::error(message);
+		debug::show_message_prompt(std::string {message}, debug::MessageBoxButtons::Ok, "Critial Failure");
+		matManager = nullptr;
+		Close();
+		Release();
+		util::sleep_for_seconds(5);
+		return false;
+	};
+
 	// Initialize Window context
 	try {
 		InitializeRenderAPI();
 	}
 	catch(const std::runtime_error &err) {
-		spdlog::error("Unable to initialize graphics API: {}", err.what());
-		util::sleep_for_seconds(5);
-		Close();
+		criticalFailure(std::format("Unable to initialize graphics API: {}", err.what()));
 		return false;
 	}
 
@@ -928,7 +937,11 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	}
 	contextCreateInfo.presentMode = presentMode;
 
-	GetRenderContext().Initialize(contextCreateInfo);
+	auto res = GetRenderContext().Initialize(contextCreateInfo);
+	if(!res) {
+		criticalFailure(std::format("Failed to initialize render context: {}. {} will now exit.", res.error(), engine_info::get_name()));
+		return false;
+	}
 
 	auto &window = GetRenderContext().GetWindow();
 	if(g_titleBarColor.has_value())
@@ -966,7 +979,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	shaderManager.GetShader("blur_vertical");
 
 	// Initialize Client Instance
-	auto matManager = material::CMaterialManager::Create(GetRenderContext());
+	matManager = material::CMaterialManager::Create(GetRenderContext());
 	matManager->SetImportDirectory("addons/converted/");
 	InitializeAssetManager(*matManager);
 	pragma::asset::update_extension_cache(asset::Type::Material);
@@ -975,7 +988,6 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	InitializeAssetManager(texManager);
 	texManager.GetCallbacks().onAssetReloaded = [](const std::string &assetName) {
 		// TODO: Reload all materials using this texture
-		std::cout << "";
 	};
 
 	auto matErr = matManager->LoadAsset("error");
@@ -996,17 +1008,8 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		}
 	}
 
-	auto fail = [&]() {
-		matManager = nullptr;
-		Close();
-		Release();
-		util::sleep_for_seconds(5);
-		return false;
-	};
-
 	if(!FindFontSet(defaultFontSet)) {
-		spdlog::error("Failed to find default font set '{}'!", defaultFontSet);
-		fail();
+		criticalFailure(std::format("Failed to find default font set '{}'!", defaultFontSet));
 		return false;
 	}
 
@@ -1024,28 +1027,28 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	gui.SetMaterialLoadHandler([this](const std::string &path) -> material::Material * { return GetClientState()->LoadMaterial(path); });
 	auto *fontData = fontSet.FindFontFileCandidate(FontSetFlag::Sans | FontSetFlag::Bold);
 	if(!fontData) {
-		spdlog::error("Failed to determine default font for font set '{}'!", defaultFontSet);
-		fail();
+		criticalFailure(std::format("Failed to determine default font for font set '{}'!", defaultFontSet));
 		return false;
 	}
 	auto r = gui.Initialize(GetRenderResolution(), fontData->fileName, {"source-han-sans/SourceHanSans-VF.ttf"});
 	if(r != gui::WGUI::ResultCode::Ok) {
-		Con::CERR << "Unable to initialize GUI library: ";
+		std::stringstream errMsg;
+		errMsg << "Unable to initialize GUI library: ";
 		switch(r) {
 		case gui::WGUI::ResultCode::UnableToInitializeFontManager:
-			Con::CERR << "Error initializing font manager!";
+			errMsg << "Error initializing font manager!";
 			break;
 		case gui::WGUI::ResultCode::ErrorInitializingShaders:
-			Con::CERR << "Error initializing shaders!";
+			errMsg << "Error initializing shaders!";
 			break;
 		case gui::WGUI::ResultCode::FontNotFound:
-			Con::CERR << "Font not found!";
+			errMsg << "Font not found!";
 			break;
 		default:
-			Con::COUT << "Unknown error!";
+			errMsg << "Unknown error!";
 			break;
 		}
-		fail();
+		criticalFailure(errMsg.str());
 		return false;
 	}
 	gui::types::WIContextMenu::SetKeyBindHandler(
@@ -1440,16 +1443,17 @@ void pragma::CEngine::SetGPUProfilingEnabled(bool bEnabled)
 	}
 }
 
-std::shared_ptr<prosper::Window> pragma::CEngine::CreateWindow(prosper::WindowSettings &settings)
+std::expected<std::shared_ptr<prosper::Window>, std::string> pragma::CEngine::CreateWindow(prosper::WindowSettings &settings)
 {
 	if(settings.width == 0 || settings.height == 0)
-		return nullptr;
+		return std::unexpected {"Attempted to create window with empty dimensions (" + std::to_string(settings.width) + "x" + std::to_string(settings.height) + "! This is not allowed."};
 	auto &mainWindowCreateInfo = get_cengine()->GetRenderContext().GetWindow().GetWindowSettings();
 	settings.flags = mainWindowCreateInfo.flags;
 	settings.api = mainWindowCreateInfo.api;
-	auto window = get_cengine()->GetRenderContext().CreateWindow(settings);
-	if(!window)
-		return nullptr;
+	auto res = get_cengine()->GetRenderContext().CreateWindow(settings);
+	if(!res)
+		return std::unexpected {res.error()};
+	auto &window = res.value();
 
 	if(g_titleBarColor.has_value())
 		(*window)->SetTitleBarColor(*g_titleBarColor);
@@ -1767,12 +1771,14 @@ void pragma::CEngine::Close()
 	};
 	closeSecondaryWindows();
 
-	gui::WGUI::GetInstance().ClearSkins(); // Should be cleared before lua states are closed
+	if (gui::WGUI::IsOpen())
+		gui::WGUI::GetInstance().ClearSkins(); // Should be cleared before lua states are closed
 	CloseClientState();
 	m_auxEffects.clear();
 	CloseSoundEngine(); // Has to be closed after client state (since clientstate may still have some references at this point)
 	m_clInstance = nullptr;
-	gui::WGUI::Close(); // Has to be closed after client state
+	if (gui::WGUI::IsOpen())
+		gui::WGUI::Close(); // Has to be closed after client state
 	RenderContext::Release();
 	g_engine = nullptr;
 

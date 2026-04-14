@@ -222,7 +222,7 @@ export namespace pragma {
 		void SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate);
 
 		void InitializeWindowInputCallbacks(prosper::Window &window);
-		std::shared_ptr<prosper::Window> CreateWindow(prosper::WindowSettings &settings);
+		std::expected<std::shared_ptr<prosper::Window>, std::string> CreateWindow(prosper::WindowSettings &settings);
 
 		void SetGpuPerformanceTimersEnabled(bool enabled);
 		std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const;

@@ -878,6 +878,43 @@ void pragma::Engine::RegisterConsoleCommands()
 			return;
 		Get()->SetProfilingEnabled(newVal);
 	}});
+
+	conVarMapEn.RegisterConCommand(
+	  "debug_material",
+	  [this](NetworkState *, BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  if(argv.empty()) {
+			  Con::CWAR << "No material specified!" << Con::endl;
+			  return;
+		  }
+		  auto &matName = argv.front();
+
+		  auto printMaterialInfo = [&matName](std::string_view identifier, NetworkState &nw) -> bool {
+			  auto *asset = nw.GetMaterialManager().FindCachedAsset(matName);
+			  auto *mat = asset ? static_cast<material::MaterialManager::AssetType *>(asset->assetObject.get()) : nullptr;
+			  if(!mat) {
+				  //  Con::CWAR << "Specified material is not loaded!" << Con::endl;
+				  return false;
+			  }
+			  auto &data = mat->GetPropertyDataBlock();
+			  if(!data) {
+				  // Con::CWAR << "Material has invalid data block!" << Con::endl;
+				  return false;
+			  }
+			  auto dataStr = mat->GetPropertyDataBlock()->ToString(mat->GetShaderIdentifier());
+			  Con::COUT << "[" << identifier << "] Material Data:\n" << dataStr << "\n" << Con::endl;
+			  return true;
+		  };
+		  size_t found = 0;
+		  auto *sv = pragma::get_engine()->GetServerNetworkState();
+		  if(sv && printMaterialInfo("Server", *sv))
+			  ++found;
+		  auto *cl = pragma::get_engine()->GetClientState();
+		  if(cl && printMaterialInfo("Client", *cl))
+			  ++found;
+		  if(found == 0)
+			  Con::CWAR << "Specified material is not loaded!" << Con::endl;
+	  },
+	  console::ConVarFlags::None, "Prints debug information about the specified material.");
 }
 
 class ModuleInstallJob : public pragma::util::ParallelWorker<bool> {

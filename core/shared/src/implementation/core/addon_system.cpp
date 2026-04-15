@@ -206,7 +206,7 @@ void pragma::AddonSystem::MountAddons()
 				  }
 #ifdef _WIN32
 				  else if(pragma::string::compare<std::string>(ext, "lnk", false) == true)
-					  mount_linked_addon(fName, m_addons, false);
+					  mount_linked_addon(path.GetString(), m_addons, false);
 #endif
 			  }
 			  else {

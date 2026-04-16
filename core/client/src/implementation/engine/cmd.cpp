@@ -26,6 +26,35 @@ static void clamp_bytes_value(std::string &value, std::string_view minVal, std::
 		value = *maxValBytes;
 }
 
+static std::expected<void, std::string> run_test(lua::State *l, std::string_view testName)
+{
+	const auto *baseTestScript = "tests/base.lua";
+	auto result = pragma::scripting::lua_core::include(l, baseTestScript, pragma::scripting::lua_core::IncludeFlags::AddToCache);
+	if(result.statusCode != Lua::StatusCode::Ok)
+		return std::unexpected {std::format("Failed to load base test lua script \"{}\"!", baseTestScript)};
+	Lua::Pop(l, result.numResults);
+
+	std::vector<std::string> files;
+	pragma::fs::find_files("scripts/tests/*.udm", &files, nullptr);
+	for(auto &fileName : files) {
+		auto filePath = pragma::util::DirPath("tests") / fileName;
+		std::string err;
+		auto status = pragma::scripting::lua_core::run_string(l, std::format("tests.load(\"{}\")", filePath.GetString()), "run", 0, &err);
+		if(status != Lua::StatusCode::Ok)
+			return std::unexpected {std::format("Failed to load test configuration \"{}\": {}", filePath.GetString(), err)};
+	}
+
+	std::string err;
+	auto status = pragma::scripting::lua_core::run_string(l, std::format("tests.queue(\"{}\")", testName), "run", 0, &err);
+	if(status != Lua::StatusCode::Ok)
+		return std::unexpected {std::format("Failed to queue test \"{}\": {}", testName, err)};
+
+	status = pragma::scripting::lua_core::run_string(l, "tests.run()", "run", 0, &err);
+	if(status != Lua::StatusCode::Ok)
+		return std::unexpected {std::format("Failed to run tests: {}", err)};
+	return {};
+}
+
 DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
 extern bool g_dumpRenderQueues;
 void pragma::CEngine::RegisterConsoleCommands()
@@ -639,4 +668,23 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  Lua::util::start_debugger_server(l);
 	  },
 	  console::ConVarFlags::None, "Starts the Lua debugger server for the clientside lua state.");
+
+	conVarMap.RegisterConCommand(
+	  "debug_run_test",
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  auto *l = state->GetLuaState();
+		  if(!l) {
+			  Con::CWAR << "No active Lua state!" << Con::endl;
+			  return;
+		  }
+		  if(argv.empty()) {
+			  Con::CWAR << "No test specified!" << Con::endl;
+			  return;
+		  }
+		  auto &testName = argv.front();
+		  auto result = run_test(l, testName);
+		  if(!result)
+			  Con::CWAR << "Failed to run test \"" << testName << "\": " << result.error() << Con::endl;
+	  },
+	  console::ConVarFlags::None, "Runs the specified test.");
 }

@@ -32,7 +32,7 @@ endfunction()
 
 pr_fetch_external_lib("alsoundsystem"           "https://github.com/Silverlan/alsoundsystem.git"      "b4a1c80e3952f5be8eaa5a60903d366bfd4fafdf")
 pr_fetch_external_lib("datasystem"              "https://github.com/Silverlan/datasystem"             "0feba2d2a0036d58c144ade31a6fe9f49a582626")
-pr_fetch_external_lib("iglfw"                   "https://github.com/Silverlan/iglfw"                  "4440cf0400fd7c991ef712bd6fecfddd94464ed8")
+pr_fetch_external_lib("iglfw"                   "https://github.com/Silverlan/iglfw"                  "c75cacf293a3cc703dd8078ff4c4ec401edf5b45")
 pr_fetch_external_lib("luasystem"               "https://github.com/Silverlan/luasystem"              "e26dfd343eed040d3e5e5faa810ca2aa31ea4df4")
 pr_fetch_external_lib("materialsystem"          "https://github.com/Silverlan/materialsystem"         "accd417b59e29797690d07b69971110d7b4f23c4")
 pr_fetch_external_lib("mathutil"                "https://github.com/Silverlan/mathutil"               "27fa92ba59e79f619f8bb29d8e62b53d1607f4d4")

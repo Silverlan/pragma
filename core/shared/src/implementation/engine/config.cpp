@@ -47,7 +47,7 @@ bool pragma::Engine::ExecConfig(const std::string &cfg, ConVarInfoList &infoList
 void pragma::Engine::ExecCommands(ConVarInfoList &cmds)
 {
 	for(auto &cmd : cmds.GetConVars())
-		RunConsoleCommand(cmd.cmd, cmd.args);
+		RunConsoleCommand(cmd.cmd, cmd.args, {.suppressOutput = true});
 }
 
 bool pragma::Engine::ExecConfig(const std::string &cfg, const std::function<void(std::string &, std::vector<std::string> &)> &callback)
@@ -108,7 +108,7 @@ void pragma::Engine::SaveEngineConfig()
 	WriteEngineConfig(f);
 }
 
-void pragma::Engine::RestoreConVarsForUnknownCommands(fs::VFilePtrReal f, const ConVarInfoList &origCvarValues, const std::map<std::string, std::shared_ptr<console::ConConf>> &stateConVars)
+void pragma::Engine::RestoreConVarsForUnknownCommands(fs::VFilePtrReal f, const ConVarInfoList &origCvarValues, const string::OrderedStringMap<std::shared_ptr<console::ConConf>> &stateConVars)
 {
 	// We need to restore commands from the previous config in cases where we don't know the command.
 	// In this case the command may be from a script or module that hasn't been loaded during this instance and

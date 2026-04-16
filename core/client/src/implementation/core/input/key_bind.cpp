@@ -89,41 +89,42 @@ bool KeyBind::Execute(pragma::platform::KeyState inputState, pragma::platform::K
 			auto bExecutedCmd = false;
 			for(auto &info : m_cmds) {
 				auto bActionCmd = (info.cmd.empty() == false && info.cmd.front() == '+') ? true : false;
-				pragma::get_cengine()->RunConsoleCommand(info.cmd, info.argv, static_cast<KeyState>(pressState), magnitude, [&info, &bExecutedCmd, pressState, bReleased, bAxisInput, bNegativeAxis, bActionCmd](pragma::console::ConConf *cf, float &magnitude) -> bool {
-					auto cmdReleased = bReleased;
-					auto flags = cf->GetFlags();
-					auto bSingleAxis = ((flags & pragma::console::ConVarFlags::JoystickAxisSingle) != pragma::console::ConVarFlags::None) ? true : false;
-					if(bNegativeAxis == true) {
-						if(bAxisInput == false || bSingleAxis == false)
-							return false;
-						magnitude = pragma::get_cengine()->GetRawJoystickAxisMagnitude();
-					}
+				pragma::get_cengine()->RunConsoleCommand(info.cmd, info.argv,
+				  {.pressState = static_cast<KeyState>(pressState), .magnitude = magnitude, .callback = [&info, &bExecutedCmd, pressState, bReleased, bAxisInput, bNegativeAxis, bActionCmd](pragma::console::ConConf *cf, float &magnitude) -> bool {
+					   auto cmdReleased = bReleased;
+					   auto flags = cf->GetFlags();
+					   auto bSingleAxis = ((flags & pragma::console::ConVarFlags::JoystickAxisSingle) != pragma::console::ConVarFlags::None) ? true : false;
+					   if(bNegativeAxis == true) {
+						   if(bAxisInput == false || bSingleAxis == false)
+							   return false;
+						   magnitude = pragma::get_cengine()->GetRawJoystickAxisMagnitude();
+					   }
 
-					if(bSingleAxis == true)
-						bExecutedCmd = true; // Single axis commands have priority over everything else
-					if(bAxisInput == true) {
-						// invalidKeyState is true if the input is neither pressed, nor released
-						auto invalidKeyState = (pressState == pragma::platform::KeyState::Invalid) ? true : false;
+					   if(bSingleAxis == true)
+						   bExecutedCmd = true; // Single axis commands have priority over everything else
+					   if(bAxisInput == true) {
+						   // invalidKeyState is true if the input is neither pressed, nor released
+						   auto invalidKeyState = (pressState == pragma::platform::KeyState::Invalid) ? true : false;
 
-						if((flags & pragma::console::ConVarFlags::JoystickAxisContinuous) != pragma::console::ConVarFlags::None && (cmdReleased == true || invalidKeyState == true))
-							cmdReleased = (pragma::get_cengine()->IsValidAxisInput(magnitude) == false) ? true : false; // Input won't count as 'released' unless joystick axis is at home position (near 0)
-						else if(invalidKeyState == true) {
-							bExecutedCmd = true; // Special case; Don't execute other commands
-							return false;        // Axis is held down, but command doesn't react to below-threshold inputs, and previous state wasn't pressed; Skip the command
-						}
-					}
-					if(bActionCmd == true) {
-						if(cmdReleased == true) {
-							pragma::get_cengine()->RunConsoleCommand('-' + info.cmd.substr(1), info.argv, static_cast<KeyState>(pressState));
-							return false; // Block this command, since we're calling "-" instead
-						}
-					}
-					if(cmdReleased == false) {
-						bExecutedCmd = true;
-						return true;
-					}
-					return false;
-				});
+						   if((flags & pragma::console::ConVarFlags::JoystickAxisContinuous) != pragma::console::ConVarFlags::None && (cmdReleased == true || invalidKeyState == true))
+							   cmdReleased = (pragma::get_cengine()->IsValidAxisInput(magnitude) == false) ? true : false; // Input won't count as 'released' unless joystick axis is at home position (near 0)
+						   else if(invalidKeyState == true) {
+							   bExecutedCmd = true; // Special case; Don't execute other commands
+							   return false;        // Axis is held down, but command doesn't react to below-threshold inputs, and previous state wasn't pressed; Skip the command
+						   }
+					   }
+					   if(bActionCmd == true) {
+						   if(cmdReleased == true) {
+							   pragma::get_cengine()->RunConsoleCommand('-' + info.cmd.substr(1), info.argv, {.pressState = static_cast<KeyState>(pressState)});
+							   return false; // Block this command, since we're calling "-" instead
+						   }
+					   }
+					   if(cmdReleased == false) {
+						   bExecutedCmd = true;
+						   return true;
+					   }
+					   return false;
+				   }});
 			}
 			return bExecutedCmd;
 		}

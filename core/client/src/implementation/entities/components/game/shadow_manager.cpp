@@ -102,6 +102,7 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
 	if(type == Type::Cube)
 		createInfo.flags = prosper::util::ImageCreateInfo::Flags::Cubemap;
+	createInfo.debugName = "shadowmap";
 	auto img = get_cengine()->GetRenderContext().CreateImage(createInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
@@ -119,8 +120,8 @@ CShadowManagerComponent::RtHandle CShadowManagerComponent::RequestRenderTarget(T
 	auto rt = pragma::util::make_shared<RenderTarget>();
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
+	rtCreateInfo.debugName = "shadowmap_rt";
 	rt->renderTarget = get_cengine()->GetRenderContext().CreateRenderTarget({depthTexture}, static_cast<prosper::ShaderGraphics *>(m_whShadowShader.get())->GetRenderPass(), rtCreateInfo);
-	rt->renderTarget->SetDebugName("shadowmap_rt");
 	set.buffers.push_back({});
 	auto &data = set.buffers.back();
 	data.lastPriority = priority;

@@ -174,7 +174,7 @@ std::shared_ptr<nwm::ServerClient> pragma::networking::NWMActiveServer::CreateCl
 std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActiveServer::Create(uint16_t tcpPort, uint16_t udpPort, nwm::ConnectionType conType)
 {
 	auto r = nwm::Server::Create<NWMActiveServer>(tcpPort, udpPort, conType);
-	r->SetTimeoutDuration(GET_TIMEOUT_DURATION(ServerState::Get()->GetConVarFloat("sv_timeout_duration")));
+	r->SetTimeoutDuration(GET_TIMEOUT_DURATION(ServerState::Get()->GetConVarValueOr<udm::Float>("sv_timeout_duration")));
 	r->Start();
 	return r;
 }
@@ -182,7 +182,7 @@ std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActi
 std::unique_ptr<pragma::networking::NWMActiveServer> pragma::networking::NWMActiveServer::Create(uint16_t port, nwm::ConnectionType conType)
 {
 	auto r = nwm::Server::Create<NWMActiveServer>(port, conType);
-	r->SetTimeoutDuration(GET_TIMEOUT_DURATION(ServerState::Get()->GetConVarFloat("sv_timeout_duration")));
+	r->SetTimeoutDuration(GET_TIMEOUT_DURATION(ServerState::Get()->GetConVarValueOr<udm::Float>("sv_timeout_duration")));
 	r->Start();
 	return r;
 }

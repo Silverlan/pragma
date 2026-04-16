@@ -2,6 +2,10 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#ifdef PRAGMA_WITH_MIMALLOC
+#include <mimalloc.h>
+#endif
+
 #undef CreateFile
 
 module pragma.shared;
@@ -611,10 +615,10 @@ void pragma::Engine::RegisterConsoleCommands()
 		  std::string name = "cmd";
 		  if(!argv.empty())
 			  name = argv.front();
-		  ::debug::get_domain().BeginTask(name);
+		  debug::get_domain().BeginTask(name);
 	  },
 	  pragma::console::ConVarFlags::None, "Start the VTune profiler.");
-	conVarMap.RegisterConCommand("debug_vtune_prof_end", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { ::debug::get_domain().EndTask(); }, pragma::console::ConVarFlags::None, "End the VTune profiler.");
+	conVarMap.RegisterConCommand("debug_vtune_prof_end", [this](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) { debug::get_domain().EndTask(); }, pragma::console::ConVarFlags::None, "End the VTune profiler.");
 #endif
 	conVarMap.RegisterConCommand(
 	  "log_level_console",
@@ -669,7 +673,7 @@ void pragma::Engine::RegisterConsoleCommands()
 	  console::ConVarFlags::None, "Deletes all cache files.");
 
 	conVarMapEn.RegisterConVar<udm::String>("cache_version", "", console::ConVarFlags::Archive, "The engine version that the cache files are associated with. If this version doesn't match the current engine version, the cache will be cleared.");
-	conVarMapEn.RegisterConVar<udm::UInt32>("cache_version_target", 17, console::ConVarFlags::None, "If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
+	conVarMapEn.RegisterConVar<udm::UInt32>("cache_version_target", 18, console::ConVarFlags::None, "If cache_version does not match this value, the cache files will be cleared and it will be set to it.");
 	conVarMapEn.RegisterConVar<udm::Boolean>("debug_profiling_enabled", false, console::ConVarFlags::None, "Enables profiling timers.");
 	conVarMapEn.RegisterConVar<udm::Boolean>("debug_disable_animation_updates", false, console::ConVarFlags::None, "Disables animation updates.");
 	conVarMapEn.RegisterConVar<udm::Boolean>("sh_mount_external_game_resources", true, console::ConVarFlags::Archive, "If set to 1, the game will attempt to load missing resources from external games.");
@@ -827,11 +831,90 @@ void pragma::Engine::RegisterConsoleCommands()
 	conVarMapEn.RegisterConCommand("debug_profiling_physics_end", debug_profiling_physics_end, console::ConVarFlags::None, "Prints physics profiling information for the last simulation step.");
 	conVarMapEn.RegisterConCommand("debug_dump_scene_graph", static_cast<void (*)(NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float)>(debug_dump_scene_graph), console::ConVarFlags::None, "Prints the game scene graph.");
 
+	conVarMapEn.RegisterConCommand(
+	  "debug_memory_usage",
+	  [](NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float) {
+		  auto printLuaMemoryUsage = []() {
+			  auto &en = *pragma::get_engine();
+			  std::vector<std::pair<lua::State *, std::string>> luaStates;
+
+			  {
+				  auto *sv = en.GetServerNetworkState();
+				  auto *lua = sv ? sv->GetLuaState() : nullptr;
+				  if(lua)
+					  luaStates.push_back({lua, "Server"});
+			  }
+
+			  {
+				  auto *cl = en.GetClientState();
+				  auto *lua = cl ? cl->GetLuaState() : nullptr;
+				  if(lua)
+					  luaStates.push_back({lua, "Client"});
+			  }
+			  Con::COUT << "Lua Memory Usage:" << Con::endl;
+			  size_t total = 0;
+			  for(auto &[state, name] : luaStates) {
+				  auto memUsage = lua::get_memory_usage(state);
+				  Con::COUT << name << ": " << util::get_pretty_bytes(memUsage) << Con::endl;
+				  total += memUsage;
+			  }
+			  Con::COUT << "Total: " << util::get_pretty_bytes(total) << Con::endl;
+		  };
+		  printLuaMemoryUsage();
+
+		  Con::COUT << "Current RSS memory usage: " << util::get_pretty_bytes(util::get_current_rss_memory_usage()) << Con::endl;
+		  Con::COUT << "Peak RSS memory usage: " << util::get_pretty_bytes(util::get_peak_rss_memory_usage()) << Con::endl;
+
+#ifdef PRAGMA_WITH_MIMALLOC
+		  Con::COUT << "mimalloc memory stats:" << Con::endl;
+		  mi_collect(true);
+		  mi_stats_print(nullptr);
+#endif
+	  },
+	  console::ConVarFlags::None, "Prints the current memory usage.");
+
 	conVarMap.RegisterConVarCallback("asset_multithreading_enabled", std::function<void(NetworkState *, const console::ConVar &, bool, bool)> {[this](NetworkState *nw, const console::ConVar &cv, bool oldVal, bool newVal) -> void {
 		if(Get() == nullptr)
 			return;
 		Get()->SetProfilingEnabled(newVal);
 	}});
+
+	conVarMapEn.RegisterConCommand(
+	  "debug_material",
+	  [this](NetworkState *, BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  if(argv.empty()) {
+			  Con::CWAR << "No material specified!" << Con::endl;
+			  return;
+		  }
+		  auto &matName = argv.front();
+
+		  auto printMaterialInfo = [&matName](std::string_view identifier, NetworkState &nw) -> bool {
+			  auto *asset = nw.GetMaterialManager().FindCachedAsset(matName);
+			  auto *mat = asset ? static_cast<material::MaterialManager::AssetType *>(asset->assetObject.get()) : nullptr;
+			  if(!mat) {
+				  //  Con::CWAR << "Specified material is not loaded!" << Con::endl;
+				  return false;
+			  }
+			  auto &data = mat->GetPropertyDataBlock();
+			  if(!data) {
+				  // Con::CWAR << "Material has invalid data block!" << Con::endl;
+				  return false;
+			  }
+			  auto dataStr = mat->GetPropertyDataBlock()->ToString(mat->GetShaderIdentifier());
+			  Con::COUT << "[" << identifier << "] Material Data:\n" << dataStr << "\n" << Con::endl;
+			  return true;
+		  };
+		  size_t found = 0;
+		  auto *sv = pragma::get_engine()->GetServerNetworkState();
+		  if(sv && printMaterialInfo("Server", *sv))
+			  ++found;
+		  auto *cl = pragma::get_engine()->GetClientState();
+		  if(cl && printMaterialInfo("Client", *cl))
+			  ++found;
+		  if(found == 0)
+			  Con::CWAR << "Specified material is not loaded!" << Con::endl;
+	  },
+	  console::ConVarFlags::None, "Prints debug information about the specified material.");
 }
 
 class ModuleInstallJob : public pragma::util::ParallelWorker<bool> {

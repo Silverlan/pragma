@@ -32,7 +32,7 @@ void pragma::ClientState::RequestServerInfo()
 {
 	Con::CCL << "Sending serverinfo request..." << Con::endl;
 	NetPacket packet;
-	packet->WriteString(GetConVarString("password"));
+	packet->WriteString(GetConVarValueOr<udm::String>("password"));
 	SendPacket(networking::net_messages::server::SERVERINFO_REQUEST, packet, networking::Protocol::SlowReliable);
 }
 
@@ -213,7 +213,7 @@ void pragma::ClientState::HandleReceiveGameInfo(NetPacket &packet)
 	game::GameModeManager::Initialize();
 	//if(IsConnected())
 	if(IsGameActive() == false)
-		StartNewGame(GetConVarString("sv_gamemode"));
+		StartNewGame(GetConVarValueOr<udm::String>("sv_gamemode"));
 	auto *game = static_cast<CGame *>(GetGameState());
 	game->InitializeGame();
 

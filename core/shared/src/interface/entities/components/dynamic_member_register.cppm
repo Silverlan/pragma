@@ -9,6 +9,17 @@ export module pragma.shared:entities.components.dynamic_member_register;
 export import :entities.enums;
 export import :entities.member_info;
 
+#ifdef WINDOWS_CLANG_COMPILER_FIX
+// Normally defined in pragma.util:global_string_table
+// but we have to define it here for now due to a linker bug on Windows
+export {
+	template<>
+	struct std::hash<pragma::util::GString> {
+		std::size_t operator()(const pragma::util::GString &k) const { return std::hash<std::string>()(k.c_str()); }
+	};
+}
+#endif
+
 export namespace pragma {
 	class BaseEntityComponentSystem;
 	class DLLNETWORK DynamicMemberRegister {

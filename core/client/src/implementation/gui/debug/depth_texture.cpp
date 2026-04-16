@@ -43,14 +43,16 @@ void pragma::gui::types::WIDebugDepthTexture::SetTexture(prosper::Texture &textu
 	imgCreateInfo.height = extents.height;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+	imgCreateInfo.debugName = "debug_depth";
 	auto img = context.CreateImage(imgCreateInfo);
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::Resolvable;
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
 	auto tex = context.CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
-	m_renderTarget = context.CreateRenderTarget({tex}, shader.GetRenderPass());
-	m_renderTarget->SetDebugName("debug_depth_rt");
+	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
+	rtCreateInfo.debugName = "debug_depth_rt";
+	m_renderTarget = context.CreateRenderTarget({tex}, shader.GetRenderPass(), rtCreateInfo);
 
 	m_dsgSceneDepthTex = context.CreateDescriptorSetGroup(ShaderDepthToRGB::DESCRIPTOR_SET);
 
@@ -59,8 +61,9 @@ void pragma::gui::types::WIDebugDepthTexture::SetTexture(prosper::Texture &textu
 	imgViewCreateInfo.levelCount = 1u; //inputImg.get_image_n_layers();
 	imgViewCreateInfo.aspectFlags = stencil ? prosper::ImageAspectFlags::StencilBit : prosper::ImageAspectFlags::DepthBit;
 	samplerCreateInfo = {};
-	m_srcDepthTex = context.CreateTexture({}, texture.GetImage(), imgViewCreateInfo, samplerCreateInfo);
-	m_srcDepthTex->SetDebugName("debug_depth_src_rt");
+	texCreateInfo = {};
+	texCreateInfo.debugName = "debug_depth_src_rt";
+	m_srcDepthTex = context.CreateTexture(texCreateInfo, texture.GetImage(), imgViewCreateInfo, samplerCreateInfo);
 	if(inputImg.GetLayerCount() == 1u)
 		m_dsgSceneDepthTex->GetDescriptorSet()->SetBindingTexture(*m_srcDepthTex, 0u);
 	else

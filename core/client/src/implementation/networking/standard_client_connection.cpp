@@ -91,7 +91,7 @@ std::unique_ptr<pragma::networking::NWMClientConnection> pragma::networking::NWM
 #ifdef _DEBUG
 	cl->SetTimeoutDuration(0.f);
 #else
-	cl->SetTimeoutDuration(get_client_state()->GetConVarFloat("sv_timeout_duration"));
+	cl->SetTimeoutDuration(get_client_state()->GetConVarValueOr<udm::Float>("sv_timeout_duration"));
 #endif
 	//cl->SetPingEnabled(false);
 	cl->Start();

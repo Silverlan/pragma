@@ -87,8 +87,8 @@ void export_world_fragment_data(mat4 mdlMatrix, vec3 vpos, bool useNormalMap, bo
 	if(useNormalMap || useParallaxMap) {
 		if(CSPEC_ENABLE_ANIMATION == 0)
 			mBone = mat4(1.0);
-		vec3 T = normalize((mBone * vec4(in_vert_tangent, 0.0)).xyz);
-		vec3 B = normalize((mBone * vec4(in_vert_bitangent, 0.0)).xyz);
+		vec3 T = normalize((mBone * vec4(in_vert_tangent.xyz, 0.0)).xyz);
+		vec3 B = normalize((mBone * vec4(get_vertex_bitangent(in_vert_normal), 0.0)).xyz);
 		vec3 N = vertNorm;
 		set_tbn_matrix(mat3(T, B, N));
 		set_vertex_normal_cs((V * mdlMatrix * vec4(vertNorm, 0)).xyz);
@@ -104,8 +104,8 @@ void export_world_fragment_data(mat4 mdlMatrix, vec3 vpos, bool useNormalMap, bo
 	// Parallax Mapping
 	/*if(use_parallax_map() == true) // We only need these if parallax mapping is enabled
 	{
-		vec3 tangent = normalize((mBone *vec4(-in_vert_tangent,0.0)).xyz);
-		vec3 bitangent = normalize((mBone *vec4(in_vert_bitangent,0.0)).xyz);
+		vec3 tangent = normalize((mBone *vec4(-in_vert_tangent.xyz,0.0)).xyz);
+		vec3 bitangent = normalize((mBone *vec4(get_vertex_bitangent(in_vert_normal),0.0)).xyz);
 		mat3 TBN = transpose(mat3(
 			normalize((mdlMatrix *vec4(tangent,0.0)).xyz),
 			normalize((mdlMatrix *vec4(bitangent,0.0)).xyz),

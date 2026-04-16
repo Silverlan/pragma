@@ -50,27 +50,27 @@ static void cl_steam_audio_enabled(pragma::NetworkState *state, ConVar *, bool, 
 		pragma::get_cgame()->ClearSoundCache();
 
 	auto *en = pragma::get_cengine();
-	soundSys->SetSteamAudioSpatializerEnabled(pragma::get_cengine()->GetConVarBool("cl_steam_audio_spatialize_enabled"));
-	soundSys->SetSteamAudioReverbEnabled(en->GetConVarBool("cl_steam_audio_reverb_enabled"));
+	soundSys->SetSteamAudioSpatializerEnabled(pragma::get_cengine()->GetConVarValueOr<udm::Boolean>("cl_steam_audio_spatialize_enabled"));
+	soundSys->SetSteamAudioReverbEnabled(en->GetConVarValueOr<udm::Boolean>("cl_steam_audio_reverb_enabled"));
 
 	soundSys->SetSteamAudioEnabled(val);
 
 	auto &props = soundSys->GetSteamAudioProperties();
-	props.spatializer.directBinaural = en->GetConVarBool("cl_steam_audio_spatialize_direct_binaural");
-	props.spatializer.HRTFInterpolation = static_cast<pragma::audio::steam_audio::SpatializerInterpolation>(en->GetConVarInt("cl_steam_audio_spatialize_hrtf_interpolation"));
-	props.spatializer.distanceAttenuation = en->GetConVarBool("cl_steam_audio_spatialize_distance_attenuation");
-	props.spatializer.airAbsorption = en->GetConVarBool("cl_steam_audio_spatialize_air_absorption");
-	props.spatializer.occlusionMode = static_cast<pragma::audio::steam_audio::SpatializerOcclusionMode>(en->GetConVarInt("cl_steam_audio_spatialize_occlusion_mode"));
-	props.spatializer.occlusionMethod = static_cast<pragma::audio::steam_audio::OcclusionMethod>(en->GetConVarInt("cl_steam_audio_spatialize_occlusion_method"));
-	props.spatializer.directLevel = en->GetConVarFloat("cl_steam_audio_spatialize_direct_level");
-	props.spatializer.indirect = en->GetConVarBool("cl_steam_audio_spatialize_indirect");
-	props.spatializer.indirectBinaural = en->GetConVarBool("cl_steam_audio_spatialize_indirect_binaural");
-	props.spatializer.indirectLevel = en->GetConVarFloat("cl_steam_audio_spatialize_indirect_level");
-	props.spatializer.simulationType = static_cast<pragma::audio::steam_audio::SimulationType>(en->GetConVarInt("cl_steam_audio_spatialize_simulation_type"));
-	props.spatializer.staticListener = en->GetConVarBool("cl_steam_audio_spatialize_static_listener");
+	props.spatializer.directBinaural = en->GetConVarValueOr<udm::Boolean>("cl_steam_audio_spatialize_direct_binaural");
+	props.spatializer.HRTFInterpolation = static_cast<pragma::audio::steam_audio::SpatializerInterpolation>(en->GetConVarValueOr<udm::Int32>("cl_steam_audio_spatialize_hrtf_interpolation"));
+	props.spatializer.distanceAttenuation = en->GetConVarValueOr<udm::Boolean>("cl_steam_audio_spatialize_distance_attenuation");
+	props.spatializer.airAbsorption = en->GetConVarValueOr<udm::Boolean>("cl_steam_audio_spatialize_air_absorption");
+	props.spatializer.occlusionMode = static_cast<pragma::audio::steam_audio::SpatializerOcclusionMode>(en->GetConVarValueOr<udm::Int32>("cl_steam_audio_spatialize_occlusion_mode"));
+	props.spatializer.occlusionMethod = static_cast<pragma::audio::steam_audio::OcclusionMethod>(en->GetConVarValueOr<udm::Int32>("cl_steam_audio_spatialize_occlusion_method"));
+	props.spatializer.directLevel = en->GetConVarValueOr<udm::Float>("cl_steam_audio_spatialize_direct_level");
+	props.spatializer.indirect = en->GetConVarValueOr<udm::Boolean>("cl_steam_audio_spatialize_indirect");
+	props.spatializer.indirectBinaural = en->GetConVarValueOr<udm::Boolean>("cl_steam_audio_spatialize_indirect_binaural");
+	props.spatializer.indirectLevel = en->GetConVarValueOr<udm::Float>("cl_steam_audio_spatialize_indirect_level");
+	props.spatializer.simulationType = static_cast<pragma::audio::steam_audio::SimulationType>(en->GetConVarValueOr<udm::Int32>("cl_steam_audio_spatialize_simulation_type"));
+	props.spatializer.staticListener = en->GetConVarValueOr<udm::Boolean>("cl_steam_audio_spatialize_static_listener");
 
-	props.reverb.indirectBinaural = en->GetConVarBool("cl_steam_audio_reverb_indirect_binaural");
-	props.reverb.simulationType = static_cast<pragma::audio::steam_audio::SimulationType>(en->GetConVarInt("cl_steam_audio_reverb_simulation_type"));
+	props.reverb.indirectBinaural = en->GetConVarValueOr<udm::Boolean>("cl_steam_audio_reverb_indirect_binaural");
+	props.reverb.simulationType = static_cast<pragma::audio::steam_audio::SimulationType>(en->GetConVarValueOr<udm::Int32>("cl_steam_audio_reverb_simulation_type"));
 
 	if(val == true)
 		reload_sound_cache();

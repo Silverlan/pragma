@@ -68,7 +68,7 @@ static void create_directory_change_listener(lua::State *l, const std::string &p
 {
 	Lua::CheckFunction(l, 2);
 	try {
-		auto listener = pragma::util::make_shared<pragma::fs::DirectoryWatcherCallback>(path, [callback](const std::string &fileName) mutable { callback(fileName); }, flags);
+		auto listener = pragma::util::make_shared<pragma::fs::DirectoryWatcherCallback>(path, [callback](const pragma::util::Path &basePath, const pragma::util::Path &filePath) mutable { callback(filePath.GetString()); }, flags);
 		Lua::Push(l, listener);
 	}
 	catch(const std::runtime_error &err) {
@@ -1471,6 +1471,10 @@ void pragma::Game::RegisterLuaClasses()
 	// Entity
 	auto &modUtil = GetLuaInterface().RegisterLibrary("util");
 	LuaCore::register_thread_pool(GetLuaState(), modUtil);
+
+	modUtil[luabind::def("get_peak_rss_memory_usage", &pragma::util::get_peak_rss_memory_usage)];
+	modUtil[luabind::def("get_current_rss_memory_usage", &pragma::util::get_current_rss_memory_usage)];
+
 	auto entDef = luabind::class_<LEntityProperty, LBasePropertyWrapper>("EntityProperty");
 	//Lua::Property::add_generic_methods<LEntityProperty,EntityHandle,luabind::class_<LEntityProperty,LBasePropertyWrapper>>(entDef);
 	entDef.def(luabind::constructor<>());

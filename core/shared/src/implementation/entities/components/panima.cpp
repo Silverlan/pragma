@@ -173,11 +173,11 @@ void PanimaComponent::DebugPrint()
 void PanimaComponent::UpdateAnimationChannelSubmitters()
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("panima_update_channel_values");
+	debug::get_domain().BeginTask("panima_update_channel_values");
 #endif
 	InitializeAnimationChannelValueSubmitters();
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 }
 

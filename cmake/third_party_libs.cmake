@@ -93,10 +93,14 @@ function(pr_fetch_third_party_repository IDENTIFIER GIT_URL GIT_SHA)
     endif()
 endfunction()
 
+# Disable tests and docs globally
+set(BUILD_TESTS OFF CACHE BOOL OFF FORCE)
+set(ENABLE_TESTS OFF CACHE BOOL OFF FORCE)
+set(ENABLE_DOCS OFF CACHE BOOL OFF FORCE)
+
 # Misc
 pr_fetch_third_party_repository("bvh"                 "https://github.com/madmann91/bvh"                    "ac41ab8")
 pr_fetch_third_party_repository("exprtk"              "https://github.com/ArashPartow/exprtk"               "f46bffcd6966d38a09023fb37ba9335214c9b959")
-pr_fetch_third_party_repository("freetype"            "https://github.com/aseprite/freetype2"               "9a2d6d97b2d8a5d22d02948b783df12b764afa2d")
 pr_fetch_third_party_repository("miniball"            "https://github.com/Silverlan/miniball"               "609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")
 
 if(WIN32)
@@ -402,25 +406,6 @@ set(BUILD_SHARED_LIBS
 pr_set_target_folder(OpenFBX third_party_libs)
 #
 
-# In Linux there is a cyclic deps between freetype,harfbuzz,pango,cairo and most importantly fontconfig. Fontconfig in linux is reposnsible for discovery of
-# fonts. (think C:\Windows\Fonts for linux but customizable via configs) recently I hit a snag in which harfbuzz failed to load due to missing pango symbols.
-# The AppImage team hit similar snag too, see https://github.com/AppImageCommunity/pkg2appimage/pull/323 and
-# https://github.com/probonopd/linuxdeployqt/issues/261 Even if I would include pango and cairo into our pipeline, CEF would complain (coincidentally hitting
-# AppImage's snag too), since that DOES use system fonts. (fontconfig has persistent presence in all graphical managers in linux)
-if(WIN32)
-    add_library(freetype SHARED IMPORTED)
-    set_property(TARGET freetype PROPERTY IMPORTED_IMPLIB "${DEPENDENCY_FREETYPE_LIBRARY}") # pragma_install_lib should pick up the dll file to install, since I
-                                                                                            # did not install a target here
-
-    target_include_directories(freetype INTERFACE ${DEPENDENCY_FREETYPE_INCLUDE})
-endif()
-# in linux the check is done in wgui
-
-if(WIN32)
-    set_target_properties(freetype PROPERTIES FOLDER third_party_libs)
-endif()
-#
-
 # tinygltf
 set(BUILD_SHARED_LIBS
     OFF
@@ -430,3 +415,8 @@ set(BUILD_SHARED_LIBS
     ON
     CACHE BOOL ON FORCE)
 #
+
+# mimalloc
+if(PRAGMA_WITH_MIMALLOC)
+    pr_fetch_third_party_lib("mimalloc" "https://github.com/microsoft/mimalloc.git" "75d69f4ab736ad9f56cdd76c7eb883f60ac48869")
+endif()

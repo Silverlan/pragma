@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
 	std::string exeName = "pragma.com";
 #else
 	std::string exeName = "pragma";
-#endif;
+#endif
 	std::string exePath = rootPath + "/" + exeName;
 
 	std::stringstream bakeArgs;

@@ -8,7 +8,7 @@ module pragma.shared;
 
 import :locale;
 import :util.resource_watcher;
-
+#pragma clang optimize off
 decltype(pragma::util::eResourceWatcherCallbackType::Model) pragma::util::eResourceWatcherCallbackType::Model = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Model);
 decltype(pragma::util::eResourceWatcherCallbackType::Material) pragma::util::eResourceWatcherCallbackType::Material = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Material);
 decltype(pragma::util::eResourceWatcherCallbackType::Texture) pragma::util::eResourceWatcherCallbackType::Texture = EResourceWatcherCallbackType::createFromEnum(EResourceWatcherCallbackType::E::Texture);
@@ -309,7 +309,7 @@ bool pragma::util::ResourceWatcherManager::MountDirectory(const std::string &pat
 		m_watchers.reserve(m_watchers.size() + watchPaths.size());
 		for(auto &watchPath : watchPaths) {
 			auto pwatchPath = DirPath(watchPath);
-			m_watchers.push_back(pragma::util::make_shared<fs::DirectoryWatcherCallback>(DirPath(path, pwatchPath).GetString(), [this, pwatchPath = std::move(pwatchPath)](const std::string &fName) { OnResourceChanged(pwatchPath, fName); }, watchFlags, m_watcherManager.get()));
+			m_watchers.push_back(pragma::util::make_shared<fs::DirectoryWatcherCallback>(DirPath(path, pwatchPath).GetString(), [this, pwatchPath = std::move(pwatchPath)](const Path &basePath, const Path &filePath) { OnResourceChanged(pwatchPath, filePath); }, watchFlags, m_watcherManager.get()));
 		}
 		m_watcherMutex.unlock();
 	}

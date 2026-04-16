@@ -78,12 +78,12 @@ export {
 			double ConnectionTime() const;
 			double TimeConnected() const;
 			virtual void PrintMessage(std::string message, console::MESSAGE type) = 0;
-			void GetConVars(std::unordered_map<std::string, std::string> **convars);
-			bool GetConVar(std::string cvar, std::string *val);
-			std::string GetConVarString(std::string cvar) const;
-			int GetConVarInt(std::string cvar) const;
-			float GetConVarFloat(std::string cvar) const;
-			bool GetConVarBool(std::string cvar) const;
+			string::StringMap<std::string> &GetConVars();
+			bool GetConVar(std::string_view cvar, std::string *val);
+			std::string GetConVarString(std::string_view cvar) const;
+			int GetConVarInt(std::string_view cvar) const;
+			float GetConVarFloat(std::string_view cvar) const;
+			bool GetConVarBool(std::string_view cvar) const;
 			ecs::BaseEntity *FindUseEntity() const;
 			void Use();
 			Vector3 GetViewPos() const;
@@ -152,7 +152,7 @@ export {
 			unsigned short m_portUDP;
 			std::unordered_map<int, bool> m_keysPressed;
 			bool m_bLocalPlayer;
-			std::unordered_map<std::string, std::string> m_conVars;
+			string::StringMap<std::string> m_conVars;
 
 			// Movement
 			float m_speedWalk;

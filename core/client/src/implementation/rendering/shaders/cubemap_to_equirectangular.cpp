@@ -36,6 +36,7 @@ std::shared_ptr<prosper::IImage> ShaderCubemapToEquirectangular::CreateEquirecta
 	createInfo.flags |= flags;
 	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+	createInfo.debugName = "shader_cubemap_to_equirectangular";
 
 	return get_cengine()->GetRenderContext().CreateImage(createInfo);
 }
@@ -54,10 +55,8 @@ std::shared_ptr<prosper::RenderTarget> ShaderCubemapToEquirectangular::CreateEqu
 
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	//rtCreateInfo.useLayerFramebuffers = true;
-	auto rt = get_cengine()->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass(), rtCreateInfo);
-	if(rt)
-		rt->SetDebugName("equirectangular_render_target");
-	return rt;
+	rtCreateInfo.debugName = "shader_cubemap_to_equirectangular";
+	return get_cengine()->GetRenderContext().CreateRenderTarget({tex}, GetRenderPass(), rtCreateInfo);
 }
 
 std::shared_ptr<prosper::Texture> ShaderCubemapToEquirectangular::CubemapToEquirectangularTexture(prosper::Texture &cubemap, uint32_t width, uint32_t height, math::Degree range, prosper::ImageLayout cubemapLayout)

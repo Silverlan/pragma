@@ -16,7 +16,7 @@ void pragma::ClientState::StartResourceTransfer()
 	if(m_client != nullptr)
 		m_client->SetTimeoutDuration(0.0); // Disable timeout until resource transfer has been completed
 	NetPacket resourceReq;
-	resourceReq->Write<bool>(GetConVarBool("cl_allowdownload"));
+	resourceReq->Write<bool>(GetConVarValueOr<udm::Boolean>("cl_allowdownload"));
 	SendPacket(networking::net_messages::server::RESOURCE_BEGIN, resourceReq, networking::Protocol::SlowReliable);
 }
 

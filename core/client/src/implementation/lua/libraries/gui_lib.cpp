@@ -352,6 +352,7 @@ std::shared_ptr<prosper::IImage> Lua::gui::create_color_image(uint32_t w, uint32
 	imgCreateInfo.height = h;
 	imgCreateInfo.usage = usageFlags;
 	imgCreateInfo.postCreateLayout = initialLayout;
+	imgCreateInfo.debugName = "lua_render_target";
 	if(msaa)
 		imgCreateInfo.samples = pragma::gui::wGUI::MSAA_SAMPLE_COUNT;
 	return context.CreateImage(imgCreateInfo);

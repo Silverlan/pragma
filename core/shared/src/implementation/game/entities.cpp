@@ -15,8 +15,8 @@ pragma::ecs::BaseEntity *pragma::Game::CreateEntity(std::string classname) { ret
 void pragma::Game::SpawnEntity(ecs::BaseEntity *ent)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("spawn_entity");
-	pragma::util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
+	debug::get_domain().BeginTask("spawn_entity");
+	pragma::util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	ent->OnSpawn();
 }

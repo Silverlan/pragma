@@ -25,16 +25,15 @@ bool CRaytracingComponent::InitializeBuffers()
 {
 	if(s_allResourcesInitialized)
 		return true;
-	auto instanceSize = sizeof(SubMeshRenderInfoBufferData);
-	auto instanceCount = 32'768;
-	auto maxInstanceCount = instanceCount * 10u;
+	constexpr auto instanceSize = sizeof(SubMeshRenderInfoBufferData);
+	constexpr uint32_t instanceCount = 32'768u; // Not an absolute limit, but exceeding it will trigger re-allocation
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = instanceSize * instanceCount;
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
+	createInfo.debugName = "entity_mesh_info_buf";
 	m_entityMeshCount = 0;
-	s_entityMeshInfoBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.1f);
-	s_entityMeshInfoBuffer->SetDebugName("entity_mesh_info_buf");
+	s_entityMeshInfoBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize);
 
 	s_gameSceneDsg = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderRayTracing::DESCRIPTOR_SET_GAME_SCENE);
 	s_materialDescriptorArrayManager = prosper::DescriptorArrayManager::Create<material::MaterialDescriptorArrayManager>(s_gameSceneDsg, math::to_integral(ShaderRayTracing::GameSceneBinding::TextureArray));

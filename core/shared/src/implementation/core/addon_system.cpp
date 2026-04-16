@@ -182,11 +182,11 @@ void pragma::AddonSystem::MountAddons()
 	try {
 		m_addonWatcher = pragma::util::make_shared<fs::DirectoryWatcherCallback>(
 		  "addons",
-		  [](const std::string &fName) {
+		  [](const util::Path &basePath, const util::Path &path) {
 			  std::string ext;
-			  if(ufile::get_extension(fName, &ext) == true) {
+			  if(ufile::get_extension(path.GetString(), &ext) == true) {
 				  if(pragma::string::compare<std::string>(ext, "pad", false) == true) {
-					  auto *pad = LoadPADPackage("addons\\" + fName);
+					  auto *pad = LoadPADPackage(util::DirPath("addons") / path);
 					  if(pad != nullptr) {
 						  auto *archFile = pad->GetArchiveFile();
 						  if(archFile != nullptr) {
@@ -206,12 +206,12 @@ void pragma::AddonSystem::MountAddons()
 				  }
 #ifdef _WIN32
 				  else if(pragma::string::compare<std::string>(ext, "lnk", false) == true)
-					  mount_linked_addon(fName, m_addons, false);
+					  mount_linked_addon(path.GetString(), m_addons, false);
 #endif
 			  }
 			  else {
 				  // Directory
-				  MountAddon(fName, m_addons, false);
+				  MountAddon(path.GetString(), m_addons, false);
 			  }
 		  },
 		  fs::DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges);

@@ -84,8 +84,8 @@ static void record_render_ui(pragma::gui::types::WIBase &el, prosper::IImage &im
 static bool render_ui(pragma::gui::types::WIBase &el, prosper::RenderTarget &rt, const Lua::gui::DrawToTextureInfo &info)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	debug::get_domain().BeginTask("draw_ui_to_texture");
-	pragma::util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+	pragma::debug::get_domain().BeginTask("draw_ui_to_texture");
+	pragma::util::ScopeGuard sgVtune {[]() { pragma::debug::get_domain().EndTask(); }};
 #endif
 	auto &context = rt.GetContext();
 	auto drawCmd = info.commandBuffer;
@@ -1920,8 +1920,8 @@ static void restore_cursor_pos_override(pragma::gui::types::WIRoot *elRoot, cons
 void Lua::WIBase::InjectMouseMoveInput(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("inect_mouse_move_input");
-	pragma::util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
+	pragma::debug::get_domain().BeginTask("inect_mouse_move_input");
+	pragma::util::ScopeGuard sgVtune {[]() { pragma::debug::get_domain().EndTask(); }};
 #endif
 	auto *elRoot = hPanel.GetBaseRootElement();
 	auto absPos = hPanel.GetAbsolutePos();

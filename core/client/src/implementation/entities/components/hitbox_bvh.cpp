@@ -518,7 +518,7 @@ bool CHitboxBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 
 		return false;
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("hitbox_bvh_raycast");
+	debug::get_domain().BeginTask("hitbox_bvh_raycast");
 #endif
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	pragma::util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};

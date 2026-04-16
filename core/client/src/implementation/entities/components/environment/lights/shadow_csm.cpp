@@ -245,6 +245,7 @@ void CShadowCSMComponent::InitializeTextureSet(TextureSet &set, rendering::Shado
 	if(smType == rendering::ShadowMapType::Static)
 		imgCreateInfo.usage |= prosper::ImageUsageFlags::TransferSrcBit;
 	imgCreateInfo.layers = layerCount;
+	imgCreateInfo.debugName = "csm";
 	auto img = get_cengine()->GetRenderContext().CreateImage(imgCreateInfo);
 
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};
@@ -261,9 +262,9 @@ void CShadowCSMComponent::InitializeTextureSet(TextureSet &set, rendering::Shado
 	auto tex = get_cengine()->GetRenderContext().CreateTexture(texCreateInfo, *img, imgViewCreateInfo, samplerCreateInfo);
 	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
 	rtCreateInfo.useLayerFramebuffers = true;
+	rtCreateInfo.debugName = "csm_rt";
 
 	set.renderTarget = get_cengine()->GetRenderContext().CreateRenderTarget({tex}, static_cast<prosper::ShaderGraphics *>(wpShaderShadow.get())->GetRenderPass(), rtCreateInfo);
-	set.renderTarget->SetDebugName("csm_rt");
 }
 void CShadowCSMComponent::UpdateFrustum(CCameraComponent &cam, const Mat4 &matView, const Vector3 &dir)
 {

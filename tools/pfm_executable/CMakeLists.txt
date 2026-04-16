@@ -2,6 +2,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 
 set(PROJ_NAME pfm_executable)
 pr_add_executable(${PROJ_NAME} APP_ICON_WIN "${CMAKE_CURRENT_SOURCE_DIR}/appicon.rc" DEBUGGER_LAUNCH_ARGS "-console -luaext")
+pr_init_main_application_executable(${PROJ_NAME})
 
 pr_add_third_party_dependency(${PROJ_NAME} pragma_executable PUBLIC)
 

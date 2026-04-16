@@ -307,7 +307,7 @@ void pragma::gui::types::WIServerBrowser::DoRefresh()
 {
 	m_bRefreshScheduled = false;
 	if(m_msQueryDispatcher) {
-		networking::IMasterServerQueryDispatcher::Filter filter {get_client_state()->GetConVarString("networking_library")};
+		networking::IMasterServerQueryDispatcher::Filter filter {get_client_state()->GetConVarValueOr<udm::String>("networking_library")};
 		m_msQueryDispatcher->QueryServers(filter);
 	}
 }

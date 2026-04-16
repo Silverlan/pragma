@@ -59,6 +59,5 @@ int Lua::ents::Client::get_instance_bone_buffer(lua::State *l)
 {
 	auto &instanceBuffer = pragma::get_instance_bone_buffer();
 	Lua::Push<std::shared_ptr<prosper::IBuffer>>(l, instanceBuffer);
-	PushInt(l, instanceBuffer->GetInstanceSize());
-	return 2;
+	return 1;
 }

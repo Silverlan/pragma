@@ -60,14 +60,14 @@ void DLLNETWORK RunEngine(int argc, char *argv[])
 }
 }
 
-static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &get_convar_ptrs()
+static pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> &get_convar_ptrs()
 {
-	static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> ptrs;
+	static pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> ptrs;
 	return ptrs;
 }
 
-std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &pragma::Engine::GetConVarPtrs() { return get_convar_ptrs(); }
-pragma::console::ConVarHandle pragma::Engine::GetConVarHandle(std::string scvar) { return CVarHandler::GetConVarHandle(get_convar_ptrs(), scvar); }
+pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> &pragma::Engine::GetConVarPtrs() { return get_convar_ptrs(); }
+pragma::console::ConVarHandle pragma::Engine::GetConVarHandle(std::string_view scvar) { return CVarHandler::GetConVarHandle(get_convar_ptrs(), scvar); }
 
 static pragma::Engine *g_engine = nullptr;
 
@@ -119,7 +119,7 @@ pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullpt
 #endif
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::open_domain();
+	debug::open_domain();
 #endif
 
 	debug::set_lua_backtrace_function([this]() -> std::string {
@@ -185,7 +185,7 @@ void pragma::Engine::SetConsoleType(ConsoleType type) { m_consoleType = type; }
 
 pragma::Engine::ConsoleType pragma::Engine::GetConsoleType() const { return (m_consoleInfo && m_consoleInfo->console) ? ConsoleType::Terminal : ConsoleType::None; }
 
-void pragma::Engine::SetReplicatedConVar(const std::string &cvar, const std::string &val)
+void pragma::Engine::SetReplicatedConVar(std::string_view cvar, const std::string &val)
 {
 	auto *client = GetClientState();
 	if(client == nullptr)
@@ -770,8 +770,8 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	if(!IsServerOnly())
 		LoadConfig();
 
-	auto cacheVersion = GetConVarInt("cache_version");
-	auto cacheVersionTarget = GetConVarInt("cache_version_target");
+	auto cacheVersion = GetConVarValueOr<udm::Int32>("cache_version");
+	auto cacheVersionTarget = GetConVarValueOr<udm::Int32>("cache_version_target");
 	if(cacheVersion != cacheVersionTarget) {
 		SetConVar("cache_version", std::to_string(cacheVersionTarget));
 		ClearCache();
@@ -781,9 +781,9 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	if(server != nullptr && IsServerOnly())
 		LoadConfig();
 
-	if(!GetConVarBool("asset_file_cache_enabled"))
+	if(!GetConVarValueOr<udm::Boolean>("asset_file_cache_enabled"))
 		fs::set_use_file_index_cache(false);
-	if(!GetConVarBool("asset_multithreading_enabled"))
+	if(!GetConVarValueOr<udm::Boolean>("asset_multithreading_enabled"))
 		SetAssetMultiThreadedLoadingEnabled(false);
 	return true;
 }
@@ -793,8 +793,8 @@ void pragma::Engine::InitializeAssetManager(util::FileAssetManager &assetManager
 	assetManager.SetLogHandler(&log);
 	assetManager.SetExternalSourceFileImportHandler([this, &assetManager](const std::string &path, const std::string &outputPath) -> std::optional<std::string> {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-		::debug::get_domain().BeginTask("import_asset_file");
-		pragma::util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
+		debug::get_domain().BeginTask("import_asset_file");
+		pragma::util::ScopeGuard sg {[]() { debug::get_domain().EndTask(); }};
 #endif
 		auto *nw = GetClientState();
 		if(!nw || !nw->IsGameActive()) {
@@ -1104,6 +1104,14 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 	}
 	zip.AddFile("engine.txt", engineInfo.str());
 
+	// Memory
+	{
+		std::stringstream memInfo;
+		memInfo << "Current RSS memory usage: " << util::get_pretty_bytes(util::get_current_rss_memory_usage()) << "\n";
+		memInfo << "Peak RSS memory usage: " << util::get_pretty_bytes(util::get_peak_rss_memory_usage()) << "\n";
+		zip.AddFile("memory_usage.txt", memInfo.str());
+	}
+
 	std::stringstream compilerInfo;
 #if defined(__clang__)
 
@@ -1138,7 +1146,7 @@ void pragma::Engine::DumpDebugInformation(uzip::ZIPFile &zip) const
 
 	add_zip_file(zip, "git_info.txt", "git_info.txt");
 
-	auto fWriteConvars = [&zip](const std::map<std::string, std::shared_ptr<console::ConConf>> &cvarMap, const std::string &fileName) {
+	auto fWriteConvars = [&zip](const string::OrderedStringMap<std::shared_ptr<console::ConConf>> &cvarMap, const std::string &fileName) {
 		std::stringstream convars;
 		for(auto &pair : cvarMap) {
 			if(pair.second->GetType() != console::ConType::Variable)
@@ -1235,7 +1243,7 @@ pragma::Engine::~Engine()
 	if(math::is_flag_set(m_stateFlags, StateFlags::Running))
 		throw std::runtime_error("Engine has to be closed before it can be destroyed!");
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::close_domain();
+	debug::close_domain();
 #endif
 
 	debug::set_lua_backtrace_function(nullptr);

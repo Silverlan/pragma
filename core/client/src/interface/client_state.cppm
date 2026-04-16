@@ -55,16 +55,16 @@ export namespace pragma {
 	class DLLCLIENT ClientState : public NetworkState {
 		// For internal use only! Not to be used directly!
 	  public:
-		virtual std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() override;
-		static console::ConVarHandle GetConVarHandle(std::string scvar);
+		virtual string::StringMap<std::shared_ptr<console::PtrConVar>> &GetConVarPtrs() override;
+		static console::ConVarHandle GetConVarHandle(std::string_view scvar);
 		//
 	  private:
 		std::unique_ptr<networking::IClient> m_client;
 		std::unique_ptr<ServerInfo> m_svInfo;
 		std::unique_ptr<ResourceDownload> m_resDownload; // Current resource file being downloaded
 
-		unsigned int GetServerMessageID(std::string identifier);
-		unsigned int GetServerConVarID(std::string scmd);
+		unsigned int GetServerMessageID(std::string_view identifier);
+		unsigned int GetServerConVarID(std::string_view scmd);
 		bool GetServerConVarIdentifier(uint32_t id, std::string &cvar);
 
 		// Sound
@@ -88,7 +88,7 @@ export namespace pragma {
 		void ResetGameClient();
 		void DestroyClient();
 
-		virtual void implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const override;
+		virtual void implFindSimilarConVars(std::string_view input, std::vector<SimilarCmdInfo> &similarCmds) const override;
 		virtual material::Material *LoadMaterial(const std::string &path, bool precache, bool bReload) override;
 	  public:
 		ClientState();
@@ -137,8 +137,8 @@ export namespace pragma {
 		static void RegisterVulkanLuaInterface(Lua::Interface &lua);
 		// CVars
 		void RegisterServerConVar(std::string scmd, unsigned int id);
-		virtual bool RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr) override;
-		virtual console::ConVar *SetConVar(std::string scmd, std::string value, bool bApplyIfEqual = false) override;
+		virtual console::ConCommandResult RunConsoleCommand(std::string_view scmd, std::vector<std::string> &argv, BasePlayerComponent *pl = nullptr, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr) override;
+		virtual SetConVarResult SetConVar(std::string_view scmd, const std::string &value, bool bApplyIfEqual = false) override;
 		// Sockets
 		void Connect(std::string ip, std::string port = networking::DEFAULT_PORT_TCP);
 		// Peer-to-peer only!

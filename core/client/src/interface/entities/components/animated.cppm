@@ -13,7 +13,7 @@ export import pragma.prosper;
 export namespace pragma {
 	void initialize_articulated_buffers();
 	void clear_articulated_buffers();
-	const std::shared_ptr<prosper::IUniformResizableBuffer> &get_instance_bone_buffer();
+	const std::shared_ptr<prosper::IDynamicResizableBuffer> &get_instance_bone_buffer();
 
 	namespace cAnimatedComponent {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SKELETON_UPDATED;

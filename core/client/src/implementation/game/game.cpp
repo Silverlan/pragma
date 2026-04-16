@@ -650,8 +650,8 @@ void pragma::CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 		throw std::runtime_error {"Failed to create scene."};
 	scene->GetEntity().SetName("scene_game");
 	m_scene = scene->GetHandle();
-	scene->SetDebugMode(static_cast<SceneDebugMode>(GetConVarInt("render_debug_mode")));
-	SetViewModelFOV(GetConVarFloat("cl_fov_viewmodel"));
+	scene->SetDebugMode(static_cast<SceneDebugMode>(GetConVarValueOr<udm::Int32>("render_debug_mode")));
+	SetViewModelFOV(GetConVarValueOr<udm::Float>("cl_fov_viewmodel"));
 
 	auto *entRenderer = CreateEntity<CRasterizationRenderer>();
 	if(entRenderer) {
@@ -660,7 +660,7 @@ void pragma::CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 			auto *renderer = rasterization->GetRendererComponent<CRendererComponent>();
 			if(renderer) {
 				scene->SetRenderer(renderer);
-				rasterization->SetSSAOEnabled(GetConVarBool("cl_render_ssao"));
+				rasterization->SetSSAOEnabled(GetConVarValueOr<udm::Boolean>("cl_render_ssao"));
 				scene->ReloadRenderTarget(static_cast<uint32_t>(resolution.x), static_cast<uint32_t>(resolution.y));
 				scene->SetWorldEnvironment(GetWorldEnvironment());
 			}
@@ -672,7 +672,7 @@ void pragma::CGame::InitializeGame() // Called by NET_cl_resourcecomplete
 
 	Resize(false);
 
-	auto *cam = CreateCamera<CCameraComponent>(scene->GetWidth(), scene->GetHeight(), GetConVarFloat("cl_render_fov"), get_cengine()->GetNearZ(), get_cengine()->GetFarZ());
+	auto *cam = CreateCamera<CCameraComponent>(scene->GetWidth(), scene->GetHeight(), GetConVarValueOr<udm::Float>("cl_render_fov"), get_cengine()->GetNearZ(), get_cengine()->GetFarZ());
 	if(cam) {
 		auto toggleC = cam->GetEntity().GetComponent<CToggleComponent>();
 		if(toggleC.valid())

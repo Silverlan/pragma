@@ -41,7 +41,7 @@ decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_POSITION) ShaderGameWorld
 decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_UV) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_UV = {ShaderEntity::VERTEX_ATTRIBUTE_UV, VERTEX_BINDING_VERTEX};
 decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_NORMAL) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_NORMAL = {ShaderEntity::VERTEX_ATTRIBUTE_NORMAL, VERTEX_BINDING_VERTEX};
 decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_TANGENT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_TANGENT = {ShaderEntity::VERTEX_ATTRIBUTE_TANGENT, VERTEX_BINDING_VERTEX};
-decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BI_TANGENT = {ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT, VERTEX_BINDING_VERTEX};
+// decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BI_TANGENT) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_BI_TANGENT = {ShaderEntity::VERTEX_ATTRIBUTE_BI_TANGENT, VERTEX_BINDING_VERTEX};
 
 decltype(ShaderGameWorldLightingPass::VERTEX_BINDING_LIGHTMAP) ShaderGameWorldLightingPass::VERTEX_BINDING_LIGHTMAP = {prosper::VertexInputRate::Vertex};
 decltype(ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderGameWorldLightingPass::VERTEX_ATTRIBUTE_LIGHTMAP_UV = {ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV, VERTEX_BINDING_LIGHTMAP};
@@ -63,14 +63,13 @@ static void initialize_material_settings_cache()
 	// does not happen automatically). TODO: Implement this? On the other hand, material data
 	// isn't that big to begin with, so maybe just make sure the buffer is large enough for all use cases?
 	constexpr auto matSize = rendering::shader_material::MAX_MATERIAL_SIZE;
-	constexpr size_t count = 524'288;
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	//bufCreateInfo.size = sizeof(ShaderGameWorldLightingPass::MaterialData) *2'048;
-	bufCreateInfo.size = matSize * count; // ~64 MiB
+	bufCreateInfo.size = pragma::console::get_con_var_value_bytes(*pragma::get_client_state(), "render_material_settings_buffer_initial_capacity", MATERIAL_SETTINGS_BUFFER_DEFAULT_INITIAL_SIZE);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
-	g_materialSettingsBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo, matSize, matSize * count, 0.05f);
+	g_materialSettingsBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo, matSize);
 	g_materialSettingsBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 }
 ShaderGameWorldLightingPass::ShaderGameWorldLightingPass(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderGameWorld(context, identifier, vsShader, fsShader, gsShader)
@@ -191,7 +190,7 @@ void ShaderGameWorldLightingPass::InitializeGfxPipelineVertexAttributes()
 	AddVertexAttribute(VERTEX_ATTRIBUTE_UV);
 	AddVertexAttribute(VERTEX_ATTRIBUTE_NORMAL);
 	AddVertexAttribute(VERTEX_ATTRIBUTE_TANGENT);
-	AddVertexAttribute(VERTEX_ATTRIBUTE_BI_TANGENT);
+	// AddVertexAttribute(VERTEX_ATTRIBUTE_BI_TANGENT);
 
 	AddVertexAttribute(VERTEX_ATTRIBUTE_LIGHTMAP_UV);
 

@@ -28,6 +28,7 @@ std::shared_ptr<prosper::RenderTarget> pragma::ShaderCombineImageChannels::Creat
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit;
 	imgCreateInfo.width = extents.width;
 	imgCreateInfo.height = extents.height;
+	imgCreateInfo.debugName = "shader_combine_image_channels";
 	auto img = context.CreateImage(imgCreateInfo);
 
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};

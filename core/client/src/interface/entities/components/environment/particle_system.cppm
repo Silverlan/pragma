@@ -25,6 +25,10 @@ export namespace pragma::ecs {
 	DLLCLIENT std::unordered_map<std::string, std::string> get_particle_key_values(lua::State *l, const luabind::map<std::string, void> &keyValues);
 	class DLLCLIENT CParticleSystemComponent final : public BaseEnvParticleSystemComponent, public CBaseNetComponent, public pts::CParticleSystemBaseKeyValues {
 	  public:
+		static constexpr std::string_view PARTICLE_BUFFER_DEFAULT_INITIAL_SIZE = "100KiB";
+		static constexpr std::string_view PARTICLE_ANIMATION_START_BUFFER_DEFAULT_INITIAL_SIZE = "50KiB";
+		static constexpr std::string_view PARTICLE_ANIMATION_BUFFER_DEFAULT_INITIAL_SIZE = "50KiB";
+
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		static const uint32_t PARTICLE_DATA_SIZE;

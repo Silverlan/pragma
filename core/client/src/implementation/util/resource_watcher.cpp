@@ -133,8 +133,12 @@ void pragma::util::CResourceWatcherManager::OnResourceChanged(const Path &rootPa
 		auto shaderPath = "shaders\\" + strPath;
 		Con::COUT << "[ResourceWatcher] Shader has changed: " << shaderPath << ". Attempting to reload..." << Con::endl;
 #endif
-		auto canonShader = fs::get_canonicalized_path(strPath);
-		ufile::remove_extension_from_filename(canonShader);
+		auto canonShaderPath = util::Path::CreateFile(strPath);
+		canonShaderPath.Canonicalize();
+		canonShaderPath.RemoveFileExtension();
+		canonShaderPath.PopFront(); // Remove root dir ("shaders")
+
+		auto canonShader = canonShaderPath.GetString();
 		string::to_lower(canonShader);
 		auto &shaderManager = get_cengine()->GetShaderManager();
 		std::vector<std::string> reloadShaders;

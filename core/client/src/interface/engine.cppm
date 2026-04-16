@@ -176,8 +176,8 @@ export namespace pragma {
 		// Util
 		virtual bool IsServerOnly() override;
 		// Convars
-		virtual console::ConConf *GetConVar(const std::string &cv) override;
-		virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr) override;
+		virtual console::ConConf *GetConVar(std::string_view cv) override;
+		virtual console::ConCommandResult RunConsoleCommand(std::string_view cmd, std::vector<std::string> &argv, const RunConCommandInfo &cmdInfo = {}) override;
 		// ClientState
 		virtual NetworkState *GetClientState() const override;
 		ClientState *OpenClientState();
@@ -222,7 +222,7 @@ export namespace pragma {
 		void SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate);
 
 		void InitializeWindowInputCallbacks(prosper::Window &window);
-		std::shared_ptr<prosper::Window> CreateWindow(prosper::WindowSettings &settings);
+		std::expected<std::shared_ptr<prosper::Window>, std::string> CreateWindow(prosper::WindowSettings &settings);
 
 		void SetGpuPerformanceTimersEnabled(bool enabled);
 		std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const;

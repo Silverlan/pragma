@@ -96,13 +96,13 @@ void pragma::gui::types::WINetGraph::Initialize()
 
 	auto *client = get_client_state();
 	std::stringstream ssUpdateRate;
-	ssUpdateRate << "update rate: " << client->GetConVarInt("cl_updaterate");
+	ssUpdateRate << "update rate: " << client->GetConVarValueOr<udm::Int32>("cl_updaterate");
 
 	auto *pTextUpdateRate = CreateText(ssUpdateRate.str());
 	m_txtUpdateRate = pTextUpdateRate->GetHandle();
 
 	std::stringstream ssTickRate;
-	ssTickRate << "tick rate: " << client->GetConVarInt("sv_tickrate");
+	ssTickRate << "tick rate: " << client->GetConVarValueOr<udm::Int32>("sv_tickrate");
 
 	auto *pTextTickRate = CreateText(ssTickRate.str());
 	m_txtTickRate = pTextTickRate->GetHandle();

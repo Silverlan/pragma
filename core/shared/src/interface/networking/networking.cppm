@@ -9,6 +9,7 @@ export import :networking.error;
 export import :networking.game_server_info;
 export import :networking.ip_address;
 export import :networking.master_server_query_dispatcher;
+export import :networking.message;
 export import :networking.message_tracker;
 export import :networking.modules;
 export import :networking.net_message_map;

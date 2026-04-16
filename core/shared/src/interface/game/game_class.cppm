@@ -9,6 +9,7 @@ module;
 export module pragma.shared:game.game;
 
 export import :console.convar;
+export import :console.cvar_handler;
 export import :console.output;
 export import :core.addon_system;
 export import :debug.performance_profiler;
@@ -263,14 +264,18 @@ export {
 			void ClearTimers();
 			// ConVars
 			template<class T>
-			T *GetConVar(const std::string &scmd);
-			console::ConConf *GetConVar(const std::string &scmd);
-			int GetConVarInt(const std::string &scmd);
-			std::string GetConVarString(const std::string &scmd);
-			float GetConVarFloat(const std::string &scmd);
-			bool GetConVarBool(const std::string &scmd);
-			console::ConVarFlags GetConVarFlags(const std::string &scmd);
-			const std::unordered_map<std::string, std::vector<console::CvarCallback>> &GetConVarCallbacks() const;
+			T *GetConVar(std::string_view scmd);
+			console::ConConf *GetConVar(std::string_view scmd);
+
+			template<typename T>
+			    requires(console::is_valid_convar_type_v<T>)
+			T GetConVarValueOr(std::string_view cvarName, const T &defVal = {}, bool applyConstraint = false) const;
+			template<typename T>
+			    requires(console::is_valid_convar_type_v<T>)
+			std::optional<T> GetConVarValue(std::string_view cvarName, bool applyConstraint = false) const;
+
+			console::ConVarFlags GetConVarFlags(std::string_view scmd);
+			const string::StringMap<std::vector<console::CvarCallback>> &GetConVarCallbacks() const;
 
 			virtual Float GetFrictionScale() const = 0;
 			virtual Float GetRestitutionScale() const = 0;
@@ -309,9 +314,9 @@ export {
 			std::unique_ptr<LuaCore::ClassManager> m_luaClassManager;
 			std::unique_ptr<LuaDirectoryWatcherManager> m_scriptWatcher = nullptr;
 			std::unique_ptr<physics::SurfaceMaterialManager> m_surfaceMaterialManager = nullptr;
-			std::unordered_map<std::string, std::vector<console::CvarCallback>> m_cvarCallbacks;
+			string::StringMap<std::vector<console::CvarCallback>> m_cvarCallbacks;
 			std::vector<std::unique_ptr<Timer>> m_timers;
-			std::unordered_map<std::string, int> m_luaNetMessages;
+			string::StringMap<int> m_luaNetMessages;
 			std::vector<std::string> m_luaNetMessageIndex;
 			MapInfo m_mapInfo = {};
 			std::deque<unsigned int> m_entIndices;
@@ -374,6 +379,11 @@ export {
 			void SetupEntity(ecs::BaseEntity *ent);
 			virtual void InitializeEntityComponents(EntityComponentManager &componentManager);
 			virtual void OnMapLoaded();
+		private:
+			// This just static casts our network state to a CVarHandler.
+			// This is needed as a workaround for a msvc linker bug and should
+			// not be used outside of that.
+			const console::CVarHandler *GetNetworkStateCVarHandler() const;
 		};
 		using namespace pragma::math::scoped_enum::bitwise;
 	}
@@ -382,7 +392,7 @@ export {
 	DLLNETWORK void IncludeLuaEntityBaseClasses(lua::State *l, int refEntities, int obj, int data);
 	namespace pragma {
 		template<class T>
-		T *Game::GetConVar(const std::string &scmd)
+		T *Game::GetConVar(std::string_view scmd)
 		{
 			console::ConConf *cv = GetConVar(scmd);
 			if(cv == nullptr)
@@ -467,6 +477,20 @@ export {
 				return nullptr;
 			}
 			return el;
+		}
+
+		template<typename T>
+		    requires(console::is_valid_convar_type_v<T>)
+		T Game::GetConVarValueOr(std::string_view cvarName, const T &defVal, bool applyConstraint) const
+		{
+			return GetNetworkStateCVarHandler()->GetConVarValueOr<T>(cvarName, defVal, applyConstraint);
+		}
+
+		template<typename T>
+		    requires(console::is_valid_convar_type_v<T>)
+		std::optional<T> Game::GetConVarValue(std::string_view cvarName, bool applyConstraint) const
+		{
+			return GetNetworkStateCVarHandler()->GetConVarValue<T>(cvarName, applyConstraint);
 		}
 	}
 

@@ -986,14 +986,52 @@ if not deps_only:
 		os.chdir(build_dir)
 		targets = ["pragma-install-full"]
 
+		if platform == "win32":
+			vsdevcmd_path = determine_vsdevcmd_path(deps_dir)
+
+		def dump_and_print_build_commands(build_args):
+			cmds = []
+			if platform == "win32":
+				fileName = "build.bat"
+				cmds.append('call "' +vsdevcmd_path +'" -arch=x64')
+			else:
+				fileName = "build.sh"
+			filePath = Path(build_dir) / fileName
+			cmds.append(join_args(build_args))
+			
+			for cmd in cmds:
+				print_info(cmd)
+
+			if platform == "win32":
+				cmds = ["@echo off"] +cmds
+			else:
+				cmds = ["#!/bin/bash"] +cmds
+
+			with open(str(filePath), "w") as f:
+				for cmd in cmds:
+					f.write(cmd +"\n")
+				return filePath
+			return None
+
 		print_msg("Running build command...")
-		cmake_build(build_config,targets,verbose=verbose)
+		try:
+			build_args = cmake_build(build_config,targets,verbose=verbose,buildDir=build_dir)
+		except subprocess.CalledProcessError as e:
+			print_warning("Build Failed! To re-run the build without having to re-run the entire build script, use the following commands:")
+			build_args = cmake_build(build_config,targets,verbose=verbose,buildDir=build_dir,returnCommandOnly=True)
+			buildCmdFilePath = dump_and_print_build_commands(build_args)
+			print("")
+			if buildCmdFilePath is not None:
+				print("Or execute \"" +str(buildCmdFilePath) +"\".")
+			raise
 
 		print_msg("Build Successful! Pragma has been installed to \"" +normalize_path(install_dir) +"\".")
-		print_msg("If you make any changes to the core source code, you can build the \"pragma-install\" target to compile the changes and re-install the binaries automatically.")
-		print_msg("If you make any changes to a module, you will have to build the module target first, and then build \"pragma-install\".")
-		print_msg("")
+		print_msg("If you make any changes to the source code, you can use the following commands to build the changes and re-install the binaries without having to re-run this build script:")
+		buildCmdFilePath = dump_and_print_build_commands(build_args)
+		print("")
+		if buildCmdFilePath is not None:
+			print("Or execute \"" +str(buildCmdFilePath) +"\".")
 
-print_msg("All actions have been completed! Please make sure to re-run this script every time you pull any changes from the repository, and after adding any new modules.")
+print_msg("All actions have been completed!")
 
 os.chdir(root)

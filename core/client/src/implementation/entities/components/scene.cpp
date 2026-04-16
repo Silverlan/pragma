@@ -239,8 +239,8 @@ void CSceneComponent::InitializeRenderSettingsBuffer()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_renderSettings);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+	createInfo.debugName = "render_settings_buf";
 	m_renderSettingsBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_renderSettings);
-	m_renderSettingsBuffer->SetDebugName("render_settings_buf");
 	UpdateRenderSettings();
 	//
 }
@@ -255,13 +255,13 @@ void CSceneComponent::InitializeCameraBuffer()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_cameraData);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+	createInfo.debugName = "camera_buf";
 	m_cameraBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
-	m_cameraBuffer->SetDebugName("camera_buf");
 	//
 
 	// View Camera
+	createInfo.debugName = "camera_view_buf";
 	m_cameraViewBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
-	m_cameraViewBuffer->SetDebugName("camera_view_buf");
 	//
 }
 void CSceneComponent::InitializeFogBuffer()
@@ -270,8 +270,8 @@ void CSceneComponent::InitializeFogBuffer()
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = sizeof(m_fogData);
 	createInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferDstBit;
+	createInfo.debugName = "fog_buf";
 	m_fogBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo, &m_cameraData);
-	m_fogBuffer->SetDebugName("fog_buf");
 }
 template<typename TCPPM>
 TCPPM *CSceneComponent::FindOcclusionCuller()

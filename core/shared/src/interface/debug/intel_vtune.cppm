@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MIT
 module;
 
-#include "definitions.hpp"
+#ifdef PRAGMA_ENABLE_VTUNE_PROFILING
+#include <ittnotify.h>
+#endif
 
 export module pragma.shared:debug.intel_vtune;
 
@@ -10,8 +12,6 @@ export import std;
 
 export {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	struct ___itt_domain;
-	struct ___itt_string_handle;
 	namespace pragma::debug {
 		struct DLLNETWORK VTuneTask {
 			void Begin();

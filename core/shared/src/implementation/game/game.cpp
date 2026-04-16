@@ -443,7 +443,7 @@ void pragma::Game::InitializeGame()
 {
 	InitializeLua(); // Lua has to be initialized completely before any entites are created
 
-	auto physEngineName = GetConVarString("phys_engine");
+	auto physEngineName = GetConVarValueOr<udm::String>("phys_engine");
 	auto physEngineLibName = physics::IEnvironment::GetPhysicsEngineModuleLocation(physEngineName);
 	spdlog::info("Loading physics module '{}'...", physEngineLibName);
 	std::string err;
@@ -541,14 +541,14 @@ pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *pragma::Gam
 bool pragma::Game::StartProfilingStage(const char *stage)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("stage_" + std::string {stage});
+	debug::get_domain().BeginTask("stage_" + std::string {stage});
 #endif
 	return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage);
 }
 bool pragma::Game::StopProfilingStage()
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage();
 }
@@ -842,7 +842,7 @@ bool pragma::Game::PrecacheModel(const std::string &mdl)
 	auto r = GetNetworkState()->GetModelManager().PreloadAsset(mdl, std::move(loadInfo));
 	if(r.assetRequest) {
 		r.assetRequest->AddCallback([this](util::Asset *asset, util::AssetLoadResult result) {
-			if (result != util::AssetLoadResult::Succeeded)
+			if(result != util::AssetLoadResult::Succeeded)
 				return;
 			assert(asset != nullptr);
 			auto mdl = asset::ModelManager::GetAssetObject(*asset);
@@ -857,8 +857,8 @@ std::shared_ptr<pragma::asset::Model> pragma::Game::LoadModel(const std::string 
 	if(mdl.empty())
 		return nullptr;
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("load_model");
-	pragma::util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
+	debug::get_domain().BeginTask("load_model");
+	pragma::util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	spdlog::debug("Loading model '{}'...", mdl);
 	auto *asset = GetNetworkState()->GetModelManager().FindCachedAsset(mdl);
@@ -933,9 +933,7 @@ double &pragma::Game::DeltaTickTime() { return m_tDeltaTick; }
 float pragma::Game::GetTimeScale() { return 1.f; }
 void pragma::Game::SetTimeScale(float t) { m_stateNetwork->SetConVar("host_timescale", std::to_string(t)); }
 
-pragma::console::ConConf *pragma::Game::GetConVar(const std::string &scmd) { return m_stateNetwork->GetConVar(scmd); }
-int pragma::Game::GetConVarInt(const std::string &scmd) { return m_stateNetwork->GetConVarInt(scmd); }
-std::string pragma::Game::GetConVarString(const std::string &scmd) { return m_stateNetwork->GetConVarString(scmd); }
-float pragma::Game::GetConVarFloat(const std::string &scmd) { return m_stateNetwork->GetConVarFloat(scmd); }
-bool pragma::Game::GetConVarBool(const std::string &scmd) { return m_stateNetwork->GetConVarBool(scmd); }
-pragma::console::ConVarFlags pragma::Game::GetConVarFlags(const std::string &scmd) { return m_stateNetwork->GetConVarFlags(scmd); }
+pragma::console::ConConf *pragma::Game::GetConVar(std::string_view scmd) { return m_stateNetwork->GetConVar(scmd); }
+pragma::console::ConVarFlags pragma::Game::GetConVarFlags(std::string_view scmd) { return m_stateNetwork->GetConVarFlags(scmd); }
+
+const pragma::console::CVarHandler *pragma::Game::GetNetworkStateCVarHandler() const { return static_cast<console::CVarHandler*>(m_stateNetwork); }

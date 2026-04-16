@@ -57,15 +57,15 @@ void ShadowDataBufferManager::DoInitialize()
 	limit = limits.maxStorageBufferRange;
 #endif
 
-	auto shadowDataSize = sizeof(ShadowBufferData);
+	constexpr auto shadowDataSize = sizeof(ShadowBufferData);
 	auto numShadows = static_cast<uint32_t>(math::min(static_cast<uint64_t>(limit / shadowDataSize), static_cast<uint64_t>(GameLimits::MaxAbsoluteShadowLights)));
 	m_maxCount = numShadows;
 
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	createInfo.size = m_maxCount * shadowDataSize;
+	createInfo.debugName = "light_shadow_data_buf";
 
-	m_masterBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, shadowDataSize, createInfo.size, 0.05f, nullptr, alignment);
-	m_masterBuffer->SetDebugName("light_shadow_data_buf");
+	m_masterBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, shadowDataSize, nullptr, alignment);
 
 	m_bufferIndexToLightSource.resize(m_maxCount, nullptr);
 }
@@ -89,7 +89,7 @@ void LightDataBufferManager::DoInitialize()
 {
 	auto limits = get_cengine()->GetRenderContext().GetPhysicalDeviceLimits();
 
-	auto lightDataSize = sizeof(LightBufferData);
+	constexpr auto lightDataSize = sizeof(LightBufferData);
 	prosper::DeviceSize maxBufferSize = 0;
 
 	prosper::util::BufferCreateInfo createInfo {};
@@ -124,8 +124,8 @@ void LightDataBufferManager::DoInitialize()
 		}
 	}
 
-	m_masterBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, lightDataSize, createInfo.size, 0.05f, initialLightBufferData.data(), alignment);
-	m_masterBuffer->SetDebugName("light_data_buf");
+	createInfo.debugName = "light_data_buf";
+	m_masterBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, lightDataSize, initialLightBufferData.data(), alignment);
 
 	m_bufferIndexToLightSource.resize(m_maxCount, nullptr);
 }

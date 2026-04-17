@@ -343,6 +343,8 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	  luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &)>([](const std::string &a, const std::string &b) -> bool { return string::compare(a, b, true); })),
 	  luabind::def("hash", static_cast<std::string (*)(const std::string &)>([](const std::string &str) -> std::string { return std::to_string(std::hash<std::string> {}(str)); })))];
 
+	Lua::SetTableCFunction(lua.GetState(), "string", "fmt", Lua::util::fmt);
+
 	auto modLight = luabind::module_(lua.GetState(), "light");
 	modLight[(luabind::def("get_color_temperature", static_cast<void (*)(ulighting::NaturalLightType, Kelvin &, Kelvin &)>([](ulighting::NaturalLightType type, Kelvin &outMin, Kelvin &outMax) {
 		auto colTemp = ulighting::get_color_temperature(type);

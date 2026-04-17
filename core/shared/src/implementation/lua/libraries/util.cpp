@@ -1601,3 +1601,37 @@ std::string Lua::util::get_addon_path(lua::State *l)
 	path += '/';
 	return path;
 }
+int Lua::util::fmt(lua::State *L)
+{
+	int nargs = lua::get_top(L);
+	if(nargs < 1)
+		return lua::error(L, "expected format string");
+
+	size_t len;
+	const char *fmt = lua::check_string(L, 1, &len);
+	std::string result(fmt, len);
+
+	int arg_idx = 2;
+	size_t pos = 0;
+
+	while((pos = result.find("{}", pos)) != std::string::npos) {
+		if(arg_idx > nargs)
+			return lua::error(L, "not enough arguments for format string");
+
+		// Copy in case lua_value_to_string modifies the string
+		lua::push_value(L, arg_idx);
+
+		int r;
+		std::string replacement;
+		lua_value_to_string(L, -1, &r, &replacement);
+
+		lua::pop(L, 1); // pop copy
+
+		result.replace(pos, 2, replacement);
+		pos += replacement.length();
+		arg_idx++;
+	}
+
+	lua::push_string(L, result.c_str());
+	return 1;
+}

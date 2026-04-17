@@ -454,6 +454,19 @@ static bool compare_numeric_values(const Lua::udm_ng &ov0, const Lua::udm_ng &ov
 	});
 }
 
+static std::string to_ascii_value(const Lua::udm_type &o, udm::Type type, const std::string &prefix = "", udm::AsciiSaveFlags flags = udm::AsciiSaveFlags::Default)
+{
+	return udm::visit(type, [&o, &prefix, flags](auto tag) {
+		using T = typename decltype(tag)::type;
+		constexpr auto type = ::udm::type_to_enum<T>();
+		if constexpr(type != ::udm::Type::Element && !::udm::is_array_type(type)) {
+			auto val = luabind::object_cast<T>(o);
+			return udm::Property::to_ascii_value<T>(val, prefix, flags);
+		}
+		return std::string {};
+	});
+}
+
 void Lua::udm::register_library(Interface &lua)
 {
 	auto modUdm = luabind::module(lua.GetState(), "udm");
@@ -593,6 +606,15 @@ void Lua::udm::register_library(Interface &lua)
 		luabind::def("deserialize",&deserialize),
 		luabind::def("is_supported_array_value_type",&is_supported_array_value_type),
 		luabind::def("is_supported_array_value_type",&is_supported_array_value_type,luabind::default_parameter_policy<2,::udm::ArrayType::Raw>{}),
+		luabind::def("to_ascii_value",+[](const Lua::udm_type &value, ::udm::Type type, const std::string &prefix, ::udm::AsciiSaveFlags flags) {
+			return to_ascii_value(value, type, prefix, flags);
+	}),
+	luabind::def("to_ascii_value",+[](const Lua::udm_type &value, ::udm::Type type, const std::string &prefix) {
+		return to_ascii_value(value, type, prefix);
+	}),
+	luabind::def("to_ascii_value",+[](const Lua::udm_type &value, ::udm::Type type) {
+		return to_ascii_value(value, type);
+	}),
 		luabind::def("convert",+[](lua::State *l,const luabind::object &o0,::udm::Type t0,::udm::Type t1) -> luabind::object {
 			return ::udm::visit<true,true,true>(t0,[l,&o0,t1](auto tag){
                 using T0 = typename decltype(tag)::type;

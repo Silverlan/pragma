@@ -182,7 +182,9 @@ void pragma::AddonSystem::MountAddons()
 	try {
 		m_addonWatcher = pragma::util::make_shared<fs::DirectoryWatcherCallback>(
 		  "addons",
-		  [](const util::Path &basePath, const util::Path &path) {
+		  [](const util::Path &basePath, const util::Path &path, fs::FileWatcherEvent event) {
+			  if(event != fs::FileWatcherEvent::Add)
+				  return;
 			  std::string ext;
 			  if(ufile::get_extension(path.GetString(), &ext) == true) {
 				  if(pragma::string::compare<std::string>(ext, "pad", false) == true) {

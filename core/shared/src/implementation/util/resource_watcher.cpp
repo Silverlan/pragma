@@ -309,7 +309,14 @@ bool pragma::util::ResourceWatcherManager::MountDirectory(const std::string &pat
 		m_watchers.reserve(m_watchers.size() + watchPaths.size());
 		for(auto &watchPath : watchPaths) {
 			auto pwatchPath = DirPath(watchPath);
-			m_watchers.push_back(pragma::util::make_shared<fs::DirectoryWatcherCallback>(DirPath(path, pwatchPath).GetString(), [this, pwatchPath = std::move(pwatchPath)](const Path &basePath, const Path &filePath) { OnResourceChanged(pwatchPath, filePath); }, watchFlags, m_watcherManager.get()));
+			m_watchers.push_back(pragma::util::make_shared<fs::DirectoryWatcherCallback>(
+			  DirPath(path, pwatchPath).GetString(),
+			  [this, pwatchPath = std::move(pwatchPath)](const Path &basePath, const Path &filePath, fs::FileWatcherEvent event) {
+				  if(event != fs::FileWatcherEvent::Modified)
+					  return;
+				  OnResourceChanged(pwatchPath, filePath);
+			  },
+			  watchFlags, m_watcherManager.get()));
 		}
 		m_watcherMutex.unlock();
 	}

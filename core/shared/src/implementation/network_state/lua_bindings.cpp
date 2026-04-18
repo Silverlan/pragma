@@ -68,7 +68,7 @@ static void create_directory_change_listener(lua::State *l, const std::string &p
 {
 	Lua::CheckFunction(l, 2);
 	try {
-		auto listener = pragma::util::make_shared<pragma::fs::DirectoryWatcherCallback>(path, [callback](const pragma::util::Path &basePath, const pragma::util::Path &filePath) mutable { callback(filePath.GetString()); }, flags);
+		auto listener = pragma::util::make_shared<pragma::fs::DirectoryWatcherCallback>(path, [callback](const pragma::util::Path &basePath, const pragma::util::Path &filePath, pragma::fs::FileWatcherEvent event) mutable { callback(filePath.GetString(), pragma::math::to_integral(event)); }, flags);
 		Lua::Push(l, listener);
 	}
 	catch(const std::runtime_error &err) {
@@ -115,6 +115,11 @@ static void register_directory_watcher(lua::State *l, luabind::module_ &modUtil)
 	defListener->add_static_constant("LISTENER_FLAG_ABSOLUTE_PATH", pragma::math::to_integral(pragma::fs::DirectoryWatcherCallback::WatchFlags::AbsolutePath));
 	defListener->add_static_constant("LISTENER_FLAG_START_DISABLED", pragma::math::to_integral(pragma::fs::DirectoryWatcherCallback::WatchFlags::StartDisabled));
 	defListener->add_static_constant("LISTENER_FLAG_WATCH_DIRECTORY_CHANGES", pragma::math::to_integral(pragma::fs::DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges));
+
+	defListener->add_static_constant("EVENT_ADD", pragma::math::to_integral(pragma::fs::FileWatcherEvent::Add));
+	defListener->add_static_constant("EVENT_DELETE", pragma::math::to_integral(pragma::fs::FileWatcherEvent::Delete));
+	defListener->add_static_constant("EVENT_MODIFIED", pragma::math::to_integral(pragma::fs::FileWatcherEvent::Modified));
+	defListener->add_static_constant("EVENT_MOVED", pragma::math::to_integral(pragma::fs::FileWatcherEvent::Moved));
 	static_assert(magic_enum::enum_count<pragma::fs::DirectoryWatcherCallback::WatchFlags>() == 4);
 	defListener
 	  ->scope[luabind::def("create", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &path, luabind::object callback) { create_directory_change_listener(l, path, callback, pragma::fs::DirectoryWatcherCallback::WatchFlags::None); }))];

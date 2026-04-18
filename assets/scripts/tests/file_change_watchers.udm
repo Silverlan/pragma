@@ -1,0 +1,29 @@
+"addon_file_change_watcher"
+{
+	$string scriptFile "tests/engine/file_change_watchers/addon.lua"
+}
+
+"locale_file_change_watcher"
+{
+	$string scriptFile "tests/engine/file_change_watchers/locale.lua"
+}
+
+"lua_script_file_change_watcher"
+{
+	$string scriptFile "tests/engine/file_change_watchers/lua_script.lua"
+}
+
+"material_file_change_watcher"
+{
+	$string scriptFile "tests/engine/file_change_watchers/material.lua"
+}
+
+"file_change_watchers"
+{
+	$array children [string][
+		"addon_file_change_watcher",
+		"locale_file_change_watcher",
+		"lua_script_file_change_watcher",
+		"material_file_change_watcher"
+	]
+}

@@ -3,10 +3,16 @@
 	$string scriptFile "tests/assets/load_models.lua"
 }
 
+"material"
+{
+	$string scriptFile "tests/assets/material.lua"
+}
+
 
 "assets"
 {
 	$array children [string][
-		"load_models"
+		"load_models",
+		"material"
 	]
 }

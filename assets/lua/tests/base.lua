@@ -12,6 +12,9 @@ function tests.TestManager:__init()
 	self.m_scripts = {}
 	self.m_resultData = {}
 	self.m_resultAssetPaths = {}
+	self.m_numCompleted = 0
+	self.m_numSucceeded = 0
+	self.m_numFailed = 0
 	file.delete_directory("temp/tests")
 	file.create_path("temp/tests")
 end
@@ -81,7 +84,10 @@ function tests.TestManager:CompleteTest(success, resultData)
 		msg = "Test '" .. curTest .. "' failed: " .. tostring(msg)
 		LOGGER:Err(msg)
 		-- error(msg)
-	end
+
+		self.m_numFailed = self.m_numFailed +1
+	else self.m_numSucceeded = self.m_numSucceeded +1 end
+	self.m_numCompleted = self.m_numCompleted +1
 
 	LOGGER:Info("Test '{}' has completed!", curTest)
 	self:CallCallbacks("OnTestComplete", success, resultData)
@@ -105,7 +111,15 @@ function tests.TestManager:CompleteTest(success, resultData)
 	end
 
 	if #self.m_testQueue == 0 then
-		LOGGER:Info("All tests have been completed!")
+		LOGGER:Info("All (" .. self.m_numCompleted .. ") tests have been completed! " .. self.m_numSucceeded .. " tests have succeeded!")
+		if(self.m_numFailed > 0) then
+			LOGGER:Warn(self.m_numFailed .. " tests have failed!")
+		end
+
+		self.m_numCompleted = 0
+		self.m_numSucceeded = 0
+		self.m_numFailed = 0
+
 		self:CallCallbacks("OnAllTestsComplete")
 	end
 end

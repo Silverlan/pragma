@@ -48,18 +48,18 @@ static void load_autorun_scripts(const std::function<void(const std::string &, s
 		games.push_back(cl->GetGameState());
 	for(auto *game : games) {
 		std::vector<std::string> files;
-		fFindFiles(Lua::SCRIPT_DIRECTORY + "\\autorun\\*." + Lua::FILE_EXTENSION, files);
+		fFindFiles(Lua::SCRIPT_DIRECTORY + "/autorun/*." + Lua::FILE_EXTENSION, files);
 
 		for(auto &fName : files) {
-			auto luaFileName = "autorun\\" + fName;
+			auto luaFileName = "autorun/" + fName;
 			game->ExecuteLuaFile(luaFileName);
 		}
 
 		files.clear();
 		std::string gameDir = game->IsClient() ? "client" : "server";
-		fFindFiles(Lua::SCRIPT_DIRECTORY + "\\autorun\\" + gameDir + "\\*." + Lua::FILE_EXTENSION, files);
+		fFindFiles(Lua::SCRIPT_DIRECTORY + "/autorun/" + gameDir + "/*." + Lua::FILE_EXTENSION, files);
 		for(auto &fName : files) {
-			auto luaFileName = "autorun\\" + gameDir + '\\' + fName;
+			auto luaFileName = "autorun/" + gameDir + '/' + fName;
 			game->ExecuteLuaFile(luaFileName);
 		}
 	}
@@ -67,7 +67,7 @@ static void load_autorun_scripts(const std::function<void(const std::string &, s
 
 static bool is_addon_mounted(const std::string &addonPath, const std::vector<pragma::AddonInfo> &addons)
 {
-	auto path = "addons\\" + addonPath;
+	auto path = "addons/" + addonPath;
 	auto it = std::find_if(addons.begin(), addons.end(), [&path](const pragma::AddonInfo &addonInfo) { return pragma::fs::compare_path(addonInfo.GetLocalPath(), path); });
 	return it != addons.end();
 }
@@ -87,8 +87,8 @@ static bool mount_linked_addon(const std::string &pathLink, std::vector<pragma::
 		return false;
 	}
 	pragma::fs::add_custom_mount_directory(resolvedPath, true, static_cast<pragma::fs::SearchFlags>(pragma::FSYS_SEARCH_ADDON));
-	outAddons.push_back(pragma::AddonInfo("addons\\" + pathLink));
-	load_autorun_scripts([&resolvedPath](const std::string &findTarget, std::vector<std::string> &outFiles) { pragma::fs::find_system_files((resolvedPath + '\\' + findTarget), &outFiles, nullptr); });
+	outAddons.push_back(pragma::AddonInfo("addons/" + pathLink));
+	load_autorun_scripts([&resolvedPath](const std::string &findTarget, std::vector<std::string> &outFiles) { pragma::fs::find_system_files((resolvedPath + '/' + findTarget), &outFiles, nullptr); });
 	if(silent == false)
 		Con::COUT << "Mounting linked addon '" << pathLink << "'..." << Con::endl;
 	return true;
@@ -101,7 +101,7 @@ bool pragma::AddonSystem::MountAddon(const std::string &paddonPath, std::vector<
 {
 	// Valid addon paths are: addons/addonName, addons/addonName/addons/subAddonName, etc.
 	auto addonPath = paddonPath;
-	string::replace(addonPath, "/", "\\"); // TODO: We should be using forward slashes, not backward slashes for the normalized paths!
+	string::replace(addonPath, "\\", "/");
 	auto path = util::Path::CreatePath(addonPath);
 	auto n = path.GetComponentCount();
 	if((n % 2) == 0)
@@ -119,11 +119,11 @@ bool pragma::AddonSystem::MountAddon(const std::string &paddonPath, std::vector<
 
 	if(is_addon_mounted(addonPath, outAddons))
 		return true;
-	auto fullPath = "addons\\" + addonPath;
+	auto fullPath = "addons/" + addonPath;
 	fs::add_custom_mount_directory(fullPath, static_cast<fs::SearchFlags>(FSYS_SEARCH_ADDON));
 	outAddons.push_back(AddonInfo(fullPath));
 	update_package_paths();
-	load_autorun_scripts([&fullPath](const std::string &findTarget, std::vector<std::string> &outFiles) { fs::find_files((fullPath + '\\' + findTarget), &outFiles, nullptr); });
+	load_autorun_scripts([&fullPath](const std::string &findTarget, std::vector<std::string> &outFiles) { fs::find_files((fullPath + '/' + findTarget), &outFiles, nullptr); });
 	if(silent == false)
 		Con::COUT << "Mounting addon '" << addonPath << "'..." << Con::endl;
 	spdlog::info("Mounting addon '{}'...", addonPath);
@@ -150,8 +150,8 @@ void pragma::AddonSystem::MountAddons()
 {
 	std::vector<std::string> resFiles;
 	std::vector<std::string> resDirs;
-	fs::find_files("addons\\*", nullptr, &resDirs);
-	fs::find_files("addons\\*.pad", &resFiles, nullptr);
+	fs::find_files("addons/*", nullptr, &resDirs);
+	fs::find_files("addons/*.pad", &resFiles, nullptr);
 	m_addons.reserve(resFiles.size() + resDirs.size());
 
 	// Make sure that the "converted" addon is always the first in the mount order!
@@ -170,13 +170,13 @@ void pragma::AddonSystem::MountAddons()
 
 #ifdef _WIN32
 	std::vector<std::string> resLinks;
-	fs::find_files("addons\\*.lnk", &resLinks, nullptr);
+	fs::find_files("addons/*.lnk", &resLinks, nullptr);
 	for(auto &pathLink : resLinks)
 		mount_linked_addon(pathLink, m_addons);
 #endif
 
 	for(auto &f : resFiles)
-		LoadPADPackage("addons\\" + f);
+		LoadPADPackage("addons/" + f);
 
 	// Initialize watcher for new addons
 	try {
@@ -195,7 +195,7 @@ void pragma::AddonSystem::MountAddons()
 							  load_autorun_scripts([archFile](const std::string &findTarget, std::vector<std::string> &outFiles) {
 								  std::vector<uva::FileInfo *> results;
 								  archFile->SearchFiles(findTarget, results);
-								  // archFile->SearchFiles(Lua::SCRIPT_DIRECTORY + "\\autorun\\*." + Lua::FILE_EXTENSION_PRECOMPILED, results);
+								  // archFile->SearchFiles(Lua::SCRIPT_DIRECTORY + "/autorun/*." + Lua::FILE_EXTENSION_PRECOMPILED, results);
 								  outFiles.reserve(outFiles.size() + results.size());
 								  for(auto *fi : results) {
 									  if(fi->IsFile() == false)

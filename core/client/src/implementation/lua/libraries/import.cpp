@@ -81,7 +81,7 @@ static aiNode &add_node(aiNode &parentNode,uint32_t index,const std::string &nam
 	if(nodeName.empty())
 		nodeName = name;
 	auto *node = new aiNode {};
-	node->mName = nodeName +'_' +std::to_string(ent.GetLocalIndex());
+	node->mName = nodeName +'_' +util::to_string(ent.GetLocalIndex());
 	node->mParent = &parentNode;
 	node->mTransformation = to_assimp_matrix(m);
 	parentNode.mChildren[index] = node;

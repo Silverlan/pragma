@@ -95,7 +95,7 @@ pragma::animation::BoneId pragma::animation::Skeleton::AddBone(Bone *bone)
 	m_bones.push_back(std::shared_ptr<Bone>(bone));
 
 	if(bone->name.empty())
-		bone->name = "unnamed_" + std::to_string(ID);
+		bone->name = "unnamed_" + util::to_string(ID);
 	return ID;
 }
 
@@ -202,7 +202,7 @@ bool pragma::animation::Skeleton::LoadFromAssetData(const udm::AssetData &data, 
 		bone->name = boneInfo.name;
 
 		if(boneInfo.index >= m_referencePoses.size())
-			throw std::runtime_error {"Bone index " + std::to_string(boneInfo.index) + " for reference pose is out of bounds!"};
+			throw std::runtime_error {"Bone index " + util::to_string(boneInfo.index) + " for reference pose is out of bounds!"};
 		auto &pose = m_referencePoses[boneInfo.index];
 		boneInfo.udmBone["pose"](pose);
 

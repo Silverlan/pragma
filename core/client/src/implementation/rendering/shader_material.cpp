@@ -167,7 +167,7 @@ static std::string vec_to_string(const std::string &typeName, T *baseVal, size_t
 	for(size_t i = 0; i < numComponents; ++i) {
 		if(i > 0)
 			str += ",";
-		str += std::to_string(*baseVal);
+		str += pragma::util::to_string(*baseVal);
 		++baseVal;
 	}
 	str += ")";
@@ -317,8 +317,8 @@ std::string ShaderMaterial::ToGlslStruct() const
 		ss << "\tvec4 val = texture(" << varName << ",uv);\n";
 		if(tex.colorMap) {
 			if(isrgb >= MAX_NUMBER_OF_SRGB_TEXTURES)
-				throw std::runtime_error {"Only up to " + std::to_string(MAX_NUMBER_OF_SRGB_TEXTURES) + "texture definitions with the 'convertToLinearSpace' flag are allowed!"};
-			std::string flag = "FMAT_FLAGS_SRGB" + std::to_string(isrgb);
+				throw std::runtime_error {"Only up to " + util::to_string(MAX_NUMBER_OF_SRGB_TEXTURES) + "texture definitions with the 'convertToLinearSpace' flag are allowed!"};
+			std::string flag = "FMAT_FLAGS_SRGB" + util::to_string(isrgb);
 			ss << "\tif(!is_mat_flag_set(" << flag << "))\n";
 			ss << "\t\tval.rgb = srgb_to_linear(val.rgb);\n";
 			++isrgb;
@@ -410,7 +410,7 @@ ShaderMaterial::ShaderMaterial(const util::GString &name) : ShaderInputDescripto
 	}
 	assert(properties.size() == PREDEFINED_PROPERTY_COUNT);
 	if(properties.size() != PREDEFINED_PROPERTY_COUNT)
-		throw std::logic_error {"Number of predefined properties does not match expected count of " + std::to_string(PREDEFINED_PROPERTY_COUNT) + "!"};
+		throw std::logic_error {"Number of predefined properties does not match expected count of " + util::to_string(PREDEFINED_PROPERTY_COUNT) + "!"};
 }
 
 pragma::rendering::ShaderInputDescriptor *ShaderMaterial::Import(const std::string &name) { return g_shaderMaterialCache->Load(name).get(); }

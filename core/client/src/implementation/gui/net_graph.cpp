@@ -116,7 +116,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 	uint8_t numMessagesLines = 4;
 	m_txtMessages.reserve(numMessagesLines);
 	for(uint8_t i = 0; i < numMessagesLines; ++i) {
-		auto *pText = CreateText(std::string("#") + std::to_string(i));
+		auto *pText = CreateText(std::string("#") + util::to_string(i));
 		m_txtMessages.push_back(pText->GetHandle());
 	}
 

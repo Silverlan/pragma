@@ -1501,8 +1501,8 @@ std::optional<uint32_t> pragma::asset::Model::AssignDistinctMaterial(const Model
 	auto ext = path.GetFileExtension();
 	path.RemoveFileExtension();
 	path += '_' + group.GetName();
-	path += '_' + std::to_string(meshIdx);
-	path += '_' + std::to_string(subMeshIdx);
+	path += '_' + util::to_string(meshIdx);
+	path += '_' + util::to_string(subMeshIdx);
 
 	util::Path rootPath {};
 	while(path.GetFront() != "materials") // TODO: What if inside addon called "materials"?

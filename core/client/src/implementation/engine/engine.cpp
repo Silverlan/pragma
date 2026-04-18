@@ -1446,7 +1446,7 @@ void pragma::CEngine::SetGPUProfilingEnabled(bool bEnabled)
 std::expected<std::shared_ptr<prosper::Window>, std::string> pragma::CEngine::CreateWindow(prosper::WindowSettings &settings)
 {
 	if(settings.width == 0 || settings.height == 0)
-		return std::unexpected {"Attempted to create window with empty dimensions (" + std::to_string(settings.width) + "x" + std::to_string(settings.height) + "! This is not allowed."};
+		return std::unexpected {"Attempted to create window with empty dimensions (" + util::to_string(settings.width) + "x" + util::to_string(settings.height) + "! This is not allowed."};
 	auto &mainWindowCreateInfo = get_cengine()->GetRenderContext().GetWindow().GetWindowSettings();
 	settings.flags = mainWindowCreateInfo.flags;
 	settings.api = mainWindowCreateInfo.api;

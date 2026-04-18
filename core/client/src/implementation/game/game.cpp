@@ -409,7 +409,7 @@ TCPPM *pragma::CGame::CreateParticleTracer(const Vector3 &start, const Vector3 &
 {
 	std::stringstream ssColor;
 	ssColor << col.r << " " << col.g << " " << col.b << " " << col.a;
-	std::unordered_map<std::string, std::string> values {{"maxparticles", "1"}, {"max_node_count", "2"}, {"emission_rate", "10000"}, {"material", material}, {"radius", std::to_string(radius)}, {"color", ssColor.str()}, {"sort_particles", "0"}, {"bloom_scale", std::to_string(bloomScale)}};
+	std::unordered_map<std::string, std::string> values {{"maxparticles", "1"}, {"max_node_count", "2"}, {"emission_rate", "10000"}, {"material", material}, {"radius", util::to_string(radius)}, {"color", ssColor.str()}, {"sort_particles", "0"}, {"bloom_scale", util::to_string(bloomScale)}};
 	auto *particle = ecs::CParticleSystemComponent::Create(values, nullptr);
 	if(particle == nullptr)
 		return nullptr;
@@ -862,7 +862,7 @@ pragma::gui::types::WIBase *pragma::CGame::CreateGUIElement(std::string classNam
 }
 
 static auto cvLODBias = pragma::console::get_client_con_var("cl_render_lod_bias");
-void pragma::CGame::SetLODBias(int32_t bias) { get_client_state()->SetConVar("cl_render_lod_bias", std::to_string(bias)); }
+void pragma::CGame::SetLODBias(int32_t bias) { get_client_state()->SetConVar("cl_render_lod_bias", util::to_string(bias)); }
 int32_t pragma::CGame::GetLODBias() const { return cvLODBias->GetInt(); }
 uint32_t pragma::CGame::GetLOD(float dist, uint32_t maxLod) const
 {
@@ -881,14 +881,14 @@ void pragma::CGame::CreateGiblet(const GibletCreateInfo &info, TCPPM **particle)
 		*particle = nullptr;
 	if(info.lifetime <= 0.f)
 		return;
-	auto *pt = ecs::CParticleSystemComponent::Create({{"maxparticles", "1"}, {"emission_rate", "10000"}, {"cast_shadows", "1"}, {"radius", std::to_string(info.scale)},
-	  {"world_rotation", std::to_string(info.rotation.w) + " " + std::to_string(info.rotation.x) + " " + std::to_string(info.rotation.y) + " " + std::to_string(info.rotation.z)}});
+	auto *pt = ecs::CParticleSystemComponent::Create({{"maxparticles", "1"}, {"emission_rate", "10000"}, {"cast_shadows", "1"}, {"radius", util::to_string(info.scale)},
+	  {"world_rotation", util::to_string(info.rotation.w) + " " + util::to_string(info.rotation.x) + " " + util::to_string(info.rotation.y) + " " + util::to_string(info.rotation.z)}});
 	if(pt == nullptr)
 		return;
-	pt->AddInitializer("lifetime_random", {{"lifetime_min", std::to_string(info.lifetime)}, {"lifetime_max", std::to_string(info.lifetime)}});
-	pt->AddInitializer("initial_velocity", {{"velocity", std::to_string(info.velocity.x) + " " + std::to_string(info.velocity.y) + " " + std::to_string(info.velocity.z)}});
-	pt->AddInitializer("initial_angular_velocity", {{"velocity", std::to_string(info.angularVelocity.x) + " " + std::to_string(info.angularVelocity.y) + " " + std::to_string(info.angularVelocity.z)}});
-	pt->AddRenderer("model", {{"model", info.model}, {"skin", std::to_string(info.skin)}});
+	pt->AddInitializer("lifetime_random", {{"lifetime_min", util::to_string(info.lifetime)}, {"lifetime_max", util::to_string(info.lifetime)}});
+	pt->AddInitializer("initial_velocity", {{"velocity", util::to_string(info.velocity.x) + " " + util::to_string(info.velocity.y) + " " + util::to_string(info.velocity.z)}});
+	pt->AddInitializer("initial_angular_velocity", {{"velocity", util::to_string(info.angularVelocity.x) + " " + util::to_string(info.angularVelocity.y) + " " + util::to_string(info.angularVelocity.z)}});
+	pt->AddRenderer("model", {{"model", info.model}, {"skin", util::to_string(info.skin)}});
 
 	if(info.physShape != GibletCreateInfo::PhysShape::None) {
 		std::stringstream ssTranslationOffset;
@@ -897,21 +897,21 @@ void pragma::CGame::CreateGiblet(const GibletCreateInfo &info, TCPPM **particle)
 		ssRotationOffset << info.physRotationOffset.p << " " << info.physRotationOffset.y << " " << info.physRotationOffset.r;
 		switch(info.physShape) {
 		case GibletCreateInfo::PhysShape::Model:
-			pt->AddOperator("physics_model", {{"model", info.model}, {"mass", std::to_string(info.mass)}, {"translation_offset", ssTranslationOffset.str()}, {"rotation_offset", ssRotationOffset.str()}});
+			pt->AddOperator("physics_model", {{"model", info.model}, {"mass", util::to_string(info.mass)}, {"translation_offset", ssTranslationOffset.str()}, {"rotation_offset", ssRotationOffset.str()}});
 			break;
 		case GibletCreateInfo::PhysShape::Sphere:
-			pt->AddOperator("physics_sphere", {{"mass", std::to_string(info.mass)}, {"translation_offset", ssTranslationOffset.str()}, {"rotation_offset", ssRotationOffset.str()}, {"radius", std::to_string(info.physRadius)}});
+			pt->AddOperator("physics_sphere", {{"mass", util::to_string(info.mass)}, {"translation_offset", ssTranslationOffset.str()}, {"rotation_offset", ssRotationOffset.str()}, {"radius", util::to_string(info.physRadius)}});
 			break;
 		case GibletCreateInfo::PhysShape::Box:
-			pt->AddOperator("physics_box", {{"mass", std::to_string(info.mass)}, {"translation_offset", ssTranslationOffset.str()}, {"rotation_offset", ssRotationOffset.str()}, {"extent", std::to_string(info.physRadius)}});
+			pt->AddOperator("physics_box", {{"mass", util::to_string(info.mass)}, {"translation_offset", ssTranslationOffset.str()}, {"rotation_offset", ssRotationOffset.str()}, {"extent", util::to_string(info.physRadius)}});
 			break;
 		case GibletCreateInfo::PhysShape::Cylinder:
-			pt->AddOperator("physics_cylinder", {{"mass", std::to_string(info.mass)}, {"translation_offset", ssTranslationOffset.str()}, {"rotation_offset", ssRotationOffset.str()}, {"radius", std::to_string(info.physRadius)}, {"height", std::to_string(info.physHeight)}});
+			pt->AddOperator("physics_cylinder", {{"mass", util::to_string(info.mass)}, {"translation_offset", ssTranslationOffset.str()}, {"rotation_offset", ssRotationOffset.str()}, {"radius", util::to_string(info.physRadius)}, {"height", util::to_string(info.physHeight)}});
 			break;
 		}
 	}
 	pt->AddOperator("gravity", {{"effective_scale", "1.0"}});
-	pt->AddOperator("color_fade", {{"alpha", "0"}, {"fade_start", std::to_string(info.lifetime - 0.2f)}, {"fade_end", std::to_string(info.lifetime)}});
+	pt->AddOperator("color_fade", {{"alpha", "0"}, {"fade_start", util::to_string(info.lifetime - 0.2f)}, {"fade_end", util::to_string(info.lifetime)}});
 	auto pTrComponent = pt->GetEntity().GetTransformComponent();
 	if(pTrComponent != nullptr)
 		pTrComponent->SetPosition(info.position);
@@ -1542,7 +1542,7 @@ void pragma::CGame::ReceiveSnapshot(NetPacket &packet)
 				if(ent != nullptr && svId < svComponentToClComponentTable.size() && svComponentToClComponentTable.at(svId) != CEntityComponentManager::INVALID_COMPONENT) {
 					auto clId = svComponentToClComponentTable.at(svId);
 					if(clId >= componentTypes.size())
-						throw std::runtime_error("Invalid client component type index " + std::to_string(clId) + "!");
+						throw std::runtime_error("Invalid client component type index " + util::to_string(clId) + "!");
 					auto pComponent = ent->FindComponent(clId);
 					if(pComponent.valid()) {
 						auto *pSnapshotComponent = dynamic_cast<CBaseSnapshotComponent *>(pComponent.get());

@@ -58,7 +58,7 @@ int Lua::util::Client::create_muzzle_flash(lua::State *l)
 			if(IsSet(l, 4))
 				relRot = Lua::Check<Quat>(l, 4);
 		}
-		std::string particleName = "muzzleflash0" + std::to_string(pragma::math::random(1, 6));
+		std::string particleName = "muzzleflash0" + pragma::util::to_string(pragma::math::random(1, 6));
 		auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleName);
 		if(pt == nullptr)
 			return 0;
@@ -85,7 +85,7 @@ int Lua::util::Client::create_muzzle_flash(lua::State *l)
 	}
 	auto &pos = Lua::Check<Vector3>(l, 1);
 	auto &rot = Lua::Check<Quat>(l, 2);
-	std::string particleName = "muzzleflash0" + std::to_string(pragma::math::random(1, 6));
+	std::string particleName = "muzzleflash0" + pragma::util::to_string(pragma::math::random(1, 6));
 	auto *pt = pragma::ecs::CParticleSystemComponent::Create(particleName);
 	if(pt == nullptr)
 		return 0;

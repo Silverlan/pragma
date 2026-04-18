@@ -35,7 +35,7 @@ void pragma::AddonInstallManager::CancelDownload() { m_curlQueryHandler->CancelD
 void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQuery> &addon, uint32_t fileId, const std::string &filePath, uint64_t fileSize, const std::function<void(int64_t, int64_t, int64_t, int64_t)> &progressCallback)
 {
 	m_curlQueryHandler->AddRequest(
-	  get_query_url() + "query_addon_request_file.php", {{"addonid", addon->addonInfo->GetUniqueId()}, {"fileid", std::to_string(fileId)}},
+	  get_query_url() + "query_addon_request_file.php", {{"addonid", addon->addonInfo->GetUniqueId()}, {"fileid", util::to_string(fileId)}},
 	  [this, addon, fileId, filePath, fileSize](int32_t code, const std::string &response) {
 		  if(m_curlQueryHandler->IsErrorCode(code) == false) {
 			  auto &updateFile = addon->updateFile;
@@ -140,7 +140,7 @@ void pragma::AddonInstallManager::QueryFile(const std::shared_ptr<AddonUpdateQue
 void pragma::AddonInstallManager::QueryUpdateFileInfo(const std::shared_ptr<AddonUpdateQuery> &addon, const std::unordered_map<uint32_t, bool> &skipFileIds)
 {
 	auto addonVersion = util::Version {};
-	m_curlQueryHandler->AddRequest(get_query_url() + "query_addon_update_file_headers.php", {{"addonid", addon->addonInfo->GetUniqueId()}, {"major", std::to_string(addonVersion.major)}, {"minor", std::to_string(addonVersion.minor)}, {"revision", std::to_string(addonVersion.revision)}},
+	m_curlQueryHandler->AddRequest(get_query_url() + "query_addon_update_file_headers.php", {{"addonid", addon->addonInfo->GetUniqueId()}, {"major", util::to_string(addonVersion.major)}, {"minor", util::to_string(addonVersion.minor)}, {"revision", util::to_string(addonVersion.revision)}},
 	  [this, addon, skipFileIds](int32_t code, const std::string &response) {
 		  if(m_curlQueryHandler->IsErrorCode(code) == false) {
 			  std::vector<std::string> fileHeaders;

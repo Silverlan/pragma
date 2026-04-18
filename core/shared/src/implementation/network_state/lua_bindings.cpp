@@ -341,7 +341,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	  })),
 	  luabind::def("fill_zeroes", string::fill_zeroes), luabind::def("compare", static_cast<bool (*)(const char *, const char *, bool, size_t)>(string::compare)), luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &, bool)>(string::compare)),
 	  luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &)>([](const std::string &a, const std::string &b) -> bool { return string::compare(a, b, true); })),
-	  luabind::def("hash", static_cast<std::string (*)(const std::string &)>([](const std::string &str) -> std::string { return std::to_string(std::hash<std::string> {}(str)); })))];
+	  luabind::def("hash", static_cast<std::string (*)(const std::string &)>([](const std::string &str) -> std::string { return util::to_string(std::hash<std::string> {}(str)); })))];
 
 	Lua::SetTableCFunction(lua.GetState(), "string", "fmt", Lua::util::fmt);
 

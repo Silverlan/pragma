@@ -32,7 +32,7 @@ void CSoundComponent::OnEntitySpawn()
 		auto pMapComponent = ent.GetComponent<pragma::MapComponent>();
 		if(pMapComponent.expired())
 			return;
-		name = "world_sound" + std::to_string(pMapComponent->GetMapIndex());
+		name = "world_sound" + util::to_string(pMapComponent->GetMapIndex());
 	}
 	if(m_wpSound.expired() == false)
 		apply_sound_identifier(*m_wpSound.lock(), name);

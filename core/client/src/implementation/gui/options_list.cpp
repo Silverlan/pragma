@@ -113,7 +113,7 @@ pragma::gui::types::WICheckbox *pragma::gui::types::WIOptionsList::AddToggleChoi
 	pCheckbox->AddCallback("OnChange", FunctionCallback<void, bool>::Create([hOptions, cvarName, translator](bool bChecked) mutable {
 		if(!hOptions.IsValid())
 			return;
-		hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = (translator == nullptr) ? std::to_string(bChecked) : translator(bChecked);
+		hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = (translator == nullptr) ? util::to_string(bChecked) : translator(bChecked);
 	}));
 	pCheckbox->SetAutoCenterToParent(true);
 	row->InsertElement(1, hCheckbox);
@@ -267,7 +267,7 @@ pragma::gui::types::WISlider *pragma::gui::types::WIOptionsList::AddSlider(const
 		pSlider->AddCallback("OnChange", FunctionCallback<void, float, float>::Create([hOptions, cvarName](float, float value) mutable {
 			if(!hOptions.IsValid())
 				return;
-			hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = std::to_string(value);
+			hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = util::to_string(value);
 		}));
 	}
 	row->InsertElement(1, pSlider);

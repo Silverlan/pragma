@@ -423,7 +423,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  if(useCount == 0)
 				  console::reset_console_color();
 
-			  std::string res = std::to_string(img.GetWidth()) + "x" + std::to_string(img.GetHeight());
+			  std::string res = util::to_string(img.GetWidth()) + "x" + util::to_string(img.GetHeight());
 			  Con::COUT << std::setw(12) << res;
 			  Con::COUT << std::setw(10) << img.GetLayerCount();
 

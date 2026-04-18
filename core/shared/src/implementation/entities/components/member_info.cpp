@@ -327,7 +327,7 @@ CallbackHandle EntityComponentManager::AddCreationCallback(ComponentId component
 	if(!info) {
 		auto it = std::find_if(m_preRegistered.begin(), m_preRegistered.end(), [componentId](const std::unique_ptr<ComponentInfo> &componentInfo) { return componentInfo->id == componentId; });
 		if(it == m_preRegistered.end())
-			throw std::runtime_error {"Invalid component (" + std::to_string(componentId) + ")"};
+			throw std::runtime_error {"Invalid component (" + util::to_string(componentId) + ")"};
 		info = it->get();
 	}
 	if(!info->onCreateCallbacks)
@@ -507,7 +507,7 @@ std::string EntityComponentManager::GetEventName(ComponentEventId evId) const
 {
 	std::string name;
 	if(GetEventName(evId, name) == false)
-		throw std::logic_error("Entity component event '" + std::to_string(evId) + "' has not been registered!");
+		throw std::logic_error("Entity component event '" + util::to_string(evId) + "' has not been registered!");
 	return name;
 }
 const std::unordered_map<ComponentEventId, ComponentEventInfo> &EntityComponentManager::GetEvents() const { return m_componentEvents; }

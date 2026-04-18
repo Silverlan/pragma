@@ -260,8 +260,8 @@ static void debug_profiling_print(pragma::NetworkState *, pragma::BasePlayerComp
 				auto tMsAcc = pragma::util::clock::to_milliseconds(accDur);
 				auto tMs = pragma::util::clock::to_milliseconds(*result->duration);
 				sTimeMs = pragma::util::round_string(tMs, 2) + "ms (" + pragma::util::round_string(tMsAcc, 2) + "ms)";
-				sTimeNs = std::to_string(result->duration->count()) + "ns";
-				sCount = std::to_string(stage.GetCount());
+				sTimeNs = pragma::util::to_string(result->duration->count()) + "ns";
+				sCount = pragma::util::to_string(stage.GetCount());
 
 				std::stringstream ss;
 				ss << stage.GetThreadId();

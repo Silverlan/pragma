@@ -421,7 +421,7 @@ bool pragma::asset::Model::LoadFromAssetData(Game &game, const udm::AssetData &d
 		auto &colMesh = colMeshes[i];
 		colMesh = physics::CollisionMesh::Load(game, *this, udm::AssetData {udmColMeshes[i]}, outErr);
 		if(colMesh == nullptr) {
-			outErr = "Failed to load collision mesh " + std::to_string(i) + ": " + outErr;
+			outErr = "Failed to load collision mesh " + util::to_string(i) + ": " + outErr;
 			return false;
 		}
 	}
@@ -450,7 +450,7 @@ bool pragma::asset::Model::LoadFromAssetData(Game &game, const udm::AssetData &d
 		uint32_t groupIdx = 0;
 		udmMeshGroup.property["index"](groupIdx);
 		if(groupIdx >= meshGroups.size()) {
-			spdlog::warn("Invalid mesh group index: " + std::to_string(groupIdx));
+			spdlog::warn("Invalid mesh group index: " + util::to_string(groupIdx));
 			continue;
 		}
 		meshGroups[groupIdx] = meshGroup;
@@ -475,7 +475,7 @@ bool pragma::asset::Model::LoadFromAssetData(Game &game, const udm::AssetData &d
 				subMesh = CreateSubMesh();
 				subMesh->LoadFromAssetData(udm::AssetData {udmSubMesh}, outErr);
 				if(subMesh == nullptr) {
-					outErr = "Failed to load sub mesh " + std::to_string(subMeshIdx) + " of mesh " + std::to_string(meshIdx) + " of mesh group " + std::string {udmMeshGroup.key} + ": " + outErr;
+					outErr = "Failed to load sub mesh " + util::to_string(subMeshIdx) + " of mesh " + util::to_string(meshIdx) + " of mesh group " + std::string {udmMeshGroup.key} + ": " + outErr;
 					return false;
 				}
 				// subMesh->Update(ModelUpdateFlags::UpdateBuffers);
@@ -569,9 +569,9 @@ bool pragma::asset::Model::LoadFromAssetData(Game &game, const udm::AssetData &d
 		for(auto udmFlex : udmFlexes.ElIt()) {
 			udmFlex.property["index"](idx);
 			if(idx >= flexes.size()) {
-				// outErr = "Flex index " + std::to_string(idx) + " out of range! (Number of flexes: " + std::to_string(flexes.size()) + ")";
+				// outErr = "Flex index " + util::to_string(idx) + " out of range! (Number of flexes: " + util::to_string(flexes.size()) + ")";
 				// return false;
-				Con::CWAR << "Flex index " << std::to_string(idx) << " out of range! (Number of flexes: " << std::to_string(flexes.size()) << ")" << Con::endl;
+				Con::CWAR << "Flex index " << util::to_string(idx) << " out of range! (Number of flexes: " << util::to_string(flexes.size()) << ")" << Con::endl;
 				flexes.resize(idx + 1);
 			}
 			auto &flex = flexes[idx];
@@ -881,7 +881,7 @@ bool pragma::asset::Model::Save(Game &game, udm::AssetDataArg outData, std::stri
 				if(animName.empty()) {
 					uint32_t j = 0;
 					do
-						animName = "unnamed" + std::to_string(j++);
+						animName = "unnamed" + util::to_string(j++);
 					while(udmAnimations[animName] || m_animationIDs.find(animName) != m_animationIDs.end());
 				}
 				auto udmAnim = udmAnimations[animName];
@@ -1006,7 +1006,7 @@ bool pragma::asset::Model::Save(Game &game, udm::AssetDataArg outData, std::stri
 		for(auto &eyeball : eyeballs) {
 			std::string name = eyeball.name;
 			if(name.empty()) {
-				name = "eyeball" + std::to_string(eyeballIdx);
+				name = "eyeball" + util::to_string(eyeballIdx);
 				Con::CWAR << "Eyeball with no name found, assigning name '" << name << "'" << Con::endl;
 			}
 			auto udmEyeball = udmEyeballs[name];

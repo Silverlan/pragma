@@ -268,9 +268,9 @@ DLLNETWORK bool KeyToString(short c, std::string *key)
 			auto r = get_controller_button(btId, controllerId, bAxis);
 			assert(r == true);
 			if(bAxis == false)
-				*key = "vr" + std::to_string(controllerId) + "bt" + std::to_string(btId);
+				*key = "vr" + pragma::util::to_string(controllerId) + "bt" + pragma::util::to_string(btId);
 			else
-				*key = "vr" + std::to_string(controllerId) + "axis" + std::to_string(btId);
+				*key = "vr" + pragma::util::to_string(controllerId) + "axis" + pragma::util::to_string(btId);
 		}
 		else if(c >= GLFW_CUSTOM_KEY_JOYSTICK_0_KEY_START) {
 			auto btId = c;
@@ -279,9 +279,9 @@ DLLNETWORK bool KeyToString(short c, std::string *key)
 			auto r = get_controller_button(btId, controllerId, bAxis);
 			assert(r == true);
 			if(bAxis == false)
-				*key = "joy" + std::to_string(controllerId) + "bt" + std::to_string(btId);
+				*key = "joy" + pragma::util::to_string(controllerId) + "bt" + pragma::util::to_string(btId);
 			else
-				*key = "joy" + std::to_string(controllerId) + "axis" + std::to_string(btId);
+				*key = "joy" + pragma::util::to_string(controllerId) + "axis" + pragma::util::to_string(btId);
 		}
 		else
 			return false;
@@ -550,7 +550,7 @@ DLLNETWORK bool KeyToText(short c, std::string *key)
 					identifier = (bAxis == false) ? "key_vr" : "key_vr_axis";
 				else
 					identifier = (bAxis == false) ? "key_joystick" : "key_joystick_axis";
-				*key = pragma::locale::get_text(identifier, {std::to_string(controllerId + 1), std::to_string(btId + 1)});
+				*key = pragma::locale::get_text(identifier, {pragma::util::to_string(controllerId + 1), pragma::util::to_string(btId + 1)});
 			}
 			else
 				return false;

@@ -627,7 +627,7 @@ void pragma::geometry::ModelSubMesh::SetIndexType(IndexType type)
 			auto idx = src[i];
 			if constexpr(std::numeric_limits<TIdxSrc>::max() > std::numeric_limits<TIdxDst>::max()) {
 				if(idx >= std::numeric_limits<TIdxDst>::max())
-					throw std::runtime_error {"Attempted to change index type of mesh from " + std::string {magic_enum::enum_name(m_indexType)} + " to " + std::string {magic_enum::enum_name(type)} + ", but index " + std::to_string(idx) + " exceeds range of target type!"};
+					throw std::runtime_error {"Attempted to change index type of mesh from " + std::string {magic_enum::enum_name(m_indexType)} + " to " + std::string {magic_enum::enum_name(type)} + ", but index " + util::to_string(idx) + " exceeds range of target type!"};
 			}
 			dst[i] = idx;
 		}

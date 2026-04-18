@@ -152,7 +152,7 @@ std::shared_ptr<prosper::IBuffer> LightDataBufferManager::Request(CLightComponen
 	m_bufferIndexToLightSource.at(baseIndex) = &lightSource;
 	assert(baseIndex >= (m_highestBufferIndexInUse + 1));
 	if(baseIndex < (m_highestBufferIndexInUse + 1))
-		throw std::logic_error("Light source buffer index " + std::to_string(baseIndex) + " exceeds highest lights buffer index in use (" + std::to_string(m_highestBufferIndexInUse) + ")!");
+		throw std::logic_error("Light source buffer index " + util::to_string(baseIndex) + " exceeds highest lights buffer index in use (" + util::to_string(m_highestBufferIndexInUse) + ")!");
 	m_highestBufferIndexInUse = baseIndex;
 
 	m_lightDataBuffers.resize(m_masterBuffer->GetTotalInstanceCount(), nullptr);
@@ -170,7 +170,7 @@ void LightDataBufferManager::Free(const std::shared_ptr<prosper::IBuffer> &rende
 		auto *pLight = m_bufferIndexToLightSource.at(m_highestBufferIndexInUse);
 		assert(pLight != nullptr);
 		if(pLight == nullptr)
-			throw std::logic_error("Expected valid light source at light buffer index " + std::to_string(m_highestBufferIndexInUse) + ", but none available!");
+			throw std::logic_error("Expected valid light source at light buffer index " + util::to_string(m_highestBufferIndexInUse) + ", but none available!");
 		// TODO: We can just copy the buffer data on the GPU instead
 		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, 0ull, pLight->GetBufferData());
 		pLight->SetRenderBuffer(renderBuffer, false);
@@ -185,7 +185,7 @@ void LightDataBufferManager::Free(const std::shared_ptr<prosper::IBuffer> &rende
 	else {
 		assert(m_highestBufferIndexInUse == 1);
 		if(m_highestBufferIndexInUse != 1)
-			throw std::logic_error("Light source buffer index " + std::to_string(baseIndex) + " exceeds highest lights buffer index in use (" + std::to_string(m_highestBufferIndexInUse) + ")!");
+			throw std::logic_error("Light source buffer index " + util::to_string(baseIndex) + " exceeds highest lights buffer index in use (" + util::to_string(m_highestBufferIndexInUse) + ")!");
 		m_highestBufferIndexInUse = 0;
 		//const auto flags = BufferFlags::None;
 		//pragma::get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer,offsetof(BufferData,flags),flags);

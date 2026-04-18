@@ -79,7 +79,7 @@ void CRenderComponent::InitializeBuffers()
 	constexpr prosper::DeviceSize alignment = 256; // See https://vulkan.gpuinfo.org/displaydevicelimit.php?name=minUniformBufferOffsetAlignment
 	auto internalAlignment = get_cengine()->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit);
 	if(internalAlignment > alignment)
-		throw std::runtime_error {"Unsupported minimum uniform buffer alignment (" + std::to_string(internalAlignment) + "!"};
+		throw std::runtime_error {"Unsupported minimum uniform buffer alignment (" + util::to_string(internalAlignment) + "!"};
 	createInfo.debugName = "entity_instance_data_buf";
 	s_instanceBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, nullptr, alignment);
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)

@@ -580,11 +580,11 @@ bool pragma::animation::Animation::Save(udm::AssetDataArg outData, std::string &
 		auto &frameTransforms = frame->GetBoneTransforms();
 		auto &scales = frame->GetBoneScales();
 		if(frameTransforms.size() != numBones) {
-			outErr = "Number of transforms (" + std::to_string(frameTransforms.size()) + ") in frame does not match number of bones (" + std::to_string(numBones) + ")!";
+			outErr = "Number of transforms (" + util::to_string(frameTransforms.size()) + ") in frame does not match number of bones (" + util::to_string(numBones) + ")!";
 			return false;
 		}
 		if(!scales.empty() && scales.size() != numBones) {
-			outErr = "Number of scales (" + std::to_string(scales.size()) + ") in frame does not match number of bones (" + std::to_string(numBones) + ")!";
+			outErr = "Number of scales (" + util::to_string(scales.size()) + ") in frame does not match number of bones (" + util::to_string(numBones) + ")!";
 			return false;
 		}
 		auto t = frameIdx / static_cast<float>(m_fps);

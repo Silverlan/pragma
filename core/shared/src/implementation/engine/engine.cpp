@@ -696,7 +696,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 		size_t resDirIdx = 1;
 		for(auto &resourceDir : g_lpResourceDirs) {
 			spdlog::debug("Adding read-only resource directory '{}'...", resourceDir);
-			fs::add_secondary_absolute_read_only_root_path("resource" + std::to_string(resDirIdx), resourceDir, resDirIdx /* priority */);
+			fs::add_secondary_absolute_read_only_root_path("resource" + util::to_string(resDirIdx), resourceDir, resDirIdx /* priority */);
 			++resDirIdx;
 		}
 	}
@@ -773,7 +773,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	auto cacheVersion = GetConVarValueOr<udm::Int32>("cache_version");
 	auto cacheVersionTarget = GetConVarValueOr<udm::Int32>("cache_version_target");
 	if(cacheVersion != cacheVersionTarget) {
-		SetConVar("cache_version", std::to_string(cacheVersionTarget));
+		SetConVar("cache_version", util::to_string(cacheVersionTarget));
 		ClearCache();
 	}
 

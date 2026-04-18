@@ -1446,7 +1446,7 @@ std::string Lua::util::get_type_name(lua::State *l, const luabind::object &o)
 	return lua::get_type(l, 1);
 }
 std::string Lua::util::variable_type_to_string(pragma::util::VarType varType) { return pragma::util::variable_type_to_string(varType); }
-std::string Lua::util::get_string_hash(const std::string &str) { return std::to_string(std::hash<std::string> {}(str)); }
+std::string Lua::util::get_string_hash(const std::string &str) { return pragma::util::to_string(std::hash<std::string> {}(str)); }
 luabind::object Lua::util::get_class_value(lua::State *l, const luabind::object &oClass, const std::string &key)
 {
 	int32_t t = 1;

@@ -75,7 +75,7 @@ static void cl_gpu_timer_queries_dump(pragma::NetworkState *state, pragma::BaseP
 			if(result && result->duration.has_value()) {
 				auto t = pragma::util::clock::to_milliseconds(*result->duration);
 				sTime = pragma::util::round_string(t, 2) + " ms";
-				sTime += " (" + std::to_string(result->duration->count()) + " ns)";
+				sTime += " (" + pragma::util::to_string(result->duration->count()) + " ns)";
 			}
 			Con::COUT << t << stage.GetName() << ": " << sTime;
 			Con::COUT << " (" << prosper::util::to_string(static_cast<GPUProfilingStage &>(stage).GetPipelineStage()) << ")" << Con::endl;

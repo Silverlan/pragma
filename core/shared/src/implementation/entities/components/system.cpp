@@ -163,7 +163,7 @@ void BaseEntityComponentSystem::RemoveComponent(BaseEntityComponent &component)
 	if(math::is_flag_set(component.m_stateFlags, BaseEntityComponent::StateFlags::Removed))
 		return;
 	if(math::is_flag_set(component.m_stateFlags, BaseEntityComponent::StateFlags::IsInitializing))
-		throw std::runtime_error {"Attempted to remove component of type " + std::to_string(component.GetComponentId()) + " while it is being initialized. This is not allowed!"};
+		throw std::runtime_error {"Attempted to remove component of type " + util::to_string(component.GetComponentId()) + " while it is being initialized. This is not allowed!"};
 	math::set_flag(component.m_stateFlags, BaseEntityComponent::StateFlags::Removed);
 	auto it = std::find_if(m_components.begin(), m_components.end(), [&component](const util::TSharedHandle<BaseEntityComponent> &componentOther) { return componentOther.valid() && componentOther.get() == &component; });
 	if(it == m_components.end())

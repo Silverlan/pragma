@@ -506,7 +506,7 @@ ShaderSpecializationManager::PassTypeIndex ShaderSpecializationManager::GetBaseP
 		if(pipelineIdx >= info.pipelineIndexRange.first && pipelineIdx < info.pipelineIndexRange.second)
 			return it - m_passTypeSpecializationToPipelineIdx.begin();
 	}
-	throw std::logic_error {"Invalid pipeline index " + std::to_string(pipelineIdx) + "!"};
+	throw std::logic_error {"Invalid pipeline index " + util::to_string(pipelineIdx) + "!"};
 }
 bool ShaderSpecializationManager::IsSpecializationConstantSet(uint32_t pipelineIdx, SpecializationFlags flag) const
 {

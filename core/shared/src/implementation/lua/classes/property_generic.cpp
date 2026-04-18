@@ -71,13 +71,13 @@ void LGenericFloatPropertyWrapper::LinkOther(pragma::util::StringProperty &prop)
 {
 	switch(m_propertyType) {
 	case ArithmeticFloatPropertyType::Float:
-		prop.Link<pragma::util::FloatProperty, float>(static_cast<pragma::util::FloatProperty &>(*m_property), [](const float &other) -> std::string { return std::to_string(other); });
+		prop.Link<pragma::util::FloatProperty, float>(static_cast<pragma::util::FloatProperty &>(*m_property), [](const float &other) -> std::string { return pragma::util::to_string(other); });
 		break;
 	case ArithmeticFloatPropertyType::Double:
-		prop.Link<pragma::util::DoubleProperty, double>(static_cast<pragma::util::DoubleProperty &>(*m_property), [](const double &other) -> std::string { return std::to_string(other); });
+		prop.Link<pragma::util::DoubleProperty, double>(static_cast<pragma::util::DoubleProperty &>(*m_property), [](const double &other) -> std::string { return pragma::util::to_string(other); });
 		break;
 	case ArithmeticFloatPropertyType::LongDouble:
-		prop.Link<pragma::util::LongDoubleProperty, long double>(static_cast<pragma::util::LongDoubleProperty &>(*m_property), [](const long double &other) -> std::string { return std::to_string(other); });
+		prop.Link<pragma::util::LongDoubleProperty, long double>(static_cast<pragma::util::LongDoubleProperty &>(*m_property), [](const long double &other) -> std::string { return pragma::util::to_string(other); });
 		break;
 	}
 }
@@ -554,28 +554,28 @@ void LGenericIntPropertyWrapper::LinkOther(pragma::util::StringProperty &prop)
 {
 	switch(m_propertyType) {
 	case ArithmeticIntPropertyType::Int8:
-		prop.Link<pragma::util::Int8Property, int8_t>(static_cast<pragma::util::Int8Property &>(*m_property), [](const int8_t &other) -> std::string { return std::to_string(other); });
+		prop.Link<pragma::util::Int8Property, int8_t>(static_cast<pragma::util::Int8Property &>(*m_property), [](const int8_t &other) -> std::string { return pragma::util::to_string(other); });
 		break;
 	case ArithmeticIntPropertyType::UInt8:
-		prop.Link<pragma::util::UInt8Property, uint8_t>(static_cast<pragma::util::UInt8Property &>(*m_property), [](const uint8_t &other) -> std::string { return std::to_string(other); });
+		prop.Link<pragma::util::UInt8Property, uint8_t>(static_cast<pragma::util::UInt8Property &>(*m_property), [](const uint8_t &other) -> std::string { return pragma::util::to_string(other); });
 		break;
 	case ArithmeticIntPropertyType::Int16:
-		prop.Link<pragma::util::Int16Property, int16_t>(static_cast<pragma::util::Int16Property &>(*m_property), [](const int16_t &other) -> std::string { return std::to_string(other); });
+		prop.Link<pragma::util::Int16Property, int16_t>(static_cast<pragma::util::Int16Property &>(*m_property), [](const int16_t &other) -> std::string { return pragma::util::to_string(other); });
 		break;
 	case ArithmeticIntPropertyType::UInt16:
-		prop.Link<pragma::util::UInt16Property, uint16_t>(static_cast<pragma::util::UInt16Property &>(*m_property), [](const uint16_t &other) -> std::string { return std::to_string(other); });
+		prop.Link<pragma::util::UInt16Property, uint16_t>(static_cast<pragma::util::UInt16Property &>(*m_property), [](const uint16_t &other) -> std::string { return pragma::util::to_string(other); });
 		break;
 	case ArithmeticIntPropertyType::Int32:
-		prop.Link<pragma::util::Int32Property, int32_t>(static_cast<pragma::util::Int32Property &>(*m_property), [](const int32_t &other) -> std::string { return std::to_string(other); });
+		prop.Link<pragma::util::Int32Property, int32_t>(static_cast<pragma::util::Int32Property &>(*m_property), [](const int32_t &other) -> std::string { return pragma::util::to_string(other); });
 		break;
 	case ArithmeticIntPropertyType::UInt32:
-		prop.Link<pragma::util::UInt32Property, uint32_t>(static_cast<pragma::util::UInt32Property &>(*m_property), [](const uint32_t &other) -> std::string { return std::to_string(other); });
+		prop.Link<pragma::util::UInt32Property, uint32_t>(static_cast<pragma::util::UInt32Property &>(*m_property), [](const uint32_t &other) -> std::string { return pragma::util::to_string(other); });
 		break;
 	case ArithmeticIntPropertyType::Int64:
-		prop.Link<pragma::util::Int64Property, int64_t>(static_cast<pragma::util::Int64Property &>(*m_property), [](const int64_t &other) -> std::string { return std::to_string(other); });
+		prop.Link<pragma::util::Int64Property, int64_t>(static_cast<pragma::util::Int64Property &>(*m_property), [](const int64_t &other) -> std::string { return pragma::util::to_string(other); });
 		break;
 	case ArithmeticIntPropertyType::UInt64:
-		prop.Link<pragma::util::UInt64Property, uint64_t>(static_cast<pragma::util::UInt64Property &>(*m_property), [](const uint64_t &other) -> std::string { return std::to_string(other); });
+		prop.Link<pragma::util::UInt64Property, uint64_t>(static_cast<pragma::util::UInt64Property &>(*m_property), [](const uint64_t &other) -> std::string { return pragma::util::to_string(other); });
 		break;
 	}
 }

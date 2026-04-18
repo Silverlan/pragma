@@ -64,11 +64,11 @@ void CMD_connect(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, s
 			return;
 		}
 		if(lastConnection.address.has_value()) {
-			std::vector<std::string> argv {lastConnection.address->first, std::to_string(lastConnection.address->second)};
+			std::vector<std::string> argv {lastConnection.address->first, pragma::util::to_string(lastConnection.address->second)};
 			CMD_connect(state, pl, argv);
 		}
 		else if(lastConnection.steamId.has_value()) {
-			std::vector<std::string> argv {std::to_string(*lastConnection.steamId)};
+			std::vector<std::string> argv {pragma::util::to_string(*lastConnection.steamId)};
 			CMD_connect(state, pl, argv);
 		}
 		return;

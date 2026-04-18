@@ -21,7 +21,7 @@ std::optional<std::string> Lua::VarToString(lua::State *lua, int n)
 	case Type::LightUserData:
 		return "lightuserdata";
 	case Type::Number:
-		return "number (" + std::to_string(ToNumber(lua, n)) + ")";
+		return "number (" + pragma::util::to_string(ToNumber(lua, n)) + ")";
 	case Type::String:
 		return "string (" + std::string {ToString(lua, n)} + ")";
 	case Type::Table:
@@ -49,9 +49,9 @@ std::optional<std::string> Lua::StackToString(lua::State *lua)
 	std::string str;
 	int top = GetStackTop(lua);
 	str += "------------ LUA STACKDUMP ------------\n";
-	str += "Values in stack: " + std::to_string(top) + "\n";
+	str += "Values in stack: " + pragma::util::to_string(top) + "\n";
 	for(int i = 1; i <= top; i++) {
-		str += "\t" + std::to_string(i) + ": ";
+		str += "\t" + pragma::util::to_string(i) + ": ";
 		auto var = VarToString(lua, i);
 		if(var.has_value())
 			str += *var;
@@ -75,11 +75,11 @@ std::optional<std::string> Lua::TableToString(lua::State *lua, int n)
 	std::string str;
 	str += "------------ LUA TABLEDUMP ------------\n";
 	if(n <= 0) {
-		str += "INVALID STACK INDEX (" + std::to_string(n) + ")\n";
+		str += "INVALID STACK INDEX (" + pragma::util::to_string(n) + ")\n";
 		return str;
 	}
 	if(!IsTable(lua, n)) {
-		str += "VALUE " + std::to_string(n) + " ON STACK IS A ";
+		str += "VALUE " + pragma::util::to_string(n) + " ON STACK IS A ";
 		auto var = VarToString(lua, n);
 		if(var.has_value())
 			str += *var;
@@ -931,7 +931,7 @@ double &pragma::Game::LastTick() { return m_tLastTick; }
 double &pragma::Game::DeltaTickTime() { return m_tDeltaTick; }
 
 float pragma::Game::GetTimeScale() { return 1.f; }
-void pragma::Game::SetTimeScale(float t) { m_stateNetwork->SetConVar("host_timescale", std::to_string(t)); }
+void pragma::Game::SetTimeScale(float t) { m_stateNetwork->SetConVar("host_timescale", util::to_string(t)); }
 
 pragma::console::ConConf *pragma::Game::GetConVar(std::string_view scmd) { return m_stateNetwork->GetConVar(scmd); }
 pragma::console::ConVarFlags pragma::Game::GetConVarFlags(std::string_view scmd) { return m_stateNetwork->GetConVarFlags(scmd); }

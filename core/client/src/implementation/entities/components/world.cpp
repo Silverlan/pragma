@@ -263,7 +263,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 		for(auto clusterIdx = start; clusterIdx < end; ++clusterIdx) {
 			if(failure == true)
 				return;
-			auto clusterRenderQueue = rendering::RenderQueue::Create("world_cluster_" + std::to_string(clusterIdx));
+			auto clusterRenderQueue = rendering::RenderQueue::Create("world_cluster_" + util::to_string(clusterIdx));
 			clusterRenderQueues[clusterIdx] = clusterRenderQueue;
 			std::shared_ptr<rendering::RenderQueue> clusterRenderTranslucentQueue = nullptr;
 			auto &meshes = meshesPerClusters.at(clusterIdx);
@@ -290,7 +290,7 @@ void CWorldComponent::BuildOfflineRenderQueues(bool rebuild)
 				if(shader->GetPipelineId(pipelineId, pipelineIdx) == false || pipelineId == std::numeric_limits<decltype(pipelineId)>::max())
 					continue;
 				if(mat->GetAlphaMode() == AlphaMode::Blend || shader->IsTranslucentPipeline(pipelineIdx)) {
-					clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : rendering::RenderQueue::Create("world_translucent_cluster_" + std::to_string(clusterIdx));
+					clusterRenderTranslucentQueue = clusterRenderTranslucentQueue ? clusterRenderTranslucentQueue : rendering::RenderQueue::Create("world_translucent_cluster_" + util::to_string(clusterIdx));
 					clusterRenderTranslucentQueue->Add(static_cast<ecs::CBaseEntity &>(GetEntity()), subMeshIdx, *mat, pipelineId);
 					continue;
 				}

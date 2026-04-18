@@ -41,7 +41,7 @@ void pragma::gui::types::WIMainMenuMods::Think(const std::shared_ptr<prosper::IP
 		m_downloadMutex.lock();
 		for(auto it = m_downloads.begin(); it != m_downloads.end();) {
 			auto &dlInfo = *it;
-			ExecJavascript("set_addon_download_progress('" + dlInfo->uniqueId + "'," + std::to_string(*dlInfo->downloadProgress) + ");");
+			ExecJavascript("set_addon_download_progress('" + dlInfo->uniqueId + "'," + util::to_string(*dlInfo->downloadProgress) + ");");
 			if(*dlInfo->downloadProgress == 1.f)
 				it = m_downloads.erase(it);
 			else

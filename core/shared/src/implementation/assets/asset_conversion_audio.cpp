@@ -67,7 +67,7 @@ bool pragma::util::port_sound_script(NetworkState *nw, const std::string &path)
 				else if(outVal == "PITCH_HIGH")
 					outVal = "1.2";
 				else
-					outVal = std::to_string(to_float(outVal) / 100.f);
+					outVal = util::to_string(to_float(outVal) / 100.f);
 				udmEvent["pitch"] = outVal;
 			}
 			else if(val.identifier == "soundlevel") {

@@ -600,7 +600,7 @@ BaseLuaBaseEntityComponent::MemberIndex BaseLuaBaseEntityComponent::RegisterMemb
 				setter += " = value";
 		}
 		if((memberFlags & MemberFlags::TransmitOnChange) == MemberFlags::TransmitOnChange || (memberFlags & MemberFlags::OutputBit) != MemberFlags::None || itMember->onChange)
-			setter += " self:OnMemberValueChanged(" + std::to_string(idx) + ")";
+			setter += " self:OnMemberValueChanged(" + util::to_string(idx) + ")";
 		setter += " end";
 		auto bSetterValid = true;
 		std::string err;

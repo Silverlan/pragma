@@ -707,7 +707,7 @@ void NET_cl_SND_EV(NetPacket packet)
 	case pragma::audio::ALSound::NetEvent::SetEntityMapIndex:
 		{
 			auto idx = packet->Read<uint32_t>();
-			//as->SetIdentifier("world_sound" +std::to_string(idx)); // Has to correspond to identifier in c_game_audio.cpp
+			//as->SetIdentifier("world_sound" +util::to_string(idx)); // Has to correspond to identifier in c_game_audio.cpp
 			break;
 		}
 	default:
@@ -1729,7 +1729,7 @@ void NET_cl_CREATE_EXPLOSION(NetPacket packet)
 			pQuakeComponent->SetAmplitude(50.f);
 			pQuakeComponent->SetRadius(radius);
 		}
-		entQuake->SetKeyValue("spawnflags", std::to_string(SF_QUAKE_IN_AIR | SF_QUAKE_REMOVE_ON_COMPLETE));
+		entQuake->SetKeyValue("spawnflags", pragma::util::to_string(SF_QUAKE_IN_AIR | SF_QUAKE_REMOVE_ON_COMPLETE));
 		entQuake->Spawn();
 		auto pInputComponent = entQuake->GetComponent<pragma::CIOComponent>();
 		if(pInputComponent.valid())

@@ -948,6 +948,23 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		window->SetTitleBarColor(*g_titleBarColor);
 	if(g_borderColor.has_value())
 		window->SetBorderColor(*g_borderColor);
+	window.SetStagingTargetReloadCallback([this, &window]() {
+		auto size = window.GetGlfwWindow().GetSize();
+		math::set_flag(m_stateFlags, StateFlags::FirstFrame, true);
+
+		auto &wgui = gui::WGUI::GetInstance();
+		auto *baseEl = wgui.GetBaseElement();
+		if(baseEl != nullptr)
+			baseEl->SetSize(size.x, size.y);
+
+		auto *cl = GetClientState();
+		if(cl == nullptr)
+			return;
+		auto *game = static_cast<CGame *>(cl->GetGameState());
+		if(game == nullptr)
+			return;
+		game->Resize(true);
+	});
 
 #ifdef _WIN32
 #if defined(WINVER) && (WINVER >= 0x0501)
@@ -1463,7 +1480,7 @@ std::expected<std::shared_ptr<prosper::Window>, std::string> pragma::CEngine::Cr
 	auto *pWindow = window.get();
 	pWindow->GetStagingRenderTarget(); // This will initialize the staging target immediately
 	(*pWindow)->SetWindowSizeCallback([pWindow](platform::Window &window, Vector2i size) {
-		pWindow->ReloadStagingRenderTarget();
+		pWindow->ScheduleStagingRenderTargetReload(std::chrono::milliseconds {50});
 		auto *el = gui::WGUI::GetInstance().GetBaseElement(pWindow);
 		if(el)
 			el->SetSize(size);
@@ -1498,11 +1515,7 @@ void pragma::CEngine::InitializeWindowInputCallbacks(prosper::Window &window)
 	});
 	window->SetIMEStatusCallback([this, &window](platform::Window &glfwWindow) { OnIMEStatusChanged(window, glfwWindow.IsIMEEnabled()); });
 }
-void pragma::CEngine::OnWindowResized(prosper::Window &window, Vector2i size)
-{
-	m_stateFlags |= StateFlags::WindowSizeChanged;
-	m_tWindowResizeTime = util::Clock::now();
-}
+void pragma::CEngine::OnWindowResized(prosper::Window &window, Vector2i size) { window.ScheduleStagingRenderTargetReload(); }
 
 void pragma::CEngine::OnWindowInitialized()
 {
@@ -1771,13 +1784,13 @@ void pragma::CEngine::Close()
 	};
 	closeSecondaryWindows();
 
-	if (gui::WGUI::IsOpen())
+	if(gui::WGUI::IsOpen())
 		gui::WGUI::GetInstance().ClearSkins(); // Should be cleared before lua states are closed
 	CloseClientState();
 	m_auxEffects.clear();
 	CloseSoundEngine(); // Has to be closed after client state (since clientstate may still have some references at this point)
 	m_clInstance = nullptr;
-	if (gui::WGUI::IsOpen())
+	if(gui::WGUI::IsOpen())
 		gui::WGUI::Close(); // Has to be closed after client state
 	RenderContext::Release();
 	g_engine = nullptr;
@@ -2091,21 +2104,6 @@ void pragma::CEngine::UpdateTickCount()
 
 void pragma::CEngine::Tick()
 {
-	if(math::is_flag_set(m_stateFlags, StateFlags::WindowSizeChanged)) {
-		auto t = util::Clock::now();
-		auto dt = t - m_tWindowResizeTime;
-		// If the window is being resized by the user, we don't want to update the resolution constantly,
-		// so we add a small delay
-		if(dt > std::chrono::milliseconds {250}) {
-			auto &window = GetWindow();
-			auto size = window.GetGlfwWindow().GetSize();
-			if(size.x > 0 && size.y > 0) { // If either size is 0, the window is probably minimized and we don't need to update.
-				math::set_flag(m_stateFlags, StateFlags::WindowSizeChanged, false);
-				OnResolutionChanged(size.x, size.y);
-			}
-		}
-	}
-
 	locale::poll();
 	ProcessConsoleInput();
 	RunTickEvents();
@@ -2140,24 +2138,7 @@ void pragma::CEngine::OnResolutionChanged(uint32_t width, uint32_t height)
 		OnRenderResolutionChanged(width, height);
 }
 
-void pragma::CEngine::OnRenderResolutionChanged(uint32_t width, uint32_t height)
-{
-	GetRenderContext().GetWindow().ReloadStagingRenderTarget();
-	math::set_flag(m_stateFlags, StateFlags::FirstFrame, true);
-
-	auto &wgui = gui::WGUI::GetInstance();
-	auto *baseEl = wgui.GetBaseElement();
-	if(baseEl != nullptr)
-		baseEl->SetSize(width, height);
-
-	auto *cl = GetClientState();
-	if(cl == nullptr)
-		return;
-	auto *game = static_cast<CGame *>(cl->GetGameState());
-	if(game == nullptr)
-		return;
-	game->Resize(true);
-}
+void pragma::CEngine::OnRenderResolutionChanged(uint32_t width, uint32_t height) { GetRenderContext().GetWindow().ReloadStagingRenderTarget(); }
 
 uint32_t pragma::CEngine::DoClearUnusedAssets(asset::Type type) const
 {

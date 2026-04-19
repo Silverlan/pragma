@@ -681,7 +681,13 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		  uint32_t universalQueueFamilyIndex;
 		  return get_cengine()->GetRenderContext().AllocateSecondaryLevelCommandBuffer(prosper::QueueFamilyType::Universal, universalQueueFamilyIndex);
 	  })),
-	  luabind::def("create_window", &CEngine::CreateWindow))];
+	  luabind::def(
+	    "create_window", +[](CEngine &en, prosper::WindowSettings &settings) -> std::shared_ptr<prosper::Window> {
+		    auto window = en.CreateWindow(settings);
+		    if(!window)
+			    return nullptr;
+		    return window.value();
+	    }))];
 
 	prosperMod[luabind::namespace_("util")[(luabind::def("get_square_vertex_uv_buffer", &Lua::Vulkan::get_square_vertex_uv_buffer), luabind::def("get_square_vertex_buffer", &Lua::Vulkan::get_square_vertex_buffer), luabind::def("get_square_uv_buffer", &Lua::Vulkan::get_square_uv_buffer),
 	  luabind::def("get_square_vertices", &prosper::CommonBufferCache::GetSquareVertices), luabind::def("get_square_uv_coordinates", &prosper::CommonBufferCache::GetSquareUvCoordinates), luabind::def("get_square_vertex_count", &prosper::CommonBufferCache::GetSquareVertexCount),

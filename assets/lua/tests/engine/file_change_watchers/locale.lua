@@ -3,6 +3,8 @@
 
 -- This test creates a localization file, makes some changes to it and then checks if the localization file was reloaded properly.
 
+locale.change_language("en")
+
 local contents = [[
 test_change_locale = "Original"
 ]]

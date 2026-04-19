@@ -90,8 +90,6 @@ local function cleanup()
 	file.delete(testMatFilePath)
 end
 
-print(contents)
-
 if(not file.write(testMatFilePath, contents)) then
 	cleanup()
 	return false, "Failed to write test material '" .. testMatFilePath .. "'!"
@@ -107,7 +105,9 @@ for _, valInfo in ipairs(testValues) do
 	local val = mat:GetProperty(valInfo.key, valInfo.type)
 	if(val == nil or not valInfo.compareFunction(val, valInfo.value)) then
 		cleanup()
-		tests.complete(false, string.fmt("Value of material property '{}' does not match expected value '{}'.", tostring(val), valInfo.value))
-		return
+		return false, string.fmt("Value of material property '{}' does not match expected value '{}'.", tostring(val), valInfo.value)
 	end
 end
+
+cleanup()
+return true

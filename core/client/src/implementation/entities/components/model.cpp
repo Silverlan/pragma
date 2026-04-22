@@ -249,8 +249,8 @@ void CModelComponent::UpdateRenderBufferList()
 		if(mat == nullptr || shader == nullptr)
 			continue;
 		renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(*mat);
-		if(mat->GetProperty("test_glow", false))
-			math::set_flag(renderBufferData.stateFlags, rendering::RenderBufferData::StateFlags::EnableGlowPass);
+		// if(mat->GetProperty("test_glow", false))
+		// 	math::set_flag(renderBufferData.stateFlags, rendering::RenderBufferData::StateFlags::EnableGlowPass);
 	}
 }
 

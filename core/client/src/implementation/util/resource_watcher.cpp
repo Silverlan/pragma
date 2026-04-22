@@ -136,7 +136,6 @@ void pragma::util::CResourceWatcherManager::OnResourceChanged(const Path &rootPa
 		auto canonShaderPath = util::Path::CreateFile(strPath);
 		canonShaderPath.Canonicalize();
 		canonShaderPath.RemoveFileExtension();
-		canonShaderPath.PopFront(); // Remove root dir ("shaders")
 
 		auto canonShader = canonShaderPath.GetString();
 		string::to_lower(canonShader);

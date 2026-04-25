@@ -27,6 +27,7 @@ runs:
         test-scripts: |
           "tests/assets.udm"
           "tests/game.udm"
+          "tests/file_change_watchers.udm"
         working-directory: "${{ inputs.working-directory }}"
         artifacts-name: "base-tests"
 

@@ -128,7 +128,7 @@ util::EventReply CFlammableComponent::Ignite(float duration, ecs::BaseEntity *at
 	auto particleCount = math::clamp(math::ceil(radius / 10.f), 12, 20);
 	auto particleRadius = math::max(radius / 3.f, 14.f);
 
-	const std::unordered_map<std::string, std::string> radiusRandom = {{"radius_min", std::to_string(particleRadius)}, {"radius_max", std::to_string(particleRadius + 25)}};
+	const std::unordered_map<std::string, std::string> radiusRandom = {{"radius_min", util::to_string(particleRadius)}, {"radius_max", util::to_string(particleRadius + 25)}};
 
 	struct ParticleInfo {
 		ParticleInfo(const Vector3 &_position, uint32_t _boneId) : position(_position), boneId(_boneId) {}

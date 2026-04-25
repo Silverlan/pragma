@@ -20,46 +20,27 @@
 #ifdef _WIN32
 #include <windows.h>
 #else
-#define LINUX_THREAD_TEST
-#ifdef LINUX_THREAD_TEST
 #include <unistd.h>
 #include <dlfcn.h>
 #include <algorithm>
 #include <iostream>
-#include <thread>
-#endif
 #endif
 
-static std::string GetAppPath()
+#ifdef PRAGMA_WITH_MIMALLOC
+#include "mimalloc-new-delete.h"
+#endif
+
+#ifdef _WIN32
+static std::string get_app_path()
 {
-#ifdef __linux__
-	std::string path = "";
-	pid_t pid = getpid();
-	char buf[20] = {0};
-	sprintf(buf, "%d", pid);
-	std::string _link = "/proc/";
-	_link.append(buf);
-	_link.append("/exe");
-	char proc[512];
-	int ch = readlink(_link.c_str(), proc, 512);
-	if(ch != -1) {
-		proc[ch] = 0;
-		path = proc;
-		std::string::size_type t = path.find_last_of("/");
-		path = path.substr(0, t);
-	}
-	return path;
-#else
 	char path[MAX_PATH + 1];
 	GetModuleFileName(NULL, path, MAX_PATH + 1); // Requires windows.h
 
 	std::string appPath = path;
 	appPath = appPath.substr(0, appPath.rfind("\\"));
 	return appPath;
-#endif
 }
 
-#ifdef _WIN32
 static std::string get_last_system_error_string(DWORD errorMessageID)
 {
 	if(errorMessageID == 0)
@@ -116,7 +97,7 @@ namespace pragma {
 #if ENABLE_GDEBUGGER_SUPPORT == 1
 		HINSTANCE hEngine = LoadLibrary(library);
 #else
-		std::string path = GetAppPath();
+		std::string path = get_app_path();
 		path += "\\bin\\";
 		path += library;
 		HINSTANCE hEngine = LoadLibraryEx(path.c_str(), nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
@@ -153,9 +134,6 @@ namespace pragma {
 			}
 		}
 		auto wrapper = ModuleWrapper::Create(hEngine);
-#if 0
-		std::thread t([]() { std::cout << "Linux Thread Test"; });
-#endif
 		void (*runEngine)(int, char *[]) = (void (*)(int, char *[]))dlsym(hEngine, runEngineSymbol);
 		if(runEngine != nullptr) {
 			runEngine(argc, argv);

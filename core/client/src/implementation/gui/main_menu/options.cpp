@@ -52,7 +52,7 @@ void pragma::gui::types::WIMainMenuOptions::ApplyOptions()
 	if(m_hAntiAliasing.IsValid()) {
 		auto *pChoice = static_cast<WIChoiceList *>(m_hAntiAliasing.get())->GetSelectedChoice();
 		if(pChoice->value == "fxaa") {
-			std::vector<std::string> argv {std::to_string(math::to_integral(rendering::AntiAliasing::FXAA))};
+			std::vector<std::string> argv {util::to_string(math::to_integral(rendering::AntiAliasing::FXAA))};
 			client->RunConsoleCommand("cl_render_anti_aliasing", argv);
 		}
 		else if(string::substr(pChoice->value, 0, 4) == "msaa") {
@@ -71,11 +71,11 @@ void pragma::gui::types::WIMainMenuOptions::ApplyOptions()
 				mssaaSamples = "6";
 			std::vector<std::string> argv {mssaaSamples};
 			client->RunConsoleCommand("cl_render_msaa_samples", argv);
-			argv = {std::to_string(math::to_integral(rendering::AntiAliasing::MSAA))};
+			argv = {util::to_string(math::to_integral(rendering::AntiAliasing::MSAA))};
 			client->RunConsoleCommand("cl_render_anti_aliasing", argv);
 		}
 		else {
-			std::vector<std::string> argv {std::to_string(math::to_integral(rendering::AntiAliasing::None))};
+			std::vector<std::string> argv {util::to_string(math::to_integral(rendering::AntiAliasing::None))};
 			client->RunConsoleCommand("cl_render_anti_aliasing", argv);
 		}
 	}
@@ -188,7 +188,7 @@ void pragma::gui::types::WIMainMenuOptions::ShowVideoSettings() { SetActiveMenu(
 void pragma::gui::types::WIMainMenuOptions::ShowAudioSettings() { SetActiveMenu(m_hAudioSettings); }
 void pragma::gui::types::WIMainMenuOptions::ShowControlSettings() { SetActiveMenu(m_hControlSettings); }
 
-static std::string sliderTranslator(float f) { return std::to_string(CInt32(f * 100.f)); }
+static std::string sliderTranslator(float f) { return pragma::util::to_string(CInt32(f * 100.f)); }
 static void sliderInitializer(pragma::gui::types::WISlider *pSlider)
 {
 	pSlider->SetRange(0.f, 1.f, 0.01f);
@@ -590,9 +590,9 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 		  }
 		  for(int i = 0; i < modes.size(); i++) {
 			  const auto &videoMode = modes[i];
-			  std::string res = std::to_string(videoMode.width);
+			  std::string res = util::to_string(videoMode.width);
 			  res += "x";
-			  res += std::to_string(videoMode.height);
+			  res += util::to_string(videoMode.height);
 			  pMenu->AddOption(res, res);
 		  }
 	  },
@@ -631,7 +631,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 				  }
 			  }
 			  if(numExists > 0) {
-				  name += std::string(" #") + std::to_string(numExists + 1);
+				  name += std::string(" #") + util::to_string(numExists + 1);
 				  if(numExists == 1)
 					  monitorOptionNames[idxFirst] += " #1";
 			  }
@@ -649,10 +649,10 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 	auto *pDeviceMenu = pList->AddDropDownMenu(pragma::locale::get_text("physical_device"),[](WIDropDownMenu *pMenu) {
 		auto deviceList = prosper::util::get_available_vendor_devices(pragma::get_cengine()->GetRenderContext());
 		for(auto &devInfo : deviceList)
-			pMenu->AddOption(devInfo.deviceName,std::to_string(pragma::math::to_integral(devInfo.vendor)) +"," +std::to_string(devInfo.deviceId));
+			pMenu->AddOption(devInfo.deviceName,util::to_string(pragma::math::to_integral(devInfo.vendor)) +"," +util::to_string(devInfo.deviceId));
 
 		pMenu->SelectOption(0u);
-		pMenu->SelectOption(client->GetConVarString("cl_gpu_device"));
+		pMenu->SelectOption(client->GetConVarValueOr<udm::String>("cl_gpu_device"));
 	},"cl_gpu_device");
 #endif
 	//
@@ -712,22 +712,22 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 	/*while(samples <= maxSamples)
 	{
 		std::string o = "MSAA x";
-		o += std::to_string(samples);
-		aaChoices.push_back(std::make_pair("msaa" +std::to_string(samples),o));
+		o += util::to_string(samples);
+		aaChoices.push_back(std::make_pair("msaa" +util::to_string(samples),o));
 		samples *= 2;
 	}*/
 	auto *antiAlias = pList->AddChoiceList(locale::get_text("anti_aliasing"), aaChoices, "", "cl_render_anti_aliasing");
 	m_hAntiAliasing = antiAlias->GetHandle();
 	if(antiAlias != nullptr) {
-		auto antiAliasingType = static_cast<rendering::AntiAliasing>(get_client_state()->GetConVarInt("cl_render_anti_aliasing"));
+		auto antiAliasingType = static_cast<rendering::AntiAliasing>(get_client_state()->GetConVarValueOr<udm::Int32>("cl_render_anti_aliasing"));
 		switch(antiAliasingType) {
 		case rendering::AntiAliasing::FXAA:
 			antiAlias->SelectChoice("fxaa");
 			break;
 		case rendering::AntiAliasing::MSAA:
 			{
-				auto msaaSamples = get_client_state()->GetConVarInt("cl_render_msaa_samples");
-				//antiAlias->SelectChoice("msaa" +std::to_string(static_cast<int32_t>(sqrt(msaaSamples))));
+				auto msaaSamples = get_client_state()->GetConVarValueOr<udm::Int32>("cl_render_msaa_samples");
+				//antiAlias->SelectChoice("msaa" +util::to_string(static_cast<int32_t>(sqrt(msaaSamples))));
 				break;
 			}
 		}
@@ -792,7 +792,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 		auto start = 3;
 		for(auto it = anisotropy.begin(); it != anisotropy.end(); ++it) {
 			auto v = *it;
-			pList->AddChoice(locale::get_text("texfilter_anisotropic_filtering") + " x" + std::to_string(v), std::to_string(start++));
+			pList->AddChoice(locale::get_text("texfilter_anisotropic_filtering") + " x" + util::to_string(v), util::to_string(start++));
 		}
 	};
 	auto *texFilter = pList->AddChoiceList(
@@ -976,7 +976,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeVideoSettings()
 
 	InitializeOptionsList(pList);
 
-	if(get_client_state()->GetConVarInt("cl_render_preset") < 0) {
+	if(get_client_state()->GetConVarValueOr<udm::Int32>("cl_render_preset") < 0) {
 		pListPreset->SelectChoice(3);
 		if(m_hButtonApply.IsValid()) {
 			SetActiveMenu(m_hVideoSettings);

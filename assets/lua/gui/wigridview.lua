@@ -212,4 +212,4 @@ function gui.WIGridView:Update()
 	pLine2:SetPos(self:GetSize() * 0.5 - Vector2(1, pLine2:GetHeight() * 0.5))
 	self:CallCallbacks("Update")
 end
-gui.register("WIGridView", gui.WIGridView)
+gui.register("grid_view", gui.WIGridView)

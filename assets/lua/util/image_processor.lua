@@ -146,6 +146,7 @@ function util.ImageProcessor:AddStagingTexture(createInfo)
 	createInfo.tiling = prosper.IMAGE_TILING_OPTIMAL
 	createInfo.memoryFeatures = prosper.MEMORY_FEATURE_GPU_BULK_BIT
 	createInfo.postCreateLayout = prosper.IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+	createInfo.debugName = "image_processor_staging"
 	local img = prosper.create_image(createInfo)
 	img:SetDebugName("image_processor_staging_tex")
 	local samplerCreateInfo = prosper.SamplerCreateInfo()

@@ -9,12 +9,6 @@ import :client_state;
 
 pragma::gui::types::WIGridPanel::WIGridPanel() : WITable(), m_resizeMode(ResizeMode::FitToChildren), m_numColumns(0) {}
 
-void pragma::gui::types::WIGridPanel::SetSize(int x, int y)
-{
-	WITable::SetSize(x, y);
-	//auto &children = *GetChildren();
-}
-
 void pragma::gui::types::WIGridPanel::FillRows(uint32_t count)
 {
 	auto numRows = GetRowCount();

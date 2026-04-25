@@ -61,6 +61,7 @@ export namespace pragma {
 		std::vector<PassTypeInfo> m_passTypeSpecializationToPipelineIdx;
 	};
 
+	constexpr std::string_view MATERIAL_SETTINGS_BUFFER_DEFAULT_INITIAL_SIZE = "512KiB";
 	class DLLCLIENT ShaderGameWorldLightingPass : public ShaderGameWorld, public ShaderSpecializationManager {
 	  public:
 		static ShaderGraphics::VertexBinding VERTEX_BINDING_RENDER_BUFFER_INDEX;
@@ -79,7 +80,7 @@ export namespace pragma {
 		static VertexAttribute VERTEX_ATTRIBUTE_UV;
 		static VertexAttribute VERTEX_ATTRIBUTE_NORMAL;
 		static VertexAttribute VERTEX_ATTRIBUTE_TANGENT;
-		static VertexAttribute VERTEX_ATTRIBUTE_BI_TANGENT;
+		// static VertexAttribute VERTEX_ATTRIBUTE_BI_TANGENT;
 
 		static ShaderGraphics::VertexBinding VERTEX_BINDING_LIGHTMAP;
 		static VertexAttribute VERTEX_ATTRIBUTE_LIGHTMAP_UV;

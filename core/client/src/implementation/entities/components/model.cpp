@@ -233,12 +233,12 @@ void CModelComponent::UpdateRenderBufferList()
 			}
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-			::debug::get_domain().BeginTask("init_mat_desc_set");
+			debug::get_domain().BeginTask("init_mat_desc_set");
 #endif
 			if(!shader->InitializeMaterialDescriptorSet(*mat))
 				mat = nullptr;
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-			::debug::get_domain().EndTask();
+			debug::get_domain().EndTask();
 #endif
 		}
 		m_lodMeshRenderBufferData.push_back({});
@@ -249,8 +249,8 @@ void CModelComponent::UpdateRenderBufferList()
 		if(mat == nullptr || shader == nullptr)
 			continue;
 		renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(*mat);
-		if(mat->GetProperty("test_glow", false))
-			math::set_flag(renderBufferData.stateFlags, rendering::RenderBufferData::StateFlags::EnableGlowPass);
+		// if(mat->GetProperty("test_glow", false))
+		// 	math::set_flag(renderBufferData.stateFlags, rendering::RenderBufferData::StateFlags::EnableGlowPass);
 	}
 }
 

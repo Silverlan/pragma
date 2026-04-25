@@ -1,6 +1,6 @@
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 
-option(CONFIG_BUILD_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)
+option(PRAGMA_WITH_VTUNE_SUPPORT "Build with VTune profiler support?" OFF)
 
 set(PROJ_NAME shared)
 pr_add_library(${PROJ_NAME} SHARED)
@@ -383,6 +383,15 @@ pr_add_compile_definitions(
 
 		PUBLIC
 )
+if(PRAGMA_WITH_MIMALLOC)
+	pr_add_compile_definitions(
+			${PROJ_NAME}
+			-DPRAGMA_WITH_MIMALLOC=1
+
+			PUBLIC
+	)
+	target_link_libraries(${PROJ_NAME} PUBLIC mimalloc)
+endif()
 
 # Required by sound_ogg.cpp
 pr_add_dependency(${PROJ_NAME} vorbis TARGET)
@@ -399,7 +408,7 @@ pr_add_headers(${PROJ_NAME} "include/" EXCLUDE "${SOURCE_EXCLUSION_FILTER}")
 
 pr_add_compile_definitions(${PROJ_NAME} -DDLLNETWORK_EX -DENGINE_NETWORK)
 
-if(${CONFIG_BUILD_WITH_VTUNE_SUPPORT})
+if(${PRAGMA_WITH_VTUNE_SUPPORT})
 	pr_add_external_dependency(${PROJ_NAME} vtune_profiler LIBRARY)
 	pr_add_compile_definitions(${PROJ_NAME} -DPRAGMA_ENABLE_VTUNE_PROFILING PUBLIC)
 endif()

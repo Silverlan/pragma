@@ -51,7 +51,7 @@ runs:
             local testName = file.remove_file_extension(file.get_file_name(script), {\"udm\"})
             tests.queue(testName)
           end
-          local cbOnTestComplete = tests.add_event_listener(\"OnAllTestsComplete\", function(success, errMsg)
+          local cbOnTestComplete = tests.add_event_listener(\"OnAllTestsComplete\", function(numCompleted, numSucceeded, numFailed)
             file.rename(\"temp/tests\", \"artifacts\")
             engine.shutdown()
           end)

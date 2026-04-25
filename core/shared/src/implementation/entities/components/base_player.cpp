@@ -498,7 +498,7 @@ Vector2 BasePlayerComponent::CalcMovementSpeed() const
 	float speed;
 	auto physComponent = GetEntity().GetPhysicsComponent();
 	if(physComponent && physComponent->GetMoveType() == physics::MoveType::Noclip) {
-		speed = GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_noclip_speed");
+		speed = GetEntity().GetNetworkState()->GetGameState()->GetConVarValueOr<udm::Float>("sv_noclip_speed");
 		if(IsWalking())
 			speed *= 0.5f;
 		else if(IsSprinting())
@@ -514,12 +514,12 @@ Vector2 BasePlayerComponent::CalcMovementSpeed() const
 		speed = GetRunSpeed();
 	return {speed, 0.f};
 }
-float BasePlayerComponent::CalcAirMovementModifier() const { return GetEntity().GetNetworkState()->GetGameState()->GetConVarFloat("sv_player_air_move_scale"); }
+float BasePlayerComponent::CalcAirMovementModifier() const { return GetEntity().GetNetworkState()->GetGameState()->GetConVarValueOr<udm::Float>("sv_player_air_move_scale"); }
 float BasePlayerComponent::CalcMovementAcceleration(float &optOutRampUpTime) const
 {
 	auto *game = GetEntity().GetNetworkState()->GetGameState();
-	optOutRampUpTime = game->GetConVarFloat("sv_acceleration_ramp_up_time");
-	return game->GetConVarFloat("sv_acceleration");
+	optOutRampUpTime = game->GetConVarValueOr<udm::Float>("sv_acceleration_ramp_up_time");
+	return game->GetConVarValueOr<udm::Float>("sv_acceleration");
 }
 
 void BasePlayerComponent::SetUDPPort(unsigned short port) { m_portUDP = port; }
@@ -545,44 +545,44 @@ void BasePlayerComponent::OnEntitySpawn()
 	PlaySharedActivity(Activity::Idle);
 }
 
-void BasePlayerComponent::GetConVars(std::unordered_map<std::string, std::string> **convars) { *convars = &m_conVars; }
+string::StringMap<std::string> &BasePlayerComponent::GetConVars() { return m_conVars; }
 
-bool BasePlayerComponent::GetConVar(std::string cvar, std::string *val)
+bool BasePlayerComponent::GetConVar(std::string_view cvar, std::string *val)
 {
-	std::unordered_map<std::string, std::string>::iterator i = m_conVars.find(cvar);
+	auto i = m_conVars.find(cvar);
 	if(i == m_conVars.end())
 		return false;
 	*val = i->second;
 	return true;
 }
 
-std::string BasePlayerComponent::GetConVarString(std::string cvar) const
+std::string BasePlayerComponent::GetConVarString(std::string_view cvar) const
 {
-	std::unordered_map<std::string, std::string>::iterator i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
+	auto i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
 	if(i == m_conVars.end())
 		return "";
 	return i->second;
 }
 
-int BasePlayerComponent::GetConVarInt(std::string cvar) const
+int BasePlayerComponent::GetConVarInt(std::string_view cvar) const
 {
-	std::unordered_map<std::string, std::string>::iterator i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
+	auto i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
 	if(i == m_conVars.end())
 		return 0;
 	return string::to_int(i->second);
 }
 
-float BasePlayerComponent::GetConVarFloat(std::string cvar) const
+float BasePlayerComponent::GetConVarFloat(std::string_view cvar) const
 {
-	std::unordered_map<std::string, std::string>::iterator i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
+	auto i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
 	if(i == m_conVars.end())
 		return 0;
 	return util::to_float(i->second);
 }
 
-bool BasePlayerComponent::GetConVarBool(std::string cvar) const
+bool BasePlayerComponent::GetConVarBool(std::string_view cvar) const
 {
-	std::unordered_map<std::string, std::string>::iterator i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
+	auto i = const_cast<BasePlayerComponent *>(this)->m_conVars.find(cvar);
 	if(i == m_conVars.end())
 		return false;
 	return i->second != "0";

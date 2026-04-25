@@ -416,46 +416,46 @@ static std::string get_key_value(lua::State *l, const luabind::object &value)
 	auto type = static_cast<Lua::Type>(luabind::type(value));
 	switch(type) {
 	case Lua::Type::Number:
-		return std::to_string(luabind::object_cast<double>(value));
+		return util::to_string(luabind::object_cast<double>(value));
 	case Lua::Type::Bool:
 		return luabind::object_cast<bool>(value) ? "1" : "0";
 	case Lua::Type::UserData:
 		{
 			auto *v4 = luabind::object_cast_nothrow<Vector4 *>(value, static_cast<Vector4 *>(nullptr));
 			if(v4)
-				return std::to_string(v4->x) + " " + std::to_string(v4->y) + " " + std::to_string(v4->z) + " " + std::to_string(v4->w);
+				return util::to_string(v4->x) + " " + util::to_string(v4->y) + " " + util::to_string(v4->z) + " " + util::to_string(v4->w);
 
 			auto *v3 = luabind::object_cast_nothrow<Vector3 *>(value, static_cast<Vector3 *>(nullptr));
 			if(v3)
-				return std::to_string(v3->x) + " " + std::to_string(v3->y) + " " + std::to_string(v3->z);
+				return util::to_string(v3->x) + " " + util::to_string(v3->y) + " " + util::to_string(v3->z);
 
 			auto *v2 = luabind::object_cast_nothrow<Vector2 *>(value, static_cast<Vector2 *>(nullptr));
 			if(v2)
-				return std::to_string(v2->x) + " " + std::to_string(v2->y);
+				return util::to_string(v2->x) + " " + util::to_string(v2->y);
 
 			auto *v4i = luabind::object_cast_nothrow<Vector4i *>(value, static_cast<Vector4i *>(nullptr));
 			if(v4i)
-				return std::to_string(v4i->x) + " " + std::to_string(v4i->y) + " " + std::to_string(v4i->z) + " " + std::to_string(v4i->w);
+				return util::to_string(v4i->x) + " " + util::to_string(v4i->y) + " " + util::to_string(v4i->z) + " " + util::to_string(v4i->w);
 
 			auto *v3i = luabind::object_cast_nothrow<Vector3i *>(value, static_cast<Vector3i *>(nullptr));
 			if(v3i)
-				return std::to_string(v3i->x) + " " + std::to_string(v3i->y) + " " + std::to_string(v3i->z);
+				return util::to_string(v3i->x) + " " + util::to_string(v3i->y) + " " + util::to_string(v3i->z);
 
 			auto *v2i = luabind::object_cast_nothrow<Vector2i *>(value, static_cast<Vector2i *>(nullptr));
 			if(v2i)
-				return std::to_string(v2i->x) + " " + std::to_string(v2i->y);
+				return util::to_string(v2i->x) + " " + util::to_string(v2i->y);
 
 			auto *col = luabind::object_cast_nothrow<Color *>(value, static_cast<Color *>(nullptr));
 			if(col)
-				return std::to_string(col->r) + " " + std::to_string(col->g) + " " + std::to_string(col->b) + " " + std::to_string(col->a);
+				return util::to_string(col->r) + " " + util::to_string(col->g) + " " + util::to_string(col->b) + " " + util::to_string(col->a);
 
 			auto *ang = luabind::object_cast_nothrow<EulerAngles *>(value, static_cast<EulerAngles *>(nullptr));
 			if(ang)
-				return std::to_string(ang->p) + " " + std::to_string(ang->y) + " " + std::to_string(ang->r);
+				return util::to_string(ang->p) + " " + util::to_string(ang->y) + " " + util::to_string(ang->r);
 
 			auto *rot = luabind::object_cast_nothrow<Quat *>(value, static_cast<Quat *>(nullptr));
 			if(rot)
-				return std::to_string(rot->w) + " " + std::to_string(rot->x) + " " + std::to_string(rot->y) + " " + std::to_string(rot->z);
+				return util::to_string(rot->w) + " " + util::to_string(rot->x) + " " + util::to_string(rot->y) + " " + util::to_string(rot->z);
 		}
 	}
 	return luabind::object_cast<std::string>(value);

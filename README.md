@@ -47,36 +47,48 @@ Please consider creating a [binary module](https://github.com/Silverlan/pragma#m
 
 Build Requirements
 ------
-- [CMake](https://cmake.org/download/) 4.2.0 or newer
+- [CMake](https://cmake.org/download/) 4.2.0 or newer *
 - [Ninja-build](https://ninja-build.org/)
+- [Python 3](https://www.python.org/downloads/)
 - At least 16 GiB of RAM
-- Recommended IDE: [CLion](https://www.jetbrains.com/clion/) *
+- Recommended IDE: [CLion](https://www.jetbrains.com/clion/)
 
-<sub>\* CLion ships with a slightly older version of CMake. If you want to use CLion, you will have to download the latest version of CMake manually and set it up in the CLion settings under File > Settings... > Build, Execution, Deployment > Toolchains > CMake.</sub>
+<sub>\* CMake 4.3.x is currently not supported and will cause errors during configuration due to a [regression issue](https://gitlab.kitware.com/cmake/cmake/-/issues/27600).</sub>
 
 ###### Linux (Recommended)
 - ~30 GiB of disk space
-- Ubuntu 24.04 or newer, or Arch-based distro with up-to-date packages
+
+Supported Distros:
+- Ubuntu 24.04 or newer
+- Arch with up-to-date packages
+- Fedora 43 or newer
 
 The following system packages have to be installed (these will be installed automatically if you're using the build script):
 
-Ubuntu:
+**Ubuntu**:
 ```bash
+sudo apt update
 sudo apt install cmake ninja-build gcc g++ libfreetype6-dev libwayland-dev libx11-dev libxkbcommon-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev pkg-config libxcb-keysyms1-dev libx11-xcb-dev libssl-dev
 ```
 (`libssl-dev` is only required if you're building with PFM.)
 
-Arch:
+**Arch**:
+```bash
+sudo pacman -Sy --needed cmake ninja
 ```
-sudo pacman -S cmake ninja
+
+**Fedora**:
+```bash
+dnf install cmake ninja gcc g++ freetype-devel wayland-devel libxkbcommon-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel xcb-util-keysyms-devel openssl-devel
 ```
+(`openssl-devel` is only required if you're building with PFM.)
 
 ###### Windows
 - ~80 GiB of disk space
-- Visual Studio 2022 or newer *
+- Visual Studio 2022 *
 - Windows SDK 10.0.22000.0 or newer
 
-<sub>\* Generating a Visual Studio project is currently not supported, but you can still use the MSVC compiler.</sub>
+<sub>\* Generating a Visual Studio project is currently not supported, but you can still use the MSVC 2022 compiler. Please note that the MSVC 2026 compiler will *not* work.</sub>
 
 Build Instructions
 ------
@@ -85,13 +97,12 @@ To clone Pragma, run:
 git clone https://github.com/Silverlan/pragma.git
 ```
 
-Then use the build method of your choice below *. CMake will be used regardless of which build method you choose. The build files will be placed in "pragma/build", and Pragma will be installed to "pragma/build/install" by default. The default (and recommended) compiler (regardless of the os) is clang and the default build system is Ninja.
+Then use the build method of your choice below. CMake will be used regardless of which build method you choose. The build files will be placed in "pragma/build", and Pragma will be installed to "pragma/build/install" by default. The default (and recommended) compiler (regardless of the os) is clang and the default build system is Ninja.
 
 To cut down on disk space, Pragma uses prebuilt binaries for a lot of third-party dependencies by default. You can use the build script if you want to build those as well, but this will **significantly** increase the build time and disk space usage and is generally not recommended.
 
-<sub>\* :warning: On Windows only the [build script](#build-script) method is currently supported. Simply double-click "build.bat"/"build_full.bat" or execute it from a command-line window.</sub>
-
 ### CLion (Recommended)
+
 If you're using the [CLion IDE](https://www.jetbrains.com/clion/), you can simply open the cloned Pragma repository and it should prompt you with a list of the available profiles. Make sure to **delete or disable the default Debug profile**, then enable the profile of your choice:
 
 <img src="https://wiki.pragma-engine.com/uploads/images/gallery/2026-01/clion-profiles.png" width="800" />
@@ -101,6 +112,14 @@ Use a profile with the `-full` suffix if you want to have all features available
 Press OK and CLion will configure the project automatically. Once the configuration, you should restart CLion at least once to make sure CLion loads the most up-to-date configuration files, otherwise you may get issues when trying to run Pragma through CLion.
 
 You can then build, install and launch Pragma using the "pragma" configuration. If you have chosen a `-full` profile, you can use the "pfm" configuration respectively to launch PFM.
+
+> :warning:<br/>
+> When using CLion, it is recommended to use the prebuilt binaries for third-party dependencies (which is the default behavior).
+> If you enable dependency builds, make sure to set the dependency directory somewhere outside of the Pragma directory, otherwise
+> you may experience freezes, crashes and general instability with CLion. You can use the `--deps-directory` argument for the build script, and `-DPRAGMA_DEPS_DIR`
+> CMake argument in CLion to specify a custom directory.
+> If you're not using the build script, or you haven't enabled the `--build-all` option, you can ignore this warning.
+<br/>
 
 ### CMake
 If you want to use a different IDE or just want to set up Pragma via command-line, you can set up Pragma using a CMake workflow preset:

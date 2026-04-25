@@ -31,6 +31,7 @@ export namespace Lua {
 		DLLNETWORK void remove(lua::State *l, const luabind::object &o, bool removeSafely);
 		DLLNETWORK bool is_table(luabind::argument arg);
 		DLLNETWORK bool is_table();
+		DLLNETWORK int fmt(lua::State *L);
 		DLLNETWORK std::string date_time(const std::string &format);
 		DLLNETWORK std::string date_time();
 		DLLNETWORK luabind::object fire_bullets(lua::State *l, pragma::game::BulletInfo &bulletInfo, bool hitReport, const std::function<void(pragma::game::DamageInfo &, pragma::physics::TraceData &, pragma::physics::TraceResult &, uint32_t &)> &f);

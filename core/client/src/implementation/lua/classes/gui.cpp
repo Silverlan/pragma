@@ -84,8 +84,8 @@ static void record_render_ui(pragma::gui::types::WIBase &el, prosper::IImage &im
 static bool render_ui(pragma::gui::types::WIBase &el, prosper::RenderTarget &rt, const Lua::gui::DrawToTextureInfo &info)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	debug::get_domain().BeginTask("draw_ui_to_texture");
-	pragma::util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
+	pragma::debug::get_domain().BeginTask("draw_ui_to_texture");
+	pragma::util::ScopeGuard sgVtune {[]() { pragma::debug::get_domain().EndTask(); }};
 #endif
 	auto &context = rt.GetContext();
 	auto drawCmd = info.commandBuffer;
@@ -252,6 +252,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetPos", static_cast<const ::Vector2i &(pragma::gui::types::WIBase::*)() const>(&pragma::gui::types::WIBase::GetPos), luabind::copy_policy<0> {});
 	classDef.def("SetPos", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, ::Vector2)>(&SetPos));
 	classDef.def("SetPos", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, float, float)>(&SetPos));
+	classDef.def("ApplyPos", static_cast<void (pragma::gui::types::WIBase::*)(const ::Vector2i &)>(&pragma::gui::types::WIBase::ApplyPos));
+	classDef.def("ApplyPos", static_cast<void (pragma::gui::types::WIBase::*)(int, int)>(&pragma::gui::types::WIBase::ApplyPos));
 	classDef.def("GetAbsolutePos", static_cast<::Vector2 (pragma::gui::types::WIBase::*)(bool) const>(&pragma::gui::types::WIBase::GetAbsolutePos));
 	classDef.def("GetAbsolutePos", static_cast<::Vector2 (pragma::gui::types::WIBase::*)(bool) const>(&pragma::gui::types::WIBase::GetAbsolutePos), luabind::default_parameter_policy<2, true> {});
 	classDef.def("GetAbsolutePos", static_cast<::Vector2 (pragma::gui::types::WIBase::*)(const ::Vector2 &, bool) const>(&pragma::gui::types::WIBase::GetAbsolutePos));
@@ -264,8 +266,6 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetColorProperty", &pragma::gui::types::WIBase::GetColorProperty);
 	classDef.def("GetFocusProperty", &pragma::gui::types::WIBase::GetFocusProperty);
 	classDef.def("GetVisibilityProperty", &pragma::gui::types::WIBase::GetVisibilityProperty);
-	classDef.def("GetPosProperty", &pragma::gui::types::WIBase::GetPosProperty);
-	classDef.def("GetSizeProperty", &pragma::gui::types::WIBase::GetSizeProperty);
 	classDef.def("GetMouseInBoundsProperty", &pragma::gui::types::WIBase::GetMouseInBoundsProperty);
 	classDef.def("SetColor", &SetColor);
 	classDef.def("SetColorRGB", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, const ::Color &)>([](lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Color &color) {
@@ -280,6 +280,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetSize", static_cast<const ::Vector2i &(pragma::gui::types::WIBase::*)() const>(&pragma::gui::types::WIBase::GetSize), luabind::copy_policy<0> {});
 	classDef.def("SetSize", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, ::Vector2)>(&SetSize));
 	classDef.def("SetSize", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, float, float)>(&SetSize));
+	classDef.def("ApplySize", static_cast<void (pragma::gui::types::WIBase::*)(const ::Vector2i &)>(&pragma::gui::types::WIBase::ApplySize));
+	classDef.def("ApplySize", static_cast<void (pragma::gui::types::WIBase::*)(int, int)>(&pragma::gui::types::WIBase::ApplySize));
 	classDef.def("Wrap", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, const std::string &)>(&Wrap));
 	classDef.def("Wrap", static_cast<bool (pragma::gui::types::WIBase::*)(pragma::gui::types::WIBase &)>(&pragma::gui::types::WIBase::Wrap));
 	classDef.def("AnchorWithMargin", static_cast<void (pragma::gui::types::WIBase::*)(uint32_t, uint32_t, uint32_t, uint32_t)>(&pragma::gui::types::WIBase::AnchorWithMargin));
@@ -321,11 +323,16 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetY", &GetY);
 	classDef.def("SetX", &SetX);
 	classDef.def("SetY", &SetY);
+	classDef.def("ApplyX", &pragma::gui::types::WIBase::ApplyX);
+	classDef.def("ApplyY", &pragma::gui::types::WIBase::ApplyY);
 	classDef.def("SetWidth", &SetWidth);
 	classDef.def("SetHeight", &SetHeight);
-	classDef.def("SizeToContents", &pragma::gui::types::WIBase::SizeToContents);
-	classDef.def("SizeToContents", &pragma::gui::types::WIBase::SizeToContents, luabind::default_parameter_policy<3, true> {});
-	classDef.def("SizeToContents", &pragma::gui::types::WIBase::SizeToContents, luabind::meta::join<luabind::default_parameter_policy<2, true>, luabind::default_parameter_policy<3, true>>::type {});
+	classDef.def("ApplyWidth", &pragma::gui::types::WIBase::ApplyWidth);
+	classDef.def("ApplyHeight", &pragma::gui::types::WIBase::ApplyHeight);
+	classDef.def("SizeToContents", +[](pragma::gui::types::WIBase &el, bool x, bool y, pragma::gui::ChangeSource changeSource) { el.SizeToContents(x, y, changeSource); });
+	classDef.def("SizeToContents", +[](pragma::gui::types::WIBase &el, bool x, bool y) { el.SizeToContents(x, y); });
+	classDef.def("SizeToContents", +[](pragma::gui::types::WIBase &el, bool x) { el.SizeToContents(x); });
+	classDef.def("SizeToContents", +[](pragma::gui::types::WIBase &el) { el.SizeToContents(); });
 	classDef.def("AddCallback", &AddCallback);
 	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, std::string)>(&CallCallbacks));
 	classDef.def("CallCallbacks", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, std::string, luabind::object)>(&CallCallbacks));
@@ -354,6 +361,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("IsFadingOut", &pragma::gui::types::WIBase::IsFadingOut);
 	classDef.def("IsFadingIn", &pragma::gui::types::WIBase::IsFadingIn);
 	classDef.def("GetClass", &pragma::gui::types::WIBase::GetClass);
+	classDef.def("GetTypeId", &pragma::gui::types::WIBase::GetTypeId);
+	classDef.def("IsType", +[](const pragma::gui::types::WIBase &el, pragma::gui::TypeId typeId) { return el.GetTypeId() == typeId; });
 	classDef.def(
 	  "Think", +[](pragma::gui::types::WIBase &el, std::shared_ptr<prosper::ICommandBuffer> &cmd) {
 		  if(!cmd->IsPrimary())
@@ -397,7 +406,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetCursor", &pragma::gui::types::WIBase::GetCursor);
 	classDef.def("RemoveElementOnRemoval", &pragma::gui::types::WIBase::RemoveOnRemoval);
 	classDef.def("GetTooltip", &pragma::gui::types::WIBase::GetTooltip);
-	classDef.def("SetTooltip", &pragma::gui::types::WIBase::SetTooltip);
+	classDef.def("SetTooltip", +[](pragma::gui::types::WIBase &el, const std::string &tooltip) { el.SetTooltip(tooltip); });
+	classDef.def("SetTooltip", static_cast<void (pragma::gui::types::WIBase::*)(const pragma::gui::LocalizedString &)>(&pragma::gui::types::WIBase::SetTooltip));
 	classDef.def("HasTooltip", &pragma::gui::types::WIBase::HasTooltip);
 	classDef.def("GetLeft", &pragma::gui::types::WIBase::GetLeft);
 	classDef.def("GetTop", &pragma::gui::types::WIBase::GetTop);
@@ -456,15 +466,28 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetAttachmentPosProperty", &pragma::gui::types::WIBase::GetAttachmentPosProperty);
 	classDef.def("SetAnchor", static_cast<void (pragma::gui::types::WIBase::*)(float, float, float, float, uint32_t, uint32_t)>(&pragma::gui::types::WIBase::SetAnchor));
 	classDef.def("SetAnchor", static_cast<void (*)(pragma::gui::types::WIBase &, float, float, float, float)>([](pragma::gui::types::WIBase &el, float left, float top, float right, float bottom) { el.SetAnchor(left, top, right, bottom); }));
-	classDef.def("SetAnchorLeft", &pragma::gui::types::WIBase::SetAnchorLeft);
-	classDef.def("SetAnchorRight", &pragma::gui::types::WIBase::SetAnchorRight);
-	classDef.def("SetAnchorTop", &pragma::gui::types::WIBase::SetAnchorTop);
-	classDef.def("SetAnchorBottom", &pragma::gui::types::WIBase::SetAnchorBottom);
+	classDef.def("SetAnchor", static_cast<void (pragma::gui::types::WIBase::*)(pragma::gui::Anchor::Edge, float)>(&pragma::gui::types::WIBase::SetAnchor));
+	classDef.def("SetAnchorHorizontal", &pragma::gui::types::WIBase::SetAnchorHorizontal);
+	classDef.def("SetAnchorVertical", &pragma::gui::types::WIBase::SetAnchorVertical);
+	classDef.def("SetAnchorCenter", &pragma::gui::types::WIBase::SetAnchorCenter, luabind::meta::join<luabind::default_parameter_policy<2, 0>, luabind::default_parameter_policy<3, 0>>::type {});
+	classDef.def("SetAnchorCenter", &pragma::gui::types::WIBase::SetAnchorCenter, luabind::default_parameter_policy<2, 0> {});
+	classDef.def("SetAnchorCenter", &pragma::gui::types::WIBase::SetAnchorCenter);
+	classDef.def("SetAnchorHorizontalCenter", &pragma::gui::types::WIBase::SetAnchorHorizontalCenter, luabind::default_parameter_policy<2, 0> {});
+	classDef.def("SetAnchorHorizontalCenter", &pragma::gui::types::WIBase::SetAnchorHorizontalCenter);
+	classDef.def("SetAnchorVerticalCenter", &pragma::gui::types::WIBase::SetAnchorVerticalCenter, luabind::default_parameter_policy<2, 0> {});
+	classDef.def("SetAnchorVerticalCenter", &pragma::gui::types::WIBase::SetAnchorVerticalCenter);
 	classDef.def("ClearAnchor", &pragma::gui::types::WIBase::ClearAnchor);
 	classDef.def(
 	  "GetAnchor", +[](pragma::gui::types::WIBase &el) -> std::optional<std::tuple<float, float, float, float>> {
 		  float left, top, right, bottom;
 		  if(!el.GetAnchor(left, top, right, bottom))
+			  return {};
+		  return std::tuple<float, float, float, float> {left, top, right, bottom};
+	  });
+	classDef.def(
+	  "GetAnchorPixelOffsets", +[](pragma::gui::types::WIBase &el) -> std::optional<std::tuple<float, float, float, float>> {
+		  float left, top, right, bottom;
+		  if(!el.GetAnchorPixelOffsets(left, top, right, bottom))
 			  return {};
 		  return std::tuple<float, float, float, float> {left, top, right, bottom};
 	  });
@@ -516,6 +539,11 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetFileHovering", &pragma::gui::types::WIBase::SetFileHovering);
 	classDef.def("GetFileDropInputEnabled", &pragma::gui::types::WIBase::GetFileDropInputEnabled);
 	classDef.def("SetFileDropInputEnabled", &pragma::gui::types::WIBase::SetFileDropInputEnabled);
+	classDef.def("SetAnchorEdgeEnabled", &pragma::gui::types::WIBase::SetAnchorEdgeEnabled);
+	classDef.def("IsAnchorEdgeEnabled", &pragma::gui::types::WIBase::IsAnchorEdgeEnabled);
+	classDef.def("SetAutoCenterToParentX", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoCenterToParentX));
+	classDef.def("SetAutoCenterToParentY", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoCenterToParentY));
+	classDef.def("SetAutoCenterToParent", &pragma::gui::types::WIBase::SetAutoCenterToParent);
 
 	auto defDrawInfo = luabind::class_<pragma::gui::DrawInfo>("DrawInfo");
 	defDrawInfo.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::gui::DrawInfo::Flags::None));
@@ -820,8 +848,10 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<pragma::gui::types::WID
 	classDef.def("GetText", +[](const pragma::gui::types::WIDropDownMenu &menu) { return menu.GetText().cpp_str(); });
 	classDef.def("SetText", +[](pragma::gui::types::WIDropDownMenu &menu, const std::string &text) { return menu.SetText(text); });
 	classDef.def("GetOptionCount", &pragma::gui::types::WIDropDownMenu::GetOptionCount);
-	classDef.def("AddOption", static_cast<pragma::gui::types::WIDropDownMenuOption *(pragma::gui::types::WIDropDownMenu::*)(const std::string &, const std::string &)>(&pragma::gui::types::WIDropDownMenu::AddOption));
-	classDef.def("AddOption", static_cast<pragma::gui::types::WIDropDownMenuOption *(pragma::gui::types::WIDropDownMenu::*)(const std::string &)>(&pragma::gui::types::WIDropDownMenu::AddOption));
+	classDef.def("AddOption", +[](pragma::gui::types::WIDropDownMenu &el, const std::string &option) -> pragma::gui::types::WIDropDownMenuOption * { return el.AddOption(option); });
+	classDef.def("AddOption", +[](pragma::gui::types::WIDropDownMenu &el, const std::string &option, const std::string &value) -> pragma::gui::types::WIDropDownMenuOption * { return el.AddOption(option, value); });
+	classDef.def("AddOption", +[](pragma::gui::types::WIDropDownMenu &el, const pragma::gui::Loc &option) -> pragma::gui::types::WIDropDownMenuOption * { return el.AddOption(option); });
+	classDef.def("AddOption", +[](pragma::gui::types::WIDropDownMenu &el, const pragma::gui::Loc &option, const std::string &value) -> pragma::gui::types::WIDropDownMenuOption * { return el.AddOption(option, value); });
 	classDef.def("OpenMenu", &pragma::gui::types::WIDropDownMenu::OpenMenu);
 	classDef.def("CloseMenu", &pragma::gui::types::WIDropDownMenu::CloseMenu);
 	classDef.def("ToggleMenu", &pragma::gui::types::WIDropDownMenu::ToggleMenu);
@@ -839,7 +869,12 @@ void Lua::WIDropDownMenu::register_class(luabind::class_<pragma::gui::types::WID
 void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pragma::gui::types::WIBase> &classDef)
 {
 	classDef.def("SetText", static_cast<void (*)(lua::State *, pragma::gui::types::WIText &, const std::string &)>([](lua::State *l, pragma::gui::types::WIText &hPanel, const std::string &text) { hPanel.SetText(text); }));
+	classDef.def("SetText", static_cast<void (pragma::gui::types::WIText::*)(const pragma::gui::LocalizedString &)>(&pragma::gui::types::WIText::SetText));
 	classDef.def("GetText", +[](const pragma::gui::types::WIText &text) { return text.GetText().cpp_str(); });
+	classDef.def("SetPrefixText", &pragma::gui::types::WIText::SetPrefixText);
+	classDef.def("GetPrefixText", &pragma::gui::types::WIText::GetPrefixText);
+	classDef.def("SetSuffixText", &pragma::gui::types::WIText::SetSuffixText);
+	classDef.def("GetSuffixText", &pragma::gui::types::WIText::GetSuffixText);
 	classDef.def("GetTextHeight", &pragma::gui::types::WIText::GetTextHeight);
 	classDef.def("CalcTextSize", &pragma::gui::types::WIText::CalcTextSize);
 	classDef.def("GetTextWidth", &pragma::gui::types::WIText::GetTextWidth);
@@ -915,6 +950,8 @@ void Lua::WIText::register_class(luabind::class_<pragma::gui::types::WIText, pra
 	classDef.def("AreTagsEnabled", &pragma::gui::types::WIText::AreTagsEnabled);
 	classDef.def("PopFrontLine", &pragma::gui::types::WIText::PopFrontLine);
 	classDef.def("PopBackLine", &pragma::gui::types::WIText::PopBackLine);
+	classDef.def("SetAutoSizeToText", &pragma::gui::types::WIText::SetAutoSizeToText);
+	classDef.def("ShouldAutoSizeToText", &pragma::gui::types::WIText::ShouldAutoSizeToText);
 	classDef.def("RemoveText", static_cast<bool (pragma::gui::types::WIBase::*)(pragma::string::LineIndex, pragma::string::CharOffset, pragma::string::TextLength)>(&pragma::gui::types::WIText::RemoveText));
 	classDef.def("RemoveText", static_cast<bool (pragma::gui::types::WIBase::*)(pragma::string::TextOffset, pragma::string::TextLength)>(&pragma::gui::types::WIText::RemoveText));
 	classDef.def("RemoveLine", &pragma::gui::types::WIText::RemoveLine);
@@ -1329,7 +1366,7 @@ CallbackHandle Lua::WIBase::AddCallback(lua::State *l, pragma::gui::types::WIBas
 		});
 	}
 	else if(name == "ontextchanged") {
-		if(pragma::string::compare(panel.GetClass(), std::string {"witext"}, false)) {
+		if(pragma::string::compare(panel.GetClass().c_str(), "witext", false)) {
 			hCallback = FunctionCallback<void, std::reference_wrapper<const pragma::string::Utf8String>>::Create([l, hPanel, o](std::reference_wrapper<const pragma::string::Utf8String> text) mutable {
 				if(!hPanel.IsValid())
 					return;
@@ -1883,8 +1920,8 @@ static void restore_cursor_pos_override(pragma::gui::types::WIRoot *elRoot, cons
 void Lua::WIBase::InjectMouseMoveInput(lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Vector2 &mousePos)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("inect_mouse_move_input");
-	pragma::util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
+	pragma::debug::get_domain().BeginTask("inect_mouse_move_input");
+	pragma::util::ScopeGuard sgVtune {[]() { pragma::debug::get_domain().EndTask(); }};
 #endif
 	auto *elRoot = hPanel.GetBaseRootElement();
 	auto absPos = hPanel.GetAbsolutePos();
@@ -2062,6 +2099,8 @@ void Lua::WITransformable::register_class(luabind::class_<pragma::gui::types::WI
 	classDef.def("AddSnapTarget", &pragma::gui::types::WITransformable::AddSnapTarget);
 	classDef.def("StartDrag", &pragma::gui::types::WITransformable::StartDrag);
 	classDef.def("EndDrag", &pragma::gui::types::WITransformable::EndDrag);
+	classDef.def("SetMovementPadding", &pragma::gui::types::WITransformable::SetMovementPadding);
+	classDef.def("GetMovementPadding", &pragma::gui::types::WITransformable::GetMovementPadding);
 }
 
 ////////////////////////////////////

@@ -95,7 +95,7 @@ std::optional<pragma::shadergraph::Value> ShaderInputDescriptor::parse_flags_exp
 	return {};
 }
 
-ShaderInputDescriptor::ShaderInputDescriptor(const GString &name) : name {name} {}
+ShaderInputDescriptor::ShaderInputDescriptor(const util::GString &name) : name {name} {}
 
 bool ShaderInputDescriptor::AddProperty(Property &&prop)
 {

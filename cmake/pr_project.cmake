@@ -47,7 +47,7 @@ function(pr_setup_default_project_settings TARGET_NAME)
         target_compile_definitions(${TARGET_NAME} PRIVATE "_WIN32_WINNT=0x0A00") # Windows 10
     endif()
 
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(CMAKE_LINKER_TYPE STREQUAL "GNU" OR CMAKE_LINKER_TYPE STREQUAL "LLD")
         target_link_options(${TARGET_NAME} PRIVATE "-Wl,--no-undefined")
     endif()
 
@@ -218,6 +218,18 @@ function(pr_add_executable TARGET_NAME)
         set(_tmp "${CMAKE_MODULE_PATH}")
         list(APPEND _tmp "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
         set(CMAKE_MODULE_PATH "${_tmp}" PARENT_SCOPE)
+    endif()
+endfunction()
+
+function(pr_init_main_application_executable TARGET_NAME)
+    if(PRAGMA_WITH_MIMALLOC)
+        pr_add_compile_definitions(
+                ${TARGET_NAME}
+                -DPRAGMA_WITH_MIMALLOC=1
+
+                PRIVATE
+        )
+        target_link_libraries(${TARGET_NAME} PRIVATE mimalloc)
     endif()
 endfunction()
 

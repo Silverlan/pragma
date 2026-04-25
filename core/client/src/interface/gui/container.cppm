@@ -23,7 +23,7 @@ export namespace pragma::gui::types {
 		int32_t GetPaddingBottom() const;
 		int32_t GetPaddingLeft() const;
 		int32_t GetPadding(Padding paddingType) const;
-		virtual void SizeToContents(bool x = true, bool y = true) override;
+		virtual void SizeToContents(bool x = true, bool y = true, ChangeSource changeSource = ChangeSource::User) override;
 
 		virtual void OnChildAdded(WIBase *child) override;
 		virtual void OnChildRemoved(WIBase *child) override;

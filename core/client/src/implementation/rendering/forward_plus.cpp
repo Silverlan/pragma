@@ -87,16 +87,16 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 	createInfo.size = defaultIndices.size() * sizeof(defaultIndices.front());
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
+	createInfo.debugName = "tile_vis_light_index_buf";
 	m_bufTileVisLightIndex = context.CreateBuffer(createInfo, defaultIndices.data());
-	m_bufTileVisLightIndex->SetDebugName("tile_vis_light_index_buf");
 
 	m_shadowLightBits.resize(get_shadow_integer_count(), 0);
 	createInfo.size = m_shadowLightBits.size() * sizeof(m_shadowLightBits.front());
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
 	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
+	createInfo.debugName = "vis_light_index_buf";
 	m_bufVisLightIndex = context.CreateBuffer(createInfo, m_shadowLightBits.data());
 	m_bufVisLightIndex->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::ReadBit);
-	m_bufVisLightIndex->SetDebugName("vis_light_index_buf");
 
 	m_rasterizer.GetRendererDescriptorSet()->SetBindingStorageBuffer(*m_bufTileVisLightIndex, math::to_integral(ShaderGameWorldLightingPass::RendererBinding::TileVisLightIndexBuffer));
 

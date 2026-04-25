@@ -12,6 +12,10 @@ function tests.TestManager:__init()
 	self.m_scripts = {}
 	self.m_resultData = {}
 	self.m_resultAssetPaths = {}
+	self.m_numCompleted = 0
+	self.m_numSucceeded = 0
+	self.m_numFailed = 0
+	self.m_failedInfo = {}
 	file.delete_directory("temp/tests")
 	file.create_path("temp/tests")
 end
@@ -81,7 +85,14 @@ function tests.TestManager:CompleteTest(success, resultData)
 		msg = "Test '" .. curTest .. "' failed: " .. tostring(msg)
 		LOGGER:Err(msg)
 		-- error(msg)
-	end
+
+		self.m_numFailed = self.m_numFailed +1
+		table.insert(self.m_failedInfo, {
+			test = curTest,
+			errorMessage = tostring(msg)
+		})
+	else self.m_numSucceeded = self.m_numSucceeded +1 end
+	self.m_numCompleted = self.m_numCompleted +1
 
 	LOGGER:Info("Test '{}' has completed!", curTest)
 	self:CallCallbacks("OnTestComplete", success, resultData)
@@ -105,8 +116,26 @@ function tests.TestManager:CompleteTest(success, resultData)
 	end
 
 	if #self.m_testQueue == 0 then
-		LOGGER:Info("All tests have been completed!")
-		self:CallCallbacks("OnAllTestsComplete")
+		local numCompleted = self.m_numCompleted
+		local numSucceeded = self.m_numSucceeded
+		local numFailed = self.m_numFailed
+		local failedInfo = self.m_failedInfo
+		self.m_numCompleted = 0
+		self.m_numSucceeded = 0
+		self.m_numFailed = 0
+		self.m_failedInfo = {}
+
+		LOGGER:Info("All (" .. numCompleted .. ") tests have been completed! " .. numSucceeded .. " tests have succeeded!")
+		if(numFailed > 0) then
+			local msg = numFailed .. " tests have failed:"
+			for _, info in ipairs(failedInfo) do
+				msg = msg .. "\n"
+				msg = msg .. info.test .. " => " .. info.errorMessage
+			end
+			error(msg)
+		end
+
+		self:CallCallbacks("OnAllTestsComplete", numCompleted, numSucceeded, numFailed)
 	end
 end
 
@@ -202,8 +231,7 @@ function tests.TestManager:LoadTests(scriptFileName)
 	end
 end
 
-tests.manager = tests.TestManager()
---tests.manager = tests.manager or tests.TestManager()
+tests.manager = tests.manager or tests.TestManager()
 tests.add_event_listener = function(...)
 	return tests.manager:AddCallback(...)
 end

@@ -45,7 +45,6 @@ function gui.WIMenuItem:SetRightText(text)
 		self.m_pTextRight = pText
 	end
 	self.m_pTextRight:SetText(text)
-	self.m_pTextRight:SizeToContents()
 	self:UpdateRightText()
 end
 function gui.WIMenuItem:OpenContextMenu()
@@ -136,13 +135,12 @@ function gui.WIMenuItem:SetTitle(title)
 		return
 	end
 	self.m_pText:SetText(title)
-	self.m_pText:SizeToContents()
 end
 local border = 8
 function gui.WIMenuItem:UpdateRightText()
 	--[[if(util.is_valid(self.m_pTextRight) == false) then return end
-	self.m_pTextRight:SetX(self:GetWidth() -self.m_pTextRight:GetWidth() -border)
-	self.m_pTextRight:SetY(self:GetHeight() *0.5 -self.m_pTextRight:GetHeight() *0.5)]]
+	self.m_pTextRight:ApplyX(self:GetWidth() -self.m_pTextRight:GetWidth() -border)
+	self.m_pTextRight:ApplyY(self:GetHeight() *0.5 -self.m_pTextRight:GetHeight() *0.5)]]
 end
 function gui.WIMenuItem:OnSizeChanged(width, height)
 	self:UpdateRightText()
@@ -161,4 +159,4 @@ function gui.WIMenuItem:SizeToContents()
 	self.m_pText:SetX(border)
 	self.m_pText:SetY(self:GetHeight() * 0.5 - self.m_pText:GetHeight() * 0.5)
 end
-gui.register("WIMenuItem", gui.WIMenuItem)
+gui.register("menu_item", gui.WIMenuItem)

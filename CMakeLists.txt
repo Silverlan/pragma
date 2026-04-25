@@ -25,6 +25,7 @@ set(CMAKE_C_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 set(CMAKE_CXX_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
 
 option(PRAGMA_IGNORE_WARNINGS "Ignore warnings and configure anyway?" OFF)
+option(PRAGMA_DISABLE_BUILD_FETCH "Disable fetching dependencies during build?" OFF)
 
 if(NOT PRAGMA_IGNORE_WARNINGS)
     if(CMAKE_GENERATOR MATCHES "Visual Studio.*")
@@ -38,7 +39,9 @@ endif()
 set(PRAGMA_DEPS_DIR "${CMAKE_SOURCE_DIR}/deps/staging/" CACHE PATH "Directory where dependencies will be extracted to.")
 set(PRAGMA_BUILD_TOOLS_DIR "${CMAKE_SOURCE_DIR}/build_tools/" CACHE PATH "Directory where additional build tool dependencies will be extracted to.")
 
-include("cmake/fetch_clang.cmake")
+if(NOT PRAGMA_DISABLE_BUILD_FETCH)
+    include("cmake/fetch_clang.cmake")
+endif()
 
 if(UNIX)
     # Compilers are still somewhat unreliable at finding the modules.json (which is required for import std), so
@@ -47,7 +50,9 @@ if(UNIX)
     if(EXISTS "/usr/lib/libstdc++.modules.json")
         set(CMAKE_CXX_STDLIB_MODULES_JSON "/usr/lib/libstdc++.modules.json")
     else()
-        include("cmake/fetch_gcc.cmake")
+        if(NOT PRAGMA_DISABLE_BUILD_FETCH)
+            include("cmake/fetch_gcc.cmake")
+        endif()
         set(CMAKE_CXX_STDLIB_MODULES_JSON "${PRAGMA_BUILD_TOOLS_DIR}/gcc/lib64/libstdc++.modules.json")
         
         add_compile_options(--gcc-toolchain=${PRAGMA_BUILD_TOOLS_DIR}/gcc)
@@ -58,6 +63,8 @@ endif()
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/pr_legacy.cmake)
 include(${CMAKE_SOURCE_DIR}/cmake/pr_install.cmake)
+
+set_property(GLOBAL PROPERTY PR_FLATPAK_SOURCES "")
 
 include(FetchContent)
 
@@ -88,7 +95,9 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(TOOLSET "gcc")
 endif()
 
-include("cmake/fetch_deps.cmake")
+if(NOT PRAGMA_DISABLE_BUILD_FETCH)
+    include("cmake/fetch_deps.cmake")
+endif()
 
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY true)
 
@@ -98,6 +107,9 @@ option(PRAGMA_WITH_NETWORKING "Build with networking support?" OFF)
 option(PRAGMA_WITH_COMMON_ENTITIES "Build with common entity scripts?" OFF)
 option(PRAGMA_WITH_COMMON_MODULES "Build with common modules?" ON)
 option(PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES "Build with essential client modules?" ON)
+
+# Disabled by default as it causes conflicts with chromium
+option(PRAGMA_WITH_MIMALLOC "Enable the mimalloc memory allocator?" OFF)
 
 option(PRAGMA_WITH_PFM "Build with Pragma Filmmaker?" OFF)
 option(PRAGMA_WITH_CORE_PFM_MODULES "Include essential PFM modules." ON)
@@ -468,6 +480,10 @@ foreach(component IN LISTS install_targets)
     add_dependencies(${component} pragma-install-base)
     cmake_language(EVAL CODE "${install_commands}")
 endforeach()
+
+# Generate flatpak yml
+get_property(PR_FLATPAK_SOURCES GLOBAL PROPERTY PR_FLATPAK_SOURCES)
+configure_file(io.github.silverlan.pfm.yml.in io.github.silverlan.pfm.yml @ONLY)
 
 if(DEFINED ENV{CLION_IDE})
     # When using CLion, we'll copy over some pre-made configuration files to

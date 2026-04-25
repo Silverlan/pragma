@@ -278,7 +278,7 @@ std::shared_ptr<rendering::shader_material::ShaderMaterial> ShaderGraph::Generat
 		if((offset % alignment) != 0) {
 			auto padding = alignment - (offset % alignment);
 			assert((padding % sizeof(float)) == 0);
-			auto paddingName = "padding" + std::to_string(paddingIdx++);
+			auto paddingName = "padding" + util::to_string(paddingIdx++);
 			it = globalParamNodes.insert(it, {paddingName, nullptr, sizeof(float), sizeof(float)});
 			continue;
 		}

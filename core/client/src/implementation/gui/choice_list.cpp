@@ -49,17 +49,16 @@ void pragma::gui::types::WIChoiceList::UpdateButtons()
 		m_buttonNext->SetVisible((m_selected < (m_choices.size() - 1)) ? true : false);
 }
 
-void pragma::gui::types::WIChoiceList::SetSize(int x, int y)
+void pragma::gui::types::WIChoiceList::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetSize(x, y);
 	if(m_buttonPrev.IsValid()) {
 		auto *buttonPrev = static_cast<WIButton *>(m_buttonPrev.get());
-		buttonPrev->SetSize(y, y);
+		buttonPrev->SetSize(GetHeight(), GetHeight());
 	}
 	if(m_buttonNext.IsValid()) {
 		auto *buttonNext = static_cast<WIButton *>(m_buttonNext.get());
-		buttonNext->SetSize(y, y);
-		buttonNext->SetX(x - buttonNext->GetWidth());
+		buttonNext->SetSize(GetHeight(), GetHeight());
+		buttonNext->SetX(GetWidth() - buttonNext->GetWidth());
 	}
 }
 
@@ -67,7 +66,7 @@ void pragma::gui::types::WIChoiceList::SetChoices(const std::vector<std::string>
 {
 	UInt idx = 0;
 	for(auto it = choices.begin(); it != choices.end(); ++it) {
-		AddChoice(*it, std::to_string(idx));
+		AddChoice(*it, util::to_string(idx));
 		idx++;
 	}
 }
@@ -83,7 +82,7 @@ void pragma::gui::types::WIChoiceList::AddChoice(const std::string &choice, cons
 		SelectChoice(0);
 	UpdateButtons();
 }
-void pragma::gui::types::WIChoiceList::AddChoice(const std::string &choice) { AddChoice(choice, std::to_string(m_choices.size())); }
+void pragma::gui::types::WIChoiceList::AddChoice(const std::string &choice) { AddChoice(choice, util::to_string(m_choices.size())); }
 uint32_t pragma::gui::types::WIChoiceList::GetChoiceCount() const { return static_cast<uint32_t>(m_choices.size()); }
 
 void pragma::gui::types::WIChoiceList::SelectChoice(UInt ichoice)

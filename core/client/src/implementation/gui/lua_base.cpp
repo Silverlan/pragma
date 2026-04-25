@@ -98,18 +98,13 @@ pragma::util::EventReply pragma::gui::types::WILuaBase::ScrollCallback(Vector2 o
 	return static_cast<util::EventReply>(reply);
 }
 
-void pragma::gui::types::WILuaBase::SetSize(int x, int y)
+void pragma::gui::types::WILuaBase::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	if(x == GetWidth() && y == GetHeight())
-		return;
-	WIBase::SetSize(x, y);
-	// WIBase::SetSize may have called additional callbacks, which may have changed the size
-	// of this element before we got to call the "OnSizeChanged" callback below. In this case
-	// "OnSizeChanged" has already been called by one of the other callbacks, so we should skip it.
-	auto newW = GetWidth();
-	auto newH = GetHeight();
-	if(newW == x && newH == y)
-		CallLuaMember<void, int, int>("OnSizeChanged", x, y);
+	CallLuaMember<void, int, int, ChangeSource>("OnSizeChanged", GetWidth(), GetHeight(), changeSource);
+}
+void pragma::gui::types::WILuaBase::OnPosChanged(const Vector2i &oldPos, ChangeSource changeSource)
+{
+	CallLuaMember<void, int, int, ChangeSource>("OnPosChanged", GetX(), GetY(), changeSource);
 }
 void pragma::gui::types::WILuaBase::OnVisibilityChanged(bool bVisible)
 {
@@ -260,8 +255,11 @@ void pragma::gui::types::WILuaBase::default_ScrollCallback(lua::State *, WILuaBa
 void pragma::gui::types::WILuaBase::Lua_OnUpdate() {}
 void pragma::gui::types::WILuaBase::default_OnUpdate(lua::State *l, WILuaBase &hElement) {}
 
-void pragma::gui::types::WILuaBase::Lua_OnSetSize(int, int) {}
-void pragma::gui::types::WILuaBase::default_OnSetSize(lua::State *, WILuaBase &, int, int) {}
+void pragma::gui::types::WILuaBase::Lua_OnSizeChanged(int, int, ChangeSource) {}
+void pragma::gui::types::WILuaBase::default_OnSizeChanged(lua::State *, WILuaBase &, int, int, ChangeSource) {}
+
+void pragma::gui::types::WILuaBase::Lua_OnPosChanged(int, int, ChangeSource) {}
+void pragma::gui::types::WILuaBase::default_OnPosChanged(lua::State *, WILuaBase &, int, int, ChangeSource) {}
 
 void pragma::gui::types::WILuaBase::Lua_OnSetVisible(bool) {}
 void pragma::gui::types::WILuaBase::default_OnSetVisible(lua::State *, WILuaBase &, bool) {}

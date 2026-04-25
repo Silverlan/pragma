@@ -35,6 +35,7 @@ parser.add_argument("--build-all", type=str2bool, nargs='?', const=True, default
 parser.add_argument('--build-config', help='The build configuration to use.', default='RelWithDebInfo')
 parser.add_argument('--build-directory', help='Directory to write the build files to. Can be relative or absolute.', default='build')
 parser.add_argument('--deps-directory', help='Directory to write the dependency files to. Can be relative or absolute.', default='deps')
+parser.add_argument('--build-tools-directory', help='Directory where additional build tools are located. Can be relative or absolute.', default='build_tools')
 parser.add_argument("--deps-only", type=str2bool, nargs='?', const=True, default=False, help="Configuration, build and installation of Pragma will be skipped.")
 parser.add_argument("--clean-deps-build-files", type=str2bool, nargs='?', const=True, default=False, help="Automatically clean up build files of third-party dependencies to save disk space.")
 parser.add_argument('--install-directory', help='Installation directory. Can be relative (to build directory) or absolute.', default='install')
@@ -48,6 +49,7 @@ parser.add_argument("--update", type=str2bool, nargs='?', const=True, default=Fa
 parser.add_argument("--rerun", type=str2bool, nargs='?', const=True, default=False, help="Re-run the build script with the previous arguments.")
 parser.add_argument("--prefer-git-https", type=str2bool, nargs='?', const=True, default=True, help="Clone repositories via HTTPS instead of SSH.")
 parser.add_argument("--skip-repository-updates", type=str2bool, nargs='?', const=True, default=False, help=argparse.SUPPRESS)
+parser.add_argument("--no-build-networking", type=str2bool, nargs='?', const=True, default=False, help="Disable all downloads during the build script execution.")
 if platform == "linux":
 	parser.add_argument("--no-sudo", type=str2bool, nargs='?', const=True, default=False, help="Will not run sudo commands. System packages will have to be installed manually.")
 	parser.add_argument("--no-confirm", type=str2bool, nargs='?', const=True, default=False, help="Disable any interaction with user (suitable for automated run).")
@@ -117,12 +119,16 @@ build_all = args["build_all"]
 build_config = args["build_config"]
 build_directory = args["build_directory"]
 deps_directory = args["deps_directory"]
+build_tools_directory = args["build_tools_directory"]
 deps_only = args["deps_only"]
 clean_deps_build_files = args["clean_deps_build_files"]
 install_directory = args["install_directory"]
 additional_cmake_args = args["cmake_arg"]
 additional_cmake_flags = args["cmake_cxx_flag"]
 skip_repository_updates = args["skip_repository_updates"]
+no_build_networking = args["no_build_networking"]
+if no_build_networking:
+	skip_repository_updates = True
 scripts_dir = os.getcwd() +"/build_scripts"
 #log_file = args["log_file"]
 verbose = args["verbose"]
@@ -135,6 +141,7 @@ ignore_warnings = args["ignore_warnings"]
 root = normalize_path(os.getcwd())
 build_dir = normalize_path(build_directory)
 deps_dir = normalize_path(deps_directory)
+build_tools_directory = normalize_path(build_tools_directory)
 install_dir = install_directory
 tools = root +"/tools"
 
@@ -177,6 +184,7 @@ config.prefer_git_https = prefer_git_https
 config.toolset = toolset
 config.with_lua_debugger = with_lua_debugger
 config.with_swiftshader = with_swiftshader
+config.no_build_networking = True
 if platform == "linux":
 	config.no_sudo = no_sudo
 	config.no_confirm = no_confirm
@@ -199,6 +207,7 @@ print("build_all: " +str(build_all))
 print("build_config: " +build_config)
 print("build_directory: " +build_directory)
 print("deps_directory: " +deps_directory)
+print("build_tools_directory: " +build_tools_directory)
 print("deps_only: " +str(deps_only))
 print("clean_deps_build_files: " +str(clean_deps_build_files))
 print("install_directory: " +install_directory)
@@ -216,7 +225,7 @@ mkpath(tools)
 
 config.prebuilt_bin_dir = deps_dir +"/" +config.deps_staging_dir
 
-def check_cmake(min_version):
+def check_cmake(min_version, max_version):
 	cmake_path = shutil.which("cmake")
 	if not cmake_path:
 		# CMake not found
@@ -238,7 +247,7 @@ def check_cmake(min_version):
 		version_str = match.group(1)
 		current_version = tuple(map(int, version_str.split(".")))
 
-		if current_version >= min_version:
+		if current_version >= min_version and current_version <= max_version:
 			return True
 		else:
 			# CMake is too old
@@ -259,16 +268,22 @@ def fetch_cmake():
 
 # At least CMake 4.2.0 is needed, which is still very new and not available in the package managers of
 # most distros yet. If the detected CMake version is too old (or none was found), we'll download it here.
+# Version 4.3.0 is currently not supported due to: https://gitlab.kitware.com/cmake/cmake/-/issues/27600
 use_custom_cmake = False
-if not check_cmake((4, 2, 0)):
+if not no_build_networking and not check_cmake((4, 2, 0), (4, 2, 3)):
 	use_custom_cmake = True
 	fetch_cmake()
 
 # Use prebuilt binaries if --build-all is not set
 os.chdir(root)
-if build_all == False:
-	subprocess.run([config.cmake_path, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-DTOOLSET=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
-subprocess.run([config.cmake_path, "-DPRAGMA_BUILD_TOOLS_DIR=" +config.build_tools_dir, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", "cmake/fetch_clang.cmake"],check=True)
+if not no_build_networking:
+	if build_all == False:
+		subprocess.run([config.cmake_path, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir +"", "-DTOOLSET=" +toolset, "-P", "cmake/fetch_deps.cmake"],check=True)
+	subprocess.run([config.cmake_path, "-DPRAGMA_BUILD_TOOLS_DIR=" +config.build_tools_dir, "-DPRAGMA_DEPS_DIR=" +config.prebuilt_bin_dir, "-P", "cmake/fetch_clang.cmake"],check=True)
+
+clang_root_dir = str(Path(config.build_tools_dir) / "clang/bin") +"/"
+if not Path(clang_root_dir).exists():
+	clang_root_dir = "" # Use system clang
 
 import shutil
 import subprocess
@@ -284,28 +299,28 @@ if platform == "win32":
 		#from third_party import clang
 		#clang.main()
 
-		clang_dir = str(Path(config.build_tools_dir) / "clang/bin/")
+		clang_dir = clang_root_dir
 		config.toolsetArgs = [
-			"-DCMAKE_C_COMPILER=" +str(Path(clang_dir) / "clang.exe"),
-			"-DCMAKE_CXX_COMPILER=" +str(Path(clang_dir) / "clang++.exe"),
+			"-DCMAKE_C_COMPILER=" +str(clang_dir +"clang.exe"),
+			"-DCMAKE_CXX_COMPILER=" +str(clang_dir +"clang++.exe"),
 			"-DCMAKE_MAKE_PROGRAM=ninja.exe"
 		]
 		config.toolsetCFlags = ["-fexceptions", "-fcxx-exceptions", "--target=x86_64-pc-windows-msvc"]
 
 		# Due to "import std;" support still being experimental in CMake, we have to use a custom, patched
 		# version of CMake to build Pragma with clang on Windows.
-		if not use_custom_cmake:
+		if not no_build_networking and not use_custom_cmake:
 			use_custom_cmake = True
 			fetch_cmake()
 	elif toolset == "clang-cl":
-		clang_dir = str(Path(config.build_tools_dir) / "clang/bin")
+		clang_dir = clang_root_dir
 		
 		config.toolsetArgs = [
-			"-DCMAKE_C_COMPILER=" +clang_dir +"/clang-cl.exe",
-			"-DCMAKE_CXX_COMPILER=" +clang_dir +"/clang-cl.exe",
-			"-DCMAKE_CXX_COMPILER_AR=" +clang_dir +"/llvm-ar.exe",
-			"-DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=" +clang_dir +"/clang-scan-deps.exe",
-			"-DCMAKE_CXX_COMPILER_RANLIB=" +clang_dir +"/llvm-ranlib.exe"
+			"-DCMAKE_C_COMPILER=" +clang_dir +"clang-cl.exe",
+			"-DCMAKE_CXX_COMPILER=" +clang_dir +"clang-cl.exe",
+			"-DCMAKE_CXX_COMPILER_AR=" +clang_dir +"llvm-ar.exe",
+			"-DCMAKE_CXX_COMPILER_CLANG_SCAN_DEPS=" +clang_dir +"clang-scan-deps.exe",
+			"-DCMAKE_CXX_COMPILER_RANLIB=" +clang_dir +"llvm-ranlib.exe"
 		]
 		config.toolsetCFlags = ["-Wno-error", "-Wno-unused-command-line-argument", "-Wno-enum-constexpr-conversion", "-fexceptions", "-fcxx-exceptions"]
 		print_warning(f"Toolset {toolset} for platform {platform} is currently not supported!")
@@ -324,16 +339,11 @@ if platform == "win32":
 			else:
 				print_msg("--ignore-warnings has been enabled, continuing...")
 elif platform == "linux" and (c_compiler == "clang-22" or c_compiler == "clang++-22"):
-	# Due to a compiler bug with C++20 Modules in clang, we need the
-	# very latest version of clang, which is not available in package managers yet.
-	# We'll use our own prebuilt version for now.
-	# from third_party import clang
-	# clang.main()
-	clang_staging_path = Path(config.build_tools_dir) / "clang/"
+	clang_staging_path = clang_root_dir
 	if c_compiler == "clang-22":
-		c_compiler = str(clang_staging_path / "bin/clang")
+		c_compiler = clang_staging_path +"clang"
 	if cxx_compiler == "clang++-22":
-		cxx_compiler = str(clang_staging_path / "bin/clang++")
+		cxx_compiler = clang_staging_path +"clang++"
 	print_msg("Setting c_compiler override to '" +c_compiler +"'")
 	print_msg("Setting cxx_compiler override to '" +cxx_compiler +"'")
 
@@ -443,8 +453,62 @@ if platform == "linux":
 		print_msg("--no-sudo has been specified. System packages will be skipped, this may cause errors later on...")
 	else:
 		commands = []
-		if(prefer_pacman()):
-			# Assuming arch-based system
+		if(prefer_dnf()): # Fedora / dnf
+			packages = [
+				"cmake",
+				"ninja",
+				"gcc",
+				"g++",
+				"freetype-devel"
+			]
+
+			# glfw
+			packages += [
+				"wayland-devel",
+				"libxkbcommon-devel",
+				"libXrandr-devel",
+				"libXinerama-devel",
+				"libXcursor-devel",
+				"libXi-devel"
+			]
+
+			# anvil
+			packages.append("xcb-util-keysyms-devel")
+
+			# pr_curl
+			# we'll only need this if we're building with pr_curl,
+			# so this condition should match the one in cmake/fetch_modules.cmake
+			if with_pfm and (with_core_pfm_modules or with_all_pfm_modules):
+				packages.append("openssl-devel")
+
+			if build_all:
+				packages.append("patchelf")
+				
+				# libdecor
+				packages.append("meson")
+
+				# Required for libsdbus-c++
+				packages += [
+					"meson",
+					"systemd-devel",
+					"dbus-devel"
+				]
+				
+				# luasocket
+				packages += [
+					"libunwind-devel",
+					"binutils-devel",
+					"libstdc++-static"
+				]
+				
+				# Required for Cycles
+				packages += [
+					"patch",
+					"git-lfs"
+				]
+
+			commands.append("dnf install " +" ".join(packages))
+		elif(prefer_pacman()): # Arch / pacman
 			packages = [
 				"cmake",
 				"ninja"
@@ -457,12 +521,14 @@ if platform == "linux":
 				# cycles
 				packages.append("git-lfs")
 
+				# libdecor
+				packages.append("wayland-protocols")
+
 				# vcpkg
 				packages += ["base-devel git curl zip unzip tar cmake ninja"]
 
-			commands.append("pacman -S " +" ".join(packages))
-		else:
-			# Assuming apt-based system
+			commands.append("pacman -Sy --needed " +" ".join(packages))
+		else: # Ubuntu / apt
 			packages = [
 				"cmake",
 				"ninja-build",
@@ -541,7 +607,7 @@ if platform == "linux":
 				# install freetype for linking. X server frontends (Gnome, KDE etc) already include it somewhere down the line. Also install pkg-config for easy export of flags.
 				packages += [
 					"pkg-config",
-					"libfreetype-de"
+					"libfreetype-dev"
 				]
 
 				# libdecor (required for Wayland)
@@ -559,6 +625,7 @@ if platform == "linux":
 					"pkg-config",
 					"gperf"
 				]
+			commands.append("apt update")
 			commands.append("apt install " +" ".join(packages))
 		install_system_packages(commands, no_confirm)
 
@@ -775,7 +842,8 @@ cmake_with_args.append(f"-DPRAGMA_WITH_ALL_PFM_MODULES={1 if with_all_pfm_module
 
 # Fetch base modules
 os.chdir(root)
-subprocess.run([config.cmake_path] +cmake_with_args +["-P", "cmake/fetch_modules.cmake"],check=True)
+if not no_build_networking:
+	subprocess.run([config.cmake_path] +cmake_with_args +["-P", "cmake/fetch_modules.cmake"],check=True)
 
 # Fetch additional modules
 index = 0
@@ -857,6 +925,9 @@ if not deps_only:
 
 	cmake_args += additional_cmake_args
 	cmake_args.append("-DPRAGMA_DEPS_DIR=" +config.deps_dir +"/" +config.deps_staging_dir)
+	cmake_args.append("-DPRAGMA_BUILD_TOOLS_DIR=" +build_tools_directory)
+	if no_build_networking:
+		cmake_args.append("-DPRAGMA_DISABLE_BUILD_FETCH=ON")
 
 	if platform == "win32":
 		if toolset == "msvc":
@@ -915,14 +986,52 @@ if not deps_only:
 		os.chdir(build_dir)
 		targets = ["pragma-install-full"]
 
+		if platform == "win32":
+			vsdevcmd_path = determine_vsdevcmd_path(deps_dir)
+
+		def dump_and_print_build_commands(build_args):
+			cmds = []
+			if platform == "win32":
+				fileName = "build.bat"
+				cmds.append('call "' +vsdevcmd_path +'" -arch=x64')
+			else:
+				fileName = "build.sh"
+			filePath = Path(build_dir) / fileName
+			cmds.append(join_args(build_args))
+			
+			for cmd in cmds:
+				print_info(cmd)
+
+			if platform == "win32":
+				cmds = ["@echo off"] +cmds
+			else:
+				cmds = ["#!/bin/bash"] +cmds
+
+			with open(str(filePath), "w") as f:
+				for cmd in cmds:
+					f.write(cmd +"\n")
+				return filePath
+			return None
+
 		print_msg("Running build command...")
-		cmake_build(build_config,targets,verbose=verbose)
+		try:
+			build_args = cmake_build(build_config,targets,verbose=verbose,buildDir=build_dir)
+		except subprocess.CalledProcessError as e:
+			print_warning("Build Failed! To re-run the build without having to re-run the entire build script, use the following commands:")
+			build_args = cmake_build(build_config,targets,verbose=verbose,buildDir=build_dir,returnCommandOnly=True)
+			buildCmdFilePath = dump_and_print_build_commands(build_args)
+			print("")
+			if buildCmdFilePath is not None:
+				print("Or execute \"" +str(buildCmdFilePath) +"\".")
+			raise
 
 		print_msg("Build Successful! Pragma has been installed to \"" +normalize_path(install_dir) +"\".")
-		print_msg("If you make any changes to the core source code, you can build the \"pragma-install\" target to compile the changes and re-install the binaries automatically.")
-		print_msg("If you make any changes to a module, you will have to build the module target first, and then build \"pragma-install\".")
-		print_msg("")
+		print_msg("If you make any changes to the source code, you can use the following commands to build the changes and re-install the binaries without having to re-run this build script:")
+		buildCmdFilePath = dump_and_print_build_commands(build_args)
+		print("")
+		if buildCmdFilePath is not None:
+			print("Or execute \"" +str(buildCmdFilePath) +"\".")
 
-print_msg("All actions have been completed! Please make sure to re-run this script every time you pull any changes from the repository, and after adding any new modules.")
+print_msg("All actions have been completed!")
 
 os.chdir(root)

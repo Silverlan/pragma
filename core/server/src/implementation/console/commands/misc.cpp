@@ -439,11 +439,11 @@ void CMD_sv_debug_netmessages(pragma::NetworkState *state, pragma::BasePlayerCom
 		return;
 	}
 	auto *svMap = pragma::networking::get_server_message_map();
-	pragma::util::StringMap<uint32_t> *svMsgs;
+	pragma::string::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 
 	auto *clMap = pragma::networking::get_client_message_map();
-	pragma::util::StringMap<uint32_t> *clMsgs;
+	pragma::string::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 
 	sv->DebugPrint(*svMsgs, *clMsgs);

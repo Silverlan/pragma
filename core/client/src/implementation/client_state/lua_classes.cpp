@@ -385,6 +385,9 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 {
 	auto &modEngine = lua.RegisterLibrary("engine");
 	auto defFontInfo = luabind::class_<gui::FontInfo>("FontInfo");
+	defFontInfo.def("GetName", +[](const gui::FontInfo &fontInfo) -> std::string {
+		return fontInfo.GetName();
+	});
 	modEngine[defFontInfo];
 
 	auto &modUtil = lua.RegisterLibrary("util");

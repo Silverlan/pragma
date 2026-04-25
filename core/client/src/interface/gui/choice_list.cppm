@@ -16,7 +16,6 @@ export namespace pragma::gui::types {
 		WIChoiceList();
 		virtual ~WIChoiceList() override;
 		virtual void Initialize() override;
-		virtual void SetSize(int x, int y) override;
 		void SetChoices(const std::vector<std::string> &choices);
 		void SetChoices(const std::vector<std::pair<std::string, std::string>> &choices);
 		void AddChoice(const std::string &choice, const std::string &val);
@@ -28,6 +27,7 @@ export namespace pragma::gui::types {
 		void SelectPrevious();
 		const Choice *GetSelectedChoice();
 	  private:
+		virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
 		WIHandle m_text;
 		WIHandle m_buttonPrev;
 		WIHandle m_buttonNext;

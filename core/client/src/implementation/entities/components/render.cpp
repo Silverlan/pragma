@@ -59,9 +59,8 @@ CRenderComponent::CRenderComponent(ecs::BaseEntity &ent) : BaseRenderComponent(e
 void CRenderComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CRenderComponent::InitializeBuffers()
 {
-	auto instanceSize = sizeof(rendering::InstanceData);
-	auto instanceCount = 32'768u;
-	auto maxInstanceCount = instanceCount * 100u;
+	constexpr auto instanceSize = sizeof(rendering::InstanceData);
+	constexpr uint32_t instanceCount = 32'768u; // Not an absolute limit, but exceeding it will trigger re-allocation
 	prosper::util::BufferCreateInfo createInfo {};
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA) {
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
@@ -80,9 +79,9 @@ void CRenderComponent::InitializeBuffers()
 	constexpr prosper::DeviceSize alignment = 256; // See https://vulkan.gpuinfo.org/displaydevicelimit.php?name=minUniformBufferOffsetAlignment
 	auto internalAlignment = get_cengine()->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit);
 	if(internalAlignment > alignment)
-		throw std::runtime_error {"Unsupported minimum uniform buffer alignment (" + std::to_string(internalAlignment) + "!"};
-	s_instanceBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, instanceSize * maxInstanceCount, 0.1f, nullptr, alignment);
-	s_instanceBuffer->SetDebugName("entity_instance_data_buf");
+		throw std::runtime_error {"Unsupported minimum uniform buffer alignment (" + util::to_string(internalAlignment) + "!"};
+	createInfo.debugName = "entity_instance_data_buf";
+	s_instanceBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(createInfo, instanceSize, nullptr, alignment);
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA)
 		s_instanceBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
 
@@ -467,7 +466,7 @@ void CRenderComponent::ReceiveData(NetPacket &packet) { m_renderFlags = packet->
 std::optional<math::intersection::LineMeshResult> CRenderComponent::CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise) const
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("render_component_calc_ray_intersection");
+	debug::get_domain().BeginTask("render_component_calc_ray_intersection");
 	pragma::util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
 #endif
 	auto &lodMeshes = GetLODMeshes();

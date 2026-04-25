@@ -7,6 +7,10 @@ export import :gui.line_graph;
 
 export namespace pragma::gui::types {
 	class DLLCLIENT WINetGraph : public WIBase {
+	  public:
+		WINetGraph();
+		virtual ~WINetGraph() override;
+		virtual void Initialize() override;
 	  private:
 		struct DLLCLIENT NetData {
 			NetData();
@@ -47,10 +51,6 @@ export namespace pragma::gui::types {
 		void UpdateGraph();
 		void AddGraphValue(uint32_t sz);
 		WIText *CreateText(const std::string &text);
-	  public:
-		WINetGraph();
-		virtual ~WINetGraph() override;
-		virtual void Initialize() override;
-		virtual void SetSize(int x, int y) override;
+	    virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
 	};
 };

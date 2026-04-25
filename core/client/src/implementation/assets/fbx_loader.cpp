@@ -181,7 +181,7 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 	if(!fbxMatName.empty())
 		matFilePath += fbxMatName;
 	else
-		matFilePath += "material" + std::to_string(partitionIdx);
+		matFilePath += "material" + util::to_string(partitionIdx);
 
 	auto relMatPath = matFilePath;
 	relMatPath.MakeRelative(util::CONVERT_PATH);
@@ -213,8 +213,8 @@ std::optional<uint32_t> FbxImporter::LoadMaterial(const ofbx::Material &fbxMat, 
 	applyColorFactor(fbxMat.getEmissiveColor(), fbxMat.getEmissiveFactor(), "emission_factor");
 
 	// TODO
-	//dataBlock->AddValue("float", "roughness_factor", std::to_string(pbrMetallicRoughness.roughnessFactor));
-	//dataBlock->AddValue("float", "metalness_factor", std::to_string(pbrMetallicRoughness.metallicFactor));
+	//dataBlock->AddValue("float", "roughness_factor", util::to_string(pbrMetallicRoughness.roughnessFactor));
+	//dataBlock->AddValue("float", "metalness_factor", util::to_string(pbrMetallicRoughness.metallicFactor));
 
 	auto *combine = static_cast<ShaderCombineImageChannels *>(get_cengine()->GetShader("combine_image_channels").get());
 	auto *rma = static_cast<ShaderSpecularGlossinessToMetalnessRoughness *>(get_cengine()->GetShader("specular_glossiness_to_metalness_roughness").get());
@@ -328,7 +328,7 @@ std::string FbxImporter::GetImportMeshName(const FbxMeshInfo &mesh)
 			c = '_';
 	}
 	if(mesh.subMesh >= 0) {
-		out += "_" + std::to_string(mesh.subMesh);
+		out += "_" + util::to_string(mesh.subMesh);
 	}
 	return out;
 }
@@ -1110,7 +1110,7 @@ std::shared_ptr<pragma::animation::Bone> FbxImporter::AddBone(const ofbx::Object
 {
 	std::string name = o.name;
 	if(name.empty())
-		name = "bone" + std::to_string(o.id);
+		name = "bone" + util::to_string(o.id);
 	auto &skel = m_model->GetSkeleton();
 	auto &ref = m_model->GetReference();
 	auto boneId = skel.LookupBone(name);

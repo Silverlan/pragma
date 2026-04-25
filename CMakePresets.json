@@ -63,8 +63,8 @@
       "displayName": "[Linux] Configure - Clang (Core Features)",
       "inherits": ["base-ninja", "platform-linux"],
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "${sourceDir}/build_tools/clang/bin/clang",
-        "CMAKE_CXX_COMPILER": "${sourceDir}/build_tools/clang/bin/clang++"
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++"
       }
     },
     {
@@ -78,8 +78,8 @@
       "displayName": "[Windows] Configure - Clang with Ninja (Core Features)",
       "inherits": ["base-ninja", "platform-windows"],
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "${sourceDir}/build_tools/clang/bin/clang.exe",
-        "CMAKE_CXX_COMPILER": "${sourceDir}/build_tools/clang/bin/clang++.exe"
+        "CMAKE_C_COMPILER": "clang.exe",
+        "CMAKE_CXX_COMPILER": "clang++.exe"
       }
     },
     {
@@ -96,6 +96,11 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "cl.exe",
         "CMAKE_CXX_COMPILER": "cl.exe"
+      },
+      "vendor": {
+        "jetbrains.com/clion": {
+          "toolchain": "Visual Studio" 
+        }
       }
     },
     {

@@ -8,7 +8,7 @@ def main():
 	chdir_mkdir(deps_dir)
 
 	os.chdir(deps_dir)
-	commit_sha = "cb42653" # Branch: "v2.1"
+	commit_sha = "e5bcb46be2ca41434305d3fb4f5d40ccbbc835eb" # Branch: "v2.1"
 	luajit_root = deps_dir +"/luajit"
 	if not check_repository_commit(luajit_root, commit_sha, "luajit"):
 		if not Path(luajit_root).is_dir():

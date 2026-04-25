@@ -75,12 +75,12 @@ bool pragma::util::steam::vdf::get_external_steam_locations(const std::string &s
 	};
 	for(uint8_t i = 1; i <= 8; ++i) // 8 is supposedly the max number of external locations you can specify in steam
 	{
-		auto itKv = libraryFolders.keyValues.find(std::to_string(i));
+		auto itKv = libraryFolders.keyValues.find(util::to_string(i));
 		if(itKv != libraryFolders.keyValues.end())
 			fAddPath(itKv->second);
 		else {
 			// Newer versions of Steam use a different format
-			auto itChild = libraryFolders.children.find(std::to_string(i));
+			auto itChild = libraryFolders.children.find(util::to_string(i));
 			if(itChild != libraryFolders.children.end()) {
 				auto itMounted = itChild->second.keyValues.find("mounted");
 				if(itMounted != itChild->second.keyValues.end() && itMounted->second == "0")

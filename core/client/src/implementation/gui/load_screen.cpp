@@ -34,12 +34,11 @@ void pragma::gui::types::WILoadScreen::Initialize()
 	pProgressBar->SetAutoCenterToParentX(true);
 }
 
-void pragma::gui::types::WILoadScreen::SetSize(int x, int y)
+void pragma::gui::types::WILoadScreen::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIMainMenuBase::SetSize(x, y);
 	auto yOffset = 0;
 	if(m_hText.IsValid()) {
-		yOffset = CInt32(CFloat(y) * 0.6f);
+		yOffset = CInt32(CFloat(GetHeight()) * 0.6f);
 		auto *pText = static_cast<WIText *>(m_hText.get());
 		pText->SetY(yOffset);
 		yOffset += pText->GetHeight();

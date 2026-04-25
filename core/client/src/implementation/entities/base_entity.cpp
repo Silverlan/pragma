@@ -179,10 +179,10 @@ void pragma::ecs::CBaseEntity::ReceiveData(NetPacket &packet)
 		if(svId < svComponentToClComponentTable.size() && svComponentToClComponentTable.at(svId) != CEntityComponentManager::INVALID_COMPONENT) {
 			auto clId = svComponentToClComponentTable.at(svId);
 			if(clId >= componentTypes.size())
-				throw std::runtime_error("Invalid client component type index " + std::to_string(clId) + "!");
+				throw std::runtime_error("Invalid client component type index " + util::to_string(clId) + "!");
 			auto *componentInfo = componentManager.GetComponentInfo(clId);
 			if(componentInfo == nullptr)
-				throw std::invalid_argument("Invalid component id " + std::to_string(clId) + "!");
+				throw std::invalid_argument("Invalid component id " + util::to_string(clId) + "!");
 			else {
 				std::string componentName {componentInfo->name};
 				auto component = FindComponent(componentName); // TODO: FindComponent should use std::string_view

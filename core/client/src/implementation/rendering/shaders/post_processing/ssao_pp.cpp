@@ -44,8 +44,8 @@ ShaderSSAO::ShaderSSAO(prosper::IPrContext &context, const std::string &identifi
 	bufferCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
 	bufferCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	bufferCreateInfo.size = size;
+	bufferCreateInfo.debugName = "ssao_kernel_buf";
 	m_kernelBuffer = get_cengine()->GetRenderContext().CreateBuffer(bufferCreateInfo, ssaoKernel.data());
-	m_kernelBuffer->SetDebugName("ssao_kernel_buf");
 
 	// Generate kernel rotations
 	const auto width = 4u;

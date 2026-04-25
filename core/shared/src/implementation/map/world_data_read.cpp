@@ -29,7 +29,7 @@ bool pragma::asset::WorldData::Read(fs::VFilePtr &f, EntityData::Flags entMask, 
 	auto version = f->Read<uint32_t>();
 	if(version < 11 || version > WLD_VERSION) {
 		if(errMsg)
-			*errMsg = "Unsupported map version '" + std::to_string(version) + "'!";
+			*errMsg = "Unsupported map version '" + util::to_string(version) + "'!";
 		return false;
 	}
 

@@ -169,7 +169,7 @@ static uint32_t insert_channel_values(lua::State *l, panima::Channel &channel, c
 	auto numTimes = times.size();
 	auto numValues = Lua::GetObjectLength(l, tValues);
 	if(numTimes != numValues)
-		throw std::runtime_error {"Number of elements in times array (" + std::to_string(numTimes) + ") doesn't match number of values in values array (" + std::to_string(numValues) + ")! This is not allowed."};
+		throw std::runtime_error {"Number of elements in times array (" + pragma::util::to_string(numTimes) + ") doesn't match number of values in values array (" + pragma::util::to_string(numValues) + ")! This is not allowed."};
 	auto insertIndex = udm::visit(channel.GetValueType(), [l, &tValues, &channel, &times, numValues, offset, flags](auto tag) {
 		using T = typename decltype(tag)::type;
 		using TValue = std::conditional_t<std::is_same_v<T, bool>, uint8_t, T>;
@@ -392,7 +392,7 @@ void Lua::animation::register_library(Interface &lua)
 		  auto numTimes = GetObjectLength(l, times);
 		  auto numValues = GetObjectLength(l, values);
 		  if(numTimes != numValues)
-			  throw std::runtime_error {"Number of elements in times array (" + std::to_string(numTimes) + ") doesn't match number of values in values array (" + std::to_string(numValues) + ")! This is not allowed."};
+			  throw std::runtime_error {"Number of elements in times array (" + pragma::util::to_string(numTimes) + ") doesn't match number of values in values array (" + pragma::util::to_string(numValues) + ")! This is not allowed."};
 		  udm::set_array_values(l, channel.GetTimesArray(), times, 2);
 		  udm::set_array_values(l, channel.GetValueArray(), values, 3);
 		  channel.Update();

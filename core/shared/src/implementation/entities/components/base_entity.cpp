@@ -619,7 +619,7 @@ CallbackHandle BaseEntityComponent::AddEventCallback(ComponentEventId eventId, c
 	auto &events = GetEntity().GetNetworkState()->GetGameState()->GetEntityComponentManager().GetEvents();
 	auto it = events.find(eventId);
 	if(it != events.end() && it->second.typeIndex.has_value() && componentTypeIndex != *it->second.typeIndex && baseTypeIndex != *it->second.typeIndex)
-		throw std::logic_error("Attempted to add callback for component event " + std::to_string(eventId) + " (" + it->second.name + ") to component " + std::string(typeid(*this).name()) + ", which this event does not belong to!");
+		throw std::logic_error("Attempted to add callback for component event " + util::to_string(eventId) + " (" + it->second.name + ") to component " + std::string(typeid(*this).name()) + ", which this event does not belong to!");
 
 	auto &eventCallbacks = GetEventCallbacks();
 	auto itEv = eventCallbacks.find(eventId);

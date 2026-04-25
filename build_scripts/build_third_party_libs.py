@@ -144,5 +144,7 @@ def main():
 		build_library("luasocket")
 		build_library("lua_debug")
 
+	build_library("lua_compile")
+
 if __name__ == "__main__":
 	main()

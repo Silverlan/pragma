@@ -17,7 +17,7 @@ layout(LAYOUT_PUSH_CONSTANTS()) uniform PushConstants
 	int alphaOnly;
 	float lod;
 	uint channels;
-	float padding;
+	
 	vec2 offset;
 	vec2 scale;
 }

@@ -1,7 +1,7 @@
 -- SPDX-FileCopyrightText: (c) 2023 Silverlan <opensource@pragma-engine.com>
 -- SPDX-License-Identifier: MIT
 
-include("/gui/pfm/cursor_tracker.lua")
+include("/gui/pfm/util/cursor_tracker.lua")
 
 local Component = ents.GUI3D
 

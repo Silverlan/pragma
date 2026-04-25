@@ -29,7 +29,7 @@ local function show_debug_render_stats_ui()
 		return
 	end
 
-	local elUi = gui.create("WIDebugRenderStats", el, 0, 0, width, height, 0, 0, 1, 1)
+	local elUi = gui.create("debug_render_stats", el, 0, 0, width, height, 0, 0, 1, 1)
 	elUi:SetAlpha(200)
 	elUi:RequestFocus()
 	elUi:TrapFocus()

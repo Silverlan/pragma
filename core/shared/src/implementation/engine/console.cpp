@@ -192,29 +192,37 @@ void pragma::Engine::ProcessConsoleInput(KeyState pressState)
 
 void pragma::Engine::ProcessConsoleInput(const std::string_view &line, KeyState pressState, float magnitude)
 {
-	string::get_sequence_commands(std::string {line}, [pressState, magnitude](std::string cmd, std::vector<std::string> &argv) { Get()->RunConsoleCommand(cmd, argv, pressState, magnitude); });
+	string::get_sequence_commands(std::string {line}, [pressState, magnitude](std::string cmd, std::vector<std::string> &argv) { Get()->RunConsoleCommand(cmd, argv, {.pressState = pressState, .magnitude = magnitude}); });
 }
 
-bool pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
+pragma::console::ConCommandResult pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::string> &argv, const RunConCommandInfo &cmdInfo)
 {
+	console::ConCommandResult result {};
 	auto *cv = Get()->CVarHandler::GetConVar(scmd);
 	if(cv == nullptr)
-		return false;
-	if(callback != nullptr && callback(cv, magnitude) == false)
-		return true;
+		return result;
+	auto magnitude = cmdInfo.magnitude;
+	if(cmdInfo.callback != nullptr && cmdInfo.callback(cv, magnitude) == false) {
+		result.success = true;
+		return result;
+	}
 
 	auto type = cv->GetType();
 	if(type == console::ConType::Var) {
 		auto *cvar = static_cast<console::ConVar *>(cv);
 		if(argv.empty()) {
 			cvar->Print(scmd);
-			return true;
+			result.success = true;
+			return result;
 		}
 		auto flags = cvar->GetFlags();
 		//if((flags &ConVarFlags::Cheat) == ConVarFlags::Cheat)
 		//	if(!check_cheats(scmd,this)) return true;
-		SetConVar(scmd, argv[0]);
-		return true;
+		auto convarRes = SetConVar(scmd, argv[0]);
+		result.success = convarRes.success;
+		if(convarRes.errorMessage)
+			result.errorMessage = std::move(convarRes.errorMessage);
+		return result;
 	}
 	auto *cmd = static_cast<console::ConCommand *>(cv);
 	if(type == console::ConType::Cmd) {
@@ -223,28 +231,35 @@ bool pragma::Engine::RunEngineConsoleCommand(std::string scmd, std::vector<std::
 		if(scmd.empty() == false && scmd.front() == '-')
 			magnitude = 0.f;
 		func(nullptr, nullptr, argv, magnitude);
-		return true;
+		result.success = true;
+		return result;
 	}
-	return false;
+	return result;
 }
 
-bool pragma::Engine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
+pragma::console::ConCommandResult pragma::Engine::RunConsoleCommand(std::string_view svcmd, std::vector<std::string> &argv, const RunConCommandInfo &cmdInfo)
 {
+	std::string cmd {svcmd};
 	string::to_lower(cmd);
 	auto *stateSv = GetServerNetworkState();
 	if(stateSv == nullptr)
-		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);
-	if(stateSv == nullptr || !stateSv->RunConsoleCommand(cmd, argv, nullptr, pressState, magnitude, callback)) {
-		Con::CWAR << "Unknown console command '" << cmd << "'!" << Con::endl;
-		auto similar = (stateSv != nullptr) ? stateSv->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
-		if(similar.empty() == true)
-			Con::COUT << "No similar matches found!" << Con::endl;
-		else {
-			Con::COUT << "Were you looking for one of the following?" << Con::endl;
-			for(auto &sim : similar)
-				Con::COUT << "- " << sim << Con::endl;
+		return RunEngineConsoleCommand(cmd, argv, cmdInfo);
+	console::ConCommandResult result {};
+	if(stateSv)
+		result = stateSv->RunConsoleCommand(cmd, argv, nullptr, cmdInfo.pressState, cmdInfo.magnitude, cmdInfo.callback);
+	if(!result) {
+		if (!cmdInfo.suppressOutput) {
+			Con::CWAR << "Unknown console command '" << cmd << "'!" << Con::endl;
+			auto similar = (stateSv != nullptr) ? stateSv->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
+			if(similar.empty() == true)
+				Con::COUT << "No similar matches found!" << Con::endl;
+			else {
+				Con::COUT << "Were you looking for one of the following?" << Con::endl;
+				for(auto &sim : similar)
+					Con::COUT << "- " << sim << Con::endl;
+			}
 		}
-		return false;
+		return result;
 	}
-	return true;
+	return result;
 }

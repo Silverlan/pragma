@@ -237,7 +237,7 @@ skin["wibutton"] = {
 				)
 			end
 		end
-		local cbSetSize = pElement:AddCallback("SetSize", fcSetSize)
+		local cbSetSize = pElement:AddCallback("OnSizeChanged", fcSetSize)
 		fcSetSize()
 		add_skin_element(pElement, cbSetSize)
 	end,
@@ -245,7 +245,7 @@ skin["wibutton"] = {
 	children = {
 		["witext"] = {
 			Initialize = function(GUI, pElement)
-				local cbSetSize = pElement:AddCallback("SetSize", function()
+				local cbSetSize = pElement:AddCallback("OnSizeChanged", function()
 					local p = pElement:GetParent()
 					if not p:IsValid() then
 						return
@@ -259,7 +259,6 @@ skin["wibutton"] = {
 
 				pElement:SetColorRGB(Color(255, 255, 255, 255))
 				pElement:SetText(pElement:GetText():upper())
-				pElement:SizeToContents()
 			end,
 			Release = clear_element,
 		},
@@ -307,7 +306,7 @@ skin["serverbrowser"] = {
 		["wisilkicon"] = {
 			Initialize = function(GUI, pElement)
 				local pCell = pElement:GetParent()
-				if pCell:IsValid() and pCell:GetClass() == "witablecell" then
+				if pCell:IsValid() and pCell:IsType(gui.TYPE_WITABLECELL) then
 					pElement:SetY(pCell:GetHeight() * 0.5 - pElement:GetHeight() * 0.5)
 					pElement:SetX(GUI.TABLE_TEXT_OFFSET_X)
 				end
@@ -355,7 +354,7 @@ skin["table_row_header"] = {
 						c:SetX(sz.x * 0.5 - c:GetWidth() * 0.5)
 					end
 				end
-				local cbSetSize = pElement:AddCallback("SetSize", fcSetSize)
+				local cbSetSize = pElement:AddCallback("OnSizeChanged", fcSetSize)
 				add_skin_element(pElement, cbSetSize)
 				fcSetSize()
 			end,
@@ -426,7 +425,7 @@ skin["table_row"] = {
 				local pCell = pElement:GetParent()
 				if
 					not pCell:IsValid()
-					or (pCell:GetClass() ~= "widropdownmenu" and pCell:GetClass() ~= "witextentrybase")
+					or (not pCell:IsType(gui.TYPE_WIDROPDOWNMENU) and not pCell:IsType(gui.TYPE_WITEXTENTRYBASE))
 				then
 					pElement:SetColorRGB(Color(255, 255, 255, 255))
 				end
@@ -442,7 +441,7 @@ skin["table_row_offset"] = {
 				local pCell = pElement:GetParent()
 				if pCell:IsValid() then
 					local childIdx = pCell:FindChildIndex(pElement)
-					if childIdx == 0 and pCell:GetClass() == "witablecell" then
+					if childIdx == 0 and pCell:IsType(gui.TYPE_WITABLECELL) then
 						local fcSetSize = function()
 							if pElement:IsValid() == false then
 								return
@@ -451,7 +450,7 @@ skin["table_row_offset"] = {
 							pElement:SetY(pCell:GetHeight() * 0.5 - pElement:GetHeight() * 0.5)
 							pElement:SetX(GUI.TABLE_TEXT_OFFSET_X)
 						end
-						local cbSetSize = pCell:AddCallback("SetSize", fcSetSize)
+						local cbSetSize = pCell:AddCallback("OnSizeChanged", fcSetSize)
 						add_skin_element(pElement, cbSetSize)
 						fcSetSize()
 					end
@@ -495,7 +494,6 @@ skin["wimainmenuelement"] = {
 			pText:SetFont(GUI:MENU_ITEM_FONT())
 			pText:SetText(pText:GetText())
 			pText:SetColorRGB(GUI.MENU_ITEM_COLOR)
-			pText:SizeToContents()
 
 			pElement:AddCallback("Select", function()
 				local index = pElement:GetParent():FindChildIndex(pElement)
@@ -559,7 +557,7 @@ skin["witooltip"] = {
 
 			pText:SetZPos(1)
 		end
-		local cbSize = pText:AddCallback("SetSize", function(pText)
+		local cbSize = pText:AddCallback("OnSizeChanged", function(pText)
 			local sz = pText:GetSize()
 			pText:SetPos(10, 5)
 
@@ -604,7 +602,7 @@ skin["window_frame"] = {
 				local pParent = pElement:GetParent()
 				if
 					not pParent:IsValid()
-					or (pParent:GetClass() ~= "widropdownmenu" and pParent:GetClass() ~= "witextentrybase")
+					or (not pParent:IsType(gui.TYPE_WIDROPDOWNMENU) and not pParent:IsType(gui.TYPE_WITEXTENTRYBASE))
 				then
 					pElement:SetColorRGB(Color.White)
 				end
@@ -616,7 +614,6 @@ skin["window_frame"] = {
 skin["credits_text"] = {
 	Initialize = function(GUI, pElement)
 		pElement:SetFont(GUI:CREDITS_FONT())
-		pElement:SizeToContents()
 		pElement:SetX(pElement:GetParent():GetWidth() / 2 - pElement:GetWidth() / 2)
 		pElement:SetColor(Color(200, 200, 200))
 	end,
@@ -630,14 +627,12 @@ skin["credits_logo"] = {
 skin["header"] = {
 	Initialize = function(GUI, pElement)
 		pElement:SetFont(GUI:HEADER_FONT())
-		pElement:SizeToContents()
 		pElement:SetX(pElement:GetParent():GetWidth() / 2 - pElement:GetWidth() / 2)
 	end,
 }
 skin["header2"] = {
 	Initialize = function(GUI, pElement)
 		pElement:SetFont(GUI:HEADER2_FONT())
-		pElement:SizeToContents()
 		pElement:SetX(pElement:GetParent():GetWidth() / 2 - pElement:GetWidth() / 2)
 	end,
 }

@@ -2,7 +2,7 @@
 -- SPDX-License-Identifier: MIT
 
 include("wimenuitem.lua")
-include("vbox.lua")
+include("/gui/layout/vbox.lua")
 
 util.register_class("gui.WIContextMenu", gui.Base)
 
@@ -11,6 +11,8 @@ gui.impl.contextMenu = gui.impl.contextMenu or {
 	activeMenuCount = 0,
 	menues = {},
 }
+
+local MAX_HEIGHT = 512
 
 function gui.WIContextMenu:OnRemove()
 	gui.impl.contextMenu.activeMenuCount = gui.impl.contextMenu.activeMenuCount - 1
@@ -22,7 +24,7 @@ function gui.WIContextMenu:OnInitialize()
 	gui.impl.contextMenu.activeMenuCount = gui.impl.contextMenu.activeMenuCount + 1
 	gui.Base.OnInitialize(self)
 
-	self:SetSize(64, 128)
+	self:SetSize(64, 1)
 
 	self.m_tItems = {}
 	self.m_subMenues = {}
@@ -57,19 +59,23 @@ function gui.WIContextMenu:OnInitialize()
 	end
 
 	local scrollContainer = gui.create("WIScrollContainer", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
-	scrollContainer:AddCallback("SetSize", function(el)
+	scrollContainer:AddCallback("OnSizeChanged", function(el)
 		self.m_contents:SetWidth(el:GetWidth())
 	end)
 	scrollContainer:GetVerticalScrollBar():SetScrollAmount(1)
 	self.m_scrollContainer = scrollContainer
 
-	local contents = gui.create("WIVBox", scrollContainer, 0, 0, self:GetWidth(), self:GetHeight())
+	local contents = gui.create("vbox", scrollContainer, 0, 0, self:GetWidth(), self:GetHeight())
 	contents:SetFixedWidth(true)
-	contents:AddCallback("SetSize", function(el)
+	contents:AddCallback("OnSizeChanged", function(el)
 		for _, item in ipairs(self.m_tItems) do
 			if item:IsValid() then
 				item:SetWidth(el:GetWidth())
 			end
+		end
+		
+		if(self.m_updateHeightOnContainerChange) then
+			self:UpdateCompactHeight()
 		end
 	end)
 	contents:AddCallback("OnUpdated", function(el)
@@ -78,6 +84,15 @@ function gui.WIContextMenu:OnInitialize()
 	self.m_contents = contents
 
 	self:AddStyleClass("context_menu")
+	self:SetHeight(0) -- Hide the element initially to avoid flickering
+end
+function gui.WIContextMenu:UpdateCompactHeight(h, dontApply)
+	h = h or self.m_contents:GetHeight()
+	if self.m_contents:GetHeight() <= MAX_HEIGHT and self.m_contents:GetHeight() ~= self:GetHeight() then
+		h = self.m_contents:GetHeight()
+		if(dontApply ~= false) then self:SetHeight(h) end
+	end
+	return h
 end
 function gui.WIContextMenu:IsPopulated()
 	return self:GetItemCount() > 0
@@ -152,10 +167,9 @@ function gui.WIContextMenu:OnUpdate()
 		end
 	end
 	w = w + 20
-	if self.m_contents:GetHeight() <= 128 and self.m_contents:GetHeight() ~= self:GetHeight() then
-		h = self.m_contents:GetHeight()
-	end
-	self:SetSize(w, h)
+	h = self:UpdateCompactHeight(h, true)
+	self.m_updateHeightOnContainerChange = true
+	self:ApplySize(w, h)
 
 	for _, item in ipairs(updateItems) do
 		item:Update()
@@ -242,7 +256,7 @@ local function get_base_element(window)
 	return elBase
 end
 function gui.WIContextMenu:AddItem(name, fcOnClick, keybind)
-	local pItem = gui.create("WIMenuItem", self.m_contents)
+	local pItem = gui.create("menu_item", self.m_contents)
 	if pItem == nil then
 		return
 	end
@@ -378,7 +392,7 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 			end
 		end
 	end)
-	pSubMenu = gui.create("WIContextMenu", self:GetParent())
+	pSubMenu = gui.create("context_menu", self:GetParent())
 	pSubMenu:SetZPos(self:GetZPos())
 	pSubMenu:SetParentMenu(self, pItem)
 	pSubMenu:AddCallback("OnCursorExited", function()
@@ -391,13 +405,13 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 	table.insert(self.m_subMenues, pSubMenu)
 	self.m_itemToSubMenu[pItem] = pSubMenu
 
-	local pIcon = gui.create("WIArrow", pItem)
+	local pIcon = gui.create("wiarrow", pItem)
+	pIcon:SetAutoCenterToParentY(true)
 	local function updateIcon()
-		pIcon:CenterToParentY()
 		pIcon:SetX(pItem:GetWidth() - pIcon:GetWidth() - 5)
 	end
 	updateIcon()
-	pItem:AddCallback("SetSize", updateIcon)
+	pItem:AddCallback("OnSizeChanged", updateIcon)
 	pIcon:SetDirection(gui.Arrow.DIRECTION_RIGHT)
 	pIcon:AddStyleClass("context_menu_arrow")
 
@@ -430,7 +444,7 @@ gui.open_context_menu = function(window)
 	if util.is_valid(elBase) == false then
 		return
 	end
-	local menu = gui.create("WIContextMenu", elBase)
+	local menu = gui.create("context_menu", elBase)
 	if menu ~= nil then
 		menu:SetName("context_menu")
 		menu:RequestFocus()
@@ -450,4 +464,4 @@ end
 gui.is_context_menu_open = function(elBase)
 	return util.is_valid(gui.get_context_menu(elBase))
 end
-gui.register("WIContextMenu", gui.WIContextMenu)
+gui.register("context_menu", gui.WIContextMenu)

@@ -153,22 +153,22 @@ void CAnimatedBvhComponent::Cancel() { m_cancelled = true; }
 bool CAnimatedBvhComponent::IsBusy() const
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("bvh_mutex_wait");
+	debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 	std::unique_lock<std::mutex> lock {m_animatedBvhData.completeMutex};
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	return m_animatedBvhData.completeCount != m_numJobs;
 }
 void CAnimatedBvhComponent::WaitForCompletion()
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("bvh_mutex_wait");
+	debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 	std::unique_lock<std::mutex> lock {m_animatedBvhData.completeMutex};
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	m_animatedBvhData.completeCondition.wait(lock, [this]() { return m_animatedBvhData.completeCount == m_numJobs; });
 }
@@ -191,7 +191,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 		return;
 	}*/
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("bvh_animated_prepare");
+	debug::get_domain().BeginTask("bvh_animated_prepare");
 #endif
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
 	pragma::util::ScopeGuard sg {[]() { ::debug::get_domain().EndTask(); }};
@@ -310,7 +310,7 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 
 		pool.BatchProcess(numVerts, numVerticesPerBatch, [this, fShouldConsiderVertex, numJobs, &mesh, &meshData, &animBvhData, finalize](uint32_t start, uint32_t end) mutable -> ThreadPool::ResultHandler {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-			::debug::get_domain().BeginTask("bvh_animated_compute");
+			debug::get_domain().BeginTask("bvh_animated_compute");
 #endif
 			auto &verts = mesh.GetVertices();
 			auto &vertexWeights = mesh.GetVertexWeights();
@@ -344,20 +344,20 @@ void CAnimatedBvhComponent::RebuildAnimatedBvh(bool force, const std::vector<boo
 				}
 			}
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-			::debug::get_domain().EndTask();
-			::debug::get_domain().BeginTask("bvh_mutex_wait");
+			debug::get_domain().EndTask();
+			debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 			m_animatedBvhData.completeMutex.lock();
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-			::debug::get_domain().EndTask();
+			debug::get_domain().EndTask();
 #endif
 			if(++m_animatedBvhData.completeCount == numJobs) {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-				::debug::get_domain().BeginTask("bvh_animated_finalize");
+				debug::get_domain().BeginTask("bvh_animated_finalize");
 #endif
 				finalize();
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-				::debug::get_domain().EndTask();
+				debug::get_domain().EndTask();
 #endif
 				m_animatedBvhData.completeCondition.notify_one();
 			}

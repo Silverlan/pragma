@@ -13,6 +13,48 @@ import :game;
 import :rendering.render_apis;
 // import pragma.scripting.lua;
 
+static void clamp_bytes_value(std::string &value, std::string_view minVal, std::string_view maxVal)
+{
+	auto bytes = pragma::util::parse_bytes(value);
+	auto minValBytes = pragma::util::parse_bytes(minVal);
+	auto maxValBytes = pragma::util::parse_bytes(maxVal);
+	if(!bytes || !minValBytes || !maxValBytes)
+		return;
+	if(*bytes < *minValBytes)
+		value = *minValBytes;
+	if(*bytes > *maxValBytes)
+		value = *maxValBytes;
+}
+
+static std::expected<void, std::string> run_test(lua::State *l, std::string_view testName)
+{
+	const auto *baseTestScript = "tests/base.lua";
+	auto result = pragma::scripting::lua_core::include(l, baseTestScript, pragma::scripting::lua_core::IncludeFlags::AddToCache);
+	if(result.statusCode != Lua::StatusCode::Ok)
+		return std::unexpected {std::format("Failed to load base test lua script \"{}\"!", baseTestScript)};
+	Lua::Pop(l, result.numResults);
+
+	std::vector<std::string> files;
+	pragma::fs::find_files("scripts/tests/*.udm", &files, nullptr);
+	for(auto &fileName : files) {
+		auto filePath = pragma::util::DirPath("tests") / fileName;
+		std::string err;
+		auto status = pragma::scripting::lua_core::run_string(l, std::format("tests.load(\"{}\")", filePath.GetString()), "run", 0, &err);
+		if(status != Lua::StatusCode::Ok)
+			return std::unexpected {std::format("Failed to load test configuration \"{}\": {}", filePath.GetString(), err)};
+	}
+
+	std::string err;
+	auto status = pragma::scripting::lua_core::run_string(l, std::format("tests.queue(\"{}\")", testName), "run", 0, &err);
+	if(status != Lua::StatusCode::Ok)
+		return std::unexpected {std::format("Failed to queue test \"{}\": {}", testName, err)};
+
+	status = pragma::scripting::lua_core::run_string(l, "tests.run()", "run", 0, &err);
+	if(status != Lua::StatusCode::Ok)
+		return std::unexpected {std::format("Failed to run tests: {}", err)};
+	return {};
+}
+
 DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool continuous);
 extern bool g_dumpRenderQueues;
 void pragma::CEngine::RegisterConsoleCommands()
@@ -20,6 +62,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 	Engine::RegisterConsoleCommands();
 	auto &conVarMap = *console::client::get_convar_map();
 	RegisterSharedConsoleCommands(conVarMap);
+
 	conVarMap.RegisterConCommand("lua_exec_cl", &console::commands::lua_exec, console::ConVarFlags::None, "Opens and executes a lua-file on the client.", &console::commands::lua_exec_autocomplete);
 
 	conVarMap.RegisterConCommand("lua_run_cl", static_cast<void (*)(NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float)>(&console::commands::lua_run), console::ConVarFlags::None, "Runs a lua command on the client lua state.",
@@ -135,6 +178,11 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  return;
 		  }
 		  Con::COUT << *budget << Con::endl;
+
+		  fs::create_path("temp");
+		  const auto *budgetFilePath = "temp/gpu_memory_budget.json";
+		  if(fs::write_file(budgetFilePath, *budget))
+			  Con::COUT << "Written budget: " << budgetFilePath << "." << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Prints information about the current GPU memory budget.");
 	conVarMap.RegisterConCommand(
@@ -146,6 +194,19 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  return;
 		  }
 		  Con::COUT << *stats << Con::endl;
+
+		  fs::create_path("temp");
+		  const auto *statsFilePath = "temp/gpu_memory_stats.json";
+		  if(fs::write_file(statsFilePath, *stats)) {
+			  Con::COUT << "Written stats: " << statsFilePath << "." << Con::endl;
+
+			  std::string err;
+			  const auto *statsImageFilePath = "temp/gpu_memory_stats.png";
+			  if(DumpMemoryStatsImage(statsFilePath, statsImageFilePath, err))
+				  Con::COUT << "Written stats image: " << statsImageFilePath << Con::endl;
+			  else
+				  Con::CWAR << "Failed to write stats image: " << err << Con::endl;
+		  }
 	  },
 	  console::ConVarFlags::None, "Prints statistics about the current GPU memory usage.");
 	conVarMap.RegisterConCommand(
@@ -217,6 +278,63 @@ void pragma::CEngine::RegisterConsoleCommands()
 
 	conVarMap.RegisterConVar<bool>("render_vsync_enabled", true, console::ConVarFlags::Archive, "Enables or disables vsync. OpenGL only.");
 	conVarMap.RegisterConVarCallback("render_vsync_enabled", std::function<void(NetworkState *, const console::ConVar &, bool, bool)> {[this](NetworkState *nw, const console::ConVar &cv, bool oldVal, bool newVal) -> void { GetRenderContext().GetWindow()->SetVSyncEnabled(newVal); }});
+
+	auto byteValidationFunc = +[](const udm::String &input, std::string &outErr) -> bool {
+		if(!util::parse_bytes(input)) {
+			outErr = "Invalid input format!";
+			return false;
+		}
+		return true;
+	};
+
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_global_mesh_vertex_buffer_initial_capacity", std::string {pragma::geometry::GLOBAL_MESH_VERTEX_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive,
+		  "Initial memory allocated for vertex data. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "1MiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_global_mesh_vertex_weight_buffer_initial_capacity", std::string {pragma::geometry::GLOBAL_MESH_VERTEX_WEIGHT_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive,
+		  "Initial memory allocated for vertex weight data. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "500KiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_global_mesh_alpha_buffer_initial_capacity", std::string {pragma::geometry::GLOBAL_MESH_ALPHA_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive,
+		  "Initial memory allocated for vertex alpha. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "500KiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_global_mesh_index_buffer_initial_capacity", std::string {pragma::geometry::GLOBAL_MESH_INDEX_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive,
+		  "Initial memory allocated for vertex index data. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "500KiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_particle_buffer_initial_capacity", std::string {pragma::ecs::CParticleSystemComponent::PARTICLE_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive,
+		  "Initial memory allocated for particles. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "10KiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_particle_animation_start_buffer_initial_capacity", std::string {pragma::ecs::CParticleSystemComponent::PARTICLE_ANIMATION_START_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive,
+		  "Initial memory allocated for particle animation start data. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "10KiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_particle_animation_buffer_initial_capacity", std::string {pragma::ecs::CParticleSystemComponent::PARTICLE_ANIMATION_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive,
+		  "Initial memory allocated for particle animation data. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "10KiB", "2GiB"); });
+	}
+	{
+		auto cv = conVarMap.RegisterConVar<std::string>("render_material_settings_buffer_initial_capacity", std::string {MATERIAL_SETTINGS_BUFFER_DEFAULT_INITIAL_SIZE}, console::ConVarFlags::Archive,
+		  "Initial memory allocated for material settings data. Memory will be re-allocated when exceeded.");
+		cv->SetValidationFunction<udm::String>(byteValidationFunc);
+		cv->SetConstraintFunction<udm::String>(+[](std::string &value) { clamp_bytes_value(value, "10KiB", "2GiB"); });
+	}
 
 	conVarMap.RegisterConVar<std::string>("audio_api", "fmod", console::ConVarFlags::Archive | console::ConVarFlags::Replicated, "The underlying audio API to use.", "<audioApi>", [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
 		auto audioAPIs = audio::get_available_audio_apis();
@@ -305,7 +423,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  if(useCount == 0)
 				  console::reset_console_color();
 
-			  std::string res = std::to_string(img.GetWidth()) + "x" + std::to_string(img.GetHeight());
+			  std::string res = util::to_string(img.GetWidth()) + "x" + util::to_string(img.GetHeight());
 			  Con::COUT << std::setw(12) << res;
 			  Con::COUT << std::setw(10) << img.GetLayerCount();
 
@@ -550,4 +668,23 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  Lua::util::start_debugger_server(l);
 	  },
 	  console::ConVarFlags::None, "Starts the Lua debugger server for the clientside lua state.");
+
+	conVarMap.RegisterConCommand(
+	  "debug_run_test",
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  auto *l = state->GetLuaState();
+		  if(!l) {
+			  Con::CWAR << "No active Lua state!" << Con::endl;
+			  return;
+		  }
+		  if(argv.empty()) {
+			  Con::CWAR << "No test specified!" << Con::endl;
+			  return;
+		  }
+		  auto &testName = argv.front();
+		  auto result = run_test(l, testName);
+		  if(!result)
+			  Con::CWAR << "Failed to run test \"" << testName << "\": " << result.error() << Con::endl;
+	  },
+	  console::ConVarFlags::None, "Runs the specified test.");
 }

@@ -84,10 +84,10 @@ bool LuaDirectoryWatcherManager::MountDirectory(const std::string &path, bool st
 		auto basePath = pragma::util::DirPath(path);
 		m_watchers.push_back(pragma::util::make_shared<pragma::fs::DirectoryWatcherCallback>(
 		  path,
-		  [this, basePath = std::move(basePath)](const std::string &fName) {
-			  auto relName = pragma::util::FilePath(fName);
-			  relName.MakeRelative(basePath);
-			  OnLuaFileChanged(relName.GetString());
+		  [this](const pragma::util::Path &basePath, const pragma::util::Path &filePath, pragma::fs::FileWatcherEvent event) {
+			  if(event != pragma::fs::FileWatcherEvent::Modified)
+				  return;
+			  OnLuaFileChanged(filePath.GetString());
 		  },
 		  watchFlags, m_watcherManager.get()));
 		return true;

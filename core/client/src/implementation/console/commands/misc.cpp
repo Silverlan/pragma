@@ -456,8 +456,8 @@ void CMD_screenshot(pragma::NetworkState *, pragma::BasePlayerComponent *, std::
 	auto mode = pragma::console::get_command_option_parameter_value(commandOptions, "mode");
 	if(pragma::string::compare<std::string>(mode, "raytracing", false)) {
 		auto resolution = pragma::get_cengine()->GetRenderResolution();
-		auto width = pragma::util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "width", std::to_string(resolution.x)));
-		auto height = pragma::util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "height", std::to_string(resolution.y)));
+		auto width = pragma::util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "width", pragma::util::to_string(resolution.x)));
+		auto height = pragma::util::to_uint(pragma::console::get_command_option_parameter_value(commandOptions, "height", pragma::util::to_string(resolution.y)));
 
 		auto format = pragma::image::ImageFormat::PNG;
 		auto itFormat = commandOptions.find("format");

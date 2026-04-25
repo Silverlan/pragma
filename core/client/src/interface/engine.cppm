@@ -38,7 +38,6 @@ export namespace pragma {
 			EnableGpuPerformanceTimers = TickDeltaTimeTiedToFrameRate << 1u,
 			CEClosed = EnableGpuPerformanceTimers << 1u,
 			InputBindingsDirty = CEClosed << 1u,
-			WindowSizeChanged = InputBindingsDirty << 1u,
 		};
 		enum class GPUTimer : uint32_t {
 			GUI = 0,
@@ -176,8 +175,8 @@ export namespace pragma {
 		// Util
 		virtual bool IsServerOnly() override;
 		// Convars
-		virtual console::ConConf *GetConVar(const std::string &cv) override;
-		virtual bool RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState = KeyState::Press, float magnitude = 1.f, const std::function<bool(console::ConConf *, float &)> &callback = nullptr) override;
+		virtual console::ConConf *GetConVar(std::string_view cv) override;
+		virtual console::ConCommandResult RunConsoleCommand(std::string_view cmd, std::vector<std::string> &argv, const RunConCommandInfo &cmdInfo = {}) override;
 		// ClientState
 		virtual NetworkState *GetClientState() const override;
 		ClientState *OpenClientState();
@@ -222,7 +221,7 @@ export namespace pragma {
 		void SetTickDeltaTimeTiedToFrameRate(bool tieToFrameRate);
 
 		void InitializeWindowInputCallbacks(prosper::Window &window);
-		std::shared_ptr<prosper::Window> CreateWindow(prosper::WindowSettings &settings);
+		std::expected<std::shared_ptr<prosper::Window>, std::string> CreateWindow(prosper::WindowSettings &settings);
 
 		void SetGpuPerformanceTimersEnabled(bool enabled);
 		std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const;
@@ -261,7 +260,6 @@ export namespace pragma {
 		double m_tFPSTime;
 		util::Clock::time_point m_tLastFrame;
 		util::Clock::duration m_tDeltaFrameTime;
-		util::Clock::time_point m_tWindowResizeTime;
 		std::optional<std::chrono::nanoseconds> m_fixedFrameDeltaTimeInterpretation = {};
 
 		std::unordered_map<std::string, std::shared_ptr<audio::IEffect>> m_auxEffects;

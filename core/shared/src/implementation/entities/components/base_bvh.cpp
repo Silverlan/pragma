@@ -22,11 +22,11 @@ void BaseBvhComponent::ClearBvh()
 {
 	InvokeEventCallbacks(baseBvhComponent::EVENT_ON_CLEAR_BVH);
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("bvh_mutex_wait");
+	debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 	m_bvhDataMutex.lock();
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	m_bvhData = nullptr;
 	m_bvhDataMutex.unlock();
@@ -49,11 +49,11 @@ void BaseBvhComponent::SetStaticCache(BaseStaticBvhCacheComponent *staticCache) 
 bool BaseBvhComponent::HasBvhData() const
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("bvh_mutex_wait");
+	debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 	std::scoped_lock lock {m_bvhDataMutex};
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	return m_bvhData != nullptr;
 }
@@ -61,11 +61,11 @@ bool BaseBvhComponent::HasBvhData() const
 std::shared_ptr<pragma::bvh::MeshBvhTree> BaseBvhComponent::SetBvhData(std::shared_ptr<bvh::MeshBvhTree> &bvhData)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("bvh_mutex_wait");
+	debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 	std::scoped_lock lock {m_bvhDataMutex};
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	auto tmp = bvhData;
 	m_bvhData = bvhData;
@@ -152,11 +152,11 @@ bool BaseBvhComponent::SetVertexData(bvh::MeshBvhTree &bvhData, const std::vecto
 bool BaseBvhComponent::SetVertexData(const std::vector<bvh::Primitive> &data)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("bvh_mutex_wait");
+	debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 	std::scoped_lock lock {m_bvhDataMutex};
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	return SetVertexData(*m_bvhData, data);
 }
@@ -248,11 +248,11 @@ bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &m
 		return false;
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("bvh_mutex_wait");
+	debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 	std::scoped_lock lock {m_bvhDataMutex};
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	return test_bvh_intersection_with_aabb(*bvhData, min, max, 0u, &outIntersectionInfo);
 }
@@ -263,11 +263,11 @@ bool BaseBvhComponent::IntersectionTestAabb(const Vector3 &min, const Vector3 &m
 		return false;
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("bvh_mutex_wait");
+	debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 	std::scoped_lock lock {m_bvhDataMutex};
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	return test_bvh_intersection_with_aabb(*bvhData, min, max);
 }
@@ -278,11 +278,11 @@ bool BaseBvhComponent::IntersectionTestKDop(const std::vector<math::Plane> &plan
 		return false;
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("bvh_mutex_wait");
+	debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 	std::scoped_lock lock {m_bvhDataMutex};
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	return test_bvh_intersection_with_kdop(*bvhData, planes, 0u, &outIntersectionInfo);
 }
@@ -293,11 +293,11 @@ bool BaseBvhComponent::IntersectionTestKDop(const std::vector<math::Plane> &plan
 		return false;
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("bvh_mutex_wait");
+	debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 	std::scoped_lock lock {m_bvhDataMutex};
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	return test_bvh_intersection_with_kdop(*bvhData, planes);
 }
@@ -309,11 +309,11 @@ bool BaseBvhComponent::IntersectionTest(const Vector3 &origin, const Vector3 &di
 		return false;
 	bvh::MeshBvhTree::HitData bvhHitData;
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("bvh_mutex_wait");
+	debug::get_domain().BeginTask("bvh_mutex_wait");
 #endif
 	m_bvhDataMutex.lock();
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	auto hit = bvhData->Raycast(origin, dir, minDist, maxDist, bvhHitData);
 	m_bvhDataMutex.unlock();

@@ -48,7 +48,7 @@ void CMD_cl_rcon(pragma::NetworkState *, pragma::BasePlayerComponent *, std::vec
 	auto *client = pragma::get_client_state();
 	if(!client->IsConnected() || argv.empty())
 		return;
-	std::string pass = pragma::get_cengine()->GetConVarString("rcon_password");
+	std::string pass = pragma::get_cengine()->GetConVarValueOr<udm::String>("rcon_password");
 	NetPacket p;
 	p->WriteString(pass);
 	p->WriteString(argv[0]);
@@ -64,11 +64,11 @@ void CMD_connect(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, s
 			return;
 		}
 		if(lastConnection.address.has_value()) {
-			std::vector<std::string> argv {lastConnection.address->first, std::to_string(lastConnection.address->second)};
+			std::vector<std::string> argv {lastConnection.address->first, pragma::util::to_string(lastConnection.address->second)};
 			CMD_connect(state, pl, argv);
 		}
 		else if(lastConnection.steamId.has_value()) {
-			std::vector<std::string> argv {std::to_string(*lastConnection.steamId)};
+			std::vector<std::string> argv {pragma::util::to_string(*lastConnection.steamId)};
 			CMD_connect(state, pl, argv);
 		}
 		return;
@@ -159,11 +159,11 @@ void CMD_cl_debug_netmessages(pragma::NetworkState *state, pragma::BasePlayerCom
 		return;
 	}
 	auto *svMap = pragma::networking::get_server_message_map();
-	pragma::util::StringMap<uint32_t> *svMsgs;
+	pragma::string::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 
 	auto *clMap = pragma::networking::get_client_message_map();
-	pragma::util::StringMap<uint32_t> *clMsgs;
+	pragma::string::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 
 	cl->DebugPrint(*clMsgs, *svMsgs);

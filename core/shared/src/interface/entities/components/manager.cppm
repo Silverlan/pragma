@@ -8,8 +8,6 @@ module;
 
 export module pragma.shared:entities.manager;
 
-export import :util.global_string_table;
-
 export import :entities.enums;
 export import :entities.components.events.event_info;
 export import :entities.member_info;
@@ -37,10 +35,10 @@ export {
 				None = 0,
 				HideInEditor = 1,
 			};
-			GString categoryPath = "";
+			util::GString categoryPath = "";
 			Flags flags = Flags::None;
 
-			ComponentRegInfo(GString category = "", Flags flags = Flags::None);
+			ComponentRegInfo(util::GString category = "", Flags flags = Flags::None);
 			ComponentRegInfo(Flags flags);
 		};
 
@@ -50,8 +48,8 @@ export {
 			ComponentInfo(ComponentInfo &&other);
 			ComponentInfo &operator=(const ComponentInfo &other);
 			ComponentInfo &operator=(ComponentInfo &&other);
-			GString name = "";
-			GString category = "";
+			util::GString name = "";
+			util::GString category = "";
 			std::function<util::TSharedHandle<BaseEntityComponent>(ecs::BaseEntity &)> factory = nullptr;
 			mutable std::unique_ptr<std::vector<CallbackHandle>> onCreateCallbacks = nullptr;
 			ComponentId id = std::numeric_limits<uint32_t>::max();

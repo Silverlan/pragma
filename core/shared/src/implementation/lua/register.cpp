@@ -34,11 +34,11 @@ static std::ostream &operator<<(std::ostream &out, const CallbackHandle &hCallba
 }
 
 namespace pragma::util {
-    static std::ostream &operator<<(std::ostream &out, const HSV &hsv)
-    {
-        out << hsv.h << ' ' << hsv.s << ' ' << hsv.v;
-        return out;
-    }
+	static std::ostream &operator<<(std::ostream &out, const HSV &hsv)
+	{
+		out << hsv.h << ' ' << hsv.s << ' ' << hsv.v;
+		return out;
+	}
 }
 
 static void call_callback(CallbackHandle &cb, std::initializer_list<luabind::object> args)
@@ -142,9 +142,9 @@ static int32_t parse_math_expression(lua::State *l)
 		Lua::PushString(l, pTok.GetIdent()); /* 4 */
 		Lua::SetTableValue(l, tToken);       /* 2 */
 
-		Lua::PushString(l, "code");                          /* 3 */
+		Lua::PushString(l, "code");                                 /* 3 */
 		Lua::PushInt(l, pragma::math::to_integral(pTok.GetCode())); /* 4 */
-		Lua::SetTableValue(l, tToken);                       /* 2 */
+		Lua::SetTableValue(l, tToken);                              /* 2 */
 
 		Lua::SetTableValue(l, t); /* 0 */
 	}
@@ -242,6 +242,27 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		    uvec::calc_spherical_stereo_transform(pr, dr, metres_to_units(0.065f), metres_to_units(30.0f * 0.065f));
 		    return std::pair<Vector3, Vector3> {pr, dr};
 	    }))];
+
+	modVec[(luabind::def("min", +[](const Vector2 &v0, const Vector2 &v1) { return glm::min(v0, v1); }))];
+	modVec[(luabind::def("min", +[](const Vector2i &v0, const Vector2i &v1) { return glm::min(v0, v1); }))];
+	modVec[(luabind::def("min", +[](const Vector3 &v0, const Vector3 &v1) { return glm::min(v0, v1); }))];
+	modVec[(luabind::def("min", +[](const Vector3i &v0, const Vector3i &v1) { return glm::min(v0, v1); }))];
+	modVec[(luabind::def("min", +[](const Vector4 &v0, const Vector4 &v1) { return glm::min(v0, v1); }))];
+	modVec[(luabind::def("min", +[](const Vector4i &v0, const Vector4i &v1) { return glm::min(v0, v1); }))];
+
+	modVec[(luabind::def("max", +[](const Vector2 &v0, const Vector2 &v1) { return glm::max(v0, v1); }))];
+	modVec[(luabind::def("max", +[](const Vector2i &v0, const Vector2i &v1) { return glm::max(v0, v1); }))];
+	modVec[(luabind::def("max", +[](const Vector3 &v0, const Vector3 &v1) { return glm::max(v0, v1); }))];
+	modVec[(luabind::def("max", +[](const Vector3i &v0, const Vector3i &v1) { return glm::max(v0, v1); }))];
+	modVec[(luabind::def("max", +[](const Vector4 &v0, const Vector4 &v1) { return glm::max(v0, v1); }))];
+	modVec[(luabind::def("max", +[](const Vector4i &v0, const Vector4i &v1) { return glm::max(v0, v1); }))];
+
+	modVec[(luabind::def("clamp", +[](const Vector2 &v, const Vector2 &min, const Vector2 &max) { return glm::clamp(v, min, max); }))];
+	modVec[(luabind::def("clamp", +[](const Vector2i &v, const Vector2i &min, const Vector2i &max) { return glm::clamp(v, min, max); }))];
+	modVec[(luabind::def("clamp", +[](const Vector3 &v, const Vector3 &min, const Vector3 &max) { return glm::clamp(v, min, max); }))];
+	modVec[(luabind::def("clamp", +[](const Vector3i &v, const Vector3i &min, const Vector3i &max) { return glm::clamp(v, min, max); }))];
+	modVec[(luabind::def("clamp", +[](const Vector4 &v, const Vector4 &min, const Vector4 &max) { return glm::clamp(v, min, max); }))];
+	modVec[(luabind::def("clamp", +[](const Vector4i &v, const Vector4i &min, const Vector4i &max) { return glm::clamp(v, min, max); }))];
 
 	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "ORIGIN", uvec::PRM_ORIGIN);
 	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "FORWARD", uvec::PRM_FORWARD);
@@ -475,6 +496,24 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("is_positive_axis",static_cast<bool(*)(SignedAxis)>(&is_positive_axis)),
 		luabind::def("is_negative_axis",static_cast<bool(*)(SignedAxis)>(&is_negative_axis))
 	)];
+
+	modMath[(luabind::def(
+	  "calc_screenspace_info_from_worldspace_position", +[](lua::State *l, const Vector3 &worldPos, const Mat4 &viewProjection, float screenWidth, float screenHeight) -> luabind::tableT<void> {
+		  auto screenspaceInfo = uvec::calc_screenspace_info_from_worldspace_position(worldPos, viewProjection, screenWidth, screenHeight);
+		  auto t = luabind::newtable(l);
+		  t["x"] = screenspaceInfo.x;
+		  t["y"] = screenspaceInfo.y;
+		  t["angle"] = screenspaceInfo.angle;
+		  t["onScreen"] = screenspaceInfo.onScreen;
+		  return t;
+	  }))];
+
+	modMath[luabind::def(
+	  "lerp_angle", +[](float start, float end, float t) -> float {
+		  constexpr auto TWO_PI = pragma::math::pi * 2.f;
+		  auto shortest_diff = std::remainder(end - start, TWO_PI);
+		  return start + shortest_diff * t;
+	  })];
 
 	Lua::SetTableCFunction(lua.GetState(), "math", "parse_expression", parse_math_expression);
 	Lua::SetTableCFunction(lua.GetState(), "math", "solve_quadric", Lua::math::solve_quadric);
@@ -1536,9 +1575,9 @@ void pragma::Game::RegisterLuaLibraries()
 	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, geometry::ModelMesh &, luabind::object &, luabind::object &, bool)>(
 	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, geometry::ModelMesh &mesh, luabind::object &r0, luabind::object &r1, bool precise) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1, precise); }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
-	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, geometry::ModelMesh &, luabind::object &, luabind::object &)>([](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, geometry::ModelMesh &mesh, luabind::object &r0, luabind::object &r1) {
-		  return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1);
-	  }),
+	  luabind::def("line_with_mesh",
+	    static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, geometry::ModelMesh &, luabind::object &, luabind::object &)>(
+	      [](lua::State *l, const Vector3 &rayStart, const Vector3 &rayDir, geometry::ModelMesh &mesh, luabind::object &r0, luabind::object &r1) { return Lua::intersect::line_mesh(l, rayStart, rayDir, mesh, r0, r1); }),
 	    luabind::meta::join<luabind::pure_out_value<5>, luabind::pure_out_value<6>>::type {}),
 	  luabind::def("line_with_mesh", static_cast<void (*)(lua::State *, const Vector3 &, const Vector3 &, asset::Model &, uint32_t, luabind::object &, luabind::object &, bool, const math::Transform &)>(Lua::intersect::line_mesh),
 	    luabind::meta::join<luabind::pure_out_value<6>, luabind::pure_out_value<7>>::type {}),

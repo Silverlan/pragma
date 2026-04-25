@@ -17,13 +17,13 @@ import :locale;
 void pragma::debug::start_profiling_task(const char *taskName)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask(taskName);
+	debug::get_domain().BeginTask(taskName);
 #endif
 }
 void pragma::debug::end_profiling_task()
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 }
 
@@ -32,7 +32,7 @@ void pragma::debug::open_file_in_zerobrane(const std::string &fileName, uint32_t
 	std::string zeroBranePath = "C:/Program Files (x86)/ZeroBraneStudio/zbstudio.exe"; // TODO: Find program path from registry?
 	util::CommandInfo cmdInfo;
 	cmdInfo.command = zeroBranePath;
-	cmdInfo.args.push_back(fileName + ':' + std::to_string(lineIdx));
+	cmdInfo.args.push_back(fileName + ':' + util::to_string(lineIdx));
 	cmdInfo.absoluteCommandPath = true;
 	pragma::util::start_process(cmdInfo);
 
@@ -54,7 +54,7 @@ void pragma::debug::open_file_in_zerobrane(const std::string &fileName, uint32_t
 				if(hProcess)
 				{
 					pragma::util::start_process(zeroBranePath.c_str(),std::vector<std::string>{
-						fileName +':' +std::to_string(lineIdx)
+						fileName +':' +util::to_string(lineIdx)
 					},true);
 					// ...
 					//GetExitCodeProcess(hProcess,exitCode);

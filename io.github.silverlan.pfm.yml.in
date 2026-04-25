@@ -1,0 +1,187 @@
+app-id: io.github.silverlan.pfm
+runtime: org.freedesktop.Platform
+runtime-version: "23.08"
+sdk: org.freedesktop.Sdk
+
+command: io.github.silverlan.pfm.sh
+
+build-options:
+  # make sure strip is disabled
+  strip: false
+  # disable debug‑info extraction so symbols stay in the main binaries
+  no-debuginfo: true
+
+modules:
+  - name: cmake
+    buildsystem: simple
+    sources:
+      - type: archive
+        url: https://github.com/Kitware/CMake/releases/download/v4.2.3/cmake-4.2.3-linux-x86_64.tar.gz
+        sha256: '5bb505d5e0cca0480a330f7f27ccf52c2b8b5214c5bba97df08899f5ef650c23'
+        strip-components: 0
+    build-commands:
+      - mkdir -p ${FLATPAK_DEST}/usr
+      - cp -r cmake-4.2.3-linux-x86_64/bin cmake-4.2.3-linux-x86_64/share ${FLATPAK_DEST}/usr/
+      - chmod -R a+rX ${FLATPAK_DEST}/usr/bin ${FLATPAK_DEST}/usr/share
+      - rm -rf cmake-4.2.3-linux-x86_64
+
+  - name: gcc
+    buildsystem: simple
+    sources:
+      - type: archive
+        url: https://github.com/Silverlan/gcc_prebuilt/releases/download/c3fa37ceeb5-releases-gcc-15/gcc-15.2.1-releases-gcc-15.tar.xz
+        sha256: 'df5a22907bd814c8cbc5770b5c1cc2ddd9f83ca4f7bf667d4387c8295e91da00'
+        strip-components: 0
+    build-commands:
+      - |
+        targetRoot=${FLATPAK_DEST}
+        mkdir -p ${targetRoot}/build_tools
+        cp -r gcc ${targetRoot}/build_tools/
+        chmod -R a+rX ${targetRoot}/build_tools/gcc/bin
+        cat > "${targetRoot}/build_tools/gcc/version.json" <<'EOF'
+        {
+          "version": "c3fa37ceeb5-releases-gcc-15"
+        }
+        EOF
+        rm -rf gcc-15.2.1-releases-gcc-15.tar.xz
+        echo "Extracted gcc to ${targetRoot}/build_tools/gcc/"
+
+  - name: third-party-deps
+    buildsystem: simple
+    sources:
+      - type: file
+        url: https://github.com/Silverlan/pragma-deps-lib/releases/download/2026-01-19/lib-linux-x64-clang.tar.gz
+        sha256: '9d590391b9ac40c338640cdf11517926be8d47e06820e63c2b7acdd94b9207a0'
+        dest: deps/staging
+    build-commands:
+      - |
+        targetRoot=${FLATPAK_DEST}
+        mkdir -p ${targetRoot}/deps/staging
+        tar -xzf deps/staging/lib-linux-x64-clang.tar.gz -C ${targetRoot}/deps/staging
+        cat > "${targetRoot}/deps/staging/version.json" <<'EOF'
+        {
+          "version": "2026-01-19-clang"
+        }
+        EOF
+        rm -f deps/staging/lib-linux-x64-clang.tar.gz
+        echo "Extracted deps to ${targetRoot}/deps/staging/"
+
+  - name: pragma
+    buildsystem: simple
+    sources:
+      - type: git
+        url: https://github.com/Silverlan/pragma
+        commit: b315db438e12ff3cb82b73a61b52c4af17454e8b
+        dest: 'pragma'
+@PR_FLATPAK_SOURCES@
+    build-commands:
+      - |
+        targetRoot=${FLATPAK_DEST}
+        curDir=$PWD
+
+        export PATH="${FLATPAK_DEST}/usr/bin:$PATH"
+        cd pragma
+        echo "Configuring pragma in $PWD"
+        python build_scripts/build.py --with-pfm --with-all-pfm-modules --with-vr --with-swiftshader --no-sudo --no-confirm --deps-directory=${targetRoot}/deps/ --build-tools-directory=${targetRoot}/build_tools/ --install-directory=${targetRoot}/install --no-build-networking
+
+  # Extracted gcc to /app/deps/staging/gcc
+  # PWD: /run/build/pragma
+
+  #- name: download-prebuilt-binaries
+  #  buildsystem: simple
+  #  sources:
+  #    - type: archive
+  #      url: https://github.com/Silverlan/pragma/releases/download/nightly/pragma-lin64.tar.gz
+  #      sha256: '160adba736067c88a621b66f77edd7a9ce529a238bc128b509e68152421b01eb4'
+  #      strip-components: 0
+  #  build-commands:
+  #  - cp -a ${FLATPAK_BUILDER_BUILDDIR}/. ${FLATPAK_DEST}/
+  #  - echo "FLATPAK_DEST: ${FLATPAK_DEST}"
+  #  - find "${FLATPAK_DEST}" -type f -print
+  #  - echo "pfm_automatic_updates_enabled \"0\"" >> ${FLATPAK_DEST}/cfg/client.cfg
+  #  - echo "pfm_sensitive_content_enabled \"0\"" >> ${FLATPAK_DEST}/cfg/client.cfg
+
+  - name: flatpak-resources
+    buildsystem: simple
+    sources:
+      - type: file
+        path: executables/io.github.silverlan.pfm.sh
+      - type: file
+        path: executables/io.github.silverlan.pfm.prad.sh
+      - type: file
+        path: executables/io.github.silverlan.pfm.pragma.sh
+      - type: file
+        path: executables/io.github.silverlan.pfm.pragma_server.sh
+      - type: file
+        path: executables/io.github.silverlan.pfm.render_raytracing.sh
+      - type: file
+        path: executables/io.github.silverlan.pfm.udm_convert.sh
+      - type: file
+        path: share/applications/io.github.silverlan.pfm.desktop
+      - type: file
+        path: share/applications/io.github.silverlan.pfm.prad.desktop
+      - type: file
+        path: share/applications/io.github.silverlan.pfm.pragma.desktop
+      - type: file
+        path: share/applications/io.github.silverlan.pfm.pragma_server.desktop
+      - type: file
+        path: share/applications/io.github.silverlan.pfm.render_raytracing.desktop
+      - type: file
+        path: share/applications/io.github.silverlan.pfm.udm_convert.desktop
+      - type: file
+        path: share/applications/render_raytracing.sh
+
+      - type: file
+        path: share/applications/io.github.silverlan.pfm.svg
+      - type: dir
+        path: install
+        dest: install
+    build-commands:
+    - install -Dm755 ${FLATPAK_ID}.sh -t /app/bin
+    - install -Dm755 ${FLATPAK_ID}.prad.sh -t /app/bin
+    - install -Dm755 ${FLATPAK_ID}.pragma.sh -t /app/bin
+    - install -Dm755 ${FLATPAK_ID}.pragma_server.sh -t /app/bin
+    - install -Dm755 ${FLATPAK_ID}.render_raytracing.sh -t /app/bin
+    - install -Dm755 ${FLATPAK_ID}.udm_convert.sh -t /app/bin
+
+    - install -Dm644 ${FLATPAK_ID}.desktop -t /app/share/applications
+    - install -Dm644 ${FLATPAK_ID}.prad.desktop -t /app/share/applications
+    - install -Dm644 ${FLATPAK_ID}.pragma.desktop -t /app/share/applications
+    - install -Dm644 ${FLATPAK_ID}.pragma_server.desktop -t /app/share/applications
+    - install -Dm644 ${FLATPAK_ID}.render_raytracing.desktop -t /app/share/applications
+    - install -Dm644 ${FLATPAK_ID}.udm_convert.desktop -t /app/share/applications
+
+    - install -Dm644 ${FLATPAK_ID}.svg -t /app/share/icons/hicolor/scalable/apps
+
+    - cp -a install/. /app/
+    # Overwrite existing render_raytracing.sh
+    - install -Dm755 render_raytracing.sh -t /app/lib
+
+
+
+finish-args:
+  # File system access
+  - --filesystem=~/snap/steam/common/.local/share/Steam:ro
+  - --filesystem=~/.steam/root:ro
+
+  # We need to be able to write to DaVinciResolve's script directory, which may be any of these
+  - --filesystem=~/.local/share/DaVinciResolve/Fusion/Scripts/Utility:create
+  - --filesystem=/opt/resolve/Fusion/Scripts/Utility:create
+  - --filesystem=/home/resolve/Fusion/Scripts/Utility:create
+
+  # Required for launching DaVinciResolve
+  # - --filesystem=/opt/resolve/bin/resolve:ro
+  # - --talk-name=org.freedesktop.Flatpak
+
+  - --share=ipc
+  - --socket=pulseaudio
+
+  # GPU access for OpenGL / DRI
+  - --device=dri
+
+  # Let the app talk to X11 OR Wayland compositors
+  - --socket=fallback-x11
+  - --socket=wayland
+
+  # Network access (online assets)
+  - --share=network

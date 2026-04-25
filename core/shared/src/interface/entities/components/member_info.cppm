@@ -8,7 +8,6 @@ export module pragma.shared:entities.member_info;
 
 export import :entities.enums;
 import :entities.member_type;
-export import :util.global_string_table;
 
 #ifdef _WIN32
 // Due to a compiler bug with c++20 modules in msvc, we have to wrap the getter
@@ -30,29 +29,29 @@ export {
 
 			struct DLLNETWORK CoordinateTypeMetaData : public TypeMetaData {
 				math::CoordinateSpace space = math::CoordinateSpace::World;
-				GString parentProperty = nullptr;
+				util::GString parentProperty = nullptr;
 			};
 
 			struct DLLNETWORK PoseTypeMetaData : public TypeMetaData {
-				GString posProperty = nullptr;
-				GString rotProperty = nullptr;
-				GString scaleProperty = nullptr;
+				util::GString posProperty = nullptr;
+				util::GString rotProperty = nullptr;
+				util::GString scaleProperty = nullptr;
 			};
 
 			struct DLLNETWORK PoseComponentTypeMetaData : public TypeMetaData {
-				GString poseProperty = nullptr;
+				util::GString poseProperty = nullptr;
 			};
 
 			struct DLLNETWORK OptionalTypeMetaData : public TypeMetaData {
-				GString enabledProperty = nullptr;
+				util::GString enabledProperty = nullptr;
 			};
 
 			struct DLLNETWORK EnablerTypeMetaData : public TypeMetaData {
-				GString targetProperty = nullptr;
+				util::GString targetProperty = nullptr;
 			};
 
 			struct DLLNETWORK ParentTypeMetaData : public TypeMetaData {
-				GString parentProperty = nullptr;
+				util::GString parentProperty = nullptr;
 			};
 		};
 		class BaseEntityComponent;
@@ -199,8 +198,9 @@ export {
 #endif
 			}
 
-			void SetName(const GString &name);
-			const GString &GetName() const { return m_name; }
+			void SetName(const util::GString &name);
+			void SetName(const char *name);
+			const util::GString &GetName() const { return m_name; }
 			size_t GetNameHash() const { return m_nameHash; }
 
 			AttributeSpecializationType GetSpecializationType() const { return m_specializationType; }
@@ -257,7 +257,7 @@ export {
 			};
 		  private:
 			ComponentMemberInfo();
-			GString m_name = "";
+			util::GString m_name = "";
 			size_t m_nameHash = 0;
 			ComponentMemberFlags m_flags = static_cast<ComponentMemberFlags>(0);
 

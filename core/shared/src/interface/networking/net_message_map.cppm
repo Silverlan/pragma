@@ -40,16 +40,16 @@ export {
 			NetMessageMap();
 		  public:
 			void GetNetMessages(std::unordered_map<unsigned int, T> **messages);
-			void GetNetMessages(util::StringMap<unsigned int> **messages);
+			void GetNetMessages(string::StringMap<unsigned int> **messages);
 			T *GetNetMessage(unsigned int ID);
-			T *GetNetMessage(std::string identifier);
-			unsigned int GetNetMessageID(std::string identifier);
+			T *GetNetMessage(std::string_view identifier);
+			unsigned int GetNetMessageID(std::string_view identifier);
 
 			void RegisterNetMessage(const std::string_view &name) override;
 			void RegisterNetMessage(const std::string_view &name, const T::Handler &handler);
 		  protected:
 			std::unordered_map<unsigned int, T> m_netMessages;
-			util::StringMap<unsigned int> m_netMessageIDs;
+			string::StringMap<unsigned int> m_netMessageIDs;
 			unsigned int m_messageID;
 		};
 
@@ -65,7 +65,7 @@ export {
 		}
 
 		template<class T>
-		void NetMessageMap<T>::GetNetMessages(util::StringMap<unsigned int> **messages)
+		void NetMessageMap<T>::GetNetMessages(string::StringMap<unsigned int> **messages)
 		{
 			*messages = &m_netMessageIDs;
 		}
@@ -80,7 +80,7 @@ export {
 		}
 
 		template<class T>
-		T *NetMessageMap<T>::GetNetMessage(std::string identifier)
+		T *NetMessageMap<T>::GetNetMessage(std::string_view identifier)
 		{
 			unsigned int ID = GetNetMessageID(identifier);
 			if(ID == 0)
@@ -89,9 +89,9 @@ export {
 		}
 
 		template<class T>
-		unsigned int NetMessageMap<T>::GetNetMessageID(std::string identifier)
+		unsigned int NetMessageMap<T>::GetNetMessageID(std::string_view identifier)
 		{
-			typename util::StringMap<unsigned int>::iterator i = m_netMessageIDs.find(identifier);
+			typename string::StringMap<unsigned int>::iterator i = m_netMessageIDs.find(identifier);
 			if(i == m_netMessageIDs.end())
 				return 0;
 			return i->second;
@@ -113,7 +113,7 @@ export {
 		template<class T>
 		void NetMessageMap<T>::RegisterNetMessage(const std::string_view &name, const T::Handler &handler)
 		{
-			util::StringMap<unsigned int>::iterator i = m_netMessageIDs.find(name);
+			string::StringMap<unsigned int>::iterator i = m_netMessageIDs.find(name);
 			if(i != m_netMessageIDs.end()) {
 				unsigned int ID = i->second;
 				auto j = m_netMessages.find(ID);

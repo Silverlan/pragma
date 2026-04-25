@@ -148,4 +148,4 @@ function gui.UvAtlasMeshOverlay:OnUpdate()
 	)
 	self.m_elTex:SetTexture(tex)
 end
-gui.register("WIUVAtlasMeshOverlay", gui.UvAtlasMeshOverlay)
+gui.register("uv_atlas_mesh_overlay", gui.UvAtlasMeshOverlay)

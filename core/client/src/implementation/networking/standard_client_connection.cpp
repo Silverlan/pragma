@@ -13,7 +13,7 @@ void pragma::networking::NWMClientConnection::OnPacketSent(const NWMEndpoint &ep
 #if DEBUG_CLIENT_VERBOSE == 1
 	auto id = packet.GetMessageID();
 	auto *svMap = get_server_message_map();
-	util::StringMap<uint32_t> *svMsgs;
+	string::StringMap<uint32_t> *svMsgs;
 	svMap->GetNetMessages(&svMsgs);
 	auto it = std::find_if(svMsgs->begin(), svMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != svMsgs->end()) ? it->first : "Unknown";
@@ -26,7 +26,7 @@ void pragma::networking::NWMClientConnection::OnPacketReceived(const NWMEndpoint
 	Client::OnPacketReceived(ep, id, packet);
 #if DEBUG_CLIENT_VERBOSE == 1
 	auto *clMap = get_client_message_map();
-	util::StringMap<uint32_t> *clMsgs;
+	string::StringMap<uint32_t> *clMsgs;
 	clMap->GetNetMessages(&clMsgs);
 	auto it = std::find_if(clMsgs->begin(), clMsgs->end(), [id](const std::pair<std::string, uint32_t> &pair) { return (pair.second == id) ? true : false; });
 	std::string msgName = (it != clMsgs->end()) ? it->first : "Unknown";
@@ -91,7 +91,7 @@ std::unique_ptr<pragma::networking::NWMClientConnection> pragma::networking::NWM
 #ifdef _DEBUG
 	cl->SetTimeoutDuration(0.f);
 #else
-	cl->SetTimeoutDuration(get_client_state()->GetConVarFloat("sv_timeout_duration"));
+	cl->SetTimeoutDuration(get_client_state()->GetConVarValueOr<udm::Float>("sv_timeout_duration"));
 #endif
 	//cl->SetPingEnabled(false);
 	cl->Start();

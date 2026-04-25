@@ -187,7 +187,7 @@ function debug.open_lightmap_atlas_view(ent, onInit)
 				return
 			end
 			if util.is_valid(elOverlay) == false then
-				elOverlay = gui.create("WIUVAtlasMeshOverlay", el, 0, 0, el:GetWidth(), el:GetHeight(), 0, 0, 1, 1)
+				elOverlay = gui.create("uv_atlas_mesh_overlay", el, 0, 0, el:GetWidth(), el:GetHeight(), 0, 0, 1, 1)
 			end
 			elOverlay:SetEntity(ent)
 

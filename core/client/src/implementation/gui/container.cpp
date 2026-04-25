@@ -18,7 +18,7 @@ void pragma::gui::types::WIContainer::OnChildAdded(WIBase *child)
 	auto &callbacks = it->second;
 	for(auto i = decltype(callbacks.size()) {0u}; i < callbacks.size(); ++i) {
 		auto &cb = callbacks.at(i);
-		cb = child->AddCallback((i == 0) ? "SetPos" : "SetSize", FunctionCallback<void>::Create([this]() { ScheduleUpdate(); }));
+		cb = child->AddCallback((i == 0) ? "OnPosChanged" : "OnSizeChanged", FunctionCallback<void>::Create([this]() { ScheduleUpdate(); }));
 	}
 }
 void pragma::gui::types::WIContainer::OnChildRemoved(WIBase *child)
@@ -60,10 +60,10 @@ void pragma::gui::types::WIContainer::SetPadding(Padding paddingType, int32_t pa
 		break;
 	}
 }
-void pragma::gui::types::WIContainer::SizeToContents(bool x, bool y)
+void pragma::gui::types::WIContainer::SizeToContents(bool x, bool y, ChangeSource changeSource)
 {
-	WIBase::SizeToContents(x, y);
-	SetSize(GetWidth() + GetPaddingLeft() + GetPaddingRight(), GetHeight() + GetPaddingTop() + GetPaddingBottom());
+	WIBase::SizeToContents(x, y, changeSource);
+	SetSize(GetWidth() + GetPaddingLeft() + GetPaddingRight(), GetHeight() + GetPaddingTop() + GetPaddingBottom(), changeSource);
 }
 void pragma::gui::types::WIContainer::DoUpdate()
 {

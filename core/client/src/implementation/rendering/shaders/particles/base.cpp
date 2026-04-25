@@ -191,7 +191,7 @@ void ShaderParticleBase::InitializeGfxPipeline(prosper::GraphicsPipelineCreateIn
 		  g_customAlphaBlendMode.dstAlphaBlendFactor, colorComponents);
 		break;
 	default:
-		throw std::invalid_argument("Unknown alpha mode " + std::to_string(math::to_integral(alphaMode)) + "!");
+		throw std::invalid_argument("Unknown alpha mode " + util::to_string(math::to_integral(alphaMode)) + "!");
 	}
 }
 static auto cvParticleQuality = console::get_client_con_var("cl_render_particle_quality");

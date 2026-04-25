@@ -8,7 +8,7 @@ end
 function gui.WIEditorWindow:OnInitialize()
 	gui.Base.OnInitialize(self)
 
-	local pTabbedPanel = gui.create("WITabbedPanel", self)
+	local pTabbedPanel = gui.create("tabbed_panel", self)
 	pTabbedPanel:SetAutoAlignToParent(true)
 	self.m_pTabbedPanel = pTabbedPanel
 end
@@ -38,4 +38,4 @@ function gui.WIEditorWindow:Update()
 		self.m_pTabbedPanel:Update()
 	end
 end
-gui.register("WIEditorWindow", gui.WIEditorWindow)
+gui.register("editor_window", gui.WIEditorWindow)

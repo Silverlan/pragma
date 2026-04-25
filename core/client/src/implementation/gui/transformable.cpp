@@ -190,6 +190,54 @@ void pragma::gui::types::WITransformable::Close()
 		SetVisible(false);
 	CallCallbacks<void>("OnClose");
 }
+void pragma::gui::types::WITransformable::SetMovementPadding(int32_t padding) { m_movementPadding = padding; }
+int32_t pragma::gui::types::WITransformable::GetMovementPadding() const { return m_movementPadding; }
+void pragma::gui::types::WITransformable::ClampDragBounds(int &x, int &y) const
+{
+	if(m_movementPadding <= 0)
+		return;
+	auto wParent = 0;
+	auto hParent = 0;
+	auto *parent = GetParent();
+	if(parent) {
+		wParent = parent->GetWidth();
+		hParent = parent->GetHeight();
+	}
+	auto minX = -GetWidth() + m_movementPadding;
+	auto minY = -GetHeight() + m_movementPadding;
+	auto maxX = wParent - m_movementPadding;
+	auto maxY = hParent - m_movementPadding;
+
+	auto *dragArea = GetDragArea();
+	if(dragArea) {
+		minX = math::max(minX, -dragArea->GetRight() + math::min(dragArea->GetWidth(), m_movementPadding));
+		minY = math::max(minY, -dragArea->GetBottom() + math::min(dragArea->GetHeight(), m_movementPadding));
+
+		maxX = math::min(maxX, (wParent - dragArea->GetLeft()) - math::min(dragArea->GetWidth(), m_movementPadding));
+		maxY = math::min(maxY, (hParent - dragArea->GetTop()) - math::min(dragArea->GetHeight(), m_movementPadding));
+	}
+	x = math::clamp(x, minX, maxX);
+	y = math::clamp(y, minY, maxY);
+}
+void pragma::gui::types::WITransformable::ClampResizeBounds(int &w, int &h) const
+{
+	if(m_movementPadding <= 0)
+		return;
+	int minW = math::max(m_movementPadding, m_movementPadding - GetX());
+	int minH = math::max(m_movementPadding, m_movementPadding - GetY());
+
+	auto *dragArea = GetDragArea();
+	if(dragArea) {
+		int requiredDragWidth = dragArea->GetLeft() + math::min(dragArea->GetWidth(), m_movementPadding);
+		int requiredDragHeight = dragArea->GetTop() + math::min(dragArea->GetHeight(), m_movementPadding);
+
+		minW = math::max(minW, requiredDragWidth);
+		minH = math::max(minH, requiredDragHeight);
+	}
+
+	w = math::max(w, minW);
+	h = math::max(h, minH);
+}
 pragma::gui::types::WIBase *pragma::gui::types::WITransformable::GetDragArea() const { return const_cast<WIBase *>(m_hMoveRect.get()); }
 void pragma::gui::types::WITransformable::Initialize()
 {
@@ -380,6 +428,11 @@ void pragma::gui::types::WITransformable::Think(const std::shared_ptr<prosper::I
 			}
 		}
 
+		if(bChangePos)
+			ClampDragBounds(pos.x, pos.y);
+		if(bChangeSize)
+			ClampResizeBounds(size.x, size.y);
+
 		if(bChangeSize == true || bChangePos == true) {
 			if(bChangeSize == true && IsResizeRatioLocked()) {
 				if(m_resizeMode == ResizeMode::ns || m_resizeMode == ResizeMode::sn)
@@ -407,6 +460,7 @@ void pragma::gui::types::WITransformable::Think(const std::shared_ptr<prosper::I
 		auto curPos = GetPos();
 		curPos.x = math::clamp(curPos.x, m_minDrag.x, m_maxDrag.x);
 		curPos.y = math::clamp(curPos.y, m_minDrag.y, m_maxDrag.y);
+		ClampDragBounds(curPos.x, curPos.y);
 		SetPos(curPos);
 		curPos = GetPos();
 
@@ -475,10 +529,8 @@ void pragma::gui::types::WITransformable::DestroySnapTargetGhost()
 	if(m_snapGhost.IsValid())
 		m_snapGhost->Remove();
 }
-void pragma::gui::types::WITransformable::SetSize(int x, int y)
+void pragma::gui::types::WITransformable::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	auto oldSize = GetSize();
-	WIBase::SetSize(x, y);
 	if(math::is_flag_set(m_stateFlags, StateFlags::Dragging) == true) {
 		auto sz = GetSize();
 		Vector2 sc {1.f, 1.f};
@@ -490,19 +542,21 @@ void pragma::gui::types::WITransformable::SetSize(int x, int y)
 		m_dragCursorOffset.y *= static_cast<int32_t>(sc.y);
 	}
 	Vector2i minSize = m_minSize;
-	if(x < minSize.x || y < minSize.y) {
-		if(x < minSize.x)
-			minSize.x = math::max(x, -1);
-		if(y < minSize.y)
-			minSize.y = math::max(y, -1);
+    auto w = GetWidth();
+    auto h = GetHeight();
+	if(w < minSize.x || h < minSize.y) {
+		if(w < minSize.x)
+			minSize.x = math::max(w, -1);
+		if(h < minSize.y)
+			minSize.y = math::max(h, -1);
 		SetMinSize(minSize);
 	}
 	Vector2i maxSize = m_maxSize;
-	if((x > maxSize.x && maxSize.x != -1) || (y > maxSize.y && maxSize.y != -1)) {
-		if(x > maxSize.x && maxSize.x != -1)
-			maxSize.x = x;
-		if(y > maxSize.y && maxSize.y != -1)
-			maxSize.y = y;
+	if((w > maxSize.x && maxSize.x != -1) || (h > maxSize.y && maxSize.y != -1)) {
+		if(w > maxSize.x && maxSize.x != -1)
+			maxSize.x = w;
+		if(h > maxSize.y && maxSize.y != -1)
+			maxSize.y = h;
 		SetMaxSize(maxSize);
 	}
 	UpdateResizeRect();
@@ -515,9 +569,8 @@ void pragma::gui::types::WITransformable::SetDragBounds(const Vector2i &min, con
 	m_maxDrag = max;
 }
 std::pair<Vector2i, Vector2i> pragma::gui::types::WITransformable::GetDragBounds() const { return {m_minDrag, m_maxDrag}; }
-void pragma::gui::types::WITransformable::SetPos(int x, int y)
+void pragma::gui::types::WITransformable::OnPosChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetPos(x, y);
 	UpdateResizeRectPos();
 }
 

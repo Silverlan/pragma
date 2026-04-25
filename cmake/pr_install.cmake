@@ -82,6 +82,30 @@ function(pr_install_files)
     endforeach()
 endfunction(pr_install_files)
 
+function(pr_install_executable EXECUTABLE_PATH)
+    cmake_parse_arguments(PARSE_ARGV 1 PA "" "INSTALL_DIR" "")
+
+    if(NOT DEFINED PA_INSTALL_DIR)
+        set(PA_INSTALL_DIR "${BINARY_OUTPUT_DIR}")
+    endif()
+
+    string(REPLACE "\\" "/" EXECUTABLE_PATH "${EXECUTABLE_PATH}")
+
+    get_property(part GLOBAL PROPERTY PRAGMA_INSTALL_COMPONENT_PART)
+
+    message("Adding install rule for executable \"${EXECUTABLE_PATH}\" to \"${PA_INSTALL_DIR}\"...")
+
+    pr_append_install_command(
+        "install(
+            PROGRAMS \"${EXECUTABLE_PATH}\"
+            OPTIONAL
+            DESTINATION \"${PA_INSTALL_DIR}\"
+            COMPONENT \${component}
+        )\n"
+        ${part}
+    )
+endfunction(pr_install_executable)
+
 function(pr_install_libraries)
     set(options)
     set(oneValueArgs INSTALL_DIR)

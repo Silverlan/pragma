@@ -21,12 +21,12 @@ import :util;
 
 #undef GetMessage
 
-static std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> *conVarPtrs = nullptr;
-std::unordered_map<std::string, std::shared_ptr<pragma::console::PtrConVar>> &pragma::ClientState::GetConVarPtrs() { return *conVarPtrs; }
-pragma::console::ConVarHandle pragma::ClientState::GetConVarHandle(std::string scvar)
+static pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> *conVarPtrs = nullptr;
+pragma::string::StringMap<std::shared_ptr<pragma::console::PtrConVar>> &pragma::ClientState::GetConVarPtrs() { return *conVarPtrs; }
+pragma::console::ConVarHandle pragma::ClientState::GetConVarHandle(std::string_view scvar)
 {
 	if(conVarPtrs == nullptr) {
-		static std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> ptrs;
+		static pragma::string::StringMap<std::shared_ptr<console::PtrConVar>> ptrs;
 		conVarPtrs = &ptrs;
 	}
 	return NetworkState::GetConVarHandle(*conVarPtrs, scvar);
@@ -48,6 +48,22 @@ pragma::ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo
 	pragma::asset::update_extension_cache(asset::Type::Model);
 
 	auto &gui = gui::WGUI::GetInstance();
+	// Register new GUI type enums for lua states
+	const_cast<gui::TypeFactory &>(gui.GetTypeFactory()).SetRegistrationCallback(+[](const std::string &className, gui::TypeId typeId) {
+		auto *cl = get_client_state();
+		if(!cl)
+			return;
+		auto *luaGui = cl->GetGUILuaState();
+		if(luaGui)
+			Lua::gui::register_gui_type_lua_enum(luaGui, className, typeId);
+
+		auto *game = get_client_game();
+		if(game) {
+			auto *lua = game->GetLuaState();
+			if(lua)
+				Lua::gui::register_gui_type_lua_enum(lua, className, typeId);
+		}
+	});
 	// gui.SetCreateCallback(WGUILuaInterface::InitializeGUIElement);
 	//CVarHandler::Initialize();
 	fs::add_custom_mount_directory("downloads", static_cast<fs::SearchFlags>(networking::FSYS_SEARCH_RESOURCES));
@@ -81,14 +97,14 @@ pragma::ClientState::~ClientState()
 void pragma::ClientState::UpdateGameWorldShaderSettings()
 {
 	auto oldSettings = m_worldShaderSettings;
-	m_worldShaderSettings.shadowQuality = static_cast<rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarInt("render_shadow_quality"));
-	m_worldShaderSettings.ssaoEnabled = GetConVarBool("cl_render_ssao");
-	m_worldShaderSettings.bloomEnabled = GetConVarBool("render_bloom_enabled");
-	m_worldShaderSettings.debugModeEnabled = GetConVarBool("render_debug_mode") || GetConVarBool("render_unlit");
-	m_worldShaderSettings.fxaaEnabled = static_cast<rendering::AntiAliasing>(GetConVarInt("cl_render_anti_aliasing")) == rendering::AntiAliasing::FXAA;
-	m_worldShaderSettings.iblEnabled = GetConVarBool("render_ibl_enabled");
-	m_worldShaderSettings.dynamicLightingEnabled = GetConVarBool("render_dynamic_lighting_enabled");
-	m_worldShaderSettings.dynamicShadowsEnabled = GetConVarBool("render_dynamic_shadows_enabled");
+	m_worldShaderSettings.shadowQuality = static_cast<rendering::GameWorldShaderSettings::ShadowQuality>(GetConVarValueOr<udm::Int32>("render_shadow_quality"));
+	m_worldShaderSettings.ssaoEnabled = GetConVarValueOr<udm::Boolean>("cl_render_ssao");
+	m_worldShaderSettings.bloomEnabled = GetConVarValueOr<udm::Boolean>("render_bloom_enabled");
+	m_worldShaderSettings.debugModeEnabled = GetConVarValueOr<udm::Boolean>("render_debug_mode") || GetConVarValueOr<udm::Boolean>("render_unlit");
+	m_worldShaderSettings.fxaaEnabled = static_cast<rendering::AntiAliasing>(GetConVarValueOr<udm::Int32>("cl_render_anti_aliasing")) == rendering::AntiAliasing::FXAA;
+	m_worldShaderSettings.iblEnabled = GetConVarValueOr<udm::Boolean>("render_ibl_enabled");
+	m_worldShaderSettings.dynamicLightingEnabled = GetConVarValueOr<udm::Boolean>("render_dynamic_lighting_enabled");
+	m_worldShaderSettings.dynamicShadowsEnabled = GetConVarValueOr<udm::Boolean>("render_dynamic_shadows_enabled");
 	if(m_worldShaderSettings == oldSettings)
 		return;
 
@@ -109,7 +125,7 @@ void pragma::ClientState::InitializeGameClient(bool singlePlayerLocalGame)
 	//};
 	eventInterface.handlePacket = [this](NetPacket &packet) { HandlePacket(packet); };
 	if(singlePlayerLocalGame == false) {
-		auto netLibName = GetConVarString("net_library");
+		auto netLibName = GetConVarValueOr<udm::String>("net_library");
 		auto netModPath = networking::GetNetworkingModuleLocation(netLibName, false);
 		std::string err;
 		auto dllHandle = InitializeLibrary(netModPath, &err);
@@ -158,8 +174,8 @@ void pragma::ClientState::Initialize()
 	});
 
 	get_cengine()->LoadClientConfig();
-	InitializeGUILua();
 	auto &gui = gui::WGUI::GetInstance();
+	InitializeGUILua();
 	m_hMainMenu = gui.Create<gui::types::WIMainMenu>()->GetHandle();
 
 	UpdateGameWorldShaderSettings();
@@ -204,7 +220,6 @@ Lua::Interface &pragma::ClientState::GetGUILuaInterface() { return *m_luaGUI; }
 
 //__declspec(dllimport) void test_lua_policies(lua::State *l);
 std::optional<std::vector<std::string>> g_autoExecScripts {};
-
 void pragma::ClientState::InitializeGUILua()
 {
 	m_luaGUI = pragma::util::make_shared<Lua::Interface>();
@@ -231,6 +246,8 @@ void pragma::ClientState::InitializeGUILua()
 	auto enMod = luabind::module(m_luaGUI->GetState(), "engine");
 	enMod[luabind::def("poll_console_output", &Lua::engine::poll_console_output)];
 	Lua::engine::register_library(GetGUILuaState());
+
+	Lua::gui::initialize_gui_type_lua_enums(GetGUILuaState());
 
 	// Testing
 	/*{
@@ -338,8 +355,8 @@ void pragma::ClientState::Close()
 	TerminateLuaModules(state);
 	m_luaGUI = nullptr;
 	DeregisterLuaModules(state, identifier); // Has to be called AFTER Lua instance has been released!
-	std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>> &conVarPtrs = GetConVarPtrs();
-	std::unordered_map<std::string, std::shared_ptr<console::PtrConVar>>::iterator itHandles;
+	auto &conVarPtrs = GetConVarPtrs();
+	pragma::string::StringMap<std::shared_ptr<console::PtrConVar>>::iterator itHandles;
 	for(itHandles = conVarPtrs.begin(); itHandles != conVarPtrs.end(); itHandles++)
 		itHandles->second->set(nullptr);
 	StopSounds();
@@ -349,7 +366,7 @@ void pragma::ClientState::Close()
 	ecs::CParticleSystemComponent::ClearCache();
 }
 
-void pragma::ClientState::implFindSimilarConVars(const std::string &input, std::vector<SimilarCmdInfo> &similarCmds) const
+void pragma::ClientState::implFindSimilarConVars(std::string_view input, std::vector<SimilarCmdInfo> &similarCmds) const
 {
 	NetworkState::implFindSimilarConVars(input, similarCmds);
 
@@ -362,16 +379,17 @@ void pragma::ClientState::implFindSimilarConVars(const std::string &input, std::
 
 void pragma::ClientState::RegisterServerConVar(std::string scmd, unsigned int id)
 {
-	std::unordered_map<std::string, unsigned int>::iterator i = m_conCommandIDs.find(scmd);
+	pragma::string::StringMap<unsigned int>::iterator i = m_conCommandIDs.find(scmd);
 	if(i != m_conCommandIDs.end())
 		return;
-	m_conCommandIDs.insert(std::unordered_map<std::string, unsigned int>::value_type(scmd, id));
+	m_conCommandIDs.insert(pragma::string::StringMap<unsigned int>::value_type(scmd, id));
 }
 
-bool pragma::ClientState::RunConsoleCommand(std::string scmd, std::vector<std::string> &argv, BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
+pragma::console::ConCommandResult pragma::ClientState::RunConsoleCommand(std::string_view scmd, std::vector<std::string> &argv, BasePlayerComponent *pl, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
 {
 	auto *clMap = console::client::get_convar_map();
 	auto conVarCl = clMap->GetConVar(scmd);
+	console::ConCommandResult result {};
 	auto bUseClientside = (conVarCl != nullptr) ? (conVarCl->GetType() != console::ConType::Variable || argv.empty()) : false; // Console commands are ALWAYS executed clientside, if they exist clientside
 	if(bUseClientside == false) {
 		auto *svMap = console::server::get_convar_map();
@@ -381,8 +399,10 @@ bool pragma::ClientState::RunConsoleCommand(std::string scmd, std::vector<std::s
 			if(it == m_conCommandIDs.end()) // No serverside command exists
 				bUseClientside = true;
 		}
-		else if(callback != nullptr && callback(conVarSv.get(), magnitude) == false)
-			return true;
+		else if(callback != nullptr && callback(conVarSv.get(), magnitude) == false) {
+			result.success = true;
+			return result;
+		}
 	}
 	if(bUseClientside == true)
 		return NetworkState::RunConsoleCommand(scmd, argv, pl, pressState, magnitude, callback);
@@ -393,8 +413,9 @@ bool pragma::ClientState::RunConsoleCommand(std::string scmd, std::vector<std::s
 		// (if this is a locally hosted game)
 		auto *svState = get_cengine()->GetServerNetworkState();
 		if(svState)
-			svState->RunConsoleCommand(scmd, argv, nullptr, pressState, magnitude, nullptr);
-		return true;
+			return svState->RunConsoleCommand(scmd, argv, nullptr, pressState, magnitude, nullptr);
+		result.success = true;
+		return result;
 	}
 	NetPacket p;
 	p->WriteString(scmd);
@@ -404,14 +425,16 @@ bool pragma::ClientState::RunConsoleCommand(std::string scmd, std::vector<std::s
 	for(unsigned char i = 0; i < argv.size(); i++)
 		p->WriteString(argv[i]);
 	SendPacket(networking::net_messages::server::CMD_CALL, p, networking::Protocol::SlowReliable);
-	return true;
+	result.success = true;
+	return result;
 }
 
-pragma::console::ConVar *pragma::ClientState::SetConVar(std::string scmd, std::string value, bool bApplyIfEqual)
+pragma::console::CVarHandler::SetConVarResult pragma::ClientState::SetConVar(std::string_view scmd, const std::string &value, bool bApplyIfEqual)
 {
-	console::ConVar *cvar = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
-	if(cvar == nullptr)
-		return nullptr;
+	auto result = NetworkState::SetConVar(scmd, value, bApplyIfEqual);
+	if(!result || !result.conVar)
+		return result;
+	auto *cvar = result.conVar;
 	auto flags = cvar->GetFlags();
 	if(((flags & console::ConVarFlags::Userinfo) == console::ConVarFlags::Userinfo)) {
 		NetPacket p;
@@ -419,7 +442,7 @@ pragma::console::ConVar *pragma::ClientState::SetConVar(std::string scmd, std::s
 		p->WriteString(cvar->GetString());
 		SendPacket(networking::net_messages::server::CVAR_SET, p, networking::Protocol::SlowReliable);
 	}
-	return cvar;
+	return result;
 }
 
 void pragma::ClientState::Draw(rendering::DrawSceneInfo &drawSceneInfo) //const Vulkan::RenderPass &renderPass,const Vulkan::Framebuffer &framebuffer,const Vulkan::CommandBuffer &drawCmd); // prosper TODO
@@ -575,7 +598,7 @@ void pragma::ClientState::SendUserInfo()
 	else
 		packet->Write<unsigned char>((unsigned char)(0));
 
-	auto name = GetConVarString("playername");
+	auto name = GetConVarValueOr<udm::String>("playername");
 	auto libSteamworks = GetLibraryModule("steamworks/pr_steamworks");
 	if(libSteamworks) {
 		auto *fGetClientName = libSteamworks->FindSymbolAddress<void (*)(std::string &)>("pr_steamworks_get_client_steam_name");
@@ -807,13 +830,13 @@ void pragma::ClientState::InitializeGUIModule()
 #endif
 }
 
-unsigned int pragma::ClientState::GetServerMessageID(std::string identifier)
+unsigned int pragma::ClientState::GetServerMessageID(std::string_view identifier)
 {
 	auto *map = networking::get_server_message_map();
 	return map->GetNetMessageID(identifier);
 }
 
-unsigned int pragma::ClientState::GetServerConVarID(std::string scmd)
+unsigned int pragma::ClientState::GetServerConVarID(std::string_view scmd)
 {
 	auto *map = console::server::get_convar_map();
 	return map->GetConVarID(scmd);

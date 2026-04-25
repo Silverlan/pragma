@@ -396,7 +396,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 	for(auto &gltfMat : gltfMdl.materials) {
 		auto name = gltfMat.name;
 		if(name.empty())
-			name = "material_" + std::to_string(matIdx);
+			name = "material_" + pragma::util::to_string(matIdx);
 
 		auto alphaMode = AlphaMode::Opaque;
 		if(gltfMat.alphaMode == "OPAQUE")
@@ -604,9 +604,9 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 				if(!gltfMesh.name.empty())
 					name = gltfMesh.name;
 				else
-					name = "mesh" + std::to_string(meshIdx);
+					name = "mesh" + pragma::util::to_string(meshIdx);
 				if(nodeIdx > 0)
-					name += "_" + std::to_string(nodeIdx + 1);
+					name += "_" + pragma::util::to_string(nodeIdx + 1);
 			}
 			if(importAsMap && nodeIdx > 0) {
 				// There are multiple instances of the same mesh, no need to parse the mesh again
@@ -684,7 +684,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 				auto weightsBufData = fGetVertexBufferData("WEIGHTS_0");
 
 				uint32_t iWeightChannel = 1;
-				while(fGetVertexBufferData("JOINTS_" + std::to_string(iWeightChannel++)).has_value())
+				while(fGetVertexBufferData("JOINTS_" + pragma::util::to_string(iWeightChannel++)).has_value())
 					Con::CWAR << "Model has more than 4 bone weights, this is not supported!" << Con::endl;
 
 				auto &verts = subMesh->GetVertices();
@@ -748,8 +748,8 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 			if(isSkinned && mesh->GetVertexWeights().empty() == false)
 			{
-				auto jointsAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_joints",TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT,TINYGLTF_TYPE_VEC4,vertexWeightOffset *sizeof(GLTFVertexWeight),verts.size(),BufferView::Joints);
-				auto weightsAccessor = AddAccessor("mesh" +std::to_string(meshIdx) +"_weights",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC4,vertexWeightOffset *sizeof(GLTFVertexWeight),verts.size(),BufferView::Weights);
+				auto jointsAccessor = AddAccessor("mesh" +pragma::util::to_string(meshIdx) +"_joints",TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT,TINYGLTF_TYPE_VEC4,vertexWeightOffset *sizeof(GLTFVertexWeight),verts.size(),BufferView::Joints);
+				auto weightsAccessor = AddAccessor("mesh" +pragma::util::to_string(meshIdx) +"_weights",TINYGLTF_COMPONENT_TYPE_FLOAT,TINYGLTF_TYPE_VEC4,vertexWeightOffset *sizeof(GLTFVertexWeight),verts.size(),BufferView::Weights);
 				primitive.attributes["JOINTS_0"] = jointsAccessor;
 				primitive.attributes["WEIGHTS_0"] = weightsAccessor;
 
@@ -809,7 +809,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 					if(gltfMesh.extras.Has("targetNames"))
 						morphTargetName = gltfMesh.extras.Get("targetNames").Get(targetIdx).Get<std::string>();
 					else
-						morphTargetName = std::to_string(absUnnamedFcIdx + targetIdx);
+						morphTargetName = pragma::util::to_string(absUnnamedFcIdx + targetIdx);
 
 					if(mdl->GetFlexController(morphTargetName) == nullptr) {
 						auto defaultWeight = (targetIdx < gltfMesh.weights.size()) ? gltfMesh.weights.at(targetIdx) : 0.f;
@@ -1209,7 +1209,7 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 
 		uint32_t hashIdx = 0;
 		auto createEntity = [&relFileName, &hashIdx](const pragma::math::ScaledTransform &pose, bool includeScale = true) -> std::shared_ptr<pragma::asset::EntityData> {
-			auto baseHash = std::hash<std::string> {}(relFileName.GetString() + "_" + std::to_string(hashIdx++));
+			auto baseHash = std::hash<std::string> {}(relFileName.GetString() + "_" + pragma::util::to_string(hashIdx++));
 			auto ent = pragma::asset::EntityData::Create();
 			ent->SetPose(pose);
 			return ent;
@@ -1241,24 +1241,24 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			color.resize(3);
 			auto ent = createEntity(pose, false);
 			// TODO: Some of these probably have to be converted
-			ent->SetKeyValue("color", std::to_string(color[0]) + " " + std::to_string(color[1]) + " " + std::to_string(color[2]));
-			ent->SetKeyValue("intensity", std::to_string(light.intensity));
+			ent->SetKeyValue("color", pragma::util::to_string(color[0]) + " " + pragma::util::to_string(color[1]) + " " + pragma::util::to_string(color[2]));
+			ent->SetKeyValue("intensity", pragma::util::to_string(light.intensity));
 			if(!node.name.empty())
 				ent->SetKeyValue("name", node.name);
 			if(light.type == "spot") {
 				ent->SetClassName("env_light_spot");
 
-				ent->SetKeyValue("radius", std::to_string(light.range));
-				ent->SetKeyValue("outerCutoff", std::to_string(light.spot.outerConeAngle));
+				ent->SetKeyValue("radius", pragma::util::to_string(light.range));
+				ent->SetKeyValue("outerCutoff", pragma::util::to_string(light.spot.outerConeAngle));
 
 				auto blendFraction = pragma::BaseEnvLightSpotComponent::CalcBlendFraction(light.spot.outerConeAngle, light.spot.innerConeAngle);
-				ent->SetKeyValue("blendFraction", std::to_string(blendFraction));
+				ent->SetKeyValue("blendFraction", pragma::util::to_string(blendFraction));
 
 				worldData->AddEntity(*ent);
 			}
 			else if(light.type == "point") {
 				ent->SetClassName("env_light_point");
-				ent->SetKeyValue("radius", std::to_string(light.range));
+				ent->SetKeyValue("radius", pragma::util::to_string(light.range));
 			}
 			else if(light.type == "directional")
 				;
@@ -1277,10 +1277,10 @@ static std::optional<OutputData> import_model(ufile::IFile *optFile, const std::
 			auto ent = createEntity(pose, false);
 			ent->SetClassName("env_camera");
 
-			ent->SetKeyValue("fov", std::to_string(pragma::math::rad_to_deg(cam.perspective.yfov)));
-			ent->SetKeyValue("farz", std::to_string(pragma::metres_to_units(cam.perspective.znear)));
-			ent->SetKeyValue("nearz", std::to_string(pragma::metres_to_units(cam.perspective.zfar)));
-			ent->SetKeyValue("aspectRatio", std::to_string(cam.perspective.aspectRatio));
+			ent->SetKeyValue("fov", pragma::util::to_string(pragma::math::rad_to_deg(cam.perspective.yfov)));
+			ent->SetKeyValue("farz", pragma::util::to_string(pragma::metres_to_units(cam.perspective.znear)));
+			ent->SetKeyValue("nearz", pragma::util::to_string(pragma::metres_to_units(cam.perspective.zfar)));
+			ent->SetKeyValue("aspectRatio", pragma::util::to_string(cam.perspective.aspectRatio));
 
 			worldData->AddEntity(*ent);
 		}
@@ -1545,7 +1545,7 @@ bool pragma::asset::export_map(const std::string &mapName, const ModelExportInfo
 			sceneDesc.lightSources.push_back({});
 			auto &ls = sceneDesc.lightSources.back();
 
-			ls.name = ent->GetKeyValue("name", ent->GetClassName() + '_' + std::to_string(ent->GetMapIndex()));
+			ls.name = ent->GetKeyValue("name", ent->GetClassName() + '_' + pragma::util::to_string(ent->GetMapIndex()));
 			ls.pose = ent->GetEffectivePose();
 
 			auto color = ent->GetKeyValue("color");

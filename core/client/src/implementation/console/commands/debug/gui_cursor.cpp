@@ -36,6 +36,7 @@ class GUIDebugCursorManager {
 	std::array<pragma::gui::WIHandle, 4> m_borderElements = {};
 	std::array<pragma::gui::WIHandle, 4> m_borderElementsConstrained = {};
 	std::vector<pragma::gui::WIHandle> m_cursorElementList = {}; // Last element is bottom-most element in hierarchy, all elements above are parents
+	std::unordered_set<pragma::gui::types::WIBase *> m_ignoreList;
 };
 
 GUIDebugCursorManager::GUIDebugCursorManager() {}
@@ -74,7 +75,6 @@ bool GUIDebugCursorManager::Initialize()
 	pText->SetZPos(std::numeric_limits<int32_t>::max());
 	pText->SetVisible(false);
 	pText->EnableShadow(true);
-	pText->SetShadowOffset(Vector2i(1, 1));
 	pText->SetColor(colors::Orange);
 
 	for(auto &hEl : m_borderElements) {
@@ -106,22 +106,47 @@ bool GUIDebugCursorManager::Initialize()
 	m_cbMiddleMouse = pragma::get_cengine()->AddCallback("OnMouseInput",
 	  FunctionCallback<bool, std::reference_wrapper<prosper::Window>, pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier>::CreateWithOptionalReturn(
 	    [this](bool *reply, std::reference_wrapper<prosper::Window> window, pragma::platform::MouseButton button, pragma::platform::KeyState state, pragma::platform::Modifier mods) -> CallbackReturnType {
-		    if(button == pragma::platform::MouseButton::Middle) {
+		    if(button == pragma::platform::MouseButton::Middle || button == pragma::platform::MouseButton::Right) {
 			    *reply = true;
 			    if(state == pragma::platform::KeyState::Press && !m_cursorElementList.empty()) {
 				    auto &hEl = m_cursorElementList.front();
 				    if(hEl.IsValid()) {
 					    auto *el = hEl.get();
-					    auto *cl = pragma::get_cengine()->GetClientState();
-					    auto *game = cl ? cl->GetGameState() : nullptr;
-					    if(game) {
-						    auto *l = game->GetLuaState();
-						    luabind::object g = luabind::globals(l);
-						    // Assign UI element to global variable x
-						    g["x"] = pragma::gui::WGUILuaInterface::GetLuaObject(l, *el);
-						    std::stringstream ss;
-						    el->Print(ss);
-						    Con::COUT << "Assigned element '" << ss.str() << "' to global variable 'x'!" << Con::endl;
+					    std::stringstream ss;
+					    el->Print(ss);
+					    if(button == pragma::platform::MouseButton::Right) {
+						    auto it = m_ignoreList.find(el);
+						    if(it == m_ignoreList.end()) {
+							    Con::COUT << "Add element '" << ss.str() << "' to ignore list!" << Con::endl;
+							    m_ignoreList.insert(el);
+						    }
+						    else {
+							    Con::COUT << "Remove element '" << ss.str() << "' from ignore list!" << Con::endl;
+							    m_ignoreList.erase(it);
+						    }
+					    }
+					    else {
+						    auto *cl = pragma::get_cengine()->GetClientState();
+						    auto *game = cl ? cl->GetGameState() : nullptr;
+						    if(game) {
+							    auto *l = game->GetLuaState();
+							    luabind::object g = luabind::globals(l);
+							    // Assign UI element to global variable x
+							    g["x"] = pragma::gui::WGUILuaInterface::GetLuaObject(l, *el);
+							    Con::COUT << "Assigned element '" << ss.str() << "' to global variable 'x'!" << Con::endl;
+							    if(m_hText.IsValid()) {
+								    // Flash color
+								    m_hText->SetColor(colors::Green);
+								    auto hText = m_hText;
+								    auto timer = game->CreateTimer(0.25f, 0, FunctionCallback<void>::Create([hText]() mutable {
+									    if(!hText.IsValid())
+										    return;
+									    hText->SetColor(colors::Orange);
+								    }),
+								      TimerType::RealTime);
+								    timer->Start(game);
+							    }
+						    }
 					    }
 				    }
 			    }
@@ -138,6 +163,8 @@ bool GUIDebugCursorManager::Initialize()
 bool GUIDebugCursorManager::ShouldPass(pragma::gui::types::WIBase &el) const
 {
 	if(el.IsVisible() == false || &el == m_hText.get() || el.IsDescendantOf(const_cast<pragma::gui::types::WIBase *>(m_hText.get())))
+		return false;
+	if(m_ignoreList.find(&el) != m_ignoreList.end())
 		return false;
 	for(auto &hEl : m_borderElements) {
 		if(&el == hEl.get())
@@ -180,11 +207,11 @@ std::string GUIDebugCursorManager::GetElementInfo(pragma::gui::types::WIBase &el
 	auto pos = el.GetAbsolutePos();
 	auto size = el.GetSize();
 
-	ss << "Element: " << el << "; Class: " << el.GetClass() << "; Name: " << el.GetName() << "; Index: " << el.GetIndex() << "; Size: (" << size.x << "," << size.y << ")"
-	   << "; Pos: (" << pos.x << "," << pos.y << ")";
+	ss << "Class: " << el.GetClass() << "\nName: " << el.GetName() << "\nIndex: " << el.GetIndex() << "\nSize: (" << size.x << "," << size.y << ")"
+	   << "\nPos: (" << pos.x << "," << pos.y << ")";
 	auto debugInfo = el.GetDebugInfo();
 	if(debugInfo.empty() == false)
-		ss << "; Debug Info: " << debugInfo;
+		ss << "\nDebug Info: " << debugInfo;
 	return ss.str();
 }
 
@@ -313,7 +340,7 @@ void GUIDebugCursorManager::SetTargetGUIElement(pragma::gui::types::WIBase *optE
 	std::string t = "\t";
 	auto *pParent = el.GetParent();
 	while(pParent != nullptr) {
-		Con::COUT << t << GetElementInfo(*pParent) << Con::endl;
+		// Con::COUT << t << GetElementInfo(*pParent) << Con::endl;
 		pParent = pParent->GetParent();
 		t += "\t";
 	}
@@ -329,15 +356,23 @@ void GUIDebugCursorManager::OnThink()
 	auto *window = gui.FindWindowUnderCursor();
 	if(window)
 		SetWindow(*window);
-	auto *pText = static_cast<pragma::gui::types::WIText *>(m_hText.get());
 	auto *pEl = gui.GetCursorGUIElement(nullptr, [this](pragma::gui::types::WIBase *pEl) -> bool { return ShouldPass(*pEl); }, window);
 	if(!m_targetElementOverride.IsValid())
 		SetTargetGUIElement(pEl, true);
 
 	if(m_hText.IsValid()) {
+		auto *pText = static_cast<pragma::gui::types::WIText *>(m_hText.get());
 		int32_t x, y;
 		gui.GetMousePos(x, y, window);
-		m_hText->SetPos(x, y);
+		auto *parent = pText->GetParent();
+		if(parent) {
+			auto sz = parent->GetSize();
+			if(x + pText->GetWidth() > sz.x)
+				x = sz.x - pText->GetWidth();
+			if(y + pText->GetHeight() > sz.y)
+				y = sz.y - pText->GetHeight();
+		}
+		pText->SetPos(x, y);
 	}
 }
 

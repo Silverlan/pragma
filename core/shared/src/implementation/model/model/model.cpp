@@ -405,7 +405,7 @@ int32_t pragma::asset::Model::GetBodyGroupId(const std::string &name)
 {
 	for(auto i = decltype(m_bodyGroups.size()) {0}; i < m_bodyGroups.size(); ++i) {
 		auto &bg = m_bodyGroups[i];
-		if(bg.name == name)
+		if(string::compare(bg.name, name, false))
 			return static_cast<int32_t>(i);
 	}
 	return -1;
@@ -1501,8 +1501,8 @@ std::optional<uint32_t> pragma::asset::Model::AssignDistinctMaterial(const Model
 	auto ext = path.GetFileExtension();
 	path.RemoveFileExtension();
 	path += '_' + group.GetName();
-	path += '_' + std::to_string(meshIdx);
-	path += '_' + std::to_string(subMeshIdx);
+	path += '_' + util::to_string(meshIdx);
+	path += '_' + util::to_string(subMeshIdx);
 
 	util::Path rootPath {};
 	while(path.GetFront() != "materials") // TODO: What if inside addon called "materials"?

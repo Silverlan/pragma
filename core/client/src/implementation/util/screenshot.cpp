@@ -20,7 +20,7 @@ static std::string get_screenshot_name(pragma::Game *game, pragma::image::ImageF
 	do {
 		path = "screenshots\\";
 		path += map;
-		path += pragma::string::fill_zeroes(std::to_string(i), 4);
+		path += pragma::string::fill_zeroes(pragma::util::to_string(i), 4);
 		path += "." + pragma::image::get_image_output_format_extension(format);
 		i++;
 	} while(pragma::fs::exists(path.c_str() /*,fs::SearchFlags::Local*/));

@@ -42,6 +42,11 @@ pr_install_binaries(cpptrace)
 # spdlog
 pr_install_targets(spdlog)
 
+# mimalloc
+if(PRAGMA_WITH_MIMALLOC)
+    pr_install_targets(mimalloc)
+endif()
+
 pr_install_binaries(icu)
 
 if(TARGET util_ocio)

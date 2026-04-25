@@ -10,7 +10,7 @@ function Element:OnInitialize()
 	local box = gui.create("WIVBox", self, 0, 0, self:GetWidth(), self:GetHeight())
 	box:SetName("global_container")
 	box:SetFixedWidth(true)
-	box:AddCallback("SetSize", function()
+	box:AddCallback("OnSizeChanged", function()
 		self:SetHeight(box:GetBottom())
 	end)
 
@@ -80,10 +80,10 @@ function Element:SetFrame(frame, elBg)
 
 	self.m_frame = frame
 	self.m_backgroundElement = elBg
-	self.m_framePosChangedCallback = frame:AddCallback("SetPos", function()
+	self.m_framePosChangedCallback = frame:AddCallback("OnPosChanged", function()
 		self:UpdateSocketElementPositions()
 	end)
-	self.m_frameSizeChangedCallback = frame:AddCallback("SetSize", function()
+	self.m_frameSizeChangedCallback = frame:AddCallback("OnSizeChanged", function()
 		self:UpdateSocketElementPositions()
 	end)
 end

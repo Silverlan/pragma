@@ -83,7 +83,7 @@ void pragma::asset::GLTFWriter::InitializeMorphSets(Model &mdl)
 			auto &morphSet = morphSets.back();
 			morphSet.name = name;
 			//if(morphSetIndex > 0)
-			//	morphSet.name += '_' +std::to_string(morphSetIndex);
+			//	morphSet.name += '_' +util::to_string(morphSetIndex);
 			morphSet.frame = frame;
 			morphSet.flexId = flexId;
 			//++morphSetIndex;
@@ -408,8 +408,8 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 
 #ifdef ENABLE_GLTF_VALIDATION
 					auto fGetErrMsg = [i, meshIdx, &exportData, &pos, &v]() {
-						std::string msg = "Found invalid vertex (index " + std::to_string(i) + ") for mesh " + std::to_string(meshIdx) + " of model " + exportData.model.GetName() + ": " + "pos(" + std::to_string(pos.x) + ',' + std::to_string(pos.y) + ',' + std::to_string(pos.z) + ") "
-						  + "normal(" + std::to_string(v.normal.x) + ',' + std::to_string(v.normal.y) + ',' + std::to_string(v.normal.z) + ") " + "uv(" + std::to_string(v.uv.x) + ',' + std::to_string(v.uv.y) + ")";
+						std::string msg = "Found invalid vertex (index " + util::to_string(i) + ") for mesh " + util::to_string(meshIdx) + " of model " + exportData.model.GetName() + ": " + "pos(" + util::to_string(pos.x) + ',' + util::to_string(pos.y) + ',' + util::to_string(pos.z) + ") "
+						  + "normal(" + util::to_string(v.normal.x) + ',' + util::to_string(v.normal.y) + ',' + util::to_string(v.normal.z) + ") " + "uv(" + util::to_string(v.uv.x) + ',' + util::to_string(v.uv.y) + ")";
 						return msg;
 					};
 					GLTF_ASSERT(std::isnan(pos.x) == false && std::isnan(pos.y) == false && std::isnan(pos.z) == false, fGetErrMsg());
@@ -478,7 +478,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 	uint32_t meshIdx = 0;
 	for(auto &exportData : m_uniqueModelExportList) {
 		for(auto &mesh : exportData.exportMeshes) {
-			auto meshName = name + '_' + std::to_string(meshIdx);
+			auto meshName = name + '_' + util::to_string(meshIdx);
 			std::vector<uint32_t> nodeIndices {};
 			nodeIndices.reserve(exportData.instances.size());
 			for(auto &pose : exportData.instances) {
@@ -502,10 +502,10 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			auto &verts = mesh->GetVertices();
 			gltfMdl.accessors.reserve(gltfMdl.accessors.size() + 4);
 			auto numIndices = mesh->GetIndexCount();
-			auto indicesAccessor = AddAccessor("mesh" + std::to_string(meshIdx) + "_indices", TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT, TINYGLTF_TYPE_SCALAR, indexOffset * sizeof(uint32_t), numIndices, m_bufferViewIndices.indices);
-			auto posAccessor = AddAccessor("mesh" + std::to_string(meshIdx) + "_positions", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC3, vertOffset * szVertex, verts.size(), m_bufferViewIndices.positions);
-			auto normalAccessor = AddAccessor("mesh" + std::to_string(meshIdx) + "_normals", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC3, vertOffset * szVertex, verts.size(), m_bufferViewIndices.normals);
-			auto uvAccessor = AddAccessor("mesh" + std::to_string(meshIdx) + "_uvs", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC2, vertOffset * szVertex, verts.size(), m_bufferViewIndices.texCoords);
+			auto indicesAccessor = AddAccessor("mesh" + util::to_string(meshIdx) + "_indices", TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT, TINYGLTF_TYPE_SCALAR, indexOffset * sizeof(uint32_t), numIndices, m_bufferViewIndices.indices);
+			auto posAccessor = AddAccessor("mesh" + util::to_string(meshIdx) + "_positions", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC3, vertOffset * szVertex, verts.size(), m_bufferViewIndices.positions);
+			auto normalAccessor = AddAccessor("mesh" + util::to_string(meshIdx) + "_normals", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC3, vertOffset * szVertex, verts.size(), m_bufferViewIndices.normals);
+			auto uvAccessor = AddAccessor("mesh" + util::to_string(meshIdx) + "_uvs", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC2, vertOffset * szVertex, verts.size(), m_bufferViewIndices.texCoords);
 
 			std::vector<uint32_t> uvSetsAccessors;
 			auto &uvSets = mesh->GetUVSets();
@@ -514,7 +514,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 				uint32_t uvSetIdx = 0;
 				for(auto &pair : uvSets) {
 					auto &uvSet = pair.second;
-					auto uvAccessor = AddAccessor("mesh" + std::to_string(meshIdx) + "_uvset" + std::to_string(uvSetIdx++), TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC2, uvSetOffset * sizeof(Vector2), verts.size(), m_bufferViewIndices.uvSets);
+					auto uvAccessor = AddAccessor("mesh" + util::to_string(meshIdx) + "_uvset" + util::to_string(uvSetIdx++), TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC2, uvSetOffset * sizeof(Vector2), verts.size(), m_bufferViewIndices.uvSets);
 					uvSetsAccessors.push_back(uvAccessor);
 
 					uvSetOffset += verts.size();
@@ -578,11 +578,11 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			primitive.attributes["NORMAL"] = normalAccessor;
 			primitive.attributes["TEXCOORD_0"] = uvAccessor;
 			for(auto i = decltype(uvSets.size()) {0u}; i < uvSets.size(); ++i)
-				primitive.attributes["TEXCOORD_" + std::to_string(i + 1)] = uvSetsAccessors[i];
+				primitive.attributes["TEXCOORD_" + util::to_string(i + 1)] = uvSetsAccessors[i];
 
 			if(IsSkinned(exportData.model) && mesh->GetVertexWeights().empty() == false) {
-				auto jointsAccessor = AddAccessor("mesh" + std::to_string(meshIdx) + "_joints", TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT, TINYGLTF_TYPE_VEC4, vertexWeightOffset * sizeof(GLTFVertexWeight), verts.size(), m_bufferViewIndices.joints);
-				auto weightsAccessor = AddAccessor("mesh" + std::to_string(meshIdx) + "_weights", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC4, vertexWeightOffset * sizeof(GLTFVertexWeight), verts.size(), m_bufferViewIndices.weights);
+				auto jointsAccessor = AddAccessor("mesh" + util::to_string(meshIdx) + "_joints", TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT, TINYGLTF_TYPE_VEC4, vertexWeightOffset * sizeof(GLTFVertexWeight), verts.size(), m_bufferViewIndices.joints);
+				auto weightsAccessor = AddAccessor("mesh" + util::to_string(meshIdx) + "_weights", TINYGLTF_COMPONENT_TYPE_FLOAT, TINYGLTF_TYPE_VEC4, vertexWeightOffset * sizeof(GLTFVertexWeight), verts.size(), m_bufferViewIndices.weights);
 				primitive.attributes["JOINTS_0"] = jointsAccessor;
 				primitive.attributes["WEIGHTS_0"] = weightsAccessor;
 
@@ -678,7 +678,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 				}
 			}
 
-			auto nodeName = "light_node" + std::to_string(i);
+			auto nodeName = "light_node" + util::to_string(i);
 			auto nodeIdx = AddNode(nodeName, true);
 			auto &gltfNode = gltfMdl.nodes.at(nodeIdx);
 
@@ -719,7 +719,7 @@ bool pragma::asset::GLTFWriter::Export(std::string &outErrMsg, const std::string
 			auto lightName = lightSource.name;
 			if(lightName.empty())
 				lightName = type;
-			lightName += "_" + std::to_string(i);
+			lightName += "_" + util::to_string(i);
 			tinygltf::Value::Object light {{"name", tinygltf::Value {lightName}}, {"type", tinygltf::Value {type}}, {"color", tinygltf::Value {tinygltf::Value::Array {{tinygltf::Value {color.r}, tinygltf::Value {color.g}, tinygltf::Value {color.b}}}}},
 			  {"intensity", tinygltf::Value {intensity}}};
 			if(lightSource.range.has_value() && (lightSource.type == LightSource::Type::Point || lightSource.type == LightSource::Type::Spot))

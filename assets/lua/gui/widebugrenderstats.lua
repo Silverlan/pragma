@@ -116,13 +116,13 @@ function gui.DebugRenderStats:InitializeUiElements()
 	self.m_bg = gui.create("WIRect", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
 	self.m_bg:SetColor(Color(54, 54, 54))
 
-	self.m_contents = gui.create("WIHBox", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
+	self.m_contents = gui.create("hbox", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
 	self.m_contents:SetAutoFillContents(true)
 
-	local treeVBox = gui.create("WIVBox", self.m_contents)
+	local treeVBox = gui.create("vbox", self.m_contents)
 	treeVBox:SetAutoFillContents(true)
-	local resizer = gui.create("WIResizer", self.m_contents)
-	local dataVBox = gui.create("WIVBox", self.m_contents)
+	local resizer = gui.create("resizer", self.m_contents)
+	local dataVBox = gui.create("vbox", self.m_contents)
 	dataVBox:SetAutoFillContents(true)
 
 	local function create_header_text(text, parent)
@@ -130,10 +130,9 @@ function gui.DebugRenderStats:InitializeUiElements()
 		pHeader:SetColor(Color(35, 35, 35))
 		local pHeaderText = gui.create("WIText", pHeader)
 		pHeaderText:SetColor(Color(152, 152, 152))
-		pHeaderText:SetFont("pfm_medium")
+		pHeaderText:AddStyleClass("font_medium")
 		pHeaderText:SetText(text)
-		pHeaderText:SizeToContents()
-		pHeader:AddCallback("SetSize", function()
+		pHeader:AddCallback("OnSizeChanged", function()
 			if pHeaderText:IsValid() == false then
 				return
 			end
@@ -149,13 +148,13 @@ function gui.DebugRenderStats:InitializeUiElements()
 	-- Tree
 	local treeScrollContainerBg = gui.create("WIBase", treeVBox, 0, 0, 64, 128)
 	local treeScrollContainer = gui.create("WIScrollContainer", treeScrollContainerBg, 0, 0, 64, 128, 0, 0, 1, 1)
-	treeScrollContainerBg:AddCallback("SetSize", function(el)
+	treeScrollContainerBg:AddCallback("OnSizeChanged", function(el)
 		if self:IsValid() and util.is_valid(self.m_tree) then
 			self.m_tree:SetWidth(el:GetWidth())
 		end
 	end)
 	self.m_tree = gui.create(
-		"WIPFMTreeView",
+		"pfm_tree_view",
 		treeScrollContainer,
 		0,
 		0,
@@ -167,13 +166,13 @@ function gui.DebugRenderStats:InitializeUiElements()
 	-- Data
 	local dataScrollContainerBg = gui.create("WIBase", dataVBox, 0, 0, 64, 128)
 	local dataScrollContainer = gui.create("WIScrollContainer", dataScrollContainerBg, 0, 0, 64, 128, 0, 0, 1, 1)
-	dataScrollContainerBg:AddCallback("SetSize", function(el)
+	dataScrollContainerBg:AddCallback("OnSizeChanged", function(el)
 		if self:IsValid() and util.is_valid(self.m_data) then
 			self.m_data:SetWidth(el:GetWidth())
 		end
 	end)
 	self.m_data =
-		gui.create("WIVBox", dataScrollContainer, 0, 0, dataScrollContainer:GetWidth(), dataScrollContainer:GetHeight())
+		gui.create("vbox", dataScrollContainer, 0, 0, dataScrollContainer:GetWidth(), dataScrollContainer:GetHeight())
 	self.m_data:SetAutoFillContentsToWidth(true)
 
 	local inCallback = false
@@ -388,7 +387,7 @@ function gui.DebugRenderStats:AddScene(statsData)
 end
 function gui.DebugRenderStats:AddLinkedItem(cat, nameL)
 	local l = cat[1]:AddItem(nameL)
-	local el = gui.create("WIVBox", cat[2])
+	local el = gui.create("vbox", cat[2])
 	el:SetAutoFillContentsToWidth(true)
 	el:GetVisibilityProperty():Link(cat[1]:GetChildContentsBox():GetVisibilityProperty())
 	return { l, el }
@@ -415,7 +414,6 @@ function gui.DebugRenderStats:AddSlider(cat, label, f, timer)
 
 	--[[local elLbl = gui.create("WIText",self.m_labelBox)
 	elLbl:SetText(label)
-	elLbl:SizeToContents()
 
 	local el = gui.create("WIProgressBar",self.m_sliderBox)
 	el:SetRange(0.0,1.0,0.01)
@@ -438,4 +436,4 @@ function gui.DebugRenderStats:UpdateSlider(el, value)
 	end
 	el:SetValue(value)
 end
-gui.register("WIDebugRenderStats", gui.DebugRenderStats)
+gui.register("debug_render_stats", gui.DebugRenderStats)

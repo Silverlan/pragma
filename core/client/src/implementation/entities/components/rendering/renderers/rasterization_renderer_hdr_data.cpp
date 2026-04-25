@@ -47,8 +47,8 @@ bool HDRData::Exposure::Initialize(prosper::Texture &texture)
 	createInfo.size = sizeof(Vector4);
 	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUToCPU;
+	createInfo.debugName = "avg_color_buf";
 	avgColorBuffer = get_cengine()->GetRenderContext().CreateBuffer(createInfo);
-	avgColorBuffer->SetDebugName("avg_color_buf");
 	descSetGroupAverageColorBuffer = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderCalcImageColor::DESCRIPTOR_SET_COLOR);
 	descSetGroupAverageColorBuffer->GetDescriptorSet()->SetBindingStorageBuffer(*avgColorBuffer, 0u);
 	avgColorBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::ReadBit);
@@ -176,6 +176,7 @@ void HDRData::ReloadPresentationRenderTarget(uint32_t width, uint32_t height, pr
 	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	imgCreateInfo.samples = sampleCount;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+	imgCreateInfo.debugName = "scene_post_hdr";
 
 	prosper::util::TextureCreateInfo texCreateInfo {};
 	texCreateInfo.flags = prosper::util::TextureCreateInfo::Flags::Resolvable;
@@ -184,8 +185,9 @@ void HDRData::ReloadPresentationRenderTarget(uint32_t width, uint32_t height, pr
 	auto postHdrTex = context.CreateTexture(texCreateInfo, *postHdrImg, prosper::util::ImageViewCreateInfo {}, GetSamplerCreateInfo());
 
 	auto &hShaderTonemapping = get_cgame()->GetGameShader(CGame::GameShader::PPTonemapping);
-	toneMappedRenderTarget = context.CreateRenderTarget({postHdrTex}, static_cast<prosper::ShaderGraphics *>(hShaderTonemapping.get())->GetRenderPass());
-	toneMappedRenderTarget->SetDebugName("scene_post_hdr_rt");
+	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
+	rtCreateInfo.debugName = "scene_post_hdr_rt";
+	toneMappedRenderTarget = context.CreateRenderTarget({postHdrTex}, static_cast<prosper::ShaderGraphics *>(hShaderTonemapping.get())->GetRenderPass(), rtCreateInfo);
 
 	dsgTonemappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*postHdrTex, math::to_integral(ShaderPPFXAA::TextureBinding::SceneTexturePostToneMapping));
 }
@@ -210,6 +212,7 @@ bool HDRData::Initialize(uint32_t width, uint32_t height, prosper::SampleCountFl
 	imgCreateInfo.usage = prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	imgCreateInfo.samples = sampleCount;
 	imgCreateInfo.postCreateLayout = prosper::ImageLayout::ColorAttachmentOptimal;
+	imgCreateInfo.debugName = "scene_hdr";
 	auto hdrImg = context.CreateImage(imgCreateInfo);
 
 	imgCreateInfo.usage
@@ -232,8 +235,9 @@ bool HDRData::Initialize(uint32_t width, uint32_t height, prosper::SampleCountFl
 		resolvedTex = static_cast<prosper::MSAATexture &>(*resolvedTex).GetResolvedTexture();
 
 	bloomTexture = context.CreateTexture(texCreateInfo, *hdrBloomImg, hdrImgViewCreateInfo, hdrSamplerCreateInfo);
-	sceneRenderTarget = get_cengine()->GetRenderContext().CreateRenderTarget({hdrTex, bloomTexture, prepass.textureDepth}, static_cast<prosper::ShaderGraphics *>(wpShader.get())->GetRenderPass());
-	sceneRenderTarget->SetDebugName("scene_hdr_rt");
+	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
+	rtCreateInfo.debugName = "scene_hdr_rt";
+	sceneRenderTarget = get_cengine()->GetRenderContext().CreateRenderTarget({hdrTex, bloomTexture, prepass.textureDepth}, static_cast<prosper::ShaderGraphics *>(wpShader.get())->GetRenderPass(), rtCreateInfo);
 	auto resolvedBloomTex = bloomTexture;
 	if(resolvedBloomTex->IsMSAATexture())
 		resolvedBloomTex = static_cast<prosper::MSAATexture &>(*resolvedBloomTex).GetResolvedTexture();
@@ -247,10 +251,12 @@ bool HDRData::Initialize(uint32_t width, uint32_t height, prosper::SampleCountFl
 	rpPostParticle = context.CreateRenderPass(rpCreateInfo);
 
 	imgCreateInfo.usage |= prosper::ImageUsageFlags::TransferSrcBit;
+	imgCreateInfo.debugName = "scene_staging";
 	auto hdrImgStaging = context.CreateImage(imgCreateInfo);
 	auto hdrTexStaging = context.CreateTexture(texCreateInfo, *hdrImgStaging, hdrImgViewCreateInfo, hdrSamplerCreateInfo);
-	hdrPostProcessingRenderTarget = context.CreateRenderTarget({hdrTexStaging}, prosper::ShaderGraphics::GetRenderPass<ShaderPPBase>(context));
-	hdrPostProcessingRenderTarget->SetDebugName("scene_staging_rt");
+	rtCreateInfo = {};
+	rtCreateInfo.debugName = "scene_staging_rt";
+	hdrPostProcessingRenderTarget = context.CreateRenderTarget({hdrTexStaging}, prosper::ShaderGraphics::GetRenderPass<ShaderPPBase>(context), rtCreateInfo);
 
 	dsgBloomTonemapping = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderPPHDR::DESCRIPTOR_SET_TEXTURE);
 	auto &descSetHdrResolve = *dsgBloomTonemapping->GetDescriptorSet();
@@ -276,10 +282,12 @@ bool HDRData::Initialize(uint32_t width, uint32_t height, prosper::SampleCountFl
 		if(hShaderFXAA.valid()) {
 			// TODO: Obsolete?
 			imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::TransferSrcBit;
+			imgCreateInfo.debugName = "scene_post_tonemapping_post_processing";
 			auto tmPpImg = context.CreateImage(imgCreateInfo);
 			auto tmPpTex = context.CreateTexture(texCreateInfo, *tmPpImg, hdrImgViewCreateInfo, hdrSamplerCreateInfo);
-			toneMappedPostProcessingRenderTarget = context.CreateRenderTarget({tmPpTex}, static_cast<prosper::ShaderGraphics *>(hShaderFXAA.get())->GetRenderPass());
-			toneMappedPostProcessingRenderTarget->SetDebugName("scene_post_tonemapping_post_processing_rt");
+			prosper::util::RenderTargetCreateInfo rtCreateInfo {};
+			rtCreateInfo.debugName = "scene_post_tonemapping_post_processing_rt";
+			toneMappedPostProcessingRenderTarget = context.CreateRenderTarget({tmPpTex}, static_cast<prosper::ShaderGraphics *>(hShaderFXAA.get())->GetRenderPass(), rtCreateInfo);
 			dsgToneMappedPostProcessing = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderPPFXAA::DESCRIPTOR_SET_TEXTURE);
 			dsgToneMappedPostProcessing->GetDescriptorSet()->SetBindingTexture(*tmPpTex, 0u);
 		}
@@ -346,6 +354,7 @@ bool HDRData::ReloadBloomRenderTarget(uint32_t width)
 	auto aspectRatio = width / static_cast<float>(height);
 	imgCreateInfo.width = width;
 	imgCreateInfo.height = static_cast<uint32_t>(imgCreateInfo.width * aspectRatio);
+	imgCreateInfo.debugName = "scene_bloom_blur";
 
 	if((imgCreateInfo.height % 2) != 0)
 		++imgCreateInfo.height;
@@ -353,8 +362,9 @@ bool HDRData::ReloadBloomRenderTarget(uint32_t width)
 	auto bloomBlurTexture = context.CreateTexture(texCreateInfo, *hdrBloomBlurImg, hdrImgViewCreateInfo, hdrSamplerCreateInfo);
 	imgCreateInfo.width = width;
 	imgCreateInfo.height = height;
-	bloomBlurRenderTarget = context.CreateRenderTarget({bloomBlurTexture}, prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(context, math::to_integral(prosper::ShaderBlurBase::Pipeline::R16G16B16A16Sfloat)));
-	bloomBlurRenderTarget->SetDebugName("scene_bloom_blur_rt");
+	prosper::util::RenderTargetCreateInfo rtCreateInfo {};
+	rtCreateInfo.debugName = "scene_bloom_blur_rt";
+	bloomBlurRenderTarget = context.CreateRenderTarget({bloomBlurTexture}, prosper::ShaderGraphics::GetRenderPass<prosper::ShaderBlurBase>(context, math::to_integral(prosper::ShaderBlurBase::Pipeline::R16G16B16A16Sfloat)), rtCreateInfo);
 	bloomBlurSet = prosper::BlurSet::Create(context, bloomBlurRenderTarget);
 
 	auto &descSetHdrResolve = *dsgBloomTonemapping->GetDescriptorSet();

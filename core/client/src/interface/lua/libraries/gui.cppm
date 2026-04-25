@@ -72,5 +72,8 @@ export namespace Lua {
 		DLLCLIENT float RealTime(lua::State *l);
 		DLLCLIENT float DeltaTime(lua::State *l);
 		DLLCLIENT float LastThink(lua::State *l);
+
+		DLLCLIENT void register_gui_type_lua_enum(lua::State *l, const std::string &className, pragma::gui::TypeId typeId);
+		DLLCLIENT void initialize_gui_type_lua_enums(lua::State *l);
 	};
 };

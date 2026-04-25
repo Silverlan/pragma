@@ -81,7 +81,7 @@ static void CVAR_CALLBACK_cl_render_shadow_pssm_split_count(pragma::NetworkState
 {
 	if(shadowmapTargetIdx == -1)
 		return;
-	std::vector<std::string> argv = {std::to_string(shadowmapTargetIdx), std::to_string(shadowmapWidth), std::to_string(shadowmapHeight)};
+	std::vector<std::string> argv = {pragma::util::to_string(shadowmapTargetIdx), pragma::util::to_string(shadowmapWidth), pragma::util::to_string(shadowmapHeight)};
 	CMD_debug_light_shadowmap(state, nullptr, argv);
 }
 namespace {

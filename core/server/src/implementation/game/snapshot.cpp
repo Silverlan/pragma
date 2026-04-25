@@ -111,7 +111,7 @@ void pragma::SGame::SendSnapshot(SPlayerComponent *pl)
 				pSnapshotComponent->SendSnapshotData(packet, *pl);
 				auto szComponent = packet->GetOffset() - offsetComponentDataStart;
 				if(szComponent > std::numeric_limits<uint8_t>::max())
-					throw std::runtime_error("Component size mustn't exceed " + std::to_string(std::numeric_limits<uint8_t>::max()) + " bytes!");
+					throw std::runtime_error("Component size mustn't exceed " + util::to_string(std::numeric_limits<uint8_t>::max()) + " bytes!");
 				packet->Write<uint8_t>(szComponent, &offsetComponentSize);
 
 				if(++numComponents == std::numeric_limits<uint8_t>::max()) {

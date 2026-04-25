@@ -244,7 +244,7 @@ void pragma::gui::types::WIConsole::Initialize()
 		}
 
 		std::vector<std::pair<std::string_view, float>> bestCandidates(pEntry->GetAutoCompleteEntryLimit(), std::pair<std::string_view, float> {std::string_view {}, std::numeric_limits<float>::max()});
-		const auto fProcessConVars = [&cmd, &bestCandidates](const std::map<std::string, std::shared_ptr<console::ConConf>> &conVars) {
+		const auto fProcessConVars = [&cmd, &bestCandidates](const string::OrderedStringMap<std::shared_ptr<console::ConConf>> &conVars) {
 			for(auto &pair : conVars) {
 				auto percentage = string::calc_similarity(cmd, pair.first);
 				auto it = std::find_if(bestCandidates.begin(), bestCandidates.end(), [percentage](const std::pair<std::string_view, float> &pair) { return percentage < pair.second; });
@@ -279,12 +279,12 @@ void pragma::gui::types::WIConsole::Initialize()
 	pLogBg->SetAnchor(0, 0, 1, 1);
 
 	pLog->SetSize(pLogBg->GetSize());
-	pLog->AddCallback("SetSize", FunctionCallback<void>::Create([pLog, hScrollContainer]() mutable {
+	pLog->AddCallback("OnSizeChanged", FunctionCallback<void>::Create([pLog, hScrollContainer]() mutable {
 		if(hScrollContainer.IsValid() == false)
 			return;
 		static_cast<WIScrollContainer *>(hScrollContainer.get())->Update();
 	}));
-	pLogBg->AddCallback("SetSize", FunctionCallback<void>::Create([hLog, pLogBg]() mutable {
+	pLogBg->AddCallback("OnSizeChanged", FunctionCallback<void>::Create([hLog, pLogBg]() mutable {
 		if(hLog.IsValid())
 			hLog.get()->SetWidth(pLogBg->GetWidth());
 	}));

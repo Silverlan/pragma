@@ -137,7 +137,7 @@ void CMaterialOverrideComponent::PopulateProperties()
 		string::to_lower(matName);
 
 		auto propName = matName;
-		auto *cPropName = register_global_string(propName);
+		auto *cPropName = util::register_global_string(propName);
 
 		auto memberInfo = ComponentMemberInfo::CreateDummy();
 

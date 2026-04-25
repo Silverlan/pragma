@@ -1,18 +1,18 @@
 -- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 -- SPDX-License-Identifier: MIT
 
-util.register_class("gui.WITabbedPanelTab", gui.Base)
+local TabbedPanelTab = util.register_class("gui.TabbedPanelTab", gui.Base)
 local TAB_HEIGHT = 14
-function gui.WITabbedPanelTab:__init()
-	gui.Base.__init(self)
-end
-function gui.WITabbedPanelTab:OnInitialize()
+function TabbedPanelTab:OnInitialize()
 	gui.Base.OnInitialize(self)
+
+	self:SetSize(64,64)
 
 	self.m_bSelected = false
 	local pTab = gui.create("WIRect", self)
 	pTab:SetMouseInputEnabled(true)
 	pTab:SetAutoAlignToParent(true)
+	pTab:AddStyleClass("tab_button_background_unpressed")
 	pTab:AddCallback("OnMousePressed", function(el)
 		if self:IsValid() == false then
 			return
@@ -21,73 +21,80 @@ function gui.WITabbedPanelTab:OnInitialize()
 	end)
 	self.m_pTab = pTab
 
-	local pOutline = gui.create("WIOutlinedRect", pTab)
-	pOutline:SetAutoAlignToParent(true)
+	local pOutline = gui.create("WIOutlinedRect", pTab, 0, 0, self:GetWidth(), self:GetHeight() +1, 0, 0, 1, 1)
 	pOutline:SetColor(Color(38, 38, 38, 255))
+	pOutline:AddStyleClass("outline")
 
 	local pText = gui.create("WIText", pTab)
 	pText:AddStyleClass("tab_title")
-	pText:SizeToContents()
+	pText:SetAutoCenterToParent(true)
 	self.m_pText = pText
 
-	self:Update()
+	self:UpdateStyles()
 end
-function gui.WITabbedPanelTab:Update()
+function TabbedPanelTab:UpdateStyles()
 	if util.is_valid(self.m_pTab) == false then
 		return
 	end
+	
+	-- Default colors
 	self.m_pTab:SetColor((self:IsSelected() == true) and Color(38, 38, 38, 255) or Color(10, 10, 10, 255))
-	self.m_pText:SetColor((self:IsSelected() == true) and Color.LightGrey or Color.Gray)
+	-- self.m_pText:SetColor((self:IsSelected() == true) and Color.LightGrey or Color.Gray)
+
+	-- Custom classes for override
+	if(self:IsSelected()) then
+		self.m_pTab:RemoveStyleClass("tab_button_background_unpressed")
+		self.m_pTab:AddStyleClass("tab_button_background_pressed")
+	else
+		self.m_pTab:RemoveStyleClass("tab_button_background_pressed")
+		self.m_pTab:AddStyleClass("tab_button_background_unpressed")
+	end
+	self.m_pTab:RefreshSkin()
 end
-function gui.WITabbedPanelTab:SetSelected(b)
+function TabbedPanelTab:SetSelected(b)
 	if b == self.m_bSelected then
 		return
 	end
 	self:CallCallbacks("OnSelected", b)
 	self.m_bSelected = b
-	self:Update()
+	self:UpdateStyles()
 end
-function gui.WITabbedPanelTab:IsSelected()
+function TabbedPanelTab:IsSelected()
 	return self.m_bSelected
 end
-function gui.WITabbedPanelTab:GetTabElement()
+function TabbedPanelTab:GetTabElement()
 	return self.m_pTab
 end
-function gui.WITabbedPanelTab:SetTitle(title)
+function TabbedPanelTab:SetTitle(title)
 	if util.is_valid(self.m_pText) == false then
 		return
 	end
 	local margin = 5
 	self.m_pText:SetText(title)
-	self.m_pText:SizeToContents()
 	self:SetSize(self.m_pText:GetWidth() + margin * 2, TAB_HEIGHT + margin * 2)
-	self.m_pText:SetPos(margin, self:GetHeight() * 0.5 - self.m_pText:GetHeight() * 0.5)
 end
-function gui.WITabbedPanelTab:GetTitle()
+function TabbedPanelTab:GetTitle()
 	if util.is_valid(self.m_pText) == false then
 		return ""
 	end
 	return self.m_pText:GetText()
 end
-gui.register("WITabbedPanelTab", gui.WITabbedPanelTab)
+gui.register("tabbed_panel_tab", TabbedPanelTab)
 
 ---------------
 
-util.register_class("gui.WITabbedPanel", gui.Base)
-function gui.WITabbedPanel:__init()
-	gui.Base.__init(self)
-end
-function gui.WITabbedPanel:OnInitialize()
+local TabbedPanel = util.register_class("gui.TabbedPanel", gui.Base)
+function TabbedPanel:OnInitialize()
 	gui.Base.OnInitialize(self)
 
 	self.m_tTabs = {}
 	self.m_tabIdentifierToTab = {}
 end
-function gui.WITabbedPanel:FindTab(name)
+function TabbedPanel:FindTab(name)
 	return self.m_tabIdentifierToTab[name]
 end
-function gui.WITabbedPanel:AddTab(name)
-	local t = gui.create("WITabbedPanelTab", self)
+function TabbedPanel:AddTab(name)
+	local t = gui.create("tabbed_panel_tab", self)
 	t:SetTitle(name)
 	t:AddCallback("OnSelected", function(t, b)
 		if b == false or self:IsValid() == false then
@@ -118,7 +125,7 @@ function gui.WITabbedPanel:AddTab(name)
 	self.m_tabIdentifierToTab[name] = t
 	return p
 end
-function gui.WITabbedPanel:Update()
+function TabbedPanel:UpdateLayout()
 	local sz = self:GetSize()
 	local xOffset = 0
 	local bGotSelected = false
@@ -128,13 +135,13 @@ function gui.WITabbedPanel:Update()
 			if elTab:IsSelected() == true then
 				bGotSelected = true
 			end
-			elTab:SetPos(xOffset, 0)
+			elTab:ApplyPos(xOffset, 0)
 			xOffset = xOffset + elTab:GetWidth()
 		end
 		local elBase = tabData.panel
 		if elBase:IsValid() == true then
-			elBase:SetPos(0, elTab:GetY() + elTab:GetHeight())
-			elBase:SetSize(sz.x, sz.y - elBase:GetY())
+			elBase:ApplyPos(0, elTab:GetY() + elTab:GetHeight())
+			elBase:ApplySize(sz.x, sz.y - elBase:GetY())
 		end
 	end
 	if bGotSelected == false and #self.m_tTabs > 0 then
@@ -144,7 +151,7 @@ function gui.WITabbedPanel:Update()
 		end
 	end
 end
-function gui.WITabbedPanel:OnSizeChanged(w, h)
-	self:Update()
+function TabbedPanel:OnSizeChanged(w, h)
+	self:UpdateLayout()
 end
-gui.register("WITabbedPanel", gui.WITabbedPanel)
+gui.register("tabbed_panel", TabbedPanel)

@@ -2,6 +2,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 
 set(PROJ_NAME pragma_executable)
 pr_add_executable(${PROJ_NAME} APP_ICON_WIN "${CMAKE_CURRENT_SOURCE_DIR}/appicon.rc" DEBUGGER_LAUNCH_ARGS "-console -luaext")
+pr_init_main_application_executable(${PROJ_NAME})
 
 pr_add_headers(${PROJ_NAME} "include/")
 pr_add_sources(${PROJ_NAME} "src/")

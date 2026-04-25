@@ -177,7 +177,7 @@ void pragma::gui::types::WIMainMenu::Initialize()
 	/*menu->AddMenuItem(pragma::locale::get_text("menu_addons"), FunctionCallback<>::Create([this]() {
 		//SetActiveMenu(m_hMods);
 		//ShellExecute(0,0,engine_info::get_modding_hub_url().c_str(),0,0,SW_SHOW);
-		pragma::util::open_url_in_browser("steam://url/SteamWorkshopPage/" + std::to_string(engine_info::get_steam_app_id()));
+		pragma::util::open_url_in_browser("steam://url/SteamWorkshopPage/" + util::to_string(engine_info::get_steam_app_id()));
 	}));*/
 #ifdef _DEBUG
 	menu->AddMenuItem("Loadscreen", FunctionCallback<>::Create([this]() { SetActiveMenu(m_hLoadScreen); }));
@@ -243,7 +243,7 @@ void pragma::gui::types::WIMainMenu::Initialize()
 		auto *pBuildId = static_cast<WIText *>(m_hBuild.get());
 		pBuildId->AddStyleClass("game_version");
 		pBuildId->SetColor(1.f, 1.f, 1.f, 1.f);
-		pBuildId->SetText("Build: " + std::to_string(isteamworks.get().get_build_id()));
+		pBuildId->SetText("Build: " + util::to_string(isteamworks.get().get_build_id()));
 		pBuildId->SizeToContents();
 		if(m_hVersion.IsValid()) {
 			pBuildId->SetPos(m_hVersion->GetX() /*m_hVersion->GetRight() -pBuildId->GetWidth()*/, m_hVersion->GetY() - m_hVersion->GetHeight() - 5);
@@ -366,10 +366,4 @@ void pragma::gui::types::WIMainMenu::SetNewGameMenu()
 	WIMainMenuBase *menu = static_cast<WIMainMenuBase *>(m_hMain.get());
 	menu->RemoveMenuItem(1);
 	menu->RemoveMenuItem(0);
-}
-
-void pragma::gui::types::WIMainMenu::SetSize(int x, int y)
-{
-	WIBase::SetSize(x, y);
-	uint32_t logoYBottom = 50;
 }

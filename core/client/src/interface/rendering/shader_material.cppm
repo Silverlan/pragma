@@ -10,9 +10,9 @@ export import pragma.shadergraph;
 
 export namespace pragma::rendering::shader_material {
 	struct DLLCLIENT Texture {
-		GString name;
+		util::GString name;
 		std::optional<std::string> defaultTexturePath {};
-		std::optional<GString> specializationType {};
+		std::optional<util::GString> specializationType {};
 		bool cubemap = false;
 		bool colorMap = false;
 		bool required = false;
@@ -25,7 +25,7 @@ export namespace pragma::rendering::shader_material {
 		static void SetShaderInputDataFlags(ShaderInputData &inputData, MaterialFlags flags);
 		static std::string GetTextureUniformVariableName(const std::string &texIdentifier);
 
-		ShaderMaterial(const GString &name);
+		ShaderMaterial(const util::GString &name);
 		std::vector<Texture> textures;
 
 		Texture *FindTexture(const char *key)

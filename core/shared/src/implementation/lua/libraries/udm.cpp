@@ -206,7 +206,7 @@ static void data_block_to_udm(pragma::datasystem::Block &dataBlock, udm::LinkedP
 				uint32_t i = 0;
 				auto isArray = true;
 				while(i < n) {
-					if(children.find(std::to_string(i)) == children.end()) {
+					if(children.find(pragma::util::to_string(i)) == children.end()) {
 						isArray = false;
 						break;
 					}
@@ -216,7 +216,7 @@ static void data_block_to_udm(pragma::datasystem::Block &dataBlock, udm::LinkedP
 				if(isArray) {
 					auto a = prop.AddArray(key, n, udm::Type::String);
 					for(auto i = decltype(n) {0u}; i < n; ++i) {
-						auto it = children.find(std::to_string(i));
+						auto it = children.find(pragma::util::to_string(i));
 						if(it == children.end())
 							throw std::runtime_error {"Unknown error"};
 						auto &val = it->second;
@@ -344,7 +344,7 @@ template<typename T>
 static lua_udm_underlying_numeric_type<T> get_numeric_component(const T &value, int32_t idx)
 {
 	if(idx >= udm::get_numeric_component_count(udm::type_to_enum<T>()))
-		throw std::runtime_error {"Index " + std::to_string(idx) + " exceeds component count of UDM type '" + std::string {magic_enum::enum_name(udm::type_to_enum<T>())} + "'!"};
+		throw std::runtime_error {"Index " + pragma::util::to_string(idx) + " exceeds component count of UDM type '" + std::string {magic_enum::enum_name(udm::type_to_enum<T>())} + "'!"};
 	if constexpr(std::is_same_v<T, bool>)
 		return static_cast<uint8_t>(value);
 	else
@@ -355,7 +355,7 @@ template<typename T>
 static void set_numeric_component(T &value, int32_t idx, lua_udm_underlying_numeric_type<T> compVal)
 {
 	if(idx >= udm::get_numeric_component_count(udm::type_to_enum<T>()))
-		throw std::runtime_error {"Index " + std::to_string(idx) + " exceeds component count of UDM type '" + std::string {magic_enum::enum_name(udm::type_to_enum<T>())} + "'!"};
+		throw std::runtime_error {"Index " + pragma::util::to_string(idx) + " exceeds component count of UDM type '" + std::string {magic_enum::enum_name(udm::type_to_enum<T>())} + "'!"};
 	udm::set_numeric_component(value, idx, compVal);
 }
 
@@ -451,6 +451,19 @@ static bool compare_numeric_values(const Lua::udm_ng &ov0, const Lua::udm_ng &ov
 			}
 		}
 		return true;
+	});
+}
+
+static std::string to_ascii_value(const Lua::udm_type &o, udm::Type type, const std::string &prefix = "", udm::AsciiSaveFlags flags = udm::AsciiSaveFlags::Default)
+{
+	return udm::visit(type, [&o, &prefix, flags](auto tag) {
+		using T = typename decltype(tag)::type;
+		constexpr auto type = ::udm::type_to_enum<T>();
+		if constexpr(type != ::udm::Type::Element && !::udm::is_array_type(type)) {
+			auto val = luabind::object_cast<T>(o);
+			return udm::Property::to_ascii_value<T>(val, prefix, flags);
+		}
+		return std::string {};
 	});
 }
 
@@ -593,6 +606,15 @@ void Lua::udm::register_library(Interface &lua)
 		luabind::def("deserialize",&deserialize),
 		luabind::def("is_supported_array_value_type",&is_supported_array_value_type),
 		luabind::def("is_supported_array_value_type",&is_supported_array_value_type,luabind::default_parameter_policy<2,::udm::ArrayType::Raw>{}),
+		luabind::def("to_ascii_value",+[](const Lua::udm_type &value, ::udm::Type type, const std::string &prefix, ::udm::AsciiSaveFlags flags) {
+			return to_ascii_value(value, type, prefix, flags);
+	}),
+	luabind::def("to_ascii_value",+[](const Lua::udm_type &value, ::udm::Type type, const std::string &prefix) {
+		return to_ascii_value(value, type, prefix);
+	}),
+	luabind::def("to_ascii_value",+[](const Lua::udm_type &value, ::udm::Type type) {
+		return to_ascii_value(value, type);
+	}),
 		luabind::def("convert",+[](lua::State *l,const luabind::object &o0,::udm::Type t0,::udm::Type t1) -> luabind::object {
 			return ::udm::visit<true,true,true>(t0,[l,&o0,t1](auto tag){
                 using T0 = typename decltype(tag)::type;

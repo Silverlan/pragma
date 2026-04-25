@@ -60,6 +60,10 @@ def print_msg(msg):
 	print(bcolors.OKGREEN +msg_with_timestamp +bcolors.ENDC)
 	sys.stdout.flush()
 
+def print_info(msg):
+	print(bcolors.OKCYAN +msg +bcolors.ENDC)
+	sys.stdout.flush()
+
 def print_warning(msg):
 	timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 	msg_with_timestamp = f"[{timestamp}] {msg}"
@@ -89,6 +93,9 @@ def git_clone_commit(name, path, url, commitSha, branch=None):
 	os.chdir(path)
 	reset_to_commit(commitSha)
 	return path
+
+def join_args(args):
+	return ' '.join(f'"{arg}"' if ' ' in arg else arg for arg in args)
 
 def cmake_configure(scriptPath,generator,toolsetArgs=[],additionalArgs=[],cflags=[],env=None):
 	args = [config.cmake_path,scriptPath,"-G",generator]
@@ -121,8 +128,8 @@ def cmake_configure(scriptPath,generator,toolsetArgs=[],additionalArgs=[],cflags
 		print("Configure command failed:\n\n", cmd_line, flush=True)
 		raise
 
-def cmake_build(buildConfig,targets=None,env=None,verbose=False):
-	args = [config.cmake_path,"--build",".","--config",buildConfig]
+def cmake_build(buildConfig,targets=None,env=None,verbose=False,returnCommandOnly=False,buildDir="."):
+	args = [config.cmake_path,"--build",buildDir,"--config",buildConfig]
 	if targets:
 		args.append("--target")
 		args += targets
@@ -138,6 +145,8 @@ def cmake_build(buildConfig,targets=None,env=None,verbose=False):
 		elif is_msbuild_generator(config.generator):
 			args.append("/verbosity:detailed")
 
+	if returnCommandOnly:
+		return args
 	print("Running CMake build command...")
 	# print("Running CMake build command:", ' '.join(f'"{arg}"' for arg in args))
 	try:
@@ -149,6 +158,7 @@ def cmake_build(buildConfig,targets=None,env=None,verbose=False):
 			cmd_line = shlex.join(e.cmd)
 		print("Build command failed:\n\n", cmd_line)
 		raise
+	return args
 
 def cmake_configure_def_toolset(scriptPath,generator,additionalArgs=[],additionalCFlags=[],env=None,additionalToolsetArgs=[]):
 	toolsetArgs = (config.toolsetArgs or []) +additionalToolsetArgs
@@ -857,7 +867,10 @@ def add_filepaths_to_content_version(base_path: str, filename: str, filepaths) -
 	target_file.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 def prefer_pacman():
-    return shutil.which("pacman") is not None
+	return shutil.which("pacman") is not None
+
+def prefer_dnf():
+	return shutil.which("dnf") is not None
 
 def apply_patch(path_path: str):
 	print_msg("Applying patch '{path_path}'...")

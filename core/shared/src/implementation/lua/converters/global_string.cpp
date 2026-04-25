@@ -6,13 +6,13 @@ module pragma.shared;
 
 import :scripting.lua.converters.global_string;
 
-void luabind::default_converter<pragma::GString>::to_lua(lua::State *L, pragma::GString const &x)
+void luabind::default_converter<pragma::util::GString>::to_lua(lua::State *L, pragma::util::GString const &x)
 {
 	std::string str = x;
 	object {L, str}.push(L);
 }
 
-void luabind::default_converter<pragma::GString>::to_lua(lua::State *L, pragma::GString *x)
+void luabind::default_converter<pragma::util::GString>::to_lua(lua::State *L, pragma::util::GString *x)
 {
 	if(!x)
 		Lua::PushNil(L);

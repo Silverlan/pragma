@@ -25,7 +25,7 @@ export namespace pragma::rendering {
 
 		shadergraph::Parameter parameter;
 
-		std::optional<GString> specializationType {};
+		std::optional<util::GString> specializationType {};
 		Flags propertyFlags = Flags::None;
 		size_t offset = 0;
 		size_t padding = 0;
@@ -37,9 +37,9 @@ export namespace pragma::rendering {
 	struct DLLCLIENT ShaderInputDescriptor {
 		static std::optional<shadergraph::Value> parse_flags_expression(const std::string &strVal, const std::unordered_map<std::string, uint32_t> &flags, udm::Type propType);
 
-		ShaderInputDescriptor(const GString &name);
+		ShaderInputDescriptor(const util::GString &name);
 		bool AddProperty(Property &&prop);
-		const GString name;
+		const util::GString name;
 		std::vector<Property> properties;
 
 		Property *FindProperty(const char *key)

@@ -121,7 +121,7 @@ void pragma::gui::types::WIMainMenuNewGame::ReloadMapList()
 		uniqueFiles.insert(std::move(f));
 	}
 
-	if(get_cengine()->GetConVarBool("sh_mount_external_game_resources")) {
+	if(get_cengine()->GetConVarValueOr<udm::Boolean>("sh_mount_external_game_resources")) {
 		auto dllHandle = pragma::util::initialize_external_archive_manager(get_client_state());
 		if(dllHandle) {
 			auto *fFindFiles = dllHandle->FindSymbolAddress<void (*)(const std::string &, std::vector<std::string> *, std::vector<std::string> *)>("find_files");

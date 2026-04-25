@@ -83,7 +83,7 @@ CWaterSurface *CLiquidSurfaceSimulationComponent::GetSurfaceEntity() const { ret
 
 void CLiquidSurfaceSimulationComponent::ReloadSurfaceSimulator()
 {
-	SetSpacing(get_cgame()->GetConVarInt("cl_water_surface_simulation_spacing"));
+	SetSpacing(get_cgame()->GetConVarValueOr<udm::Int32>("cl_water_surface_simulation_spacing"));
 	BaseLiquidSurfaceSimulationComponent::ReloadSurfaceSimulator();
 	if(m_hWaterSurface.valid())
 		m_hWaterSurface->Remove();

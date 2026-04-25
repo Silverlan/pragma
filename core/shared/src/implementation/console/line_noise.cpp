@@ -111,7 +111,7 @@ static void get_autocomplete_options(const std::string &cmd, std::vector<std::st
 
 	std::vector<std::pair<std::string_view, float>> bestCandidates(autoCompleteEntryLimit, std::pair<std::string_view, float> {std::string_view {}, std::numeric_limits<float>::max()});
 	std::unordered_set<std::string> traversed;
-	const auto fProcessConVars = [&cmd, &bestCandidates, &traversed](const std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &conVars) {
+	const auto fProcessConVars = [&cmd, &bestCandidates, &traversed](const pragma::string::OrderedStringMap<std::shared_ptr<pragma::console::ConConf>> &conVars) {
 		for(auto &pair : conVars) {
 			if(pair.first.length() < cmd.length())
 				continue;
@@ -160,7 +160,7 @@ const char *hints(const char *buf, int *color, int *bold)
 		return nullptr;
 	static std::string bestCandidate;
 	bestCandidate.clear();
-	const auto fProcessConVars = [&cmd](const std::map<std::string, std::shared_ptr<pragma::console::ConConf>> &conVars) {
+	const auto fProcessConVars = [&cmd](const pragma::string::OrderedStringMap<std::shared_ptr<pragma::console::ConConf>> &conVars) {
 		for(auto &pair : conVars) {
 			if(pair.first.length() < cmd.length())
 				continue;

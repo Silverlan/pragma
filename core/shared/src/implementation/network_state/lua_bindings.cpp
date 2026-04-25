@@ -68,7 +68,8 @@ static void create_directory_change_listener(lua::State *l, const std::string &p
 {
 	Lua::CheckFunction(l, 2);
 	try {
-		auto listener = pragma::util::make_shared<pragma::fs::DirectoryWatcherCallback>(path, [callback](const std::string &fileName) mutable { callback(fileName); }, flags);
+		auto listener
+		  = pragma::util::make_shared<pragma::fs::DirectoryWatcherCallback>(path, [callback](const pragma::util::Path &basePath, const pragma::util::Path &filePath, pragma::fs::FileWatcherEvent event) mutable { callback(filePath.GetString(), pragma::math::to_integral(event)); }, flags);
 		Lua::Push(l, listener);
 	}
 	catch(const std::runtime_error &err) {
@@ -115,12 +116,18 @@ static void register_directory_watcher(lua::State *l, luabind::module_ &modUtil)
 	defListener->add_static_constant("LISTENER_FLAG_ABSOLUTE_PATH", pragma::math::to_integral(pragma::fs::DirectoryWatcherCallback::WatchFlags::AbsolutePath));
 	defListener->add_static_constant("LISTENER_FLAG_START_DISABLED", pragma::math::to_integral(pragma::fs::DirectoryWatcherCallback::WatchFlags::StartDisabled));
 	defListener->add_static_constant("LISTENER_FLAG_WATCH_DIRECTORY_CHANGES", pragma::math::to_integral(pragma::fs::DirectoryWatcherCallback::WatchFlags::WatchDirectoryChanges));
+
+	defListener->add_static_constant("EVENT_ADD", pragma::math::to_integral(pragma::fs::FileWatcherEvent::Add));
+	defListener->add_static_constant("EVENT_DELETE", pragma::math::to_integral(pragma::fs::FileWatcherEvent::Delete));
+	defListener->add_static_constant("EVENT_MODIFIED", pragma::math::to_integral(pragma::fs::FileWatcherEvent::Modified));
+	defListener->add_static_constant("EVENT_MOVED", pragma::math::to_integral(pragma::fs::FileWatcherEvent::Moved));
 	static_assert(magic_enum::enum_count<pragma::fs::DirectoryWatcherCallback::WatchFlags>() == 4);
+	defListener->scope[luabind::def("create",
+	  static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &path, luabind::object callback) { create_directory_change_listener(l, path, callback, pragma::fs::DirectoryWatcherCallback::WatchFlags::None); }))];
 	defListener
-	  ->scope[luabind::def("create", static_cast<void (*)(lua::State *, const std::string &, luabind::object)>([](lua::State *l, const std::string &path, luabind::object callback) { create_directory_change_listener(l, path, callback, pragma::fs::DirectoryWatcherCallback::WatchFlags::None); }))];
-	defListener->scope[luabind::def("create", static_cast<void (*)(lua::State *, const std::string &, luabind::object, pragma::fs::DirectoryWatcherCallback::WatchFlags)>([](lua::State *l, const std::string &path, luabind::object callback, pragma::fs::DirectoryWatcherCallback::WatchFlags flags) {
-		create_directory_change_listener(l, path, callback, flags);
-	}))];
+	  ->scope[luabind::def("create", static_cast<void (*)(lua::State *, const std::string &, luabind::object, pragma::fs::DirectoryWatcherCallback::WatchFlags)>([](lua::State *l, const std::string &path, luabind::object callback, pragma::fs::DirectoryWatcherCallback::WatchFlags flags) {
+		  create_directory_change_listener(l, path, callback, flags);
+	  }))];
 	defListener->def("Poll", static_cast<uint32_t (*)(lua::State *, pragma::fs::DirectoryWatcherCallback &)>([](lua::State *l, pragma::fs::DirectoryWatcherCallback &listener) { return listener.Poll(); }));
 	defListener->def("SetEnabled", static_cast<void (*)(lua::State *, pragma::fs::DirectoryWatcherCallback &, bool)>([](lua::State *l, pragma::fs::DirectoryWatcherCallback &listener, bool enabled) { listener.SetEnabled(enabled); }));
 	defListener->def("IsEnabled", static_cast<bool (*)(lua::State *, pragma::fs::DirectoryWatcherCallback &)>([](lua::State *l, pragma::fs::DirectoryWatcherCallback &listener) { return listener.IsEnabled(); }));
@@ -318,9 +325,10 @@ static int util_dir_path(lua::State *l)
 }
 
 template<typename T>
-void glm_type_to_string(lua::State *l, const T &v) {
+void glm_type_to_string(lua::State *l, const T &v)
+{
 	std::stringstream ss;
-	ss<<v;
+	ss << v;
 	Lua::PushString(l, ss.str());
 }
 
@@ -341,7 +349,9 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	  })),
 	  luabind::def("fill_zeroes", string::fill_zeroes), luabind::def("compare", static_cast<bool (*)(const char *, const char *, bool, size_t)>(string::compare)), luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &, bool)>(string::compare)),
 	  luabind::def("compare", static_cast<bool (*)(const std::string &, const std::string &)>([](const std::string &a, const std::string &b) -> bool { return string::compare(a, b, true); })),
-	  luabind::def("hash", static_cast<std::string (*)(const std::string &)>([](const std::string &str) -> std::string { return std::to_string(std::hash<std::string> {}(str)); })))];
+	  luabind::def("hash", static_cast<std::string (*)(const std::string &)>([](const std::string &str) -> std::string { return util::to_string(std::hash<std::string> {}(str)); })))];
+
+	Lua::SetTableCFunction(lua.GetState(), "string", "fmt", Lua::util::fmt);
 
 	auto modLight = luabind::module_(lua.GetState(), "light");
 	modLight[(luabind::def("get_color_temperature", static_cast<void (*)(ulighting::NaturalLightType, Kelvin &, Kelvin &)>([](ulighting::NaturalLightType type, Kelvin &outMin, Kelvin &outMax) {
@@ -789,7 +799,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 
 	defPath->def(luabind::self + luabind::const_self);
 	defPath->def(luabind::self + std::string {});
-	
+
 	defPath->def(luabind::self / luabind::const_self);
 	defPath->def(luabind::self / std::string {});
 
@@ -1126,6 +1136,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVectori->def(int32_t() * luabind::const_self);
 	defVectori->def("Copy", &Lua::Vectori::Copy);
 	defVectori->def("Get", static_cast<void (*)(lua::State *, const Vector3i &, uint32_t)>([](lua::State *l, const Vector3i &v, uint32_t idx) { Lua::PushInt(l, v[idx]); }));
+	defVectori->def("Clamp", +[](const Vector3i &v, const Vector3i &min, const Vector3i &max) { return glm::clamp(v, min, max); });
 	modMath[*defVectori];
 	register_string_to_vector_type_constructor<Vector3i>(lua.GetState());
 
@@ -1144,6 +1155,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector2i->def(int32_t() * luabind::const_self);
 	defVector2i->def("Copy", &Lua::Vector2i::Copy);
 	defVector2i->def("Get", static_cast<void (*)(lua::State *, const Vector2i &, uint32_t)>([](lua::State *l, const Vector2i &v, uint32_t idx) { Lua::PushInt(l, v[idx]); }));
+	defVector2i->def("Clamp", +[](const Vector2i &v, const Vector2i &min, const Vector2i &max) { return glm::clamp(v, min, max); });
 	modMath[*defVector2i];
 	register_string_to_vector_type_constructor<Vector2i>(lua.GetState());
 
@@ -1165,6 +1177,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector4i->def(int32_t() * luabind::const_self);
 	defVector4i->def("Copy", &Lua::Vector4i::Copy);
 	defVector4i->def("Get", static_cast<void (*)(lua::State *, const Vector4i &, uint32_t)>([](lua::State *l, const Vector4i &v, uint32_t idx) { Lua::PushInt(l, v[idx]); }));
+	defVector4i->def("Clamp", +[](const Vector4i &v, const Vector4i &min, const Vector4i &max) { return glm::clamp(v, min, max); });
 	modMath[*defVector4i];
 	register_string_to_vector_type_constructor<Vector4i>(lua.GetState());
 
@@ -1237,6 +1250,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector->def("GetPerpendicular", uvec::get_perpendicular);
 	defVector->def("OuterProduct", &uvec::calc_outer_product);
 	defVector->def("ToScreenUv", &umat::to_screen_uv);
+	defVector->def("Clamp", +[](const Vector3 &v, const Vector3 &min, const Vector3 &max) { return glm::clamp(v, min, max); });
 	modMath[*defVector];
 	register_string_to_vector_type_constructor<Vector3>(lua.GetState());
 
@@ -1271,6 +1285,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector2->def("Set", static_cast<void (*)(lua::State *, Vector2 &, float, float)>(&Lua::Vector2::Set));
 	defVector2->def("Get", static_cast<void (*)(lua::State *, const Vector2 &, uint32_t)>([](lua::State *l, const Vector2 &v, uint32_t idx) { Lua::PushNumber(l, v[idx]); }));
 	defVector2->def("Project", &Lua::Vector2::Project);
+	defVector2->def("Clamp", +[](const Vector2 &v, const Vector2 &min, const Vector2 &max) { return glm::clamp(v, min, max); });
 	modMath[*defVector2];
 	register_string_to_vector_type_constructor<Vector2>(lua.GetState());
 
@@ -1309,6 +1324,7 @@ void pragma::NetworkState::RegisterSharedLuaClasses(Lua::Interface &lua)
 	defVector4->def("Set", static_cast<void (*)(lua::State *, Vector4 &, float, float, float, float)>(&Lua::Vector4::Set));
 	defVector4->def("Get", static_cast<void (*)(lua::State *, const Vector4 &, uint32_t)>([](lua::State *l, const Vector4 &v, uint32_t idx) { Lua::PushNumber(l, v[idx]); }));
 	defVector4->def("Project", &Lua::Vector4::Project);
+	defVector4->def("Clamp", +[](const Vector4 &v, const Vector4 &min, const Vector4 &max) { return glm::clamp(v, min, max); });
 	modMath[*defVector4];
 	register_string_to_vector_type_constructor<Vector4>(lua.GetState());
 
@@ -1471,6 +1487,10 @@ void pragma::Game::RegisterLuaClasses()
 	// Entity
 	auto &modUtil = GetLuaInterface().RegisterLibrary("util");
 	LuaCore::register_thread_pool(GetLuaState(), modUtil);
+
+	modUtil[luabind::def("get_peak_rss_memory_usage", &pragma::util::get_peak_rss_memory_usage)];
+	modUtil[luabind::def("get_current_rss_memory_usage", &pragma::util::get_current_rss_memory_usage)];
+
 	auto entDef = luabind::class_<LEntityProperty, LBasePropertyWrapper>("EntityProperty");
 	//Lua::Property::add_generic_methods<LEntityProperty,EntityHandle,luabind::class_<LEntityProperty,LBasePropertyWrapper>>(entDef);
 	entDef.def(luabind::constructor<>());

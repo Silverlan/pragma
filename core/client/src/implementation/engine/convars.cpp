@@ -7,7 +7,7 @@ import :client_state;
 import :entities.components;
 import :engine;
 
-pragma::console::ConConf *pragma::CEngine::GetConVar(const std::string &cv)
+pragma::console::ConConf *pragma::CEngine::GetConVar(std::string_view cv)
 {
 	auto *cvar = Engine::GetConVar(cv);
 	if(cvar != nullptr)
@@ -16,8 +16,9 @@ pragma::console::ConConf *pragma::CEngine::GetConVar(const std::string &cv)
 	return (stateCl != nullptr) ? stateCl->GetConVar(cv) : nullptr;
 }
 
-bool pragma::CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string> &argv, KeyState pressState, float magnitude, const std::function<bool(console::ConConf *, float &)> &callback)
+pragma::console::ConCommandResult pragma::CEngine::RunConsoleCommand(std::string_view svcmd, std::vector<std::string> &argv, const RunConCommandInfo &cmdInfo)
 {
+	std::string cmd {svcmd};
 	string::to_lower(cmd);
 	auto *stateCl = static_cast<ClientState *>(GetClientState());
 	BasePlayerComponent *pl = nullptr;
@@ -27,18 +28,24 @@ bool pragma::CEngine::RunConsoleCommand(std::string cmd, std::vector<std::string
 			pl = game->GetLocalPlayer();
 	}
 	if(stateCl == nullptr)
-		return RunEngineConsoleCommand(cmd, argv, pressState, magnitude, callback);
-	if(stateCl == nullptr || !stateCl->RunConsoleCommand(cmd, argv, pl, pressState, magnitude, callback)) {
-		Con::CWAR << "Unknown console command '" << cmd << "'!" << Con::endl;
-		auto similar = (stateCl != nullptr) ? stateCl->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
-		if(similar.empty() == true)
-			Con::COUT << "No similar matches found!" << Con::endl;
-		else {
-			Con::COUT << "Were you looking for one of the following?" << Con::endl;
-			for(auto &sim : similar)
-				Con::COUT << "- " << sim << Con::endl;
+		return RunEngineConsoleCommand(cmd, argv, cmdInfo);
+	console::ConCommandResult result {};
+	if(stateCl)
+		result = stateCl->RunConsoleCommand(cmd, argv, pl, cmdInfo.pressState, cmdInfo.magnitude, cmdInfo.callback);
+	if(!result) {
+		if (!cmdInfo.suppressOutput) {
+			Con::CWAR << "Unknown console command '" << cmd << "'!" << Con::endl;
+			auto similar = (stateCl != nullptr) ? stateCl->FindSimilarConVars(cmd) : FindSimilarConVars(cmd);
+			if(similar.empty() == true)
+				Con::COUT << "No similar matches found!" << Con::endl;
+			else {
+				Con::COUT << "Were you looking for one of the following?" << Con::endl;
+				for(auto &sim : similar)
+					Con::COUT << "- " << sim << Con::endl;
+			}
 		}
-		return false;
+		return result;
 	}
-	return true;
+	result.success = true;
+	return result;
 }

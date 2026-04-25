@@ -205,7 +205,7 @@ void pragma::gui::types::WIServerBrowser::OnServerDoubleClick(unsigned int idx)
 		get_cengine()->Connect(steamId);
 		return;
 	}
-	get_cengine()->Connect(svInfo.queryResult.ip, std::to_string(svInfo.queryResult.serverInfo.port));
+	get_cengine()->Connect(svInfo.queryResult.ip, util::to_string(svInfo.queryResult.serverInfo.port));
 }
 
 void pragma::gui::types::WIServerBrowser::DisplayMessage(std::string msg)
@@ -307,14 +307,12 @@ void pragma::gui::types::WIServerBrowser::DoRefresh()
 {
 	m_bRefreshScheduled = false;
 	if(m_msQueryDispatcher) {
-		networking::IMasterServerQueryDispatcher::Filter filter {get_client_state()->GetConVarString("networking_library")};
+		networking::IMasterServerQueryDispatcher::Filter filter {get_client_state()->GetConVarValueOr<udm::String>("networking_library")};
 		m_msQueryDispatcher->QueryServers(filter);
 	}
 }
 
 void pragma::gui::types::WIServerBrowser::Refresh() { m_bRefreshScheduled = true; }
-
-void pragma::gui::types::WIServerBrowser::SetSize(int x, int y) { WIFrame::SetSize(x, y); }
 
 void pragma::gui::types::WIServerBrowser::AddServer(const networking::MasterServerQueryResult &queryResult)
 {
@@ -349,7 +347,7 @@ void pragma::gui::types::WIServerBrowser::AddServer(const networking::MasterServ
 		row->SetValue(1, queryResult.serverInfo.name);
 		row->SetValue(2, queryResult.serverInfo.gameMode);
 		row->SetValue(3, queryResult.serverInfo.mapName);
-		row->SetValue(4, std::to_string(queryResult.numPlayers) + "/" + std::to_string(queryResult.serverInfo.maxPlayers));
-		row->SetValue(5, std::to_string(0));
+		row->SetValue(4, util::to_string(queryResult.numPlayers) + "/" + util::to_string(queryResult.serverInfo.maxPlayers));
+		row->SetValue(5, util::to_string(0));
 	}
 }

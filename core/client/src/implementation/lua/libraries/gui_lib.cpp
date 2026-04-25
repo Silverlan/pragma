@@ -352,6 +352,7 @@ std::shared_ptr<prosper::IImage> Lua::gui::create_color_image(uint32_t w, uint32
 	imgCreateInfo.height = h;
 	imgCreateInfo.usage = usageFlags;
 	imgCreateInfo.postCreateLayout = initialLayout;
+	imgCreateInfo.debugName = "lua_render_target";
 	if(msaa)
 		imgCreateInfo.samples = pragma::gui::wGUI::MSAA_SAMPLE_COUNT;
 	return context.CreateImage(imgCreateInfo);
@@ -448,3 +449,15 @@ float Lua::gui::RealTime(lua::State *l) { return pragma::get_client_state()->Rea
 float Lua::gui::DeltaTime(lua::State *l) { return pragma::get_client_state()->DeltaTime(); }
 
 float Lua::gui::LastThink(lua::State *l) { return pragma::get_client_state()->LastThink(); }
+
+void Lua::gui::register_gui_type_lua_enum(lua::State *l, const std::string &className, pragma::gui::TypeId typeId)
+{
+	auto luaTypeName = className;
+	pragma::string::to_upper(luaTypeName);
+	luabind::globals(l)["gui"]["TYPE_" + luaTypeName] = typeId;
+}
+void Lua::gui::initialize_gui_type_lua_enums(lua::State *l)
+{
+	for(auto &[name, typeInfo] : pragma::gui::WGUI::GetInstance().GetTypeFactory().GetTypes())
+		register_gui_type_lua_enum(l, name, typeInfo.id);
+}

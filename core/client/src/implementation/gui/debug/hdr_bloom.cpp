@@ -51,6 +51,7 @@ void pragma::gui::types::WIDebugHDRBloom::DoUpdate()
 	imgCreateInfo.format = prosper::Format::R8G8B8A8_UNorm;
 	imgCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
 	imgCreateInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferDstBit;
+	imgCreateInfo.debugName = "debug_hdr_bloom";
 	auto img = get_cengine()->GetRenderContext().CreateImage(imgCreateInfo);
 	prosper::util::ImageViewCreateInfo imgViewCreateInfo {};
 	prosper::util::SamplerCreateInfo samplerCreateInfo {};

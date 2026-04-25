@@ -54,9 +54,9 @@ std::string ai::BehaviorParameter::ToString() const
 	case Type::Bool:
 		return (GetBool() == true) ? "true" : "false";
 	case Type::Int:
-		return std::to_string(GetInt());
+		return util::to_string(GetInt());
 	case Type::Float:
-		return std::to_string(GetFloat());
+		return util::to_string(GetFloat());
 	case Type::String:
 		{
 			auto *str = GetString();

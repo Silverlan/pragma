@@ -70,7 +70,7 @@ function gui.WIDebugBehaviorTree:AddNode(node, parent)
 	if parent ~= nil then
 		x = parent:GetRight() + NODE_VERTICAL_SPACING
 	end
-	local p = gui.create("WIDebugBehaviorTreeNode", self)
+	local p = gui.create("debug_behavior_tree_node", self)
 	p:SetX(x)
 	p:SetSize(w, h)
 	--p:SizeToContents()
@@ -265,7 +265,7 @@ function gui.WIDebugBehaviorTree:FocusOnNode(node, xPos, yPos, duration)
 
 	self:FocusStep()
 end
-gui.register("WIDebugBehaviorTree", gui.WIDebugBehaviorTree)
+gui.register("debug_behavior_tree", gui.WIDebugBehaviorTree)
 
 local texGradient = prosper.create_gradient_texture(128, 64, prosper.FORMAT_R8G8B8A8_UNORM, Vector2(0, -1), {
 	{ offset = 0.0, color = Color.White },
@@ -347,13 +347,10 @@ function gui.WIDebugBehaviorTreeNode:SetNode(node)
 	self.m_name = node.name
 	self.m_pText:SetFont("default")
 	self.m_pText:SetText(node.name)
-	self.m_pText:SizeToContents()
 	if self.m_pText:GetWidth() > self:GetWidth() then
 		self.m_pText:SetFont("default_small")
-		self.m_pText:SizeToContents()
 		if self.m_pText:GetWidth() > self:GetWidth() then
 			self.m_pText:SetFont("default_tiny")
-			self.m_pText:SizeToContents()
 		end
 	end
 	self.m_pText:SetPos(
@@ -394,4 +391,4 @@ end
 function gui.WIDebugBehaviorTreeNode:GetChildConnectors()
 	return self.m_childConnectors
 end
-gui.register("WIDebugBehaviorTreeNode", gui.WIDebugBehaviorTreeNode)
+gui.register("debug_behavior_tree_node", gui.WIDebugBehaviorTreeNode)

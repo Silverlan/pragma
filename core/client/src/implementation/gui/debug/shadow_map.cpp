@@ -81,7 +81,7 @@ void pragma::gui::types::WIDebugShadowMap::DoUpdate()
 				else
 					dt->SetPos(wLayer * 3, hLayer); // Back
 				dt->Setup(1.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
-				dt->SetName("dbg_shadowmap" + std::to_string(i));
+				dt->SetName("dbg_shadowmap" + util::to_string(i));
 				dt->SetContrastFactor(GetContrastFactor());
 				m_shadowMapImages.push_back(dt->GetHandle());
 			}
@@ -93,7 +93,7 @@ void pragma::gui::types::WIDebugShadowMap::DoUpdate()
 			dt->SetTexture(*depthTexture, barrierImageLayout, barrierImageLayout);
 			dt->SetSize(wLayer, hLayer);
 			dt->Setup(1.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
-			dt->SetName("dbg_shadowmap" + std::to_string(0));
+			dt->SetName("dbg_shadowmap" + util::to_string(0));
 			dt->SetContrastFactor(GetContrastFactor());
 			m_shadowMapImages.push_back(dt->GetHandle());
 			break;
@@ -108,7 +108,7 @@ void pragma::gui::types::WIDebugShadowMap::DoUpdate()
 				dt->SetSize(wLayer, hLayer);
 				dt->SetPos(i * wLayer, 0);
 				dt->Setup(1.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
-				dt->SetName("dbg_shadowmap" + std::to_string(i));
+				dt->SetName("dbg_shadowmap" + util::to_string(i));
 				dt->SetContrastFactor(GetContrastFactor());
 				m_shadowMapImages.push_back(dt->GetHandle());
 			}
@@ -121,7 +121,7 @@ void pragma::gui::types::WIDebugShadowMap::DoUpdate()
 					dt->SetSize(wLayer, hLayer);
 					dt->SetPos(i * wLayer, hLayer);
 					dt->Setup(1.f, pRadiusComponent.valid() ? pRadiusComponent->GetRadius() : 0.f);
-					dt->SetName("dbg_shadowmap_static" + std::to_string(i));
+					dt->SetName("dbg_shadowmap_static" + util::to_string(i));
 					dt->SetContrastFactor(GetContrastFactor());
 					m_shadowMapImages.push_back(dt->GetHandle());
 				}

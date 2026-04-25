@@ -78,6 +78,7 @@ std::shared_ptr<prosper::IImage> ShaderCubemap::CreateCubeMap(uint32_t width, ui
 	createInfo.flags = flags;
 	createInfo.usage = prosper::ImageUsageFlags::ColorAttachmentBit | prosper::ImageUsageFlags::SampledBit | prosper::ImageUsageFlags::TransferSrcBit | prosper::ImageUsageFlags::TransferDstBit;
 	createInfo.postCreateLayout = prosper::ImageLayout::ShaderReadOnlyOptimal;
+	createInfo.debugName = "shader_cubemap";
 
 	return get_cengine()->GetRenderContext().CreateImage(createInfo);
 }

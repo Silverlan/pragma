@@ -37,10 +37,10 @@ static void map_build_reflection_probes(NetworkState *state, BasePlayerComponent
 	auto closest = commandOptions.contains("closest");
 	g_renderSettings.renderer = pragma::console::get_command_option_parameter_value(commandOptions, "renderer", util::declvalue(&::RenderSettings::renderer));
 	g_renderSettings.sky = pragma::console::get_command_option_parameter_value(commandOptions, "sky", util::declvalue(&::RenderSettings::sky));
-	g_renderSettings.skyStrength = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "sky_strength", std::to_string(util::declvalue(&::RenderSettings::skyStrength))));
-	g_renderSettings.exposure = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "exposure", std::to_string(util::declvalue(&::RenderSettings::exposure))));
+	g_renderSettings.skyStrength = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "sky_strength", util::to_string(util::declvalue(&::RenderSettings::skyStrength))));
+	g_renderSettings.exposure = util::to_float(pragma::console::get_command_option_parameter_value(commandOptions, "exposure", util::to_string(util::declvalue(&::RenderSettings::exposure))));
 	auto defAngles = util::declvalue(&::RenderSettings::skyAngles);
-	g_renderSettings.skyAngles = EulerAngles {pragma::console::get_command_option_parameter_value(commandOptions, "sky_angles", std::to_string(defAngles.p) + ' ' + std::to_string(defAngles.y) + ' ' + std::to_string(defAngles.r))};
+	g_renderSettings.skyAngles = EulerAngles {pragma::console::get_command_option_parameter_value(commandOptions, "sky_angles", util::to_string(defAngles.p) + ' ' + util::to_string(defAngles.y) + ' ' + util::to_string(defAngles.r))};
 	if(closest) {
 		ecs::EntityIterator entIt {*get_cgame(), ecs::EntityIterator::FilterFlags::Default | ecs::EntityIterator::FilterFlags::Pending};
 		entIt.AttachFilter<TEntityIteratorFilterComponent<CReflectionProbeComponent>>();
@@ -874,13 +874,13 @@ std::string CReflectionProbeComponent::GetCubemapIBLMaterialPath() const
 std::string CReflectionProbeComponent::GetLocationIdentifier() const
 {
 	auto pos = GetEntity().GetPosition();
-	auto identifier = std::to_string(pos.x) + std::to_string(pos.y) + std::to_string(pos.z);
-	return std::to_string(std::hash<std::string> {}(identifier));
+	auto identifier = util::to_string(pos.x) + util::to_string(pos.y) + util::to_string(pos.z);
+	return util::to_string(std::hash<std::string> {}(identifier));
 }
 std::string CReflectionProbeComponent::GetCubemapIdentifier() const
 {
 	if(m_srcEnvMap.empty() == false)
-		return std::to_string(std::hash<std::string> {}(m_srcEnvMap));
+		return util::to_string(std::hash<std::string> {}(m_srcEnvMap));
 	return GetLocationIdentifier();
 }
 prosper::IDescriptorSet *CReflectionProbeComponent::GetIBLDescriptorSet() { return m_iblDsg ? m_iblDsg->GetDescriptorSet() : nullptr; }

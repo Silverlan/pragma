@@ -148,7 +148,7 @@ void CPlayerComponent::OnWaterSubmerged()
 	if(entDsp == nullptr)
 		return;
 	auto *pDspComponent = static_cast<BaseEnvSoundDspComponent *>(entDsp->FindComponent("sound_dsp").get());
-	entDsp->SetKeyValue("spawnflags", std::to_string(math::to_integral(BaseEnvSoundDspComponent::SpawnFlags::All | BaseEnvSoundDspComponent::SpawnFlags::AffectRelative)));
+	entDsp->SetKeyValue("spawnflags", util::to_string(math::to_integral(BaseEnvSoundDspComponent::SpawnFlags::All | BaseEnvSoundDspComponent::SpawnFlags::AffectRelative)));
 	if(pDspComponent != nullptr)
 		pDspComponent->SetDSPEffect("underwater");
 	entDsp->Spawn();

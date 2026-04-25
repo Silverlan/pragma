@@ -1,5 +1,7 @@
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 
+option(PRAGMA_ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER "Allow the use of vertex buffers as storage buffers?" OFF)
+
 set(PROJ_NAME client)
 pr_add_library(${PROJ_NAME} SHARED)
 pr_add_export_macro(${PROJ_NAME} DLLCLIENT)
@@ -40,13 +42,21 @@ pr_add_compile_definitions(
 )
 pr_add_compile_definitions(
     ${PROJ_NAME}
-        -DENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
         -DENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER=1
         -DDEBUG_RENDER_PERFORMANCE_TEST_ENABLED=0
         -DUSE_LIGHT_SOURCE_UNIFORM_BUFFER=1
 
         PUBLIC
 )
+
+if(PRAGMA_ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER)
+    pr_add_compile_definitions(
+            ${PROJ_NAME}
+            -DENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
+
+            PUBLIC
+    )
+endif()
 
 pr_add_headers(${PROJ_NAME} "include/")
 pr_add_sources(${PROJ_NAME} "src/")

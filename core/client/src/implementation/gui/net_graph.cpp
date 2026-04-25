@@ -96,13 +96,13 @@ void pragma::gui::types::WINetGraph::Initialize()
 
 	auto *client = get_client_state();
 	std::stringstream ssUpdateRate;
-	ssUpdateRate << "update rate: " << client->GetConVarInt("cl_updaterate");
+	ssUpdateRate << "update rate: " << client->GetConVarValueOr<udm::Int32>("cl_updaterate");
 
 	auto *pTextUpdateRate = CreateText(ssUpdateRate.str());
 	m_txtUpdateRate = pTextUpdateRate->GetHandle();
 
 	std::stringstream ssTickRate;
-	ssTickRate << "tick rate: " << client->GetConVarInt("sv_tickrate");
+	ssTickRate << "tick rate: " << client->GetConVarValueOr<udm::Int32>("sv_tickrate");
 
 	auto *pTextTickRate = CreateText(ssTickRate.str());
 	m_txtTickRate = pTextTickRate->GetHandle();
@@ -116,7 +116,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 	uint8_t numMessagesLines = 4;
 	m_txtMessages.reserve(numMessagesLines);
 	for(uint8_t i = 0; i < numMessagesLines; ++i) {
-		auto *pText = CreateText(std::string("#") + std::to_string(i));
+		auto *pText = CreateText(std::string("#") + util::to_string(i));
 		m_txtMessages.push_back(pText->GetHandle());
 	}
 
@@ -161,7 +161,7 @@ void pragma::gui::types::WINetGraph::Initialize()
 			}
 			std::sort(m_netData.messages.begin(), m_netData.messages.end(), [](const std::pair<uint32_t, NetData::MessageInfo> &a, const std::pair<uint32_t, NetData::MessageInfo> &b) { return a.second.size > b.second.size; });
 			auto *map = networking::get_client_message_map();
-			util::StringMap<unsigned int> *netmessages;
+			string::StringMap<unsigned int> *netmessages;
 			map->GetNetMessages(&netmessages);
 			uint32_t idx = 0;
 			for(auto &p : m_netData.messages) {
@@ -236,13 +236,11 @@ void pragma::gui::types::WINetGraph::UpdateGraph()
 		m_hDataGraph.get<WILineGraph>()->Update();
 }
 
-void pragma::gui::types::WINetGraph::SetSize(int x, int y)
+void pragma::gui::types::WINetGraph::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
-	WIBase::SetSize(x, y);
-
 	if(!m_hPacketGraph.IsValid())
 		return;
-	m_hPacketGraph->SetX(x - m_hPacketGraph->GetWidth());
+	m_hPacketGraph->SetX(GetWidth() - m_hPacketGraph->GetWidth());
 
 	if(m_hDataGraph.IsValid())
 		m_hDataGraph->SetPos(m_hPacketGraph->GetX(), m_hPacketGraph->GetY() + m_hPacketGraph->GetHeight());

@@ -447,33 +447,33 @@ void Lua::Property::register_classes(Interface &l)
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LStringProperty &)>(link<LStringProperty, std::string>));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LBoolProperty &)>([](lua::State *l, LStringProperty &prop, LBoolProperty &propOther) { prop->Link<pragma::util::BoolProperty, bool>(*propOther, [](const bool &v) -> std::string { return v ? "true" : "false"; }); }));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LColorPropertyWrapper &)>([](lua::State *l, LStringProperty &prop, LColorPropertyWrapper &propOther) {
-		prop->Link<pragma::util::ColorProperty, ::Color>(*propOther, [](const ::Color &v) -> std::string { return std::to_string(v.r) + " " + std::to_string(v.g) + " " + std::to_string(v.b) + " " + std::to_string(v.a); });
+		prop->Link<pragma::util::ColorProperty, ::Color>(*propOther, [](const ::Color &v) -> std::string { return pragma::util::to_string(v.r) + " " + pragma::util::to_string(v.g) + " " + pragma::util::to_string(v.b) + " " + pragma::util::to_string(v.a); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LGenericFloatPropertyWrapper &)>([](lua::State *l, LStringProperty &prop, LGenericFloatPropertyWrapper &propOther) { propOther->LinkOther(*prop); }));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LGenericIntPropertyWrapper &)>([](lua::State *l, LStringProperty &prop, LGenericIntPropertyWrapper &propOther) { propOther->LinkOther(*prop); }));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LVector2Property &)>([](lua::State *l, LStringProperty &prop, LVector2Property &propOther) {
-		prop->Link<pragma::util::Vector2Property, ::Vector2>(*propOther, [](const ::Vector2 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y); });
+		prop->Link<pragma::util::Vector2Property, ::Vector2>(*propOther, [](const ::Vector2 &v) -> std::string { return pragma::util::to_string(v.x) + " " + pragma::util::to_string(v.y); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LVector2iProperty &)>([](lua::State *l, LStringProperty &prop, LVector2iProperty &propOther) {
-		prop->Link<pragma::util::Vector2iProperty, ::Vector2i>(*propOther, [](const ::Vector2i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y); });
+		prop->Link<pragma::util::Vector2iProperty, ::Vector2i>(*propOther, [](const ::Vector2i &v) -> std::string { return pragma::util::to_string(v.x) + " " + pragma::util::to_string(v.y); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LVector3Property &)>([](lua::State *l, LStringProperty &prop, LVector3Property &propOther) {
-		prop->Link<pragma::util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
+		prop->Link<pragma::util::Vector3Property, Vector3>(*propOther, [](const Vector3 &v) -> std::string { return pragma::util::to_string(v.x) + " " + pragma::util::to_string(v.y) + " " + pragma::util::to_string(v.z); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LVector3iProperty &)>([](lua::State *l, LStringProperty &prop, LVector3iProperty &propOther) {
-		prop->Link<pragma::util::Vector3iProperty, Vector3i>(*propOther, [](const Vector3i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
+		prop->Link<pragma::util::Vector3iProperty, Vector3i>(*propOther, [](const Vector3i &v) -> std::string { return pragma::util::to_string(v.x) + " " + pragma::util::to_string(v.y) + " " + pragma::util::to_string(v.z); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LVector4Property &)>([](lua::State *l, LStringProperty &prop, LVector4Property &propOther) {
-		prop->Link<pragma::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z) + " " + std::to_string(v.w); });
+		prop->Link<pragma::util::Vector4Property, ::Vector4>(*propOther, [](const ::Vector4 &v) -> std::string { return pragma::util::to_string(v.x) + " " + pragma::util::to_string(v.y) + " " + pragma::util::to_string(v.z) + " " + pragma::util::to_string(v.w); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LVector4iProperty &)>([](lua::State *l, LStringProperty &prop, LVector4iProperty &propOther) {
-		prop->Link<pragma::util::Vector4iProperty, ::Vector4i>(*propOther, [](const ::Vector4i &v) -> std::string { return std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z) + " " + std::to_string(v.w); });
+		prop->Link<pragma::util::Vector4iProperty, ::Vector4i>(*propOther, [](const ::Vector4i &v) -> std::string { return pragma::util::to_string(v.x) + " " + pragma::util::to_string(v.y) + " " + pragma::util::to_string(v.z) + " " + pragma::util::to_string(v.w); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LQuatProperty &)>([](lua::State *l, LStringProperty &prop, LQuatProperty &propOther) {
-		prop->Link<pragma::util::QuatProperty, Quat>(*propOther, [](const Quat &v) -> std::string { return std::to_string(v.w) + " " + std::to_string(v.x) + " " + std::to_string(v.y) + " " + std::to_string(v.z); });
+		prop->Link<pragma::util::QuatProperty, Quat>(*propOther, [](const Quat &v) -> std::string { return pragma::util::to_string(v.w) + " " + pragma::util::to_string(v.x) + " " + pragma::util::to_string(v.y) + " " + pragma::util::to_string(v.z); });
 	}));
 	strDef.def("Link", static_cast<void (*)(lua::State *, LStringProperty &, LEulerAnglesProperty &)>([](lua::State *l, LStringProperty &prop, LEulerAnglesProperty &propOther) {
-		prop->Link<pragma::util::EulerAnglesProperty, EulerAngles>(*propOther, [](const EulerAngles &v) -> std::string { return std::to_string(v.p) + " " + std::to_string(v.y) + " " + std::to_string(v.r); });
+		prop->Link<pragma::util::EulerAnglesProperty, EulerAngles>(*propOther, [](const EulerAngles &v) -> std::string { return pragma::util::to_string(v.p) + " " + pragma::util::to_string(v.y) + " " + pragma::util::to_string(v.r); });
 	}));
 	modUtil[strDef];
 

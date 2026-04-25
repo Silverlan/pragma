@@ -21,7 +21,7 @@ std::optional<std::string> Lua::VarToString(lua::State *lua, int n)
 	case Type::LightUserData:
 		return "lightuserdata";
 	case Type::Number:
-		return "number (" + std::to_string(ToNumber(lua, n)) + ")";
+		return "number (" + pragma::util::to_string(ToNumber(lua, n)) + ")";
 	case Type::String:
 		return "string (" + std::string {ToString(lua, n)} + ")";
 	case Type::Table:
@@ -49,9 +49,9 @@ std::optional<std::string> Lua::StackToString(lua::State *lua)
 	std::string str;
 	int top = GetStackTop(lua);
 	str += "------------ LUA STACKDUMP ------------\n";
-	str += "Values in stack: " + std::to_string(top) + "\n";
+	str += "Values in stack: " + pragma::util::to_string(top) + "\n";
 	for(int i = 1; i <= top; i++) {
-		str += "\t" + std::to_string(i) + ": ";
+		str += "\t" + pragma::util::to_string(i) + ": ";
 		auto var = VarToString(lua, i);
 		if(var.has_value())
 			str += *var;
@@ -75,11 +75,11 @@ std::optional<std::string> Lua::TableToString(lua::State *lua, int n)
 	std::string str;
 	str += "------------ LUA TABLEDUMP ------------\n";
 	if(n <= 0) {
-		str += "INVALID STACK INDEX (" + std::to_string(n) + ")\n";
+		str += "INVALID STACK INDEX (" + pragma::util::to_string(n) + ")\n";
 		return str;
 	}
 	if(!IsTable(lua, n)) {
-		str += "VALUE " + std::to_string(n) + " ON STACK IS A ";
+		str += "VALUE " + pragma::util::to_string(n) + " ON STACK IS A ";
 		auto var = VarToString(lua, n);
 		if(var.has_value())
 			str += *var;
@@ -443,7 +443,7 @@ void pragma::Game::InitializeGame()
 {
 	InitializeLua(); // Lua has to be initialized completely before any entites are created
 
-	auto physEngineName = GetConVarString("phys_engine");
+	auto physEngineName = GetConVarValueOr<udm::String>("phys_engine");
 	auto physEngineLibName = physics::IEnvironment::GetPhysicsEngineModuleLocation(physEngineName);
 	spdlog::info("Loading physics module '{}'...", physEngineLibName);
 	std::string err;
@@ -541,14 +541,14 @@ pragma::debug::ProfilingStageManager<pragma::debug::ProfilingStage> *pragma::Gam
 bool pragma::Game::StartProfilingStage(const char *stage)
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("stage_" + std::string {stage});
+	debug::get_domain().BeginTask("stage_" + std::string {stage});
 #endif
 	return m_profilingStageManager && m_profilingStageManager->StartProfilerStage(stage);
 }
 bool pragma::Game::StopProfilingStage()
 {
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().EndTask();
+	debug::get_domain().EndTask();
 #endif
 	return m_profilingStageManager && m_profilingStageManager->StopProfilerStage();
 }
@@ -842,7 +842,7 @@ bool pragma::Game::PrecacheModel(const std::string &mdl)
 	auto r = GetNetworkState()->GetModelManager().PreloadAsset(mdl, std::move(loadInfo));
 	if(r.assetRequest) {
 		r.assetRequest->AddCallback([this](util::Asset *asset, util::AssetLoadResult result) {
-			if (result != util::AssetLoadResult::Succeeded)
+			if(result != util::AssetLoadResult::Succeeded)
 				return;
 			assert(asset != nullptr);
 			auto mdl = asset::ModelManager::GetAssetObject(*asset);
@@ -857,8 +857,8 @@ std::shared_ptr<pragma::asset::Model> pragma::Game::LoadModel(const std::string 
 	if(mdl.empty())
 		return nullptr;
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
-	::debug::get_domain().BeginTask("load_model");
-	pragma::util::ScopeGuard sgVtune {[]() { ::debug::get_domain().EndTask(); }};
+	debug::get_domain().BeginTask("load_model");
+	pragma::util::ScopeGuard sgVtune {[]() { debug::get_domain().EndTask(); }};
 #endif
 	spdlog::debug("Loading model '{}'...", mdl);
 	auto *asset = GetNetworkState()->GetModelManager().FindCachedAsset(mdl);
@@ -931,11 +931,9 @@ double &pragma::Game::LastTick() { return m_tLastTick; }
 double &pragma::Game::DeltaTickTime() { return m_tDeltaTick; }
 
 float pragma::Game::GetTimeScale() { return 1.f; }
-void pragma::Game::SetTimeScale(float t) { m_stateNetwork->SetConVar("host_timescale", std::to_string(t)); }
+void pragma::Game::SetTimeScale(float t) { m_stateNetwork->SetConVar("host_timescale", util::to_string(t)); }
 
-pragma::console::ConConf *pragma::Game::GetConVar(const std::string &scmd) { return m_stateNetwork->GetConVar(scmd); }
-int pragma::Game::GetConVarInt(const std::string &scmd) { return m_stateNetwork->GetConVarInt(scmd); }
-std::string pragma::Game::GetConVarString(const std::string &scmd) { return m_stateNetwork->GetConVarString(scmd); }
-float pragma::Game::GetConVarFloat(const std::string &scmd) { return m_stateNetwork->GetConVarFloat(scmd); }
-bool pragma::Game::GetConVarBool(const std::string &scmd) { return m_stateNetwork->GetConVarBool(scmd); }
-pragma::console::ConVarFlags pragma::Game::GetConVarFlags(const std::string &scmd) { return m_stateNetwork->GetConVarFlags(scmd); }
+pragma::console::ConConf *pragma::Game::GetConVar(std::string_view scmd) { return m_stateNetwork->GetConVar(scmd); }
+pragma::console::ConVarFlags pragma::Game::GetConVarFlags(std::string_view scmd) { return m_stateNetwork->GetConVarFlags(scmd); }
+
+const pragma::console::CVarHandler *pragma::Game::GetNetworkStateCVarHandler() const { return static_cast<console::CVarHandler*>(m_stateNetwork); }

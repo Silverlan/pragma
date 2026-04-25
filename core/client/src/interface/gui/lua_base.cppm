@@ -43,7 +43,8 @@ export namespace pragma::gui::types {
 		virtual util::EventReply KeyboardCallback(platform::Key key, int scanCode, platform::KeyState state, platform::Modifier mods) override;
 		virtual util::EventReply CharCallback(unsigned int c, platform::Modifier mods = platform::Modifier::None) override;
 		virtual util::EventReply ScrollCallback(Vector2 offset, bool offsetAsPixels = false) override;
-		virtual void SetSize(int x, int y) override;
+		virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
+		virtual void OnPosChanged(const Vector2i &oldPos, ChangeSource changedSource);
 		virtual void OnVisibilityChanged(bool bVisible) override;
 		virtual void SetColor(float r, float g, float b, float a = 1.f) override;
 		virtual void SetAlpha(float alpha) override;
@@ -84,8 +85,11 @@ export namespace pragma::gui::types {
 		void Lua_OnUpdate();
 		static void default_OnUpdate(lua::State *l, WILuaBase &hElement);
 
-		void Lua_OnSetSize(int x, int y);
-		static void default_OnSetSize(lua::State *l, WILuaBase &hElement, int x, int y);
+		void Lua_OnSizeChanged(int x, int y, ChangeSource changedSource);
+		static void default_OnSizeChanged(lua::State *l, WILuaBase &hElement, int x, int y, ChangeSource changedSource);
+
+		void Lua_OnPosChanged(int x, int y, ChangeSource changedSource);
+		static void default_OnPosChanged(lua::State *l, WILuaBase &hElement, int x, int y, ChangeSource changedSource);
 
 		void Lua_OnSetVisible(bool b);
 		static void default_OnSetVisible(lua::State *l, WILuaBase &hElement, bool b);

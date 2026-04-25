@@ -48,7 +48,7 @@ std::string pragma::console::get_ansi_color_code(ConsoleColorFlags flags)
 			colorCode = bIntensity ? 90 : 30;
 			break;
 		}
-		strColorCode = "\033[" + std::to_string(colorCode) + "m";
+		strColorCode = "\033[" + util::to_string(colorCode) + "m";
 	}
 
 	colorCode = 0u;
@@ -81,7 +81,7 @@ std::string pragma::console::get_ansi_color_code(ConsoleColorFlags flags)
 			colorCode = bIntensity ? 100 : 40;
 			break;
 		}
-		strColorCode += "\033[" + std::to_string(colorCode) + "m"; // Background color
+		strColorCode += "\033[" + util::to_string(colorCode) + "m"; // Background color
 	}
 	return strColorCode;
 }
@@ -171,9 +171,9 @@ std::string pragma::console::get_true_color_code(std::optional<Color> foreground
 {
 	std::string colorCode;
 	if(foregroundColor)
-		colorCode += "\033[38;2;" + std::to_string(foregroundColor->r) + ";" + std::to_string(foregroundColor->g) + ";" + std::to_string(foregroundColor->b) + "m";
+		colorCode += "\033[38;2;" + util::to_string(foregroundColor->r) + ";" + util::to_string(foregroundColor->g) + ";" + util::to_string(foregroundColor->b) + "m";
 	if(backgroundColor)
-		colorCode += "\033[48;2;" + std::to_string(backgroundColor->r) + ";" + std::to_string(backgroundColor->g) + ";" + std::to_string(backgroundColor->b) + "m";
+		colorCode += "\033[48;2;" + util::to_string(backgroundColor->r) + ";" + util::to_string(backgroundColor->g) + ";" + util::to_string(backgroundColor->b) + "m";
 
 	if(flags != ConsoleDecoratorFlags::None) {
 		std::string decoratorCode;

@@ -137,7 +137,7 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 		case animation::Flex::Operation::Type::None:
 			break;
 		case animation::Flex::Operation::Type::Const:
-			opStack.push({std::to_string(op.d.value), 10u});
+			opStack.push({util::to_string(op.d.value), 10u});
 			break;
 		case animation::Flex::Operation::Type::Fetch:
 			{
@@ -356,8 +356,8 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 			{
 				auto *pCloseLidVController = GetFlexController(op.d.index);
 				auto pCloseLidV = (pCloseLidVController != nullptr) ? pCloseLidVController->name : "invalid_flex_controller";
-				auto flCloseLidVMin = std::to_string((pCloseLidVController != nullptr) ? pCloseLidVController->min : 0.f);
-				auto flCloseLidVMax = std::to_string((pCloseLidVController != nullptr) ? pCloseLidVController->max : 0.f);
+				auto flCloseLidVMin = util::to_string((pCloseLidVController != nullptr) ? pCloseLidVController->min : 0.f);
+				auto flCloseLidVMax = util::to_string((pCloseLidVController != nullptr) ? pCloseLidVController->max : 0.f);
 				auto flCloseLidV = "(min(max((" + pCloseLidV + " - " + flCloseLidVMin + ") / (" + flCloseLidVMax + " - " + flCloseLidVMin + "), 0), 1))";
 
 				auto closeLidIndex = opStack.top();
@@ -365,8 +365,8 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 
 				auto *pCloseLidController = GetFlexController(string::to_int(closeLidIndex.expression));
 				auto pCloseLid = (pCloseLidController != nullptr) ? pCloseLidController->name : "invalid_flex_controller";
-				auto flCloseLidMin = std::to_string((pCloseLidController != nullptr) ? pCloseLidController->min : 0.f);
-				auto flCloseLidMax = std::to_string((pCloseLidController != nullptr) ? pCloseLidController->max : 0.f);
+				auto flCloseLidMin = util::to_string((pCloseLidController != nullptr) ? pCloseLidController->min : 0.f);
+				auto flCloseLidMax = util::to_string((pCloseLidController != nullptr) ? pCloseLidController->max : 0.f);
 				auto flCloseLid = "(min(max((" + pCloseLid + " - " + flCloseLidMin + ") / (" + flCloseLidMax + " - " + flCloseLidMin + "), 0), 1))";
 
 				opStack.pop();
@@ -375,8 +375,8 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				opStack.pop();
 				auto *pEyeUpDownController = GetFlexController(string::to_int(eyeUpDownIndex.expression));
 				auto pEyeUpDown = (pEyeUpDownController != nullptr) ? pEyeUpDownController->name : "invalid_flex_controller";
-				auto flEyeUpDownMin = std::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->min : 0.f);
-				auto flEyeUpDownMax = std::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->max : 0.f);
+				auto flEyeUpDownMin = util::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->min : 0.f);
+				auto flEyeUpDownMax = util::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->max : 0.f);
 				auto flEyeUpDown = "(-1 + 2 * (min(max((" + pEyeUpDown + " - " + flEyeUpDownMin + ") / (" + flEyeUpDownMax + " - " + flEyeUpDownMin + "), 0), 1)))";
 
 				opStack.push({"(min(1, (1 - " + flEyeUpDown + ")) * (1 - " + flCloseLidV + ") * " + flCloseLid + ")", 5});
@@ -386,16 +386,16 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 			{
 				auto *pCloseLidVController = GetFlexController(op.d.index);
 				auto pCloseLidV = (pCloseLidVController != nullptr) ? pCloseLidVController->name : "invalid_flex_controller";
-				auto flCloseLidVMin = std::to_string((pCloseLidVController != nullptr) ? pCloseLidVController->min : 0.f);
-				auto flCloseLidVMax = std::to_string((pCloseLidVController != nullptr) ? pCloseLidVController->max : 0.f);
+				auto flCloseLidVMin = util::to_string((pCloseLidVController != nullptr) ? pCloseLidVController->min : 0.f);
+				auto flCloseLidVMax = util::to_string((pCloseLidVController != nullptr) ? pCloseLidVController->max : 0.f);
 				auto flCloseLidV = "(min(max((" + pCloseLidV + " - " + flCloseLidVMin + ") / (" + flCloseLidVMax + " - " + flCloseLidVMin + "), 0), 1))";
 
 				auto closeLidIndex = opStack.top();
 				opStack.pop();
 				auto *pCloseLidController = GetFlexController(string::to_int(closeLidIndex.expression));
 				auto pCloseLid = (pCloseLidController != nullptr) ? pCloseLidController->name : "invalid_flex_controller";
-				auto flCloseLidMin = std::to_string((pCloseLidController != nullptr) ? pCloseLidController->min : 0.f);
-				auto flCloseLidMax = std::to_string((pCloseLidController != nullptr) ? pCloseLidController->max : 0.f);
+				auto flCloseLidMin = util::to_string((pCloseLidController != nullptr) ? pCloseLidController->min : 0.f);
+				auto flCloseLidMax = util::to_string((pCloseLidController != nullptr) ? pCloseLidController->max : 0.f);
 				auto flCloseLid = "(min(max((" + pCloseLid + " - " + flCloseLidMin + ") / (" + flCloseLidMax + " - " + flCloseLidMin + "), 0), 1))";
 
 				opStack.pop();
@@ -404,8 +404,8 @@ bool pragma::asset::Model::GetFlexFormula(uint32_t id, std::string &formula) con
 				opStack.pop();
 				auto *pEyeUpDownController = GetFlexController(string::to_int(eyeUpDownIndex.expression));
 				auto pEyeUpDown = (pEyeUpDownController != nullptr) ? pEyeUpDownController->name : "invalid_flex_controller";
-				auto flEyeUpDownMin = std::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->min : 0.f);
-				auto flEyeUpDownMax = std::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->max : 0.f);
+				auto flEyeUpDownMin = util::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->min : 0.f);
+				auto flEyeUpDownMax = util::to_string((pEyeUpDownController != nullptr) ? pEyeUpDownController->max : 0.f);
 				auto flEyeUpDown = "(-1 + 2 * (min(max((" + pEyeUpDown + " - " + flEyeUpDownMin + ") / (" + flEyeUpDownMax + " - " + flEyeUpDownMin + "), 0), 1)))";
 
 				opStack.push({"(min(1, (1 + " + flEyeUpDown + ")) * " + flCloseLidV + " * " + flCloseLid + ")", 5});

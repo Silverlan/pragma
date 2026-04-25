@@ -106,6 +106,9 @@ void pragma::locale::reload_files()
 		load(f, true);
 }
 
+static std::function<void(const std::string &)> g_onChangeCallback;
+void pragma::locale::set_on_language_change_callback(const std::function<void(const std::string &)> &callback) { g_onChangeCallback = callback; }
+
 void pragma::locale::set_language(std::string lan)
 {
 	LOGGER.debug("Changing global language to '{}'...", lan);
@@ -118,17 +121,20 @@ void pragma::locale::set_language(std::string lan)
 		load_file(fpath, lan);
 
 	try {
-		g_locFileWatcher = std::make_unique<fs::DirectoryWatcherCallback>(LOCALIZATION_ROOT_PATH + lan + '/', [](const std::string &str) {
-			auto filePath = util::Path::CreateFile(str);
-			auto it = std::find(g_loadedFiles.begin(), g_loadedFiles.end(), filePath.GetString());
+		g_locFileWatcher = std::make_unique<fs::DirectoryWatcherCallback>(LOCALIZATION_ROOT_PATH + lan + '/', [](const util::Path &basePath, const util::Path &path, fs::FileWatcherEvent event) {
+			if(event != fs::FileWatcherEvent::Modified)
+				return;
+			auto it = std::find(g_loadedFiles.begin(), g_loadedFiles.end(), path.GetString());
 			if(it == g_loadedFiles.end())
 				return;
-			Con::COUT << "Reloading localization file '" << str << "'..." << Con::endl;
-			load(str, true);
+			Con::COUT << "Reloading localization file '" << path << "'..." << Con::endl;
+			load(path, true);
 		});
 	}
 	catch(const std::runtime_error &err) {
 	}
+	if(g_onChangeCallback)
+		g_onChangeCallback(lan);
 }
 const std::string &pragma::locale::get_language() { return g_language; }
 const pragma::locale::LanguageInfo *pragma::locale::get_language_info()

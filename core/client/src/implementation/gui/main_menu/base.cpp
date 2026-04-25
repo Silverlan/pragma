@@ -304,7 +304,6 @@ void pragma::gui::types::WIMainMenuElement::SetText(std::string &text)
 		pText->SizeToContents();
 	}
 }
-void pragma::gui::types::WIMainMenuElement::SetSize(int x, int y) { WIBase::SetSize(x, y); }
 Vector4 pragma::gui::types::WIMainMenuElement::GetBackgroundColor()
 {
 	if(!m_hBackground.IsValid())

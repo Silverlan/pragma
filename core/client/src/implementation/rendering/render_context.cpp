@@ -196,11 +196,41 @@ bool rendering::RenderContext::IsValidationErrorDisabled(const std::string &id) 
 	auto it = m_disabledValidationErrors.find(id);
 	return (it != m_disabledValidationErrors.end());
 }
+bool rendering::RenderContext::DumpMemoryStatsImage(std::string_view memstatsFilepath, std::string_view outputFilename, std::string &outErr) const
+{
+	if(GetRenderAPI() != "vulkan") {
+		outErr = "Unsupported render API";
+		return false;
+	}
+	std::string absMemstatsFilepath;
+	if(!fs::find_absolute_path(memstatsFilepath, absMemstatsFilepath)) {
+		outErr = "Failed to find memstats file '" + std::string {memstatsFilepath} + "'!";
+		return false;
+	}
+
+	auto absOutputFilename = util::Path::CreateFile(outputFilename);
+	absOutputFilename.Canonicalize();
+	absOutputFilename = util::Path::CreatePath(fs::get_program_write_path()) / absOutputFilename;
+
+	auto scriptPath = "modules/graphics/vulkan/GpuMemDumpVis.py";
+	std::string absScriptPath;
+	if(!fs::find_absolute_path(scriptPath, absScriptPath)) {
+		outErr = "Failed to find script file '" + std::string {scriptPath} + "'!";
+		return false;
+	}
+	util::CommandInfo cmdInfo;
+	cmdInfo.command = "python";
+	cmdInfo.args = {absScriptPath, "-o", absOutputFilename.GetString(), absMemstatsFilepath};
+	cmdInfo.useParentEnvironment = false;
+	auto result = util::start_and_wait_for_command(cmdInfo);
+	return result.executionResult == util::CommandResult::ExecutionResult::Success;
+}
+
 void rendering::RenderContext::ValidationCallback(prosper::DebugMessageSeverityFlags severityFlags, const std::string &message)
 {
 	std::string strMsg = message;
 
-	if(strMsg.find("No optimized version") != std::string::npos)
+		if(strMsg.find("No optimized version") != std::string::npos)
 		return;
 
 	auto p = strMsg.find("[ VUID-");

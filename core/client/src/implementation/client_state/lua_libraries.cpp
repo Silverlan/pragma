@@ -360,6 +360,7 @@ static void register_gui(Lua::Interface &lua)
 	wiBaseWIElement.def("ScrollCallback", &pragma::gui::types::WILuaBase::Lua_ScrollCallback, &pragma::gui::types::WILuaBase::default_ScrollCallback);
 	wiBaseWIElement.def("OnUpdate", &pragma::gui::types::WILuaBase::Lua_OnUpdate, &pragma::gui::types::WILuaBase::default_OnUpdate);
 	wiBaseWIElement.def("OnVisibilityChanged", &pragma::gui::types::WILuaBase::Lua_OnSetVisible, &pragma::gui::types::WILuaBase::default_OnSetVisible);
+	wiBaseWIElement.def("OnPosChanged", &pragma::gui::types::WILuaBase::Lua_OnPosChanged, &pragma::gui::types::WILuaBase::default_OnPosChanged);
 	wiBaseWIElement.def("OnSizeChanged", &pragma::gui::types::WILuaBase::Lua_OnSizeChanged, &pragma::gui::types::WILuaBase::default_OnSizeChanged);
 	wiBaseWIElement.def("OnColorChanged", &pragma::gui::types::WILuaBase::Lua_OnSetColor, &pragma::gui::types::WILuaBase::default_OnSetColor);
 	wiBaseWIElement.def("OnAlphaChanged", &pragma::gui::types::WILuaBase::Lua_OnSetAlpha, &pragma::gui::types::WILuaBase::default_OnSetAlpha);

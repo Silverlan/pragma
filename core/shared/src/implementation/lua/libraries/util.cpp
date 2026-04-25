@@ -401,6 +401,7 @@ void Lua::util::register_shared_generic(lua::State *l, luabind::module_ &mod)
 		    gen.SetMeshDataInterface(std::move(meshInterface));
 		    return gen.Generate(hairPerArea);
 	    }))];
+
 	// is_valid overloads for up to 8 arguments
 	mod[(luabind::def("is_valid", +[](lua::State *l, const luabind::object o0, const luabind::object &o1) -> bool { return is_valid(l, o0) && is_valid(l, o1); }))];
 	mod[(luabind::def("is_valid", +[](lua::State *l, const luabind::object o0, const luabind::object &o1, const luabind::object &o2) -> bool { return is_valid(l, o0) && is_valid(l, o1) && is_valid(l, o2); }))];
@@ -1220,14 +1221,21 @@ Vector3 Lua::util::calc_world_direction_from_2d_coordinates(lua::State *l, const
 {
 	return uvec::calc_world_direction_from_2d_coordinates(forward, right, up, static_cast<float>(pragma::math::deg_to_rad(fov)), nearZ, farZ, aspectRatio, 0.f, 0.f, uv);
 }
+
 void Lua::util::world_space_point_to_screen_space_uv(lua::State *l, const Vector3 &point, const ::Mat4 &vp, float nearZ, float farZ)
 {
 	float dist;
-	auto uv = uvec::calc_screenspace_uv_from_worldspace_position(point, vp, nearZ, farZ, dist);
+	bool inBounds;
+	auto uv = uvec::calc_screenspace_uv_from_worldspace_position(point, vp, nearZ, farZ, dist, inBounds);
 	Push(l, uv);
 	PushNumber(l, dist);
+	PushBool(l, inBounds);
 }
-Vector2 Lua::util::world_space_point_to_screen_space_uv(lua::State *l, const Vector3 &point, const ::Mat4 &vp) { return uvec::calc_screenspace_uv_from_worldspace_position(point, vp); }
+Vector2 Lua::util::world_space_point_to_screen_space_uv(lua::State *l, const Vector3 &point, const ::Mat4 &vp)
+{
+	bool inBounds;
+	return uvec::calc_screenspace_uv_from_worldspace_position(point, vp, inBounds);
+}
 Vector2 Lua::util::world_space_direction_to_screen_space(lua::State *l, const Vector3 &dir, const ::Mat4 &vp) { return uvec::calc_screenspace_direction_from_worldspace_direction(dir, vp); }
 float Lua::util::calc_screenspace_distance_to_worldspace_position(lua::State *l, const Vector3 &point, const ::Mat4 &vp, float nearZ, float farZ) { return uvec::calc_screenspace_distance_to_worldspace_position(point, vp, nearZ, farZ); }
 float Lua::util::depth_to_distance(lua::State *l, float depth, float nearZ, float farZ) { return uvec::depth_to_distance(depth, nearZ, farZ); }

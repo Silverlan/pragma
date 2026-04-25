@@ -257,6 +257,13 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 	modVec[(luabind::def("max", +[](const Vector4 &v0, const Vector4 &v1) { return glm::max(v0, v1); }))];
 	modVec[(luabind::def("max", +[](const Vector4i &v0, const Vector4i &v1) { return glm::max(v0, v1); }))];
 
+	modVec[(luabind::def("clamp", +[](const Vector2 &v, const Vector2 &min, const Vector2 &max) { return glm::clamp(v, min, max); }))];
+	modVec[(luabind::def("clamp", +[](const Vector2i &v, const Vector2i &min, const Vector2i &max) { return glm::clamp(v, min, max); }))];
+	modVec[(luabind::def("clamp", +[](const Vector3 &v, const Vector3 &min, const Vector3 &max) { return glm::clamp(v, min, max); }))];
+	modVec[(luabind::def("clamp", +[](const Vector3i &v, const Vector3i &min, const Vector3i &max) { return glm::clamp(v, min, max); }))];
+	modVec[(luabind::def("clamp", +[](const Vector4 &v, const Vector4 &min, const Vector4 &max) { return glm::clamp(v, min, max); }))];
+	modVec[(luabind::def("clamp", +[](const Vector4i &v, const Vector4i &min, const Vector4i &max) { return glm::clamp(v, min, max); }))];
+
 	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "ORIGIN", uvec::PRM_ORIGIN);
 	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "FORWARD", uvec::PRM_FORWARD);
 	Lua::RegisterLibraryValue<Vector3>(lua.GetState(), "vector", "RIGHT", uvec::PRM_RIGHT);
@@ -489,6 +496,24 @@ void pragma::NetworkState::RegisterSharedLuaLibraries(Lua::Interface &lua)
 		luabind::def("is_positive_axis",static_cast<bool(*)(SignedAxis)>(&is_positive_axis)),
 		luabind::def("is_negative_axis",static_cast<bool(*)(SignedAxis)>(&is_negative_axis))
 	)];
+
+	modMath[(luabind::def(
+	  "calc_screenspace_info_from_worldspace_position", +[](lua::State *l, const Vector3 &worldPos, const Mat4 &viewProjection, float screenWidth, float screenHeight) -> luabind::tableT<void> {
+		  auto screenspaceInfo = uvec::calc_screenspace_info_from_worldspace_position(worldPos, viewProjection, screenWidth, screenHeight);
+		  auto t = luabind::newtable(l);
+		  t["x"] = screenspaceInfo.x;
+		  t["y"] = screenspaceInfo.y;
+		  t["angle"] = screenspaceInfo.angle;
+		  t["onScreen"] = screenspaceInfo.onScreen;
+		  return t;
+	  }))];
+
+	modMath[luabind::def(
+	  "lerp_angle", +[](float start, float end, float t) -> float {
+		  constexpr auto TWO_PI = pragma::math::pi * 2.f;
+		  auto shortest_diff = std::remainder(end - start, TWO_PI);
+		  return start + shortest_diff * t;
+	  })];
 
 	Lua::SetTableCFunction(lua.GetState(), "math", "parse_expression", parse_math_expression);
 	Lua::SetTableCFunction(lua.GetState(), "math", "solve_quadric", Lua::math::solve_quadric);

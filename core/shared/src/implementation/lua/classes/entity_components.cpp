@@ -2638,10 +2638,11 @@ void pragma::LuaCore::base_env_camera_component::register_class(luabind::module_
 		auto &ent = hComponent.GetEntity();
 		return uvec::calc_world_direction_from_2d_coordinates(ent.GetForward(), ent.GetRight(), ent.GetUp(), hComponent.GetFOVRad(), hComponent.GetNearZ(), hComponent.GetFarZ(), hComponent.GetAspectRatio(), width, height, uv);
 	}));
-	def.def("WorldSpaceToScreenSpace", static_cast<std::pair<Vector2, float> (*)(lua::State *, BaseEnvCameraComponent &, const Vector3 &)>([](lua::State *l, BaseEnvCameraComponent &hComponent, const Vector3 &point) -> std::pair<Vector2, float> {
+	def.def("WorldSpaceToScreenSpace", static_cast<std::tuple<Vector2, float, bool> (*)(lua::State *, BaseEnvCameraComponent &, const Vector3 &)>([](lua::State *l, BaseEnvCameraComponent &hComponent, const Vector3 &point) -> std::tuple<Vector2, float, bool> {
 		float dist;
-		auto uv = uvec::calc_screenspace_uv_from_worldspace_position(point, hComponent.GetProjectionMatrix() * hComponent.GetViewMatrix(), hComponent.GetNearZ(), hComponent.GetFarZ(), dist);
-		return {uv, dist};
+		bool inBounds;
+		auto uv = uvec::calc_screenspace_uv_from_worldspace_position(point, hComponent.GetProjectionMatrix() * hComponent.GetViewMatrix(), hComponent.GetNearZ(), hComponent.GetFarZ(), dist, inBounds);
+		return {uv, dist, inBounds};
 	}));
 	def.def("WorldSpaceToScreenSpaceDirection", static_cast<Vector2 (*)(lua::State *, BaseEnvCameraComponent &, const Vector3 &)>([](lua::State *l, BaseEnvCameraComponent &hComponent, const Vector3 &dir) -> Vector2 {
 		return uvec::calc_screenspace_direction_from_worldspace_direction(dir, hComponent.GetProjectionMatrix() * hComponent.GetViewMatrix());

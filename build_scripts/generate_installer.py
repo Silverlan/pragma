@@ -41,12 +41,12 @@ if not Path(inno_root).is_dir():
 iscc = inno_root +"/ISCC.exe"
 
 definitions = [
-    "MyAppName=Pragma",
-    "MyAppVersion=" +version,
-    "MyAppPublisher=Silverlan",
-    "MyAppURL=https://pragma-engine.com/",
-    "MyAppExeName=pfm.exe",
-    "IconLocation=" +cur_dir +"/../core/pragma/appicon.ico",
+    "APP_NAME=PFM",
+    "APP_VERSION=" +version,
+    "APP_PUBLISHER=Silverlan",
+    "APP_URL=https://pragma-engine.com/",
+    "APP_EXECUTABLE=pfm.exe",
+    "IconLocation=" +cur_dir +"/../tools/pfm_executable/appicon.ico",
     "PostInstallInfoLocation=" +cur_dir +"/installer/post_install.rtf",
     "OutputFilename=pragma_setup",
     "SourceLocation=" +install_directory

@@ -1,0 +1,5 @@
+"opensans"
+{
+	$string fileName "OpenSans-Regular.ttf"
+	$uint32 fontSizeAdjustment 1
+}

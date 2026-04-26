@@ -1,0 +1,7 @@
+"wguitextured"
+{
+	"textures"
+	{
+		$string albedo_map "gui/generic_arrow_down"
+	}
+}

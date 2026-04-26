@@ -1013,7 +1013,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 
 	LoadFontSets();
 	auto &defaultFontSet = m_defaultFontSet;
-	defaultFontSet = "dejavu";
+	defaultFontSet = "opensans";
 	auto *lanInfo = locale::get_language_info();
 	if(lanInfo && lanInfo->configData) {
 		std::vector<std::string> characterSetRequirements;

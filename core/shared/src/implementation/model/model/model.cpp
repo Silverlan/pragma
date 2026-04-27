@@ -394,18 +394,22 @@ void pragma::asset::Model::GetBodyGroupMeshes(const std::vector<uint32_t> bodyGr
 }
 pragma::asset::BodyGroup &pragma::asset::Model::AddBodyGroup(const std::string &name)
 {
-	auto id = GetBodyGroupId(name);
+	auto normName = name;
+	udm::sanitize_key_name(normName);
+	auto id = GetBodyGroupId(normName);
 	if(id == -1) {
-		m_bodyGroups.push_back(BodyGroup(name));
+		m_bodyGroups.push_back(BodyGroup(normName));
 		id = static_cast<int32_t>(m_bodyGroups.size() - 1);
 	}
 	return m_bodyGroups[id];
 }
 int32_t pragma::asset::Model::GetBodyGroupId(const std::string &name)
 {
+	auto normName = name;
+	udm::sanitize_key_name(normName);
 	for(auto i = decltype(m_bodyGroups.size()) {0}; i < m_bodyGroups.size(); ++i) {
 		auto &bg = m_bodyGroups[i];
-		if(string::compare(bg.name, name, false))
+		if(string::compare(bg.name, normName, false))
 			return static_cast<int32_t>(i);
 	}
 	return -1;

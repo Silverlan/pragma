@@ -37,8 +37,6 @@ export namespace Lua {
 		DLLCLIENT void Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize);
 		DLLCLIENT void Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent);
 		DLLCLIENT void Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const pragma::gui::DrawInfo &drawInfo, pragma::gui::DrawState &drawState, const ::Vector2i &scissorOffset, const ::Vector2i &scissorSize, const ::Vector2i &offsetParent, const ::Vector2 &scale);
-		DLLCLIENT void GetX(lua::State *l, pragma::gui::types::WIBase &hPanel);
-		DLLCLIENT void GetY(lua::State *l, pragma::gui::types::WIBase &hPanel);
 		DLLCLIENT void SetX(lua::State *l, pragma::gui::types::WIBase &hPanel, float x); // TODO This should be int, but float-to-int conversion is currently broken with luabind
 		DLLCLIENT void SetY(lua::State *l, pragma::gui::types::WIBase &hPanel, float y);
 		DLLCLIENT void SetWidth(lua::State *l, pragma::gui::types::WIBase &hPanel, float w);

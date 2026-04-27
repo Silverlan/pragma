@@ -280,6 +280,7 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetSize", static_cast<const ::Vector2i &(pragma::gui::types::WIBase::*)() const>(&pragma::gui::types::WIBase::GetSize), luabind::copy_policy<0> {});
 	classDef.def("SetSize", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, ::Vector2)>(&SetSize));
 	classDef.def("SetSize", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, float, float)>(&SetSize));
+	classDef.def("SetSize", +[](pragma::gui::types::WIBase &el, ::Vector2 sz, pragma::gui::ChangeSource changeSource) { el.SetSize(sz.x, sz.y, changeSource); });
 	classDef.def("ApplySize", static_cast<void (pragma::gui::types::WIBase::*)(const ::Vector2i &)>(&pragma::gui::types::WIBase::ApplySize));
 	classDef.def("ApplySize", static_cast<void (pragma::gui::types::WIBase::*)(int, int)>(&pragma::gui::types::WIBase::ApplySize));
 	classDef.def("Wrap", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, const std::string &)>(&Wrap));
@@ -319,14 +320,16 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("DrawToTexture", &draw_to_texture);
 	classDef.def("DrawToTexture", +[](pragma::gui::types::WIBase &el) { return draw_to_texture(el, {}); });
 	classDef.def("RecordDraw", &record_draw_ui);
-	classDef.def("GetX", &GetX);
-	classDef.def("GetY", &GetY);
+	classDef.def("GetX", &pragma::gui::types::WIBase::GetX);
+	classDef.def("GetY", &pragma::gui::types::WIBase::GetY);
 	classDef.def("SetX", &SetX);
 	classDef.def("SetY", &SetY);
 	classDef.def("ApplyX", &pragma::gui::types::WIBase::ApplyX);
 	classDef.def("ApplyY", &pragma::gui::types::WIBase::ApplyY);
 	classDef.def("SetWidth", &SetWidth);
+	classDef.def("SetWidth", +[](pragma::gui::types::WIBase &el, float w, pragma::gui::ChangeSource changeSource) { el.SetWidth(w, false, changeSource); });
 	classDef.def("SetHeight", &SetHeight);
+	classDef.def("SetHeight", +[](pragma::gui::types::WIBase &el, float h, pragma::gui::ChangeSource changeSource) { el.SetHeight(h, false, changeSource); });
 	classDef.def("ApplyWidth", &pragma::gui::types::WIBase::ApplyWidth);
 	classDef.def("ApplyHeight", &pragma::gui::types::WIBase::ApplyHeight);
 	classDef.def("SizeToContents", +[](pragma::gui::types::WIBase &el, bool x, bool y, pragma::gui::ChangeSource changeSource) { el.SizeToContents(x, y, changeSource); });
@@ -492,6 +495,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 		  return std::tuple<float, float, float, float> {left, top, right, bottom};
 	  });
 	classDef.def("HasAnchor", &pragma::gui::types::WIBase::HasAnchor);
+	classDef.def("HasHorizontalAnchor", +[](const pragma::gui::types::WIBase &el) { return el.IsAnchorEdgeEnabled(pragma::gui::Anchor::Edge::Left) || el.IsAnchorEdgeEnabled(pragma::gui::Anchor::Edge::Right) || el.IsAnchorEdgeEnabled(pragma::gui::Anchor::Edge::HorizontalCenter); });
+	classDef.def("HasVerticalAnchor", +[](const pragma::gui::types::WIBase &el) { return el.IsAnchorEdgeEnabled(pragma::gui::Anchor::Edge::Top) || el.IsAnchorEdgeEnabled(pragma::gui::Anchor::Edge::Bottom) || el.IsAnchorEdgeEnabled(pragma::gui::Anchor::Edge::VerticalCenter); });
 	classDef.def("SetRemoveOnParentRemoval", &pragma::gui::types::WIBase::SetRemoveOnParentRemoval);
 	classDef.def("GetCenter", &pragma::gui::types::WIBase::GetCenter);
 	classDef.def("GetCenterX", &pragma::gui::types::WIBase::GetCenterX);
@@ -1159,36 +1164,10 @@ void Lua::WIBase::Draw(lua::State *l, pragma::gui::types::WIBase &hPanel, const 
 {
 	hPanel.Draw(drawInfo, drawState, offsetParent, scissorOffset, scissorSize, scale);
 }
-void Lua::WIBase::GetX(lua::State *l, pragma::gui::types::WIBase &hPanel)
-{
-	::Vector2i pos = hPanel.GetPos();
-	PushInt(l, pos.x);
-}
-void Lua::WIBase::GetY(lua::State *l, pragma::gui::types::WIBase &hPanel)
-{
-	::Vector2i pos = hPanel.GetPos();
-	PushInt(l, pos.y);
-}
-void Lua::WIBase::SetX(lua::State *l, pragma::gui::types::WIBase &hPanel, float x)
-{
-	::Vector2i pos = hPanel.GetPos();
-	hPanel.SetPos(::Vector2i(x, pos.y));
-}
-void Lua::WIBase::SetY(lua::State *l, pragma::gui::types::WIBase &hPanel, float y)
-{
-	::Vector2i pos = hPanel.GetPos();
-	hPanel.SetPos(::Vector2i(pos.x, y));
-}
-void Lua::WIBase::SetWidth(lua::State *l, pragma::gui::types::WIBase &hPanel, float w)
-{
-	::Vector2i size = hPanel.GetSize();
-	hPanel.SetSize(::Vector2i(w, size.y));
-}
-void Lua::WIBase::SetHeight(lua::State *l, pragma::gui::types::WIBase &hPanel, float h)
-{
-	::Vector2i size = hPanel.GetSize();
-	hPanel.SetSize(::Vector2i(size.x, h));
-}
+void Lua::WIBase::SetX(lua::State *l, pragma::gui::types::WIBase &hPanel, float x) { hPanel.SetX(x); }
+void Lua::WIBase::SetY(lua::State *l, pragma::gui::types::WIBase &hPanel, float y) { hPanel.SetY(y); }
+void Lua::WIBase::SetWidth(lua::State *l, pragma::gui::types::WIBase &hPanel, float w) { hPanel.SetWidth(w); }
+void Lua::WIBase::SetHeight(lua::State *l, pragma::gui::types::WIBase &hPanel, float h) { hPanel.SetHeight(h); }
 
 struct LuaCallbacks {
 	struct CallbackInfo {

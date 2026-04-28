@@ -1117,13 +1117,8 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		m_gpuProfilingStageManager->InitializeProfilingStageManager(gpuProfiler);
 	});
 
-	try {
-		InitializeSoundEngine();
-	}
-	catch(const std::runtime_error &err) {
-		criticalFailure(std::format("Failed to initialize audio engine: {}. {} will now exit.", err.what(), engine_info::get_name()));
+	if(!InitializeSoundEngine())
 		return false;
-	}
 
 	OpenClientState();
 	register_game_shaders(); // Preload game shaders

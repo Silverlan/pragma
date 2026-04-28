@@ -284,6 +284,7 @@ export {
 			// For internal use only
 			void SetReplicatedConVar(std::string_view cvar, const std::string &val);
 		  protected:
+			void CriticalFailure(std::string_view message, bool exit = false);
 			void UpdateParallelJobs();
 			console::ConCommandResult RunEngineConsoleCommand(std::string cmd, std::vector<std::string> &argv, const RunConCommandInfo &cmdInfo);
 			void WriteServerConfig(fs::VFilePtrReal f);

@@ -714,12 +714,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 
 	std::shared_ptr<material::CMaterialManager> matManager;
 	auto criticalFailure = [&](std::string_view message) {
-		spdlog::error(message);
-		debug::show_message_prompt(std::string {message}, debug::MessageBoxButtons::Ok, "Critial Failure");
-		matManager = nullptr;
-		Close();
-		Release();
-		util::sleep_for_seconds(5);
+		CriticalFailure(message);
 		return false;
 	};
 
@@ -1122,7 +1117,13 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		m_gpuProfilingStageManager->InitializeProfilingStageManager(gpuProfiler);
 	});
 
-	InitializeSoundEngine();
+	try {
+		InitializeSoundEngine();
+	}
+	catch(const std::runtime_error &err) {
+		criticalFailure(std::format("Failed to initialize audio engine: {}. {} will now exit.", err.message(), engine_info::get_name()));
+		return false;
+	}
 
 	OpenClientState();
 	register_game_shaders(); // Preload game shaders

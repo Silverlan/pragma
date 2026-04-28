@@ -584,7 +584,7 @@ void pragma::Engine::Tick()
 void pragma::Engine::CriticalFailure(std::string_view message, bool shouldExit)
 {
 	spdlog::error(message);
-	debug::show_message_prompt(std::string {message}, debug::MessageBoxButtons::Ok, "Critial Failure");
+	debug::show_message_prompt(std::string {message}, debug::MessageBoxButtons::Ok, "Critical Failure");
 	Close();
 	Release();
 	util::sleep_for_seconds(5);

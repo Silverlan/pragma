@@ -28,7 +28,7 @@ endif()
 
 if(PRAGMA_WITH_COMMON_MODULES)
     pr_fetch_module("pr_bullet"                    "https://github.com/Silverlan/pr_bullet.git"           "a1097f685ba2d18cb4397c48d17f3e7615b376db")
-    pr_fetch_module("pr_audio_soloud"              "https://github.com/Silverlan/pr_soloud.git"           "6e2b627232abc0410d92c614f767ca4759c0104a")
+    pr_fetch_module("pr_audio_soloud"              "https://github.com/Silverlan/pr_soloud.git"           "9bb3405fb73033402ae12b5bde09c5deb8de295c")
     pr_fetch_module("pr_audio_dummy"               "https://github.com/Silverlan/pr_audio_dummy.git"      "c54a035cf61f4c47f88bd6274e43e54054e6cb21")
     pr_fetch_module("pr_prosper_opengl"            "https://github.com/Silverlan/pr_prosper_opengl.git"   "54a9860dba94a73610e069c3d7dad627ded6c5e3")
 endif()

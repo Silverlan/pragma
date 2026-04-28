@@ -581,6 +581,17 @@ void pragma::Engine::Tick()
 	UpdateParallelJobs();
 }
 
+void pragma::Engine::CriticalFailure(std::string_view message, bool shouldExit)
+{
+	spdlog::error(message);
+	debug::show_message_prompt(std::string {message}, debug::MessageBoxButtons::Ok, "Critial Failure");
+	Close();
+	Release();
+	util::sleep_for_seconds(5);
+	if(shouldExit)
+		exit(1);
+}
+
 void pragma::Engine::UpdateParallelJobs()
 {
 	// Update background tasks

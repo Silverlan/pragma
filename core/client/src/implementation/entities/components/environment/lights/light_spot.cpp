@@ -49,7 +49,7 @@ void CLightSpotComponent::SetFieldAngleComponent(BaseFieldAngleComponent &c)
 		if(pLightComponent.expired())
 			return;
 		auto &bufferData = pLightComponent->GetBufferData();
-		bufferData.outerConeHalfAngle = static_cast<math::Radian>(math::deg_to_rad(newAng.get() / 2.f));
+		bufferData.SetOuterConeHalfAngle(newAng.get() / 2.f);
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
 			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, outerConeHalfAngle), bufferData.outerConeHalfAngle);
@@ -68,7 +68,7 @@ void CLightSpotComponent::UpdateInnerConeAngle()
 	if(pLightComponent.expired())
 		return;
 	auto &bufferData = pLightComponent->GetBufferData();
-	bufferData.innerConeHalfAngle = math::deg_to_rad(CalcInnerConeAngle(GetOuterConeAngle(), GetBlendFraction()) / 2.f);
+	bufferData.SetInnerConeHalfAngle(CalcInnerConeAngle(GetOuterConeAngle(), GetBlendFraction()) / 2.f);
 	auto &renderBuffer = pLightComponent->GetRenderBuffer();
 	if(renderBuffer != nullptr)
 		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, innerConeHalfAngle), bufferData.innerConeHalfAngle);

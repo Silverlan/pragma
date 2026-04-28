@@ -13,6 +13,9 @@ export import std.compat;
 export namespace pragma {
 #pragma pack(push, 1)
 	struct LightBufferData {
+	  private:
+		static constexpr float EPSILON = 0.00001f;
+	  public:
 		enum class BufferFlags : uint32_t { None = 0, TurnedOn = 1, TypeSpot = TurnedOn << 1, TypePoint = TypeSpot << 1, TypeDirectional = TypePoint << 1, BakedLightSource = TypeDirectional << 1 };
 		Vector4 position {}; // position.w = distance
 		Vector3 color {1.f, 1.f, 1.f};
@@ -31,6 +34,25 @@ export namespace pragma {
 
 		float falloffExponent = 1.f;
 		std::array<float, 3> padding = {}; // Padding to vec4
+
+		// These should be preferred over setting the values manually, as they ensure safe values.
+		void SetInnerConeHalfAngle(math::Degree angle)
+		{
+			auto newAngle = math::deg_to_rad(angle);
+			newAngle = math::clamp<float>(newAngle, EPSILON, math::pi_2 - (EPSILON * 2.0f));
+			innerConeHalfAngle = newAngle;
+			if(outerConeHalfAngle < innerConeHalfAngle + EPSILON)
+				outerConeHalfAngle = innerConeHalfAngle + EPSILON;
+		}
+		void SetOuterConeHalfAngle(math::Degree angle)
+		{
+			auto newAngle = math::deg_to_rad(angle);
+			newAngle = math::clamp<float>(newAngle, EPSILON * 2.0f, math::pi_2 - EPSILON);
+			outerConeHalfAngle = newAngle;
+			if(innerConeHalfAngle > outerConeHalfAngle - EPSILON)
+				innerConeHalfAngle = outerConeHalfAngle - EPSILON;
+		}
+		void SetFalloffExponent(float newFalloffExponent) { falloffExponent = math::max(newFalloffExponent, EPSILON); }
 	};
 	struct ShadowBufferData {
 		Mat4 depthVP = umat::identity();

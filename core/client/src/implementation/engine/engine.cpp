@@ -681,6 +681,11 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	Engine::Initialize(argc, argv);
 	SetCLIOnly(g_cli);
 
+	if(IsDeveloperModeEnabled()) {
+		spdlog::info("Developer mode is enabled. Disabling global shader file cache to allow hot-reloading of shader code.");
+		prosper::glsl::set_global_include_file_cache_enabled(false);
+	}
+
 #ifdef __linux__
 	auto xdgSessionType = util::get_env_variable("XDG_SESSION_TYPE");
 	if(!xdgSessionType || *xdgSessionType != "x11") {

@@ -54,6 +54,7 @@ pragma::audio::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 
 	auto &baseAudioAPI = GetAudioAPI();
 	std::vector<std::string> fallbackApis {};
+	fallbackApis.push_back(baseAudioAPI);
 	if(baseAudioAPI != "soloud")
 		fallbackApis.push_back("soloud");
 	if(baseAudioAPI != "dummy")

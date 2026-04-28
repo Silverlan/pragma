@@ -300,7 +300,7 @@ void CLightComponent::SetFalloffExponent(float falloffExponent)
 	if(falloffExponent == m_bufferData.falloffExponent)
 		return;
 	BaseEnvLightComponent::SetFalloffExponent(falloffExponent);
-	m_bufferData.falloffExponent = falloffExponent;
+	m_bufferData.SetFalloffExponent(falloffExponent);
 	if(m_renderBuffer != nullptr)
 		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_renderBuffer, offsetof(LightBufferData, falloffExponent), m_bufferData.falloffExponent);
 }

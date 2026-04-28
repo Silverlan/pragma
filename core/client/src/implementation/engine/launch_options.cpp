@@ -122,6 +122,13 @@ static void LPARAM_wayland_libdecor_plugin(const std::vector<std::string> &argv)
 	g_waylandLibdecorPlugin = argv.front();
 }
 
+static void LPARAM_disable_global_shader_file_cache(const std::vector<std::string> &argv)
+{
+	if(argv.empty())
+		return;
+	prosper::glsl::set_global_include_file_cache_enabled(pragma::util::to_boolean(argv.front()));
+}
+
 void pragma::register_client_launch_parameters(LaunchParaMap &map)
 {
 	map.RegisterParameterHelp("-windowed", &LPARAM_windowed, "-window -startwindowed -sw", "start in windowed mode");
@@ -140,6 +147,7 @@ void pragma::register_client_launch_parameters(LaunchParaMap &map)
 
 	map.RegisterParameterHelp("-fullbright", &LPARAM_fullbright, "", "start in fullbright mode");
 
+	map.RegisterParameterHelp("-enable_global_shader_file_cache", &LPARAM_disable_global_shader_file_cache, "<1/0>", "Enables or disables the global shader file cache. Disable this if you're working on shader files and need to reload them during runtime.");
 	map.RegisterParameterHelp("-enable_gfx_api_dump", &LPARAM_enable_gfx_api_dump, "<1/0>", "Enables or disables graphics API dump.");
 	map.RegisterParameterHelp("-enable_gfx_validation", &LPARAM_vk_enable_validation, "<1/0>", "Enables or disables graphics API validation.");
 	map.RegisterParameterHelp("-enable_gfx_diagnostics", &LPARAM_vk_enable_gfx_diagnostics, "<1/0>", "Enables or disables GPU diagnostics mode.");

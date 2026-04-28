@@ -1121,7 +1121,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		InitializeSoundEngine();
 	}
 	catch(const std::runtime_error &err) {
-		criticalFailure(std::format("Failed to initialize audio engine: {}. {} will now exit.", err.message(), engine_info::get_name()));
+		criticalFailure(std::format("Failed to initialize audio engine: {}. {} will now exit.", err.what(), engine_info::get_name()));
 		return false;
 	}
 

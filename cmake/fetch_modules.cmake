@@ -43,7 +43,7 @@ if(PRAGMA_WITH_PFM)
         pr_fetch_module("pr_unirender"             "https://github.com/Silverlan/pr_cycles.git"           "efa573beee18e6577c5112f340d36db5078fda27")
         pr_fetch_module("pr_xatlas"                "https://github.com/Silverlan/pr_xatlas.git"           "06013606c4efa7a9e7e96fc61af59d142c494daf")
         pr_fetch_module("pr_davinci"               "https://github.com/Silverlan/pr_davinci.git"          "8235a3e9159cb7fe7861da91dcc8f235af1a88a9")
-        pr_fetch_module("pr_opencv"                "https://github.com/Silverlan/pr_opencv.git"           "9fde9d9827a849accc9f0c2b3cc963206b31a1ca")
+        pr_fetch_module("pr_opencv"                "https://github.com/Silverlan/pr_opencv.git"           "d03fd8b40e81ec4874f28bc4d6471844b1f5681b")
     endif()
 endif()
 

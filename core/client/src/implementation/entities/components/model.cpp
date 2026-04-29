@@ -164,7 +164,7 @@ void CModelComponent::SetDepthPrepassEnabled(bool enabled) { math::set_flag(m_st
 
 void CModelComponent::SetRenderBufferData(const std::vector<rendering::RenderBufferData> &renderBufferData) { m_lodMeshRenderBufferData = renderBufferData; }
 
-void CModelComponent::AddRenderMesh(geometry::CModelSubMesh &mesh, material::CMaterial &mat, rendering::RenderBufferData::StateFlags stateFlags)
+void CModelComponent::AddRenderMesh(geometry::CModelSubMesh &mesh, material::CMaterial &mat, rendering::RenderBufferData::StateFlags stateFlags, std::optional<rendering::LayerMask> layerMask)
 {
 	if(m_lodRenderMeshGroups.empty())
 		return;
@@ -182,11 +182,20 @@ void CModelComponent::AddRenderMesh(geometry::CModelSubMesh &mesh, material::CMa
 	if(!shader || !shader->IsDepthPrepassEnabled())
 		math::set_flag(stateFlags, rendering::RenderBufferData::StateFlags::EnableDepthPrepass, false);
 
+	if(!layerMask) {
+		std::string renderLayer;
+		if(mat.GetProperty<udm::String>("render_layer", &renderLayer))
+			layerMask = get_cgame()->GetRenderLayerManager().GetMask(renderLayer);
+		else
+			layerMask = rendering::DEFAULT_LAYER;
+	}
+
 	rendering::RenderBufferData renderBufferData {};
 	renderBufferData.material = mat.GetHandle();
 	renderBufferData.renderBuffer = renderBuffer;
 	renderBufferData.stateFlags = stateFlags;
 	renderBufferData.pipelineSpecializationFlags = shader->GetMaterialPipelineSpecializationRequirements(mat);
+	renderBufferData.layerMask = *layerMask;
 
 	m_lodRenderMeshes.insert(m_lodRenderMeshes.begin() + insertIdx, mesh.shared_from_this());
 	m_lodMeshRenderBufferData.insert(m_lodMeshRenderBufferData.begin() + insertIdx, std::move(renderBufferData));
@@ -245,6 +254,11 @@ void CModelComponent::UpdateRenderBufferList()
 		auto &renderBufferData = m_lodMeshRenderBufferData.back();
 		renderBufferData.renderBuffer = renderBuffer;
 		renderBufferData.material = mat ? mat->GetHandle() : material::MaterialHandle {};
+		if(mat) {
+			std::string renderLayer;
+			if(mat->GetProperty<udm::String>("render_layer", &renderLayer))
+				renderBufferData.layerMask = get_cgame()->GetRenderLayerManager().GetMask(renderLayer);
+		}
 		math::set_flag(renderBufferData.stateFlags, rendering::RenderBufferData::StateFlags::EnableDepthPrepass, depthPrepassEnabled && shader && shader->IsDepthPrepassEnabled());
 		if(mat == nullptr || shader == nullptr)
 			continue;
@@ -536,7 +550,8 @@ void CModelComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEn
 	defCModel.def("SetRenderBufferData", &CModelComponent::SetRenderBufferData);
 	defCModel.def("GetRenderBufferData", +[](CModelComponent &c) -> std::vector<rendering::RenderBufferData> { return c.GetRenderBufferData(); });
 	defCModel.def("AddRenderMesh", &CModelComponent::AddRenderMesh);
-	defCModel.def("AddRenderMesh", &CModelComponent::AddRenderMesh, luabind::default_parameter_policy<4, rendering::RenderBufferData::StateFlags::EnableDepthPrepass> {});
+	defCModel.def("AddRenderMesh", +[](CModelComponent &modelC, geometry::CModelSubMesh &mesh, material::CMaterial &mat) { return modelC.AddRenderMesh(mesh, mat); });
+	defCModel.def("AddRenderMesh", +[](CModelComponent &modelC, geometry::CModelSubMesh &mesh, material::CMaterial &mat, rendering::RenderBufferData::StateFlags stateFlags) { return modelC.AddRenderMesh(mesh, mat, stateFlags); });
 	defCModel.def("GetRenderMeshes", +[](CModelComponent &c) -> std::vector<std::shared_ptr<geometry::ModelSubMesh>> { return c.GetRenderMeshes(); });
 	defCModel.def("GetBaseShaderSpecializationFlags", &CModelComponent::GetBaseShaderSpecializationFlags);
 	defCModel.def("SetBaseShaderSpecializationFlags", &CModelComponent::SetBaseShaderSpecializationFlags);

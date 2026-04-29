@@ -47,6 +47,7 @@ function Component:InitializeModel()
 
 	local mat = asset.create_material("pfm_wireframe_line")
 	mat:SetTexture("albedo_map", "white")
+	mat:SetProperty("render_layer", udm.TYPE_STRING, "helper")
 	local matIdx = mdl:AddMaterial(0, mat)
 	subMesh:SetSkinTextureIndex(matIdx)
 

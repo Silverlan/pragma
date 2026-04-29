@@ -9,6 +9,7 @@ export module pragma.client:entities.components.renderer;
 
 export import :entities.components.scene;
 export import :rendering.draw_scene_info;
+export import :rendering.layers;
 
 export namespace pragma {
 	struct DLLCLIENT PostProcessingEffectData {
@@ -65,10 +66,14 @@ export namespace pragma {
 		void UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd);
 		uint32_t GetWidth() const { return m_width; }
 		uint32_t GetHeight() const { return m_height; }
+
+		void SetVisibilityMask(rendering::VisibilityMask visibilityMask) { m_visibilityMask = visibilityMask; }
+		rendering::VisibilityMask GetVisibilityMask() const { return m_visibilityMask; }
 	  private:
 		uint32_t m_width = 0;
 		uint32_t m_height = 0;
 		std::vector<PostProcessingEffectData> m_postProcessingEffects;
+		rendering::VisibilityMask m_visibilityMask = rendering::ALL_LAYERS;
 	};
 
 	struct DLLCLIENT CEReloadRenderTarget : public ComponentEvent {

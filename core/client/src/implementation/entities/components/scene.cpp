@@ -80,7 +80,7 @@ static std::array<CSceneComponent *, 32> g_scenes {};
 
 CSceneComponent *CSceneComponent::Create(const CreateInfo &createInfo, CSceneComponent *optParent)
 {
-	SceneIndex sceneIndex;
+	rendering::SceneIndex sceneIndex;
 	if(optParent)
 		sceneIndex = optParent->GetSceneIndex();
 	else {
@@ -123,7 +123,7 @@ void CSceneComponent::OnRemove()
 		m_cbLink.Remove();
 
 	auto sceneIndex = GetSceneIndex();
-	if(sceneIndex == std::numeric_limits<SceneIndex>::max())
+	if(sceneIndex == std::numeric_limits<rendering::SceneIndex>::max())
 		return;
 	assert(g_sceneUseCount.size() > 0);
 	--g_sceneUseCount.at(sceneIndex);
@@ -146,7 +146,7 @@ void CSceneComponent::OnRemove()
 void CSceneComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CSceneComponent::Initialize() { BaseEntityComponent::Initialize(); }
 
-void CSceneComponent::Setup(const CreateInfo &createInfo, SceneIndex sceneIndex)
+void CSceneComponent::Setup(const CreateInfo &createInfo, rendering::SceneIndex sceneIndex)
 {
 	m_sceneIndex = sceneIndex;
 	for(auto i = decltype(CShadowCSMComponent::MAX_CASCADE_COUNT) {0}; i < CShadowCSMComponent::MAX_CASCADE_COUNT; ++i)
@@ -210,11 +210,7 @@ void CSceneComponent::InitializeShadowDescriptorSet()
 	}
 }
 
-CSceneComponent *CSceneComponent::GetByIndex(SceneIndex sceneIndex) { return (sceneIndex < g_scenes.size()) ? g_scenes.at(sceneIndex) : nullptr; }
-
-uint32_t CSceneComponent::GetSceneFlag(SceneIndex sceneIndex) { return 1 << sceneIndex; }
-
-CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex(uint32_t flag) { return math::get_least_significant_set_bit_index(flag); }
+CSceneComponent *CSceneComponent::GetByIndex(rendering::SceneIndex sceneIndex) { return (sceneIndex < g_scenes.size()) ? g_scenes.at(sceneIndex) : nullptr; }
 
 static auto cvShadowmapSize = console::get_client_con_var("cl_render_shadow_resolution");
 static auto cvShaderQuality = console::get_client_con_var("cl_render_shader_quality");
@@ -596,7 +592,9 @@ CSceneComponent *CSceneComponent::GetParentScene()
 	return GetByIndex(GetSceneIndex());
 }
 
-CSceneComponent::SceneIndex CSceneComponent::GetSceneIndex() const { return m_sceneIndex; }
+rendering::SceneIndex CSceneComponent::GetSceneIndex() const { return m_sceneIndex; }
+rendering::SceneFlag CSceneComponent::GetSceneFlag() const { return 1 << GetSceneIndex(); }
+bool CSceneComponent::IsInSceneFlags(rendering::SceneFlags sceneFlags) const { return (sceneFlags & GetSceneFlag()) != 0; }
 
 uint32_t CSceneComponent::GetWidth() const { return m_renderer.valid() ? static_cast<const CRendererComponent *>(m_renderer.get())->GetWidth() : 0; }
 uint32_t CSceneComponent::GetHeight() const { return m_renderer.valid() ? static_cast<const CRendererComponent *>(m_renderer.get())->GetHeight() : 0; }

@@ -10,6 +10,8 @@ void pragma::scripting::lua_core::bindings::register_renderers(lua::State *l, lu
 	auto defRenderer = pragma::LuaCore::create_entity_component_class<CRendererComponent, BaseEntityComponent>("RendererComponent");
 	defRenderer.def("GetWidth", &CRendererComponent::GetWidth);
 	defRenderer.def("GetHeight", &CRendererComponent::GetHeight);
+	defRenderer.def("SetVisibilityMask", &CRendererComponent::SetVisibilityMask);
+	defRenderer.def("GetVisibilityMask", &CRendererComponent::GetVisibilityMask);
 	defRenderer.def("InitializeRenderTarget", static_cast<void (*)(lua::State *, CRendererComponent &, CSceneComponent &, uint32_t, uint32_t, bool)>([](lua::State *l, CRendererComponent &renderer, CSceneComponent &scene, uint32_t width, uint32_t height, bool reload) {
 		if(reload == false && width == renderer.GetWidth() && height == renderer.GetHeight())
 			return;

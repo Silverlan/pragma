@@ -75,7 +75,7 @@ export namespace pragma {
 		const std::vector<rendering::RenderBufferData> &GetRenderBufferData() const { return const_cast<CModelComponent *>(this)->GetRenderBufferData(); };
 		std::vector<rendering::RenderBufferData> &GetRenderBufferData() { return m_lodMeshRenderBufferData; }
 		void SetRenderBufferData(const std::vector<rendering::RenderBufferData> &renderBufferData);
-		void AddRenderMesh(geometry::CModelSubMesh &mesh, material::CMaterial &mat, rendering::RenderBufferData::StateFlags stateFlags = rendering::RenderBufferData::StateFlags::EnableDepthPrepass);
+		void AddRenderMesh(geometry::CModelSubMesh &mesh, material::CMaterial &mat, rendering::RenderBufferData::StateFlags stateFlags = rendering::RenderBufferData::StateFlags::EnableDepthPrepass, std::optional<rendering::LayerMask> layerMask = {});
 
 		rendering::RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod);
 		const rendering::RenderMeshGroup &GetLodRenderMeshGroup(uint32_t lod) const;

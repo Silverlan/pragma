@@ -8,6 +8,7 @@ module;
 export module pragma.client:rendering.draw_scene_info;
 
 export import :rendering.enums;
+export import :rendering.layers;
 import :rendering.render_stats;
 
 export {
@@ -42,6 +43,7 @@ export namespace pragma::rendering {
 		std::optional<Vector3> pvsOrigin {};
 		RenderMask exclusionMask = RenderMask::None;
 		RenderMask inclusionMask = RenderMask::None;
+		VisibilityMask visibilityMask = ALL_LAYERS;
 
 		std::function<bool(ecs::CBaseEntity &)> prepassFilter = nullptr;
 		std::function<bool(ecs::CBaseEntity &)> renderFilter = nullptr;

@@ -339,6 +339,8 @@ void pragma::CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("GetExclusionRenderMask", &CSceneComponent::GetExclusionRenderMask);
 	defCScene.def("SetInclusionRenderMask", &CSceneComponent::SetInclusionRenderMask);
 	defCScene.def("GetInclusionRenderMask", &CSceneComponent::GetInclusionRenderMask);
+	defCScene.def("SetVisibilityMask", &CSceneComponent::SetVisibilityMask);
+	defCScene.def("GetVisibilityMask", &CSceneComponent::GetVisibilityMask);
 	defCScene.def("GetWidth", &CSceneComponent::GetWidth);
 	defCScene.def("GetHeight", &CSceneComponent::GetHeight);
 	defCScene.def("GetSize", static_cast<std::pair<uint32_t, uint32_t> (*)(const CSceneComponent &)>([](const CSceneComponent &scene) -> std::pair<uint32_t, uint32_t> { return {scene.GetWidth(), scene.GetHeight()}; }));
@@ -362,7 +364,7 @@ void pragma::CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("ClearWorldEnvironment", &CSceneComponent::ClearWorldEnvironment);
 	defCScene.def("InitializeRenderTarget", &CSceneComponent::ReloadRenderTarget);
 
-	defCScene.def("GetIndex", static_cast<CSceneComponent::SceneIndex (CSceneComponent::*)() const>(&CSceneComponent::GetSceneIndex));
+	defCScene.def("GetIndex", static_cast<rendering::SceneIndex (CSceneComponent::*)() const>(&CSceneComponent::GetSceneIndex));
 	defCScene.def("GetCameraDescriptorSet", static_cast<const std::shared_ptr<prosper::IDescriptorSetGroup> &(CSceneComponent::*)(prosper::PipelineBindPoint) const>(&CSceneComponent::GetCameraDescriptorSetGroup));
 	defCScene.def("GetCameraDescriptorSet", static_cast<const std::shared_ptr<prosper::IDescriptorSetGroup> &(*)(const CSceneComponent &)>([](const CSceneComponent &scene) -> const std::shared_ptr<prosper::IDescriptorSetGroup> & {
 		return scene.GetCameraDescriptorSetGroup(prosper::PipelineBindPoint::Graphics);
@@ -375,7 +377,9 @@ void pragma::CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	// defCScene.def("BuildRenderQueue",&pragma::CSceneComponent::BuildRenderQueue);
 	defCScene.def("GetRenderer", static_cast<CRendererComponent *(CSceneComponent::*)()>(&CSceneComponent::GetRenderer<CRendererComponent>));
 	defCScene.def("SetRenderer", &CSceneComponent::SetRenderer<CRendererComponent>);
-	defCScene.def("GetSceneIndex", static_cast<CSceneComponent::SceneIndex (CSceneComponent::*)() const>(&CSceneComponent::GetSceneIndex));
+	defCScene.def("GetSceneIndex", static_cast<rendering::SceneIndex (CSceneComponent::*)() const>(&CSceneComponent::GetSceneIndex));
+	defCScene.def("GetSceneFlag", &CSceneComponent::GetSceneFlag);
+	defCScene.def("IsInSceneFlags", &CSceneComponent::IsInSceneFlags);
 	defCScene.def("SetParticleSystemColorFactor", &CSceneComponent::SetParticleSystemColorFactor);
 	defCScene.def("GetParticleSystemColorFactor", &CSceneComponent::GetParticleSystemColorFactor, luabind::copy_policy<0> {});
 	//defCScene.def("GetRenderParticleSystems",static_cast<std::vector<pragma::ecs::CParticleSystemComponent*>(*)(lua::State*,pragma::CSceneComponent&)>([](lua::State *l,pragma::CSceneComponent &scene) -> std::vector<pragma::ecs::CParticleSystemComponent*> {
@@ -438,6 +442,8 @@ void pragma::CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	entsMod[defCSoundDspFlanger];
 
 	auto defCCamera = pragma::LuaCore::create_entity_component_class<CCameraComponent, BaseEnvCameraComponent>("CameraComponent");
+	defCCamera.def("SetVisibilityMask", &CCameraComponent::SetVisibilityMask);
+	defCCamera.def("GetVisibilityMask", &CCameraComponent::GetVisibilityMask);
 	entsMod[defCCamera];
 
 	auto defCOccl = pragma::LuaCore::create_entity_component_class<COcclusionCullerComponent, BaseEntityComponent>("OcclusionCullerComponent");

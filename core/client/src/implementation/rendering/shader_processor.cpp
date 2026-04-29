@@ -30,12 +30,13 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const CSceneComponent &
 	assert(dsShadows);
 	m_sceneC = &scene;
 	m_rendererC = &renderer;
+	m_visibilityMask &= hCam->GetVisibilityMask();
 	// m_sceneFlags = ShaderGameWorld::SceneFlags::None;
 	shader.RecordBindScene(*this, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsShadows, m_drawOrigin, m_sceneFlags);
 	return true;
 }
 void pragma::rendering::ShaderProcessor::SetDrawOrigin(const Vector4 &drawOrigin) { m_drawOrigin = drawOrigin; }
-bool pragma::rendering::ShaderProcessor::RecordBindShader(const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, bool view, ShaderGameWorld::SceneFlags sceneFlags, ShaderGameWorld &shader, uint32_t pipelineIdx)
+bool pragma::rendering::ShaderProcessor::RecordBindShader(const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, bool view, ShaderGameWorld::SceneFlags sceneFlags, VisibilityMask visibilityMask, ShaderGameWorld &shader, uint32_t pipelineIdx)
 {
 	auto &context = get_cengine()->GetRenderContext();
 	m_curShader = &shader;
@@ -55,6 +56,11 @@ bool pragma::rendering::ShaderProcessor::RecordBindShader(const CSceneComponent 
 	m_sceneFlags = sceneFlags;
 	m_alphaCutoff = std::numeric_limits<float>::max();
 	m_depthPrepass = shader.IsDepthPrepassShader();
+
+	m_visibilityMask = visibilityMask & scene.GetVisibilityMask();
+	auto *rendererC = renderer.GetRendererComponent<CRendererComponent>();
+	if(rendererC)
+		m_visibilityMask &= rendererC->GetVisibilityMask();
 
 	if(m_cmdBuffer.RecordBindShaderPipeline(shader, pipelineIdx) == false) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED)
@@ -183,7 +189,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(ecs::CBaseEntity &ent)
 	// TODO: 3d sky
 	return true;
 }
-bool pragma::rendering::ShaderProcessor::RecordDraw(geometry::CModelSubMesh &mesh, RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet)
+bool pragma::rendering::ShaderProcessor::RecordDraw(VisibilityMask visibilityMask, geometry::CModelSubMesh &mesh, RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet)
 {
 	uint32_t vertexAnimationOffset = 0;
 	if(m_vertexAnimC) {
@@ -217,6 +223,9 @@ bool pragma::rendering::ShaderProcessor::RecordDraw(geometry::CModelSubMesh &mes
 		return false;
 	}
 	if((m_depthPrepass && !bufferData.IsDepthPrepassEnabled()))
+		return false;
+	visibilityMask &= m_visibilityMask;
+	if(!is_layer_visible(visibilityMask, bufferData.layerMask))
 		return false;
 
 	if(m_cmdBuffer.RecordBindRenderBuffer(*bufferData.renderBuffer) == false) {

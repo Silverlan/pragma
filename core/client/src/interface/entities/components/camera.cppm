@@ -4,6 +4,7 @@
 export module pragma.client:entities.components.camera;
 
 export import :entities.base_entity;
+export import :rendering.layers;
 
 export namespace pragma {
 	namespace cCameraComponent {
@@ -19,9 +20,13 @@ export namespace pragma {
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 		virtual void InitializeLuaObject(lua::State *l) override;
 		virtual void OnEntitySpawn() override;
+
+		void SetVisibilityMask(rendering::VisibilityMask visibilityMask) { m_visibilityMask = visibilityMask; }
+		rendering::VisibilityMask GetVisibilityMask() const { return m_visibilityMask; }
 	  protected:
 		void UpdateState();
 		virtual void OnEntityComponentAdded(BaseEntityComponent &component) override;
+		rendering::VisibilityMask m_visibilityMask = rendering::ALL_LAYERS;
 	};
 };
 

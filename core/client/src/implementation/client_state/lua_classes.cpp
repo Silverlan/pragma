@@ -1368,6 +1368,7 @@ void pragma::CGame::RegisterLuaClasses()
 	defDrawSceneInfo.def_readwrite("renderTarget", &rendering::DrawSceneInfo::renderTarget);
 	defDrawSceneInfo.def_readwrite("exclusionMask", &rendering::DrawSceneInfo::exclusionMask);
 	defDrawSceneInfo.def_readwrite("inclusionMask", &rendering::DrawSceneInfo::inclusionMask);
+	defDrawSceneInfo.def_readwrite("visibilityMask", &rendering::DrawSceneInfo::visibilityMask);
 	defDrawSceneInfo.def_readwrite("outputImage", &rendering::DrawSceneInfo::outputImage);
 	static_assert(sizeof(rendering::DrawSceneInfo::outputLayerId) == sizeof(uint32_t));
 	defDrawSceneInfo.def_readwrite("outputLayerId", reinterpret_cast<uint32_t rendering::DrawSceneInfo::*>(&rendering::DrawSceneInfo::outputLayerId));

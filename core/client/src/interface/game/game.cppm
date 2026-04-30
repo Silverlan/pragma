@@ -15,6 +15,7 @@ export import :rendering.game_world_shader_settings;
 export import :rendering.global_render_settings_buffer_data;
 export import :rendering.global_shader_input_manager;
 export import :rendering.gpu_profiler;
+export import :rendering.layers;
 export import :rendering.render_queue_worker;
 export import :rendering.shaders.lua;
 export import :scripting.lua.gui_manager;
@@ -382,6 +383,7 @@ export namespace pragma {
 		rendering::GlobalShaderInputDataManager &GetGlobalShaderInputDataManager();
 		const rendering::GlobalShaderInputDataManager &GetGlobalShaderInputDataManager() const;
 
+		rendering::LayerManager &GetRenderLayerManager() { return m_renderLayerManager; }
 		rendering::RenderQueueBuilder &GetRenderQueueBuilder();
 		rendering::RenderQueueWorkerManager &GetRenderQueueWorkerManager();
 		prosper::IDescriptorSet &GetGlobalRenderSettingsDescriptorSet();
@@ -500,6 +502,7 @@ export namespace pragma {
 		rendering::RenderMask m_nextCustomRenderMaskIndex = static_cast<rendering::RenderMask>(1);
 		rendering::RenderMask m_firstPersonRenderMask = rendering::RenderMask::None;
 		rendering::RenderMask m_thirdPersonRenderMask = rendering::RenderMask::None;
+		rendering::LayerManager m_renderLayerManager;
 
 		// Entities
 		ComponentHandle<BaseEntityComponent> m_gameComponent;

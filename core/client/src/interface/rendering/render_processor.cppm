@@ -23,16 +23,18 @@ export namespace pragma::rendering {
 		Prepass = 0,
 		Lighting,
 		Shadow,
+
+		Count,
 	};
 
 	class DLLCLIENT ShaderProcessor {
 	  public:
 		ShaderProcessor(prosper::ICommandBuffer &cmdBuffer, PassType passType) : m_cmdBuffer {cmdBuffer}, m_passType {passType} {}
-		bool RecordBindShader(const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, bool view, ShaderGameWorld::SceneFlags sceneFlags, ShaderGameWorld &shader, uint32_t pipelineIdx = 0u);
+		bool RecordBindShader(const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, bool view, ShaderGameWorld::SceneFlags sceneFlags, VisibilityMask visibilityMask, ShaderGameWorld &shader, uint32_t pipelineIdx = 0u);
 		bool RecordBindEntity(ecs::CBaseEntity &ent);
 		bool RecordBindMaterial(material::CMaterial &mat);
 		bool RecordBindLight(CLightComponent &light, uint32_t layerId);
-		bool RecordDraw(geometry::CModelSubMesh &mesh, RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet = nullptr);
+		bool RecordDraw(VisibilityMask visibilityMask, geometry::CModelSubMesh &mesh, RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet = nullptr);
 
 		void SetStats(RenderPassStats *stats) { m_stats = stats; }
 		void SetDrawOrigin(const Vector4 &drawOrigin);
@@ -62,6 +64,7 @@ export namespace pragma::rendering {
 		BaseModelComponent *m_modelC = nullptr;
 		void *m_lightMapReceiverC = nullptr;
 		ShaderGameWorld::SceneFlags m_sceneFlags = ShaderGameWorld::SceneFlags::None;
+		VisibilityMask m_visibilityMask = ALL_LAYERS;
 
 		PassType m_passType = PassType::Generic;
 		uint32_t m_materialDescriptorSetIndex = std::numeric_limits<uint32_t>::max();
@@ -98,7 +101,7 @@ export namespace pragma::rendering {
 		bool BindMaterial(material::CMaterial &mat);
 		virtual bool BindEntity(ecs::CBaseEntity &ent);
 		void SetDepthBias(float d, float delta);
-		bool Render(geometry::CModelSubMesh &mesh, RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet = nullptr);
+		bool Render(VisibilityMask visibilityMask, geometry::CModelSubMesh &mesh, RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet = nullptr);
 		ShaderGameWorld *GetCurrentShader();
 		void UnbindShader();
 		void SetCountNonOpaqueMaterialsOnly(bool b);

@@ -11,6 +11,7 @@ export import :debug.enums;
 export import :entities.components.render;
 export import :rendering.draw_scene_info;
 export import :rendering.entity_instance_index_buffer;
+export import :rendering.layers;
 export import :rendering.occlusion_culling.octree;
 export import :rendering.render_queue;
 export import :rendering.shaders.textured_uniform_data;
@@ -95,21 +96,15 @@ export namespace pragma {
 
 		friend SceneRenderDesc;
 		enum class FRenderSetting : uint32_t { None = 0, Unlit = 1 };
-
 		enum class StateFlags : uint32_t { None = 0u, ValidRenderer = 1u, HasParentScene = ValidRenderer << 1u };
 
-		// Note: Scene index is *not* unique, a child-scene will share its index with its parent!
-		using SceneIndex = uint8_t;
-		using SceneFlags = uint32_t;
 		struct DLLCLIENT CreateInfo {
 			CreateInfo();
 			prosper::SampleCountFlags sampleCount;
 		};
 
 		static CSceneComponent *Create(const CreateInfo &createInfo, CSceneComponent *optParent = nullptr);
-		static CSceneComponent *GetByIndex(SceneIndex sceneIndex);
-		static SceneFlags GetSceneFlag(SceneIndex sceneIndex);
-		static SceneIndex GetSceneIndex(SceneFlags flag);
+		static CSceneComponent *GetByIndex(rendering::SceneIndex sceneIndex);
 		static const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &GetEntityInstanceIndexBuffer();
 		static void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const rendering::RenderQueue &renderQueue, rendering::RenderPassStats *optStats = nullptr);
 
@@ -120,7 +115,7 @@ export namespace pragma {
 
 		virtual void InitializeLuaObject(lua::State *l) override;
 
-		void Setup(const CreateInfo &createInfo, SceneIndex sceneIndex);
+		void Setup(const CreateInfo &createInfo, rendering::SceneIndex sceneIndex);
 		const ComponentHandle<CCameraComponent> &GetActiveCamera() const;
 		ComponentHandle<CCameraComponent> &GetActiveCamera();
 		void SetActiveCamera(CCameraComponent &cam);
@@ -180,12 +175,17 @@ export namespace pragma {
 		TCPPM *FindOcclusionCuller();
 		template<typename TCPPM>
 		const TCPPM *FindOcclusionCuller() const;
-		SceneIndex GetSceneIndex() const;
+		rendering::SceneIndex GetSceneIndex() const;
+		rendering::SceneFlag GetSceneFlag() const;
+		bool IsInSceneFlags(rendering::SceneFlags sceneFlags) const;
 		bool IsValid() const;
 		CSceneComponent *GetParentScene();
 		const CSceneComponent *GetParentScene() const { return const_cast<CSceneComponent *>(this)->GetParentScene(); }
 
 		void BuildRenderQueues(const rendering::DrawSceneInfo &drawSceneInfo);
+
+		void SetVisibilityMask(rendering::VisibilityMask visibilityMask) { m_visibilityMask = visibilityMask; }
+		rendering::VisibilityMask GetVisibilityMask() const { return m_visibilityMask; }
 
 		const std::vector<ComponentHandle<CLightComponent>> &GetPreviouslyVisibleShadowedLights() const { return m_previouslyVisibleShadowedLights; }
 		void SwapPreviouslyVisibleLights(std::vector<ComponentHandle<CLightComponent>> &&components) { std::swap(m_previouslyVisibleShadowedLights, components); }
@@ -202,7 +202,7 @@ export namespace pragma {
 		};
 		std::vector<std::unique_ptr<CSMCascadeDescriptor>> m_csmDescriptors;
 
-		SceneIndex m_sceneIndex = std::numeric_limits<SceneIndex>::max();
+		rendering::SceneIndex m_sceneIndex = std::numeric_limits<rendering::SceneIndex>::max();
 
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_camDescSetGroupGraphics = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_camDescSetGroupCompute = nullptr;
@@ -236,6 +236,7 @@ export namespace pragma {
 
 		StateFlags m_stateFlags = StateFlags::None;
 		ComponentHandle<BaseEntityComponent> m_renderer = ComponentHandle<BaseEntityComponent> {};
+		rendering::VisibilityMask m_visibilityMask = rendering::ALL_LAYERS;
 		SceneRenderDesc m_sceneRenderDesc;
 
 		void UpdateCameraBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, bool bView = false);

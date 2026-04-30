@@ -182,6 +182,10 @@ void pragma::CGame::RegisterLua()
 		    return {inclusionMask, exclusionMask};
 	    }))];
 
+	modGame[luabind::def("register_render_layer", +[](const std::string &name) { return get_cgame()->GetRenderLayerManager().RegisterLayer(name); })];
+	modGame[luabind::def("unregister_render_layer", +[](const std::string &name) { get_cgame()->GetRenderLayerManager().UnregisterLayer(name); })];
+	modGame[luabind::def("get_render_layer_mask", +[](const std::string &name) { return get_cgame()->GetRenderLayerManager().GetMask(name); })];
+
 	Lua::ents::register_library(GetLuaState());
 	auto &modEnts = GetLuaInterface().RegisterLibrary("ents",
 	  {{"get_local_player", Lua::ents::Client::get_local_player}, {"get_listener", Lua::ents::Client::get_listener}, {"get_view_body", Lua::ents::Client::get_view_body}, {"get_view_model", Lua::ents::Client::get_view_model}, {"get_instance_buffer", Lua::ents::Client::get_instance_buffer},
@@ -297,10 +301,15 @@ void pragma::CGame::RegisterLua()
 	    {"RENDER_FLAG_HDR_BIT", math::to_integral(rendering::RenderFlags::HDR)},
 	    {"RENDER_FLAG_PARTICLE_DEPTH_BIT", math::to_integral(rendering::RenderFlags::ParticleDepth)},
 
+	  	{"RENDER_LAYER_DEFAULT", math::to_integral(rendering::StandardLayer::Default)},
+	  	{"RENDER_LAYER_HELPER", math::to_integral(rendering::StandardLayer::Helper)},
+	  	{"RENDER_LAYER_GIZMO", math::to_integral(rendering::StandardLayer::Gizmo)},
+
 	    {"ASSET_LOAD_FLAG_NONE", math::to_integral(util::AssetLoadFlags::None)},
 	    {"ASSET_LOAD_FLAG_DONT_CACHE", math::to_integral(util::AssetLoadFlags::DontCache)},
 	    {"ASSET_LOAD_FLAG_IGNORE_CACHE", math::to_integral(util::AssetLoadFlags::IgnoreCache)},
 	  });
+	static_assert(math::to_integral(rendering::StandardLayer::Count) == 3, "Update the enums above when new standard layers are added!");
 
 	auto gameMod = luabind::module(GetLuaState(), "game");
 	RegisterLuaGameClasses(gameMod);

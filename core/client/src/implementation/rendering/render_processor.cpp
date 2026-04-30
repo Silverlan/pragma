@@ -371,7 +371,7 @@ bool pragma::rendering::BaseRenderProcessor::BindShader(prosper::PipelineID pipe
 			spdlog::warn("[Render] WARNING: Scene '{}' has no valid rasterization renderer!", scene.GetEntity().GetName());
 		return false;
 	}
-	if(!m_shaderProcessor.RecordBindShader(scene, *raster, bView, m_baseSceneFlags, *shaderScene, pipelineIdx))
+	if(!m_shaderProcessor.RecordBindShader(scene, *raster, bView, m_baseSceneFlags, m_drawSceneInfo.drawSceneInfo.visibilityMask, *shaderScene, pipelineIdx))
 		return false;
 	m_shaderProcessor.SetClipPlane(m_drawSceneInfo.drawSceneInfo.clipPlane);
 
@@ -514,7 +514,7 @@ bool pragma::rendering::BaseRenderProcessor::BindEntity(ecs::CBaseEntity &ent)
 
 pragma::ShaderGameWorld *pragma::rendering::BaseRenderProcessor::GetCurrentShader() { return math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) ? m_shaderScene : nullptr; }
 
-bool pragma::rendering::BaseRenderProcessor::Render(geometry::CModelSubMesh &mesh, RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet)
+bool pragma::rendering::BaseRenderProcessor::Render(VisibilityMask visibilityMask, geometry::CModelSubMesh &mesh, RenderMeshIndex meshIdx, const RenderQueue::InstanceSet *instanceSet)
 {
 	if(math::is_flag_set(m_stateFlags, StateFlags::EntityBound) == false || m_curRenderC == nullptr)
 		return false;
@@ -525,7 +525,7 @@ bool pragma::rendering::BaseRenderProcessor::Render(geometry::CModelSubMesh &mes
 	}
 	++m_numShaderInvocations;
 
-	auto r = m_shaderProcessor.RecordDraw(mesh, meshIdx, instanceSet);
+	auto r = m_shaderProcessor.RecordDraw(visibilityMask, mesh, meshIdx, instanceSet);
 	if(r == false && VERBOSE_RENDER_OUTPUT_ENABLED)
 		spdlog::warn("[Render] WARNING: Failed to draw mesh {} of entity {}!", meshIdx, m_curEntity->ToString());
 	return r;
@@ -622,9 +622,17 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const RenderQueue &rende
 		return 0;
 	RecordViewport();
 
-	auto &shaderManager = get_cengine()->GetShaderManager();
-	auto &context = get_cengine()->GetRenderContext();
-	auto &matManager = get_client_state()->GetMaterialManager();
+	auto &layerManager = get_cgame()->GetRenderLayerManager();
+	auto visibilityMask = ALL_LAYERS;
+	switch(pass) {
+	case RenderPass::Shadow:
+		visibilityMask = layerManager.GetFlagMask(LayerFlag::CastShadows);
+		break;
+	default:
+		visibilityMask = layerManager.GetFlagMask(LayerFlag::VisibleInGame);
+		break;
+	}
+
 	auto &sceneRenderDesc = m_drawSceneInfo.drawSceneInfo.scene->GetSceneRenderDesc();
 	uint32_t numShaderInvocations = 0;
 	const RenderQueue::InstanceSet *curInstanceSet = nullptr;
@@ -745,7 +753,7 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const RenderQueue &rende
 		if(optStats)
 			ttmp = std::chrono::steady_clock::now();
 		auto &mesh = static_cast<geometry::CModelSubMesh &>(*m_curEntityMeshList->at(item.mesh));
-		if(Render(mesh, item.mesh, curInstanceSet))
+		if(Render(visibilityMask, mesh, item.mesh, curInstanceSet))
 			++numShaderInvocations;
 		if(optStats)
 			(*optStats)->AddTime(RenderPassStats::Timer::DrawCall, std::chrono::steady_clock::now() - ttmp);

@@ -472,8 +472,6 @@ void LightShadowRenderer::Render(const rendering::DrawSceneInfo &drawSceneInfo)
 	rendering::RenderPassDrawInfo rpDrawInfo {drawSceneInfo, *drawSceneInfo.commandBuffer};
 	rendering::DepthStageRenderProcessor shadowRenderProcessor {rpDrawInfo, {}};
 	for(auto layerId = decltype(numLayers) {0}; layerId < numLayers; ++layerId) {
-		auto *framebuffer = shadowC->GetFramebuffer(layerId);
-
 		const prosper::ClearValue clearVal {prosper::ClearDepthStencilValue {1.f}};
 		if(drawCmd->RecordBeginRenderPass(*smRt, layerId, prosper::IPrimaryCommandBuffer::RenderPassFlags::None, &clearVal) == false)
 			continue;

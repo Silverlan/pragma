@@ -40,7 +40,7 @@ export {
 			void BuildRenderQueues(const rendering::DrawSceneInfo &drawSceneInfo, SceneData &sceneData);
 
 			float m_skyboxScale = 1.f;
-			std::unordered_map<CSceneComponent::SceneIndex, std::shared_ptr<SceneData>> m_sceneData;
+			std::unordered_map<rendering::SceneIndex, std::shared_ptr<SceneData>> m_sceneData;
 		};
 	};
 

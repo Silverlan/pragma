@@ -7,6 +7,7 @@ module;
 
 export module pragma.client:rendering.model_render_buffer_data;
 
+export import :rendering.layers;
 export import :rendering.shaders.textured_enums;
 export import pragma.cmaterialsystem;
 
@@ -22,6 +23,7 @@ export namespace pragma::rendering {
 		GameShaderSpecializationConstantFlag pipelineSpecializationFlags;
 		material::MaterialHandle material;
 		StateFlags stateFlags = StateFlags::EnableDepthPrepass;
+		LayerMask layerMask = DEFAULT_LAYER;
 
 		void SetDepthPrepassEnabled(bool enabled);
 		bool IsDepthPrepassEnabled() const;

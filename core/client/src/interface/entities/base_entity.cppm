@@ -8,6 +8,7 @@ module;
 export module pragma.client:entities.base_entity;
 
 export import pragma.shared;
+export import :rendering.layers;
 
 export namespace pragma {
 	class CRenderComponent;
@@ -60,7 +61,7 @@ export namespace pragma::ecs {
 		unsigned int GetClientIndex();
 		virtual uint32_t GetLocalIndex() const override;
 
-		uint32_t GetSceneFlags() const;
+		rendering::SceneFlags GetSceneFlags() const;
 		const util::PUInt32Property &GetSceneFlagsProperty() const;
 		void AddToScene(CSceneComponent &scene);
 		void RemoveFromScene(CSceneComponent &scene);

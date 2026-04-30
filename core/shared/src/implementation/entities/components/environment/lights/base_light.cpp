@@ -17,8 +17,13 @@ void BaseEnvLightComponent::RegisterMembers(EntityComponentManager &componentMan
 {
 	using T = BaseEnvLightComponent;
 
-	using TFalloffExponent = float;
-	registerMember(create_component_member_info<T, TFalloffExponent, static_cast<void (T::*)(TFalloffExponent)>(&T::SetFalloffExponent), static_cast<TFalloffExponent (T::*)() const>(&T::GetFalloffExponent)>("falloffExponent", 1.f));
+	{
+		using TFalloffExponent = float;
+		auto memberInfo = create_component_member_info<T, TFalloffExponent, static_cast<void (T::*)(TFalloffExponent)>(&T::SetFalloffExponent), static_cast<TFalloffExponent (T::*)() const>(&T::GetFalloffExponent)>("falloffExponent", 1.f);
+		memberInfo.SetMin(0.f);
+		memberInfo.SetMax(1.f);
+		registerMember(std::move(memberInfo));
+	}
 
 	{
 		using TIntensity = float;

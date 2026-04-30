@@ -93,7 +93,7 @@ static uint64_t get_scene_flag(const pragma::CSceneComponent &scene)
 	return 1 << index;
 }
 const pragma::util::PUInt32Property &pragma::ecs::CBaseEntity::GetSceneFlagsProperty() const { return m_sceneFlags; }
-uint32_t pragma::ecs::CBaseEntity::GetSceneFlags() const { return *m_sceneFlags; }
+pragma::rendering::SceneFlags pragma::ecs::CBaseEntity::GetSceneFlags() const { return *m_sceneFlags; }
 void pragma::ecs::CBaseEntity::AddToScene(CSceneComponent &scene)
 {
 	*m_sceneFlags = **m_sceneFlags | get_scene_flag(scene);
@@ -113,10 +113,10 @@ bool pragma::ecs::CBaseEntity::IsInScene(const CSceneComponent &scene) const { r
 std::vector<pragma::CSceneComponent *> pragma::ecs::CBaseEntity::GetScenes() const
 {
 	std::vector<CSceneComponent *> scenes {};
-	auto numScenes = sizeof(CSceneComponent::SceneFlags) * 8;
+	auto numScenes = sizeof(rendering::SceneFlags) * 8;
 	scenes.reserve(numScenes);
 	for(auto i = decltype(numScenes) {0u}; i < numScenes; ++i) {
-		auto sceneFlag = static_cast<CSceneComponent::SceneFlags>(1 << i);
+		auto sceneFlag = static_cast<rendering::SceneFlags>(1 << i);
 		if((**m_sceneFlags & sceneFlag) == 0)
 			continue;
 		auto *scene = CSceneComponent::GetByIndex(i);

@@ -14,7 +14,8 @@ using namespace pragma::rendering;
 LayerManager::LayerManager()
 {
 	std::fill(m_flagMasks.begin(), m_flagMasks.end(), ALL_LAYERS);
-	for(size_t mask = 0; mask < math::to_integral(StandardLayer::Count); ++mask) {
+	for(size_t i = 0; i < math::to_integral(StandardLayer::Count); ++i) {
+		auto mask = 1 << i;
 		auto layerFlags = LayerFlags::Default;
 		auto layer = static_cast<StandardLayer>(mask);
 		if(layer == StandardLayer::Gizmo || layer == StandardLayer::Helper)

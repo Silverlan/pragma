@@ -69,12 +69,10 @@ void CRenderComponent::InitializeBuffers()
 	else
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	createInfo.size = instanceSize * instanceCount;
-	createInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
-#if ENTITY_RENDER_BUFFER_USE_STORAGE_BUFFER == 0
-	createInfo.usageFlags = createInfo.usageFlags | prosper::BufferUsageFlags::UniformBufferBit;
-#endif
+	createInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
+	createInfo.usageFlags = createInfo.usageFlags | prosper::BufferUsageFlags::StorageBufferBit;
 #ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	createInfo.usageFlags = createInfo.usageFlags | prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit;
+	createInfo.usageFlags = createInfo.usageFlags | prosper::BufferUsageFlags::StorageBufferBit;
 #endif
 	constexpr prosper::DeviceSize alignment = 256; // See https://vulkan.gpuinfo.org/displaydevicelimit.php?name=minUniformBufferOffsetAlignment
 	auto internalAlignment = get_cengine()->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit);

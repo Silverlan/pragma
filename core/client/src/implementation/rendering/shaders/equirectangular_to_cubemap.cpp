@@ -81,8 +81,9 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 	// Shader execution
 	auto &setupCmd = get_cengine()->GetSetupCommandBuffer();
 	auto success = true;
-	for(uint8_t layerId = 0u; layerId < 6u; ++layerId) {
-		setupCmd->RecordImageBarrier(rt->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal, prosper::util::ImageSubresourceRange {layerId});
+	constexpr uint32_t numLayers = 6;
+	for(uint8_t layerId = 0u; layerId < numLayers; ++layerId) {
+		setupCmd->RecordImageBarrier(rt->GetTexture().GetImage(), prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::ColorAttachmentOptimal, prosper::util::ImageSubresourceRange {layerId, 1, 0});
 		if(setupCmd->RecordBeginRenderPass(*rt, layerId) == false) {
 			success = false;
 			break;
@@ -97,8 +98,10 @@ std::shared_ptr<prosper::Texture> ShaderEquirectangularToCubemap::Equirectangula
 		if(success == false)
 			break;
 	}
-	auto &img = rt->GetTexture().GetImage();
-	setupCmd->RecordGenerateMipmaps(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::AccessFlags::ShaderReadBit, prosper::PipelineStageFlags::FragmentShaderBit);
+	if(success) {
+		auto &img = rt->GetTexture().GetImage();
+		setupCmd->RecordGenerateMipmaps(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::AccessFlags::ShaderReadBit, prosper::PipelineStageFlags::FragmentShaderBit);
+	}
 	GetContext().FlushSetupCommandBuffer();
 	return success ? rt->GetTexture().shared_from_this() : nullptr;
 }

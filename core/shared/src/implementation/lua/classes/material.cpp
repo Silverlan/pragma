@@ -44,7 +44,7 @@ void Lua::Material::register_class(luabind::class_<pragma::material::Material> &
 		auto matCopy = mat.Copy();
 		if(matCopy == nullptr)
 			return;
-		Lua::Push<pragma::material::MaterialHandle>(l, matCopy->GetHandle());
+		Lua::Push<std::shared_ptr<pragma::material::Material>>(l, matCopy);
 	}));
 	classDef.def("UpdateTextures", &pragma::material::Material::UpdateTextures);
 	classDef.def("UpdateTextures", &pragma::material::Material::UpdateTextures, luabind::default_parameter_policy<2, bool {false}> {});

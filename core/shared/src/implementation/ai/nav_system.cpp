@@ -429,8 +429,6 @@ std::shared_ptr<RcNavMesh> pragma::nav::generate(Game &game, const Config &confi
 			auto &area = m_pmesh->areas[i];
 			if(area == RC_WALKABLE_AREA)
 				area = 0u;
-			if(area != 0u)
-				std::cout << "";
 			auto *surfMat = game.GetSurfaceMaterial(area);
 			if(surfMat != nullptr)
 				m_pmesh->flags[i] = math::to_integral(surfMat->GetNavigationFlags());

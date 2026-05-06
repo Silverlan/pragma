@@ -55,7 +55,9 @@ export {
 			WorldSpace = Controller << 1u,
 			ObjectSpace = WorldSpace << 1u,
 			// This is merely a hint flag for interfaces not to allow writing this property
-			ReadOnly = ObjectSpace << 1u
+			ReadOnly = ObjectSpace << 1u,
+			// Interface hint to disallow animating
+			NotAnimatable = ReadOnly << 1u,
 		};
 
 		enum class AttributeSpecializationType : uint8_t {

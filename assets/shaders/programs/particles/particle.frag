@@ -17,6 +17,7 @@ const uint CSPEC_SHADOW_QUALITY = 0;
 #include "/common/inputs/fs_renderer.glsl"
 #include "/common/inputs/scene_depth.glsl"
 #include "/common/inputs/render_settings.glsl"
+#include "/common/inputs/camera.glsl"
 #include "/lighting/inputs/light_sources.glsl"
 #include "/lighting/inputs/vis_light_buffer.glsl"
 #include "/common/limits.glsl"
@@ -48,9 +49,9 @@ vec3 calc_particle_lighting(vec3 normal, vec3 baseColor)
 	vec3 color = vec3(0.0, 0.0, 0.0);
 
 	color = baseColor.rgb;
-	vec3 view = normalize(u_renderSettings.posCam.xyz - fs_in.vert_pos_ws.xyz);
+	vec3 view = normalize(get_cam_pos() - fs_in.vert_pos_ws.xyz);
 #if 0
-    vec3 view = normalize(u_renderSettings.posCam.xyz - fs_in.vert_pos_ws.xyz);
+    vec3 view = normalize(get_cam_pos() - fs_in.vert_pos_ws.xyz);
 
     bool useLightmaps = is_light_map_enabled();
     if(useLightmaps)

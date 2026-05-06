@@ -59,7 +59,7 @@ bool pragma::pts::CParticleRendererRotationalBuffer::Update()
 				m_rotations.at(i) = Quat {0.f, vel.x, vel.y, vel.z};
 			}
 		}
-		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_rotBuffer, 0ull, numParticles * sizeof(m_rotations.front()), m_rotations.data());
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*m_rotBuffer, 0ull, numParticles * sizeof(m_rotations.front()), m_rotations.data());
 	}
 	return true;
 }

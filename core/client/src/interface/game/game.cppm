@@ -386,7 +386,7 @@ export namespace pragma {
 		rendering::LayerManager &GetRenderLayerManager() { return m_renderLayerManager; }
 		rendering::RenderQueueBuilder &GetRenderQueueBuilder();
 		rendering::RenderQueueWorkerManager &GetRenderQueueWorkerManager();
-		prosper::IDescriptorSet &GetGlobalRenderSettingsDescriptorSet();
+		prosper::IDescriptorSet &GetCurrentFrameGlobalRenderSettingsDescriptorSet();
 		rendering::GlobalRenderSettingsBufferData &GetGlobalRenderSettingsBufferData();
 		void ReloadGameWorldShaderPipelines() const;
 		void ReloadPrepassShaderPipelines() const;

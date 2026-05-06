@@ -38,6 +38,7 @@ void CRendererPpBloomComponent::RegisterMembers(EntityComponentManager &componen
 		auto memberInfo = create_component_member_info<T, TBloomThreshold, static_cast<void (T::*)(TBloomThreshold)>(&T::SetBloomThreshold), static_cast<TBloomThreshold (T::*)() const>(&T::GetBloomThreshold)>("bloomThreshold", 1.f);
 		memberInfo.SetMin(0);
 		memberInfo.SetMax(10.f);
+		memberInfo.SetFlag(ComponentMemberFlags::NotAnimatable);
 		registerMember(std::move(memberInfo));
 	}
 
@@ -46,6 +47,7 @@ void CRendererPpBloomComponent::RegisterMembers(EntityComponentManager &componen
 		auto memberInfo = create_component_member_info<T, TBlurAmount, static_cast<void (T::*)(TBlurAmount)>(&T::SetBlurAmount), static_cast<TBlurAmount (T::*)() const>(&T::GetBlurAmount)>("blurAmount", -1);
 		memberInfo.SetMin(-1);
 		memberInfo.SetMax(20);
+		memberInfo.SetFlag(ComponentMemberFlags::NotAnimatable);
 		registerMember(std::move(memberInfo));
 	}
 }

@@ -172,7 +172,7 @@ void LightDataBufferManager::Free(const std::shared_ptr<prosper::IBuffer> &rende
 		if(pLight == nullptr)
 			throw std::logic_error("Expected valid light source at light buffer index " + util::to_string(m_highestBufferIndexInUse) + ", but none available!");
 		// TODO: We can just copy the buffer data on the GPU instead
-		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, 0ull, pLight->GetBufferData());
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*renderBuffer, 0ull, pLight->GetBufferData());
 		pLight->SetRenderBuffer(renderBuffer, false);
 
 		m_bufferIndexToLightSource.at(m_highestBufferIndexInUse--) = nullptr;

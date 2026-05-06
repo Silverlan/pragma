@@ -37,7 +37,7 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const DrawSceneIn
 		auto &fp = GetForwardPlusInstance();
 
 		// Camera buffer
-		drawCmd->RecordBufferBarrier(*scene.GetCameraBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+		drawCmd->RecordBufferBarrier(*scene.GetCurrentFrameCameraBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 		// Render settings buffer
 		drawCmd->RecordBufferBarrier(*scene.GetRenderSettingsBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);

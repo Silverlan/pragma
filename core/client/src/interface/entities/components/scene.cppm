@@ -137,11 +137,13 @@ export namespace pragma {
 		const std::shared_ptr<prosper::IBuffer> &GetRenderSettingsBuffer() const;
 		RenderSettings &GetRenderSettings();
 		const RenderSettings &GetRenderSettings() const;
-		const std::shared_ptr<prosper::IBuffer> &GetCameraBuffer() const;
-		const std::shared_ptr<prosper::IBuffer> &GetViewCameraBuffer() const;
+		prosper::SwapBuffer *GetCameraBuffer() const;
+		prosper::IBuffer *GetCurrentFrameCameraBuffer() const;
+		prosper::SwapBuffer *GetViewCameraBuffer() const;
+		prosper::IBuffer *GetCurrentFrameViewCameraBuffer() const;
 		const std::shared_ptr<prosper::IBuffer> &GetFogBuffer() const;
-		const std::shared_ptr<prosper::IDescriptorSetGroup> &GetCameraDescriptorSetGroup(prosper::PipelineBindPoint bindPoint = prosper::PipelineBindPoint::Graphics) const;
-		const std::shared_ptr<prosper::IDescriptorSetGroup> &GetViewCameraDescriptorSetGroup() const;
+		prosper::IDescriptorSetGroup *GetCurrentFrameCameraDescriptorSetGroup(prosper::PipelineBindPoint bindPoint = prosper::PipelineBindPoint::Graphics) const;
+		prosper::IDescriptorSetGroup *GetCurrentFrameViewCameraDescriptorSetGroup() const;
 		prosper::IDescriptorSet *GetCameraDescriptorSetGraphics() const;
 		prosper::IDescriptorSet *GetCameraDescriptorSetCompute() const;
 		prosper::IDescriptorSet *GetViewCameraDescriptorSet() const;
@@ -204,16 +206,16 @@ export namespace pragma {
 
 		rendering::SceneIndex m_sceneIndex = std::numeric_limits<rendering::SceneIndex>::max();
 
-		std::shared_ptr<prosper::IDescriptorSetGroup> m_camDescSetGroupGraphics = nullptr;
-		std::shared_ptr<prosper::IDescriptorSetGroup> m_camDescSetGroupCompute = nullptr;
-		std::shared_ptr<prosper::IDescriptorSetGroup> m_camViewDescSetGroup = nullptr;
+		std::shared_ptr<prosper::SwapDescriptorSetGroup> m_camDescSetGroupGraphics = nullptr;
+		std::shared_ptr<prosper::SwapDescriptorSetGroup> m_camDescSetGroupCompute = nullptr;
+		std::shared_ptr<prosper::SwapDescriptorSetGroup> m_camViewDescSetGroup = nullptr;
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_shadowDsg = nullptr;
 
 		std::vector<ComponentHandle<CLightComponent>> m_previouslyVisibleShadowedLights;
 		ComponentHandle<BaseEntityComponent> m_lightMap = {};
 		ComponentHandle<CCameraComponent> m_camera = {};
-		std::shared_ptr<prosper::IBuffer> m_cameraBuffer = nullptr;
-		std::shared_ptr<prosper::IBuffer> m_cameraViewBuffer = nullptr;
+		std::shared_ptr<prosper::SwapBuffer> m_cameraBuffer = nullptr;
+		std::shared_ptr<prosper::SwapBuffer> m_cameraViewBuffer = nullptr;
 
 		std::shared_ptr<prosper::IBuffer> m_renderSettingsBuffer = nullptr;
 		RenderSettings m_renderSettings = {};
@@ -246,7 +248,6 @@ export namespace pragma {
 		void InitializeRenderSettingsBuffer();
 		void InitializeCameraBuffer();
 		void InitializeFogBuffer();
-		void InitializeDescriptorSetLayouts();
 		void InitializeSwapDescriptorBuffers();
 	};
 

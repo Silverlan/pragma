@@ -159,6 +159,6 @@ void pragma::CGame::InitShaders()
 
 void pragma::CGame::UpdateShaderTimeData()
 {
-	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_globalRenderSettingsBufferData->timeBuffer, 0ull,
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*m_globalRenderSettingsBufferData->timeBuffer, 0ull,
 	  ShaderGameWorldLightingPass::TimeData {static_cast<float>(CurTime()), static_cast<float>(DeltaTime()), static_cast<float>(RealTime()), static_cast<float>(DeltaRealTime())});
 }

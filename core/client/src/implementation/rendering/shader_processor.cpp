@@ -23,7 +23,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const CSceneComponent &
 	}
 	auto *dsScene = view ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
 	auto *dsRenderer = renderer.GetRendererDescriptorSet();
-	auto &dsRenderSettings = get_cgame()->GetGlobalRenderSettingsDescriptorSet();
+	auto &dsRenderSettings = get_cgame()->GetCurrentFrameGlobalRenderSettingsDescriptorSet();
 	auto *dsShadows = CShadowComponent::GetDescriptorSet();
 	assert(dsScene);
 	assert(dsRenderer);

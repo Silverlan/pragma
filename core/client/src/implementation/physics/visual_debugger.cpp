@@ -45,13 +45,13 @@ void pragma::physics::CPhysVisualDebugger::Reset()
 }
 void pragma::physics::CPhysVisualDebugger::Flush()
 {
-	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.buffer, 0, m_lineBuffer.GetDataSize(), m_lineBuffer.vertices.data());
-	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.buffer, 0, m_pointBuffer.GetDataSize(), m_pointBuffer.vertices.data());
-	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.buffer, 0, m_triangleBuffer.GetDataSize(), m_triangleBuffer.vertices.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*m_lineBuffer.buffer, 0, m_lineBuffer.GetDataSize(), m_lineBuffer.vertices.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*m_pointBuffer.buffer, 0, m_pointBuffer.GetDataSize(), m_pointBuffer.vertices.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*m_triangleBuffer.buffer, 0, m_triangleBuffer.GetDataSize(), m_triangleBuffer.vertices.data());
 
-	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_lineBuffer.colorBuffer, 0, m_lineBuffer.GetColorDataSize(), m_lineBuffer.vertexColors.data());
-	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_pointBuffer.colorBuffer, 0, m_pointBuffer.GetColorDataSize(), m_pointBuffer.vertexColors.data());
-	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_triangleBuffer.colorBuffer, 0, m_triangleBuffer.GetColorDataSize(), m_triangleBuffer.vertexColors.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*m_lineBuffer.colorBuffer, 0, m_lineBuffer.GetColorDataSize(), m_lineBuffer.vertexColors.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*m_pointBuffer.colorBuffer, 0, m_pointBuffer.GetColorDataSize(), m_pointBuffer.vertexColors.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*m_triangleBuffer.colorBuffer, 0, m_triangleBuffer.GetColorDataSize(), m_triangleBuffer.vertexColors.data());
 }
 void pragma::physics::CPhysVisualDebugger::InitializeBuffers()
 {

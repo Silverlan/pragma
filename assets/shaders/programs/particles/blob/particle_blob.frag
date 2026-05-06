@@ -119,7 +119,7 @@ void main()
 #if ENABLE_BLOB_TEXTURE == 1
 		/*if(u_instance.reflectionIntensity > 0)
 		{
-			vec3 r = refract(fragPosWs -u_renderSettings.posCam.xyz,fragNormalWs,u_instance.refractionIndexRatio);
+			vec3 r = refract(fragPosWs -get_cam_pos(),fragNormalWs,u_instance.refractionIndexRatio);
 			vec4 texCol = texture(u_blobTexture,r);
 			fs_color.rgb = mix(fs_color.rgb,texCol.rgb,u_instance.reflectionIntensity);
 		}*/
@@ -140,7 +140,7 @@ void main()
 
 		MaterialInfo materialInfo = build_material_info(pbrMat, flags, albedoColor, instanceColor, rma, 0.0, vec2(0, 0));
 
-		vec3 view = normalize(u_renderSettings.posCam.xyz - fragPosWs);
+		vec3 view = normalize(get_cam_pos() - fragPosWs);
 		vec3 normal = fragNormalWs;
 
 		ivec2 location = ivec2(gl_FragCoord.xy);

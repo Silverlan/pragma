@@ -1710,13 +1710,13 @@ void ecs::CParticleSystemComponent::Simulate(double tDelta)
 	auto bUpdateBuffers = (bStatic == false || m_numRenderParticles != m_numPrevRenderParticles) ? true : false;
 	m_numPrevRenderParticles = m_numRenderParticles;
 	if(bufParticles != nullptr && bUpdateBuffers == true && m_numRenderParticles > 0u) {
-		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(bufParticles, 0ull, m_numRenderParticles * sizeof(ParticleData), m_instanceData.data());
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*bufParticles, 0ull, m_numRenderParticles * sizeof(ParticleData), m_instanceData.data());
 		math::set_flag(m_flags, Flags::RendererBufferUpdateRequired, true);
 	}
 	if(IsAnimated()) {
 		auto &particleAnimBuffer = GetParticleAnimationBuffer();
 		if(particleAnimBuffer != nullptr && m_numRenderParticles > 0u)
-			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(particleAnimBuffer, 0ull, m_numRenderParticles * sizeof(ParticleAnimationData), m_particleAnimData.data());
+			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*particleAnimBuffer, 0ull, m_numRenderParticles * sizeof(ParticleAnimationData), m_particleAnimData.data());
 	}
 	for(auto &r : m_renderers)
 		r->PostSimulate(tDelta);

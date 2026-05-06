@@ -138,7 +138,9 @@ void rendering::RenderContext::InitializeRenderAPI()
 		msg << debugInfoLogConv;
 		LOGGER.warn(msg.str());
 	});
-	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) { LOGGER_VALIDATION.error("{}", msg); });
+	prosper::debug::set_debug_validation_callback([](prosper::DebugReportObjectTypeEXT objectType, const std::string &msg) {
+		LOGGER_VALIDATION.error("{}", msg);
+	});
 	err.clear();
 	if(!platform::initialize(err, get_cengine()->IsWindowless())) {
 		LOGGER.critical("Failed to initialize GLFW: {}", err);

@@ -22,7 +22,7 @@ endfunction()
 pr_fetch_module("interfaces"                      "https://github.com/Silverlan/pragma_interfaces.git"      "adda2aba1fbf570cf5f251ec5c1a503bab89544b")
 
 if(PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES)
-    pr_fetch_module("pr_prosper_vulkan"           "https://github.com/Silverlan/pr_prosper_vulkan.git"      "67bfaf59bf19736f4b49ca98e241ffab96c088e2")
+    pr_fetch_module("pr_prosper_vulkan"           "https://github.com/Silverlan/pr_prosper_vulkan.git"      "5220717d1014974af61312e94064f471f4460e5b")
     pr_fetch_module("pr_nsight_aftermath"         "https://github.com/Silverlan/pr_nsight_aftermath.git"    "66615caf80d9bff53d8347055a8c00d820fdd585")
 endif()
 
@@ -30,7 +30,7 @@ if(PRAGMA_WITH_COMMON_MODULES)
     pr_fetch_module("pr_bullet"                    "https://github.com/Silverlan/pr_bullet.git"           "a1097f685ba2d18cb4397c48d17f3e7615b376db")
     pr_fetch_module("pr_audio_soloud"              "https://github.com/Silverlan/pr_soloud.git"           "9bb3405fb73033402ae12b5bde09c5deb8de295c")
     pr_fetch_module("pr_audio_dummy"               "https://github.com/Silverlan/pr_audio_dummy.git"      "c54a035cf61f4c47f88bd6274e43e54054e6cb21")
-    pr_fetch_module("pr_prosper_opengl"            "https://github.com/Silverlan/pr_prosper_opengl.git"   "54a9860dba94a73610e069c3d7dad627ded6c5e3")
+    pr_fetch_module("pr_prosper_opengl"            "https://github.com/Silverlan/pr_prosper_opengl.git"   "26447ee19584921d16f17a18df58555312aaa65c")
 endif()
 
 if(PRAGMA_WITH_PFM)

@@ -78,14 +78,14 @@ export namespace pragma::rendering {
 
 		GlobalRenderSettingsBufferData();
 		std::shared_ptr<prosper::IBuffer> debugBuffer = nullptr;
-		std::shared_ptr<prosper::IBuffer> timeBuffer = nullptr;
-		std::shared_ptr<prosper::IBuffer> csmBuffer = nullptr;
+		std::shared_ptr<prosper::SwapBuffer> timeBuffer = nullptr;
+		std::shared_ptr<prosper::SwapBuffer> csmBuffer = nullptr;
 #ifdef PRAGMA_ENABLE_SHADER_DEBUG_PRINT
 		std::shared_ptr<prosper::IBuffer> debugPrintBuffer = nullptr;
 		void EvaluateDebugPrint();
 		std::optional<std::string> GetDebugPrintString() const;
 		void ResetDebugPrintData();
 #endif
-		std::shared_ptr<prosper::IDescriptorSetGroup> descSetGroup = nullptr;
+		std::shared_ptr<prosper::SwapDescriptorSetGroup> descSetGroup = nullptr;
 	};
 };

@@ -119,6 +119,7 @@ export namespace pragma::rendering {
 };
 
 export namespace pragma {
+#pragma pack(push, 1)
 	struct DLLCLIENT RendererData {
 		enum class Flags : uint32_t { None = 0u, SSAOEnabled = 1u };
 		void SetResolution(uint32_t w, uint32_t h) { vpResolution = w << 16 | (static_cast<uint16_t>(h)); }
@@ -128,6 +129,7 @@ export namespace pragma {
 		float lightmapExposurePow = 0.f;
 		float bloomThreshold = 1.f;
 	};
+#pragma pack(pop)
 
 	namespace cRasterizationRendererComponent {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_RECORD_PREPASS;
@@ -173,6 +175,7 @@ export namespace pragma {
 			PrepassEnabled = SSAOEnabled << 1u,
 
 			InitialRender = PrepassEnabled << 1u,
+			RendererBufferDataDirty = InitialRender << 1u,
 		};
 
 		enum class Stage : uint8_t {

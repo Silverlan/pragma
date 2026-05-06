@@ -94,7 +94,7 @@ void CRasterizationRendererComponent::UpdateLightmap()
 	UpdateLightmap(*g_lightmapC);
 }
 
-CRasterizationRendererComponent::CRasterizationRendererComponent(ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_hdrInfo {*this}, m_stateFlags {StateFlags::PrepassEnabled | StateFlags::InitialRender}
+CRasterizationRendererComponent::CRasterizationRendererComponent(ecs::BaseEntity &ent) : BaseEntityComponent {ent}, m_hdrInfo {*this}, m_stateFlags {StateFlags::PrepassEnabled | StateFlags::InitialRender | StateFlags::RendererBufferDataDirty}
 {
 	m_whShaderWireframe = get_cengine()->GetShader("wireframe");
 
@@ -163,7 +163,13 @@ void CRasterizationRendererComponent::Initialize()
 	UpdateLightmap();
 }
 
-void CRasterizationRendererComponent::UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) { drawCmd->RecordUpdateBuffer(*m_rendererBuffer, 0ull, m_rendererData); }
+void CRasterizationRendererComponent::UpdateRendererBuffer(std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd)
+{
+	if(!math::is_flag_set(m_stateFlags, StateFlags::RendererBufferDataDirty))
+		return;
+	math::set_flag(m_stateFlags, StateFlags::RendererBufferDataDirty, false);
+	drawCmd->RecordUpdateBuffer(*m_rendererBuffer, 0ull, m_rendererData);
+}
 
 prosper::IDescriptorSet *CRasterizationRendererComponent::GetDepthDescriptorSet() const { return (m_hdrInfo.dsgSceneDepth != nullptr) ? m_hdrInfo.dsgSceneDepth->GetDescriptorSet() : nullptr; }
 prosper::IDescriptorSet *CRasterizationRendererComponent::GetRendererDescriptorSet() const { return m_descSetGroupRenderer->GetDescriptorSet(); }
@@ -311,6 +317,7 @@ void CRasterizationRendererComponent::UpdateRenderSettings()
 
 	if(IsSSAOEnabled() == true)
 		m_rendererData.flags |= RendererData::Flags::SSAOEnabled;
+	m_stateFlags |= StateFlags::RendererBufferDataDirty;
 }
 void CRasterizationRendererComponent::SetShaderOverride(const std::string &srcShaderId, const std::string &shaderOverrideId)
 {
@@ -382,7 +389,11 @@ rendering::Prepass &CRasterizationRendererComponent::GetPrepass() { return m_hdr
 const rendering::ForwardPlusInstance &CRasterizationRendererComponent::GetForwardPlusInstance() const { return const_cast<CRasterizationRendererComponent *>(this)->GetForwardPlusInstance(); }
 rendering::ForwardPlusInstance &CRasterizationRendererComponent::GetForwardPlusInstance() { return m_hdrInfo.forwardPlusInstance; }
 
-void CRasterizationRendererComponent::SetBloomThreshold(float threshold) { m_rendererData.bloomThreshold = threshold; }
+void CRasterizationRendererComponent::SetBloomThreshold(float threshold)
+{
+	m_rendererData.bloomThreshold = threshold;
+	m_stateFlags |= StateFlags::RendererBufferDataDirty;
+}
 float CRasterizationRendererComponent::GetBloomThreshold() const { return m_rendererData.bloomThreshold; }
 
 Float CRasterizationRendererComponent::GetHDRExposure() const { return m_hdrInfo.exposure; }
@@ -441,6 +452,7 @@ void CRasterizationRendererComponent::UpdateFrustumPlanes(CSceneComponent &scene
 void CRasterizationRendererComponent::SetLightMap(CLightMapComponent &lightMapC)
 {
 	m_rendererData.lightmapExposurePow = lightMapC.CalcLightMapPowExposurePow();
+	m_stateFlags |= StateFlags::RendererBufferDataDirty;
 	/*if(
 		m_lightMapInfo.lightMapComponent.get() == &lightMapC &&
 		lightMapC.GetLightMap() == m_lightMapInfo.lightMapTexture &&
@@ -456,7 +468,10 @@ void CRasterizationRendererComponent::SetLightMap(CLightMapComponent &lightMapC)
 	m_lightMapInfo.lightMapComponent = lightMapC.GetHandle<CLightMapComponent>();
 	if(m_lightMapInfo.cbExposure.IsValid())
 		m_lightMapInfo.cbExposure.Remove();
-	m_lightMapInfo.cbExposure = lightMapC.GetLightMapExposureProperty()->AddCallback([this, &lightMapC](std::reference_wrapper<const float> oldValue, std::reference_wrapper<const float> newValue) { m_rendererData.lightmapExposurePow = lightMapC.CalcLightMapPowExposurePow(); });
+	m_lightMapInfo.cbExposure = lightMapC.GetLightMapExposureProperty()->AddCallback([this, &lightMapC](std::reference_wrapper<const float> oldValue, std::reference_wrapper<const float> newValue) {
+		m_rendererData.lightmapExposurePow = lightMapC.CalcLightMapPowExposurePow();
+		m_stateFlags |= StateFlags::RendererBufferDataDirty;
+	});
 	if(m_lightMapInfo.lightMapTexture == nullptr) {
 		CLightMapComponent::LOGGER.warn("Lightmap component has no light map texture!");
 		return;

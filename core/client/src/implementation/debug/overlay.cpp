@@ -189,14 +189,14 @@ void pragma::debug::DebugRenderer::WorldObject::UpdateVertexBuffer()
 {
 	if(m_vertexBuffer == nullptr)
 		return;
-	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_vertexBuffer, 0ull, m_vertices.size() * sizeof(m_vertices.front()), m_vertices.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*m_vertexBuffer, 0ull, m_vertices.size() * sizeof(m_vertices.front()), m_vertices.data());
 }
 
 void pragma::debug::DebugRenderer::WorldObject::UpdateColorBuffer()
 {
 	if(m_colorBuffer == nullptr)
 		return;
-	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_colorBuffer, 0ull, m_colors.size() * sizeof(m_colors.front()), m_colors.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*m_colorBuffer, 0ull, m_colors.size() * sizeof(m_colors.front()), m_colors.data());
 }
 
 ///////////////////////////

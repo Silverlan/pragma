@@ -365,11 +365,27 @@ void pragma::CGame::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defCScene.def("InitializeRenderTarget", &CSceneComponent::ReloadRenderTarget);
 
 	defCScene.def("GetIndex", static_cast<rendering::SceneIndex (CSceneComponent::*)() const>(&CSceneComponent::GetSceneIndex));
-	defCScene.def("GetCameraDescriptorSet", static_cast<const std::shared_ptr<prosper::IDescriptorSetGroup> &(CSceneComponent::*)(prosper::PipelineBindPoint) const>(&CSceneComponent::GetCameraDescriptorSetGroup));
-	defCScene.def("GetCameraDescriptorSet", static_cast<const std::shared_ptr<prosper::IDescriptorSetGroup> &(*)(const CSceneComponent &)>([](const CSceneComponent &scene) -> const std::shared_ptr<prosper::IDescriptorSetGroup> & {
-		return scene.GetCameraDescriptorSetGroup(prosper::PipelineBindPoint::Graphics);
-	}));
-	defCScene.def("GetViewCameraDescriptorSet", &CSceneComponent::GetViewCameraDescriptorSet);
+	defCScene.def(
+	  "GetCurrentFrameCameraDescriptorSet", +[](CSceneComponent &sceneC, prosper::PipelineBindPoint bindPoint) -> std::shared_ptr<prosper::IDescriptorSetGroup> {
+		  auto *dsg = sceneC.GetCurrentFrameCameraDescriptorSetGroup(bindPoint);
+		  if(!dsg)
+			  return nullptr;
+		  return dsg->shared_from_this();
+	  });
+	defCScene.def(
+	  "GetCurrentFrameCameraDescriptorSet", +[](CSceneComponent &sceneC) -> std::shared_ptr<prosper::IDescriptorSetGroup> {
+		  auto *dsg = sceneC.GetCurrentFrameCameraDescriptorSetGroup();
+		  if(!dsg)
+			  return nullptr;
+		  return dsg->shared_from_this();
+	  });
+	defCScene.def(
+	  "GetCurrentFrameViewCameraDescriptorSet", +[](CSceneComponent &sceneC) -> std::shared_ptr<prosper::IDescriptorSetGroup> {
+		  auto *dsg = sceneC.GetCurrentFrameViewCameraDescriptorSetGroup();
+		  if(!dsg)
+			  return nullptr;
+		  return dsg->shared_from_this();
+	  });
 	defCScene.def("GetDebugMode", &CSceneComponent::GetDebugMode);
 	defCScene.def("SetDebugMode", &CSceneComponent::SetDebugMode);
 	defCScene.def("Link", &CSceneComponent::Link, luabind::default_parameter_policy<3, true> {});

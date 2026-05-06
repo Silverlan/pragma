@@ -53,7 +53,7 @@ vec2 get_parallax_coordinates(bool useParallaxMap, vec2 texCoords, ParallaxInfo 
 	vec3 B = normalize(tbn[1]);
 	vec3 N = normalize(tbn[2]);
 	mat3 tbnMatrix = transpose(mat3(T, B, N));
-	vec3 camPosWs = u_renderSettings.posCam.xyz;
+	vec3 camPosWs = get_cam_pos();
 	vec3 vertPosWs = get_vertex_position_ws();
 	vec3 viewDirWs = normalize(camPosWs - vertPosWs);
 	vec3 viewDirTs = normalize(tbnMatrix * viewDirWs);

@@ -111,7 +111,7 @@ void export_world_fragment_data(mat4 mdlMatrix, vec3 vpos, bool useNormalMap, bo
 			normalize((mdlMatrix *vec4(bitangent,0.0)).xyz),
 			normalize((mdlMatrix *vec4(normal,0.0)).xyz)
 		));
-		vec3 camPosTs = TBN *u_renderSettings.posCam;
+		vec3 camPosTs = TBN *get_cam_pos();
 		vec3 vertPosTs = TBN *vs_out.vert_pos_ws.xyz;
 
 		vs_out.tangentData.cam_dir_to_vert_ts = camPosTs -vertPosTs;

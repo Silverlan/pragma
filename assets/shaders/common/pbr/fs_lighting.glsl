@@ -28,7 +28,7 @@ vec3 calc_pbr_lighting(vec2 uv, MaterialInfo materialInfo, uint materialFlags, v
 	vec3 normal = get_normal_from_map(uv, materialFlags);
 	normal = normalize((get_model_matrix() * vec4(normal.xyz, 0.0)).xyz);
 
-	vec3 view = normalize(u_renderSettings.posCam.xyz - get_vertex_position_ws());
+	vec3 view = normalize(get_cam_pos() - get_vertex_position_ws());
 
 	bool useLightmaps = false;
 	if(CSPEC_ENABLE_LIGHT_MAPS == 1) {

@@ -41,7 +41,7 @@ void main()
 	fs_color.a *= dt;
 	fs_color.a *= get_depth_smooth_factor(nearZ, farZ, get_scene_depth(viewportW, viewportH));
 
-	vec3 camDir = normalize(fs_in.vert_pos_ws - u_renderSettings.posCam.xyz);
+	vec3 camDir = normalize(fs_in.vert_pos_ws - get_cam_pos());
 	vec3 camDirCs = normalize((vm * vec4(camDir, 0.0)).xyz);
 	float l = 1.0 - max(0.0, dot(fs_in.vert_normal_cs, camDirCs));
 

@@ -73,7 +73,7 @@ void pragma::pts::CParticleRendererBeam::UpdateNodes()
 		if(color != nullptr)
 			m_nodeOrigins[i].color = {color->r / 255.f, color->g / 255.f, color->b / 255.f, color->a / 255.f};
 	}
-	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(m_vertexBuffer, 0ull, m_vertexBuffer->GetSize(), m_nodeOrigins.data());
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*m_vertexBuffer, 0ull, m_vertexBuffer->GetSize(), m_nodeOrigins.data());
 }
 
 std::pair<Vector3, Vector3> pragma::pts::CParticleRendererBeam::GetRenderBounds() const

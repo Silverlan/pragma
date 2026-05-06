@@ -17,6 +17,7 @@ export namespace pragma::rendering {
 	using SceneFlag = uint32_t;
 	constexpr auto ALL_SCENES = std::numeric_limits<SceneFlags>::max();
 
+	constexpr size_t get_max_scene_count() { return std::numeric_limits<SceneFlags>::digits; }
 	DLLCLIENT SceneFlags get_scene_flag(SceneIndex sceneIndex) { return 1 << sceneIndex; }
 	DLLCLIENT SceneIndex get_scene_index(SceneFlags flag) { return math::get_least_significant_set_bit_index(flag); }
 

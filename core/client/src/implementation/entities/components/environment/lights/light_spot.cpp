@@ -52,7 +52,7 @@ void CLightSpotComponent::SetFieldAngleComponent(BaseFieldAngleComponent &c)
 		bufferData.SetOuterConeHalfAngle(newAng.get() / 2.f);
 		auto &renderBuffer = pLightComponent->GetRenderBuffer();
 		if(renderBuffer != nullptr)
-			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, outerConeHalfAngle), bufferData.outerConeHalfAngle);
+			get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*renderBuffer, offsetof(LightBufferData, outerConeHalfAngle), bufferData.outerConeHalfAngle);
 		UpdateInnerConeAngle();
 
 		if(pLightComponent->GetLightIntensityType() == CBaseLightComponent::LightIntensityType::Lumen) {
@@ -71,7 +71,7 @@ void CLightSpotComponent::UpdateInnerConeAngle()
 	bufferData.SetInnerConeHalfAngle(CalcInnerConeAngle(GetOuterConeAngle(), GetBlendFraction()) / 2.f);
 	auto &renderBuffer = pLightComponent->GetRenderBuffer();
 	if(renderBuffer != nullptr)
-		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, innerConeHalfAngle), bufferData.innerConeHalfAngle);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*renderBuffer, offsetof(LightBufferData, innerConeHalfAngle), bufferData.innerConeHalfAngle);
 }
 Bool CLightSpotComponent::ReceiveNetEvent(NetEventId eventId, NetPacket &packet)
 {
@@ -134,7 +134,7 @@ void CLightSpotComponent::SetConeStartOffset(float offset)
 	bufferData.direction.w = offset;
 	auto &renderBuffer = pLightComponent->GetRenderBuffer();
 	if(renderBuffer != nullptr)
-		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(renderBuffer, offsetof(LightBufferData, direction) + offsetof(Vector4, w), offset);
+		get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*renderBuffer, offsetof(LightBufferData, direction) + offsetof(Vector4, w), offset);
 }
 void CLightSpotComponent::InitializeLuaObject(lua::State *l) { return BaseEntityComponent::InitializeLuaObject<std::remove_reference_t<decltype(*this)>>(l); }
 void CLightSpotComponent::UpdateTransformMatrix()
@@ -146,7 +146,7 @@ void CLightSpotComponent::UpdateTransformMatrix()
 	if(shadowBuffer == nullptr)
 		return;
 	std::array<Mat4, 3> matrices = {GetBiasTransformationMatrix(), GetViewMatrix(), GetProjectionMatrix()};
-	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(shadowBuffer, 0ull, matrices);
+	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*shadowBuffer, 0ull, matrices);
 }
 void CLightSpotComponent::UpdateProjectionMatrix()
 {

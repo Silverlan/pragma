@@ -8,8 +8,6 @@ export import pragma.math;
 export namespace pragma {
 #pragma pack(push, 1)
 	struct RenderSettings {
-		Vector3 posCam;
-		math::Radian fov;
 		int32_t flags;
 		float shadowRatioX;
 		float shadowRatioY;
@@ -21,6 +19,8 @@ export namespace pragma {
 		Mat4 V;
 		Mat4 P;
 		Mat4 VP;
+		Vector3 posCam;
+		math::Radian fov;
 	};
 	struct FogData {
 		Vector4 color;

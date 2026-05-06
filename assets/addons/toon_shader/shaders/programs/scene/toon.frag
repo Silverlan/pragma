@@ -133,7 +133,7 @@ void main()
 	normal = normalize(normalMatrix * normal);
 
 	vec3 vertPos = get_vertex_position_ws();
-	vec3 viewDir = normalize(u_renderSettings.posCam.xyz - vertPos);
+	vec3 viewDir = normalize(get_cam_pos() - vertPos);
 	ShadingInfo shadingInfo;
 	shadingInfo.surfaceNormal = normal;
 	shadingInfo.viewDirection = viewDir;

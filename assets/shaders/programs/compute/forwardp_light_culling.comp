@@ -102,10 +102,11 @@ ViewFrustum create_frustum(ivec2 tile_id, float min_depth, float max_depth, uint
 	}
 
 	vec3 temp_normal;
+	vec3 camPos = get_cam_pos();
 	for(int i = 0; i < 4; i++) {
 		//Cax+Cby+Ccz+Cd = 0, planes[i] = (Ca, Cb, Cc, Cd)
 		// temp_normal: normal without normalization
-		temp_normal = cross(frustum.points[i] - u_renderSettings.posCam.xyz, frustum.points[i + 1] - u_renderSettings.posCam.xyz);
+		temp_normal = cross(frustum.points[i] - camPos, frustum.points[i + 1] - camPos);
 		temp_normal = normalize(temp_normal);
 		frustum.planes[i] = vec4(temp_normal, -dot(temp_normal, frustum.points[i]));
 	}

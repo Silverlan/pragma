@@ -473,7 +473,7 @@ void CLiquidSurfaceComponent::RenderPostProcessingOverlay(const rendering::DrawS
 			auto &shaderPPWater = static_cast<ShaderPPWater &>(*m_shaderPpWater.get());
 			prosper::ShaderBindState bindState {*drawCmd};
 			if(mat != nullptr && mat->IsLoaded() == true && shaderPPWater.RecordBeginDraw(bindState) == true && shaderPPWater.RecordRefractionMaterial(bindState, *mat)) {
-				shaderPPWater.RecordDraw(bindState, descSetHdr, *hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(), *scene->GetCameraDescriptorSetGraphics(), get_cgame()->GetGlobalRenderSettingsDescriptorSet(), *waterScene.fogDescSetGroup->GetDescriptorSet(),
+				shaderPPWater.RecordDraw(bindState, descSetHdr, *hdrInfo.dsgDepthPostProcessing->GetDescriptorSet(), *scene->GetCameraDescriptorSetGraphics(), get_cgame()->GetCurrentFrameGlobalRenderSettingsDescriptorSet(), *waterScene.fogDescSetGroup->GetDescriptorSet(),
 				  Vector4 {n.x, n.y, n.z, planeDist});
 				shaderPPWater.RecordEndDraw(bindState);
 			}

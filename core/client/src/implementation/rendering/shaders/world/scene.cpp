@@ -196,7 +196,7 @@ void ShaderGameWorld::RecordSceneFlags(rendering::ShaderProcessor &shaderProcess
 
 bool ShaderGameWorld::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const
 {
-	return shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, layout, entityInstanceDescriptorSetIndex, *renderC.GetRenderDescriptorSet());
+	return shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, layout, entityInstanceDescriptorSetIndex, *renderC.GetCurrentFrameRenderDescriptorSet());
 }
 
 bool ShaderGameWorld::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, material::CMaterial &mat) const

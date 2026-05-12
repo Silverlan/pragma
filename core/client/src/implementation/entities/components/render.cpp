@@ -86,9 +86,10 @@ void CRenderComponent::InitializeBuffers()
 	initialize_articulated_buffers();
 	initialize_vertex_animation_buffer();
 }
-const prosper::IBuffer *CRenderComponent::GetRenderBuffer() const { return m_renderBuffer.get(); }
-std::optional<RenderBufferIndex> CRenderComponent::GetRenderBufferIndex() const { return m_renderBuffer ? m_renderBuffer->GetBaseIndex() : std::optional<RenderBufferIndex> {}; }
-prosper::IDescriptorSet *CRenderComponent::GetRenderDescriptorSet() const { return (m_renderDescSetGroup != nullptr) ? m_renderDescSetGroup->GetDescriptorSet() : nullptr; }
+const prosper::FrameScopedBuffer *CRenderComponent::GetRenderBuffer() const { return m_renderBuffer.get(); }
+prosper::SwapDescriptorSetGroup *CRenderComponent::GetRenderDescriptorSetGroup() const { return m_renderDescSetGroup.get(); }
+std::optional<RenderBufferIndex> CRenderComponent::GetCurrentFrameRenderBufferIndex() const { return m_renderBuffer ? m_renderBuffer->GetCurrentBuffer().GetBaseIndex() : std::optional<RenderBufferIndex> {}; }
+prosper::IDescriptorSet *CRenderComponent::GetCurrentFrameRenderDescriptorSet() const { return (m_renderDescSetGroup != nullptr) ? &m_renderDescSetGroup->GetCurrentDescriptorSet() : nullptr; }
 CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const { return m_stateFlags; }
 util::EventReply CRenderComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {
@@ -102,7 +103,7 @@ void CRenderComponent::SetDepthPassEnabled(bool enabled) { math::set_flag(m_stat
 bool CRenderComponent::IsDepthPassEnabled() const { return math::is_flag_set(m_stateFlags, StateFlags::EnableDepthPass); }
 void CRenderComponent::SetRenderClipPlane(const Vector4 &plane)
 {
-	if(plane == m_renderClipPlane)
+	if(m_renderClipPlane && plane == *m_renderClipPlane)
 		return;
 	m_renderClipPlane = plane;
 	BroadcastEvent(cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED);
@@ -342,7 +343,7 @@ void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 	else if(typeid(component) == typeid(CAnimatedComponent))
 		m_animComponent = nullptr;
 	else if(typeid(component) == typeid(CLightMapReceiverComponent)) {
-		m_stateFlags = m_stateFlags & ~StateFlags::RenderBufferDirty;
+		m_stateFlags &= ~StateFlags::RenderBufferDirty;
 		m_lightMapReceiverComponent = nullptr;
 	}
 }
@@ -592,8 +593,9 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 {
 	// Commented because render buffers must not be initialized on a non-main thread
 	// InitializeRenderBuffers();
+
+	auto &context = get_cengine()->GetRenderContext();
 	auto updateRenderBuffer = math::is_flag_set(m_stateFlags, StateFlags::RenderBufferDirty) || bForceBufferUpdate;
-	auto bufferDirty = false;
 	if(updateRenderBuffer) {
 		math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty, false);
 		UpdateMatrices();
@@ -607,7 +609,7 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 
 		auto renderFlags = rendering::InstanceData::RenderFlags::None;
 		auto *pMdlComponent = GetModelComponent();
-		auto bWeighted = pMdlComponent && static_cast<const CModelComponent &>(*pMdlComponent).IsWeighted();
+		auto bWeighted = pMdlComponent && pMdlComponent->IsWeighted();
 		auto *animC = GetAnimatedComponent();
 
 		// Note: If the RenderFlags::Weighted flag is set, 'GetShaderPipelineSpecialization' must not return
@@ -620,13 +622,23 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		m_instanceData.color = color;
 		m_instanceData.renderFlags = renderFlags;
 		m_instanceData.entityIndex = GetEntity().GetLocalIndex();
-		bufferDirty = true;
+
+		auto change = m_renderBuffer->Write(0, sizeof(m_instanceData), &m_instanceData);
+		if(change && *change != prosper::FrameScopedBuffer::BufferChange::NoChange) {
+			// Underlying buffers have changed, we need to update our descriptor sets
+			m_dirtyRenderBufferDescriptorSetBindings = (1 << context.GetMaxNumberOfFramesInFlight()) - 1;
+		}
 	}
-	if(bufferDirty) {
-		constexpr auto pipelineStages = prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit | prosper::PipelineStageFlags::GeometryShaderBit;
-		drawCmd->RecordBufferBarrier(*m_renderBuffer, pipelineStages, prosper::PipelineStageFlags::TransferBit, prosper::AccessFlags::UniformReadBit, prosper::AccessFlags::TransferWriteBit);
-		drawCmd->RecordUpdateBuffer(*m_renderBuffer, 0, m_instanceData);
-		drawCmd->RecordBufferBarrier(*m_renderBuffer, prosper::PipelineStageFlags::TransferBit, pipelineStages, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::UniformReadBit);
+	m_renderBuffer->Update();
+
+	// Update render buffer descriptor set bindings if necessary
+	auto resourceIdx = context.GetFrameResourceIndex();
+	auto resourceFlag = context.GetFrameResourceFlag(resourceIdx);
+	if(math::is_flag_set(m_dirtyRenderBufferDescriptorSetBindings, resourceFlag)) {
+		math::set_flag(m_dirtyRenderBufferDescriptorSetBindings, resourceFlag, false);
+		auto &ds = m_renderDescSetGroup->GetDescriptorSet(resourceIdx);
+		ds.SetBindingUniformBuffer(m_renderBuffer->GetBuffer(resourceIdx), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance));
+		ds.Update();
 	}
 
 	CEOnUpdateRenderBuffers evData {drawCmd};
@@ -794,15 +806,22 @@ void CRenderComponent::InitializeRenderBuffers()
 	if(m_renderBuffer != nullptr || ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid() == false || *m_renderPass == rendering::SceneRenderPass::None)
 		return;
 
-	get_cengine()->GetRenderContext().WaitIdle();
+	auto &context = get_cengine()->GetRenderContext();
+	context.WaitIdle();
 	math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty);
-	m_renderBuffer = s_instanceBuffer->AllocateBuffer();
+	m_renderBuffer = prosper::FrameScopedBuffer::Create(*s_instanceBuffer);
 	if(!m_renderBuffer)
 		return;
-	m_renderDescSetGroup = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
-	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(*m_renderBuffer, math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance));
+	m_renderDescSetGroup = context.CreateSwapDescriptorSetGroup(ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
+	for(size_t i = 0; i < context.GetMaxNumberOfFramesInFlight(); ++i) {
+		auto &ds = m_renderDescSetGroup->GetDescriptorSet(i);
+		ds.SetBindingUniformBuffer(m_renderBuffer->GetBuffer(i), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance));
+	}
 	UpdateBoneBuffer();
-	m_renderDescSetGroup->GetDescriptorSet()->Update();
+	for(size_t i = 0; i < context.GetMaxNumberOfFramesInFlight(); ++i)
+		m_renderDescSetGroup->GetDescriptorSet(i).Update();
+	m_dirtyRenderBufferDescriptorSetBindings = 0;
+
 	UpdateInstantiability();
 
 	BroadcastEvent(cRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED);
@@ -819,8 +838,10 @@ void CRenderComponent::UpdateBoneBuffer()
 	if(!buf)
 		return;
 	get_cengine()->GetRenderContext().WaitIdle();
-	m_renderDescSetGroup->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*buf), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
-	m_renderDescSetGroup->GetDescriptorSet()->Update();
+	for(auto &ds : *m_renderDescSetGroup) {
+		ds.SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*buf), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
+		ds.Update();
+	}
 }
 void CRenderComponent::ClearRenderBuffers()
 {
@@ -1035,7 +1056,7 @@ static void debug_entity_render_buffer(NetworkState *state, BasePlayerComponent 
 
 		auto *buf = renderC->GetRenderBuffer();
 		rendering::InstanceData bufData;
-		if(!buf || !buf->Read(0, sizeof(bufData), &bufData))
+		if(!buf || !buf->GetCurrentBuffer().Read(0, sizeof(bufData), &bufData))
 			Con::CWAR << "Failed to read buffer data!" << Con::endl;
 		else {
 			if(memcmp(&instanceData, &bufData, sizeof(bufData)) != 0) {

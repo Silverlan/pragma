@@ -131,7 +131,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindEntity(ecs::CBaseEntity &ent)
 {
 	auto *renderC = ent.GetRenderComponent();
 	assert(renderC);
-	auto *descSet = renderC->GetRenderDescriptorSet();
+	auto *descSet = renderC->GetCurrentFrameRenderDescriptorSet();
 	assert(descSet);
 	if(descSet == nullptr) {
 		if(VERBOSE_RENDER_OUTPUT_ENABLED) {

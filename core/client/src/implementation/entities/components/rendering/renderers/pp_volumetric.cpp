@@ -107,7 +107,7 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const rendering::DrawSceneIn
 				auto lightC = ent->GetComponent<CLightComponent>();
 				if(mdlC.expired() || renderC.expired() || radiusC.expired())
 					continue;
-				auto *dsInstance = renderC->GetRenderDescriptorSet();
+				auto *dsInstance = renderC->GetCurrentFrameRenderDescriptorSet();
 				if(!dsInstance)
 					continue;
 				pushConstants.color = colorC.valid() ? colorC->GetColor() : colors::White.ToVector4();

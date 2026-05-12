@@ -81,8 +81,8 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 	auto whRenderComponent = ent.GetComponent<CRenderComponent>();
 	auto &mdl = GetEntity().GetModel();
 	auto *buf = whRenderComponent.valid() ? whRenderComponent->GetRenderBuffer() : nullptr;
-	auto *ds = whRenderComponent.valid() ? whRenderComponent->GetRenderDescriptorSet() : nullptr;
-	if(!buf || mdl == nullptr || !ds)
+	auto *dsg = whRenderComponent.valid() ? whRenderComponent->GetRenderDescriptorSetGroup() : nullptr;
+	if(!buf || mdl == nullptr || !dsg)
 		return;
 	if(m_vertexAnimationBuffer == nullptr) {
 		auto &vertAnimations = mdl->GetVertexAnimations();
@@ -100,9 +100,11 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 	}
 
 	auto &vertAnimBuffer = static_cast<asset::CModel &>(*mdl).GetVertexAnimationBuffer();
-	ds->SetBindingStorageBuffer(*m_vertexAnimationBuffer, math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData));
-	ds->SetBindingStorageBuffer(*vertAnimBuffer, math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::VertexAnimations));
-	ds->Update();
+	for(auto &ds : *dsg) {
+		ds.SetBindingStorageBuffer(*m_vertexAnimationBuffer, math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData));
+		ds.SetBindingStorageBuffer(*vertAnimBuffer, math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::VertexAnimations));
+		ds.Update();
+	}
 }
 
 void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()
@@ -114,10 +116,12 @@ void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()
 
 	auto &ent = GetEntity();
 	auto whRenderComponent = ent.GetComponent<CRenderComponent>();
-	auto *pRenderDescSet = whRenderComponent.valid() ? whRenderComponent->GetRenderDescriptorSet() : nullptr;
-	if(pRenderDescSet) {
-		pRenderDescSet->SetBindingStorageBuffer(*get_cengine()->GetRenderContext().GetDummyBuffer(), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData)); // Reset buffer
-		pRenderDescSet->Update();
+	auto *pRenderDescSetGroup = whRenderComponent.valid() ? whRenderComponent->GetRenderDescriptorSetGroup() : nullptr;
+	if(pRenderDescSetGroup) {
+		for(auto &ds : *pRenderDescSetGroup) {
+			ds.SetBindingStorageBuffer(*get_cengine()->GetRenderContext().GetDummyBuffer(), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData)); // Reset buffer
+			ds.Update();
+		}
 	}
 }
 

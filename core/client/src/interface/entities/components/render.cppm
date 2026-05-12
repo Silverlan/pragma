@@ -64,10 +64,11 @@ export namespace pragma {
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
 
 		CRenderComponent(ecs::BaseEntity &ent);
-		const prosper::IBuffer *GetRenderBuffer() const;
-		std::optional<RenderBufferIndex> GetRenderBufferIndex() const;
+		const prosper::FrameScopedBuffer *GetRenderBuffer() const;
+		std::optional<RenderBufferIndex> GetCurrentFrameRenderBufferIndex() const;
 		bool IsRenderBufferValid() const { return m_renderBuffer != nullptr; }
-		prosper::IDescriptorSet *GetRenderDescriptorSet() const;
+		prosper::IDescriptorSet *GetCurrentFrameRenderDescriptorSet() const;
+		prosper::SwapDescriptorSetGroup *GetRenderDescriptorSetGroup() const;
 
 		static const std::vector<CRenderComponent *> &GetEntitiesExemptFromOcclusionCulling();
 		static const std::shared_ptr<prosper::IUniformResizableBuffer> &GetInstanceBuffer();
@@ -238,8 +239,9 @@ export namespace pragma {
 		void UpdateAbsoluteSphereRenderBounds();
 		void UpdateAbsoluteAABBRenderBounds();
 		rendering::InstanceData m_instanceData {};
-		std::shared_ptr<prosper::IBuffer> m_renderBuffer = nullptr;
-		std::shared_ptr<prosper::IDescriptorSetGroup> m_renderDescSetGroup = nullptr;
+		std::shared_ptr<prosper::FrameScopedBuffer> m_renderBuffer = nullptr;
+		std::shared_ptr<prosper::SwapDescriptorSetGroup> m_renderDescSetGroup = nullptr;
+		uint8_t m_dirtyRenderBufferDescriptorSetBindings = 0;
 		std::optional<double> m_translucencyPassDistanceOverrideSqr {};
 	};
 

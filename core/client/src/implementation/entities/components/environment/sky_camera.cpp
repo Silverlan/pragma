@@ -188,8 +188,8 @@ void CSkyCameraComponent::UpdateScenes()
 			if(!math::is_flag_set(drawSceneInfo.renderFlags, rendering::RenderFlags::Skybox) || !ent.IsInScene(*scene))
 				return util::EventReply::Unhandled;
 			// Need to update the render buffers for our render queues
-			CSceneComponent::UpdateRenderBuffers(drawCmd, *pSceneData->renderQueue, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::Prepass) : nullptr);
-			CSceneComponent::UpdateRenderBuffers(drawCmd, *pSceneData->renderQueueTranslucent, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::Prepass) : nullptr);
+			CSceneComponent::UpdateRenderBuffersMT(*pSceneData->renderQueue, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::Prepass) : nullptr);
+			CSceneComponent::UpdateRenderBuffersMT(*pSceneData->renderQueueTranslucent, drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::Prepass) : nullptr);
 			return util::EventReply::Unhandled;
 		});
 		sceneData->renderPrepass = rasterizationC->AddEventCallback(cRasterizationRendererComponent::EVENT_MT_BEGIN_RECORD_PREPASS, [this, pSceneData, &ent, scene](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {

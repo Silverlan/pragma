@@ -880,7 +880,7 @@ int Lua::game::Client::update_render_buffers(lua::State *l)
 {
 	auto &drawSceneInfo = Lua::Check<const pragma::rendering::DrawSceneInfo>(l, 1);
 	auto &renderQueue = Lua::Check<const pragma::rendering::RenderQueue>(l, 2);
-	pragma::CSceneComponent::UpdateRenderBuffers(drawSceneInfo.commandBuffer, renderQueue);
+	pragma::CSceneComponent::UpdateRenderBuffersMT(renderQueue);
 	return 0;
 }
 int Lua::game::Client::render_scenes(lua::State *l)

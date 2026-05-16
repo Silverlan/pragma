@@ -34,7 +34,7 @@ export namespace pragma {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_RENDER_MODE_CHANGED;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_SHOULD_DRAW;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_SHOULD_DRAW_SHADOW;
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_UPDATE_RENDER_BUFFERS;
+		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_UPDATE_RENDER_BUFFERS_MT;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_UPDATE_RENDER_MATRICES;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_UPDATE_INSTANTIABILITY;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_CLIP_PLANE_CHANGED;
@@ -128,8 +128,7 @@ export namespace pragma {
 
 		// Note: Called in render thread
 		void UpdateRenderDataMT(const CSceneComponent &scene, const CCameraComponent &cam, const Mat4 &vp);
-
-		void UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, bool bForceBufferUpdate = false);
+		void UpdateRenderBuffersMT();
 
 		bool ShouldDraw() const;
 		bool ShouldDrawShadow() const;
@@ -162,6 +161,7 @@ export namespace pragma {
 		void SetReceiveShadows(bool enabled);
 		bool IsReceivingShadows() const;
 
+		size_t GetLastRenderBufferUpdateFrame() const { return m_lastRenderBufferUpdateFrame; }
 		void SetRenderBufferDirty();
 		void SetRenderBoundsDirty();
 		std::optional<math::intersection::LineMeshResult> CalcRayIntersection(const Vector3 &start, const Vector3 &dir, bool precise = false) const;
@@ -207,7 +207,6 @@ export namespace pragma {
 		virtual util::EventReply HandleEvent(ComponentEventId eventId, ComponentEvent &evData) override;
 
 		void InitializeRenderBuffers();
-		void UpdateBoneBuffer();
 
 		std::optional<math::ScaledTransform> m_renderOffset {};
 		math::ScaledTransform m_renderPose {};
@@ -232,9 +231,11 @@ export namespace pragma {
 		StateFlags m_stateFlags
 		  = static_cast<StateFlags>(math::to_integral(StateFlags::RenderBufferDirty) | math::to_integral(StateFlags::EnableDepthPass) | math::to_integral(StateFlags::RenderBoundsDirty) | math::to_integral(StateFlags::ShouldDraw) | math::to_integral(StateFlags::ShouldDrawShadow));
 		std::atomic<uint64_t> m_lastRender = 0ull;
+		size_t m_lastRenderBufferUpdateFrame = std::numeric_limits<size_t>::max();
 		std::mutex m_renderDataMutex;
 		static std::vector<CRenderComponent *> s_ocExemptEntities;
 	  private:
+		void UpdateRenderBufferDsgStateMT();
 		void UpdateAbsoluteRenderBounds();
 		void UpdateAbsoluteSphereRenderBounds();
 		void UpdateAbsoluteAABBRenderBounds();
@@ -278,9 +279,8 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT CEOnUpdateRenderBuffers : public ComponentEvent {
-		CEOnUpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer);
+		CEOnUpdateRenderBuffers();
 		virtual void PushArguments(lua::State *l) override;
-		std::shared_ptr<prosper::IPrimaryCommandBuffer> commandBuffer;
 	};
 
 	struct DLLCLIENT CEOnRenderBoundsChanged : public ComponentEvent {

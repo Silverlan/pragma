@@ -143,7 +143,7 @@ decltype(ShaderEntity::VERTEX_ATTRIBUTE_LIGHTMAP_UV) ShaderEntity::VERTEX_ATTRIB
 decltype(ShaderEntity::DESCRIPTOR_SET_INSTANCE) ShaderEntity::DESCRIPTOR_SET_INSTANCE = {
   "INSTANCE",
   {prosper::DescriptorSetInfo::Binding {"ENTITY_DATA", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit},
-    prosper::DescriptorSetInfo::Binding {"BONE_MATRICES", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::VertexBit}, prosper::DescriptorSetInfo::Binding {"VERTEX_ANIMATIONS", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::VertexBit},
+    prosper::DescriptorSetInfo::Binding {"BONE_MATRICES", prosper::DescriptorType::UniformBufferDynamic, prosper::ShaderStageFlags::VertexBit}, prosper::DescriptorSetInfo::Binding {"VERTEX_ANIMATIONS", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::VertexBit},
     prosper::DescriptorSetInfo::Binding {"VERTEX_ANIMATION_FRAME_DATA", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::VertexBit}},
 };
 ShaderEntity::ShaderEntity(prosper::IPrContext &context, const std::string &identifier, const std::string &vsShader, const std::string &fsShader, const std::string &gsShader) : ShaderSceneLit(context, identifier, vsShader, fsShader, gsShader) {}
@@ -196,7 +196,14 @@ void ShaderGameWorld::RecordSceneFlags(rendering::ShaderProcessor &shaderProcess
 
 bool ShaderGameWorld::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const
 {
-	return shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, layout, entityInstanceDescriptorSetIndex, *renderC.GetCurrentFrameRenderDescriptorSet());
+	uint32_t animationBufferOffset = 0;
+	auto *animC = renderC.GetAnimatedComponent();
+	if(animC) {
+		auto tmpOffset = animC->GetCurrentFrameBoneBufferOffset();
+		if(tmpOffset)
+			animationBufferOffset = *tmpOffset;
+	}
+	return shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, layout, entityInstanceDescriptorSetIndex, *renderC.GetCurrentFrameRenderDescriptorSet(), &animationBufferOffset);
 }
 
 bool ShaderGameWorld::RecordBindMaterial(rendering::ShaderProcessor &shaderProcessor, material::CMaterial &mat) const

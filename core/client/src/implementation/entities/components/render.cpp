@@ -24,7 +24,7 @@ ComponentEventId cRenderComponent::EVENT_ON_RENDER_BOUNDS_CHANGED = INVALID_COMP
 ComponentEventId cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED = INVALID_COMPONENT_ID;
 ComponentEventId cRenderComponent::EVENT_SHOULD_DRAW = INVALID_COMPONENT_ID;
 ComponentEventId cRenderComponent::EVENT_SHOULD_DRAW_SHADOW = INVALID_COMPONENT_ID;
-ComponentEventId cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS = INVALID_COMPONENT_ID;
+ComponentEventId cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS_MT = INVALID_COMPONENT_ID;
 ComponentEventId cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES = INVALID_COMPONENT_ID;
 ComponentEventId cRenderComponent::EVENT_UPDATE_INSTANTIABILITY = INVALID_COMPONENT_ID;
 ComponentEventId cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED = INVALID_COMPONENT_ID;
@@ -37,7 +37,7 @@ void CRenderComponent::RegisterEvents(EntityComponentManager &componentManager, 
 	cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED = registerEvent("ON_RENDER_MODE_CHANGED", ComponentEventInfo::Type::Broadcast);
 	cRenderComponent::EVENT_SHOULD_DRAW = registerEvent("SHOULD_DRAW", ComponentEventInfo::Type::Explicit);
 	cRenderComponent::EVENT_SHOULD_DRAW_SHADOW = registerEvent("SHOULD_DRAW_SHADOW", ComponentEventInfo::Type::Explicit);
-	cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS = registerEvent("ON_UPDATE_RENDER_BUFFERS", ComponentEventInfo::Type::Explicit);
+	cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS_MT = registerEvent("ON_UPDATE_RENDER_BUFFERS_MT", ComponentEventInfo::Type::Explicit);
 	cRenderComponent::EVENT_ON_UPDATE_RENDER_MATRICES = registerEvent("ON_UPDATE_RENDER_MATRICES", ComponentEventInfo::Type::Explicit);
 	cRenderComponent::EVENT_UPDATE_INSTANTIABILITY = registerEvent("UPDATE_INSTANTIABILITY", ComponentEventInfo::Type::Broadcast);
 	cRenderComponent::EVENT_ON_CLIP_PLANE_CHANGED = registerEvent("ON_CLIP_PLANE_CHANGED", ComponentEventInfo::Type::Broadcast);
@@ -137,7 +137,6 @@ void CRenderComponent::Initialize()
 {
 	BaseRenderComponent::Initialize();
 
-	BindEventUnhandled(cAnimatedComponent::EVENT_ON_BONE_BUFFER_INITIALIZED, [this](std::reference_wrapper<ComponentEvent> evData) { UpdateBoneBuffer(); });
 	BindEventUnhandled(cColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { SetRenderBufferDirty(); });
 	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
 		m_localRenderBounds = {};
@@ -589,15 +588,14 @@ void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt)
 bool CRenderComponent::IsExemptFromOcclusionCulling() const { return math::is_flag_set(m_stateFlags, StateFlags::ExemptFromOcclusionCulling); }
 void CRenderComponent::SetRenderBufferDirty() { math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty); }
 void CRenderComponent::SetRenderBoundsDirty() { math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty); }
-void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, bool bForceBufferUpdate)
-{
+void CRenderComponent::UpdateRenderBufferDsgStateMT() {
 	// Commented because render buffers must not be initialized on a non-main thread
 	// InitializeRenderBuffers();
 
 	auto &context = get_cengine()->GetRenderContext();
-	auto updateRenderBuffer = math::is_flag_set(m_stateFlags, StateFlags::RenderBufferDirty) || bForceBufferUpdate;
+	auto updateRenderBuffer = math::is_flag_set(m_stateFlags, StateFlags::RenderBufferDirty);
 	if(updateRenderBuffer) {
-		math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty, false);
+		//math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty, false);
 		UpdateMatrices();
 
 		// Update Render Buffer
@@ -623,13 +621,12 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		m_instanceData.renderFlags = renderFlags;
 		m_instanceData.entityIndex = GetEntity().GetLocalIndex();
 
-		auto change = m_renderBuffer->Write(0, sizeof(m_instanceData), &m_instanceData);
+		auto change = m_renderBuffer->UpdateBufferMode(0, sizeof(m_instanceData), &m_instanceData);
 		if(change && *change != prosper::FrameScopedBuffer::BufferChange::NoChange) {
 			// Underlying buffers have changed, we need to update our descriptor sets
 			m_dirtyRenderBufferDescriptorSetBindings = (1 << context.GetMaxNumberOfFramesInFlight()) - 1;
 		}
 	}
-	m_renderBuffer->Update();
 
 	// Update render buffer descriptor set bindings if necessary
 	auto resourceIdx = context.GetFrameResourceIndex();
@@ -640,9 +637,29 @@ void CRenderComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrima
 		ds.SetBindingUniformBuffer(m_renderBuffer->GetBuffer(resourceIdx), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance));
 		ds.Update();
 	}
+}
+void CRenderComponent::UpdateRenderBuffersMT()
+{
+	auto &context = get_cengine()->GetRenderContext();
+	auto curFrame = context.GetLastFrameId();
+	if(m_lastRenderBufferUpdateFrame == curFrame)
+		return;
+	m_lastRenderBufferUpdateFrame = curFrame;
 
-	CEOnUpdateRenderBuffers evData {drawCmd};
-	InvokeEventCallbacks(cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS, evData);
+	// std::cout<<std::format("UpdateRenderBuffers for entity {}", GetEntity().GetLocalIndex())<<std::endl;
+	// Commented because render buffers must not be initialized on a non-main thread
+	// InitializeRenderBuffers();
+
+	auto updateRenderBuffer = math::is_flag_set(m_stateFlags, StateFlags::RenderBufferDirty);
+	if(updateRenderBuffer) {
+		math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty, false);
+
+		m_renderBuffer->Write(0, sizeof(m_instanceData), &m_instanceData);
+	}
+	m_renderBuffer->Update();
+
+	CEOnUpdateRenderBuffers evData {};
+	InvokeEventCallbacks(cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS_MT, evData);
 }
 const rendering::InstanceData &CRenderComponent::GetInstanceData() const { return m_instanceData; }
 void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CCameraComponent &cam, const Mat4 &vp)
@@ -673,6 +690,8 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 		if(attInfo != nullptr && (attInfo->flags & FAttachmentMode::UpdateEachFrame) != FAttachmentMode::None && GetEntity().GetParent())
 			pAttComponent->UpdateAttachmentOffset(false);
 	}
+
+	UpdateRenderBufferDsgStateMT();
 }
 
 bool CRenderComponent::AddToRenderGroup(const std::string &name)
@@ -812,36 +831,21 @@ void CRenderComponent::InitializeRenderBuffers()
 	m_renderBuffer = prosper::FrameScopedBuffer::Create(*s_instanceBuffer);
 	if(!m_renderBuffer)
 		return;
-	m_renderDescSetGroup = context.CreateSwapDescriptorSetGroup(ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
+	// We need the UpdateAfterBind flag because the descriptor sets may get updated when render buffers are being updated on the main thread
+	// while the command buffers are being recorded on the render threads.
+	m_renderDescSetGroup = context.CreateSwapDescriptorSetGroup(ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE, {"ent_instance"});
+	//auto &boneRingBuf = get_bone_ring_buffer();
+	m_renderDescSetGroup->SetBindingDynamicUniformBuffer(get_instance_bone_buffer()->GetBaseBuffer(), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
 	for(size_t i = 0; i < context.GetMaxNumberOfFramesInFlight(); ++i) {
 		auto &ds = m_renderDescSetGroup->GetDescriptorSet(i);
 		ds.SetBindingUniformBuffer(m_renderBuffer->GetBuffer(i), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance));
+		ds.Update();
 	}
-	UpdateBoneBuffer();
-	for(size_t i = 0; i < context.GetMaxNumberOfFramesInFlight(); ++i)
-		m_renderDescSetGroup->GetDescriptorSet(i).Update();
 	m_dirtyRenderBufferDescriptorSetBindings = 0;
 
 	UpdateInstantiability();
 
 	BroadcastEvent(cRenderComponent::EVENT_ON_RENDER_BUFFERS_INITIALIZED);
-}
-void CRenderComponent::UpdateBoneBuffer()
-{
-	if(m_renderBuffer == nullptr)
-		return;
-	auto &ent = GetEntity();
-	auto pAnimComponent = ent.GetAnimatedComponent();
-	if(pAnimComponent.expired())
-		return;
-	auto *buf = static_cast<CAnimatedComponent &>(*pAnimComponent).GetBoneBuffer();
-	if(!buf)
-		return;
-	get_cengine()->GetRenderContext().WaitIdle();
-	for(auto &ds : *m_renderDescSetGroup) {
-		ds.SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*buf), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
-		ds.Update();
-	}
 }
 void CRenderComponent::ClearRenderBuffers()
 {
@@ -980,7 +984,7 @@ void CEOnUpdateRenderData::PushArguments(lua::State *l) { throw std::runtime_err
 
 /////////////////
 
-CEOnUpdateRenderBuffers::CEOnUpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &commandBuffer) : commandBuffer {commandBuffer} {}
+CEOnUpdateRenderBuffers::CEOnUpdateRenderBuffers() {}
 void CEOnUpdateRenderBuffers::PushArguments(lua::State *l) {}
 
 /////////////////
@@ -1159,17 +1163,6 @@ namespace Lua::Render {
 			return;
 		Push(l, buf->shared_from_this());
 	}
-	void GetBoneBuffer(lua::State *l, CRenderComponent &hEnt)
-	{
-
-		auto *pAnimComponent = static_cast<CAnimatedComponent *>(hEnt.GetEntity().GetAnimatedComponent().get());
-		if(pAnimComponent == nullptr)
-			return;
-		auto *buf = pAnimComponent->GetBoneBuffer();
-		if(!buf)
-			return;
-		Push(l, buf->shared_from_this());
-	}
 };
 
 void CRenderComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts)
@@ -1198,7 +1191,6 @@ void CRenderComponent::RegisterLuaBindings(lua::State *l, luabind::module_ &modE
 	// defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua::State*,pragma::CRenderComponent&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,CCameraHandle&,bool)>(&Lua::Render::UpdateRenderBuffers));
 	// defCRender.def("UpdateRenderBuffers",static_cast<void(*)(lua::State*,pragma::CRenderComponent&,std::shared_ptr<prosper::ICommandBuffer>&,CSceneHandle&,CCameraHandle&)>(&Lua::Render::UpdateRenderBuffers));
 	defCRender.def("GetRenderBuffer", &Lua::Render::GetRenderBuffer);
-	defCRender.def("GetBoneBuffer", &Lua::Render::GetBoneBuffer);
 	defCRender.def("GetLODMeshes", static_cast<void (*)(lua::State *, CRenderComponent &)>([](lua::State *l, CRenderComponent &hComponent) {
 		auto &lodMeshes = hComponent.GetLODMeshes();
 		auto t = Lua::CreateTable(l);

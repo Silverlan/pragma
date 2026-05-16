@@ -55,7 +55,7 @@ void CMotionBlurDataComponent::UpdateEntityPoses()
 		auto it = m_motionBlurData.curModelMatrices.find(ent);
 
 		auto *animC = static_cast<CAnimatedComponent *>(ent->GetAnimatedComponent().get());
-		auto curBoneBuffer = animC ? animC->GetBoneBuffer() : nullptr;
+		/*auto curBoneBuffer = animC ? animC->GetCurrentFrameBoneBuffer() : nullptr;
 		if(it != m_motionBlurData.curModelMatrices.end())
 			m_motionBlurData.prevModelMatrices[ent] = it->second;
 		else
@@ -81,7 +81,7 @@ void CMotionBlurDataComponent::UpdateEntityPoses()
 				dsg->GetDescriptorSet()->SetBindingUniformBuffer(*boneBuffer, 0);
 				m_motionBlurData.prevModelMatrices[ent].boneDsg = dsg;
 			}
-		}
+		}*/
 
 		m_motionBlurData.curModelMatrices[ent] = {curPose, ent->GetPose()};
 	}

@@ -90,7 +90,8 @@ void CRendererPpVolumetricComponent::DoRenderEffect(const rendering::DrawSceneIn
 		if(renderC.expired())
 			continue;
 		// Make sure render buffers are up to date
-		renderC->UpdateRenderBuffers(drawCmd);
+		//renderC->UpdateRenderBufferDsgStateMT();
+		//renderC->UpdateRenderBuffersMT(drawCmd);
 		ents.push_back(ent);
 	}
 

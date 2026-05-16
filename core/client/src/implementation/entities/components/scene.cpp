@@ -38,10 +38,14 @@ void CSceneComponent::RegisterEvents(EntityComponentManager &componentManager, T
 static std::shared_ptr<rendering::EntityInstanceIndexBuffer> g_entityInstanceIndexBuffer = nullptr;
 const std::shared_ptr<rendering::EntityInstanceIndexBuffer> &CSceneComponent::GetEntityInstanceIndexBuffer() { return g_entityInstanceIndexBuffer; }
 
-void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd, const rendering::RenderQueue &renderQueue, rendering::RenderPassStats *optStats)
+void CSceneComponent::UpdateRenderBuffersMT(const rendering::RenderQueue &renderQueue, rendering::RenderPassStats *optStats)
 {
+	std::unique_lock lock {renderQueue.renderBufferUpdateMutex};
+	if (renderQueue.renderBuffersUpdated)
+		return;
 	renderQueue.WaitForCompletion(optStats);
 	GetEntityInstanceIndexBuffer()->UpdateBufferData(renderQueue);
+	auto curFrameId = get_cengine()->GetRenderContext().GetLastFrameId();
 	auto curEntity = std::numeric_limits<EntityIndex>::max();
 	for(auto &item : renderQueue.queue) {
 		if(item.entity == curEntity)
@@ -65,13 +69,18 @@ void CSceneComponent::UpdateRenderBuffers(const std::shared_ptr<prosper::IPrimar
 			// which is not allowed.
 			continue;
 		}
+
+		if (renderC->GetLastRenderBufferUpdateFrame() == curFrameId) // Already updated for this frame
+			continue;
+
 		if(optStats && math::is_flag_set(renderC->GetStateFlags(), CRenderComponent::StateFlags::RenderBufferDirty))
 			(*optStats)->Increment(rendering::RenderPassStats::Counter::EntityBufferUpdates);
 		auto *animC = renderC->GetAnimatedComponent();
 		if(animC && animC->AreSkeletonUpdateCallbacksEnabled())
 			animC->UpdateBoneMatricesMT();
-		renderC->UpdateRenderBuffers(drawCmd);
+		renderC->UpdateRenderBuffersMT();
 	}
+	renderQueue.renderBuffersUpdated = true;
 }
 
 using SceneCount = uint32_t;

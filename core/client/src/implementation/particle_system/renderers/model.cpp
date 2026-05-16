@@ -70,17 +70,17 @@ void pragma::pts::CParticleRendererModel::Initialize(BaseEnvParticleSystemCompon
 		for(auto i = decltype(maxParticles) {0u}; i < maxParticles; ++i)
 			m_particleComponents.push_back(ParticleModelComponent {fCreateAnimatedComponent(), nullptr});
 	}
-	if(ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid()) {
+	/*if(ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE.IsValid()) {
 		for(auto &ptComponent : m_particleComponents) {
 			auto wpBoneBuffer = ptComponent.animatedComponent->GetBoneBuffer();
 			if(wpBoneBuffer) {
 				// If we are animated, we have to create a unique descriptor set
-				ptComponent.instanceDescSetGroupAnimated = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE);
-				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(*s_instanceBufferAnimated, 0u);
-				ptComponent.instanceDescSetGroupAnimated->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IBuffer &>(*wpBoneBuffer), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
+				ptComponent.instanceDescSetGroupAnimated = get_cengine()->GetRenderContext().CreateSwapDescriptorSetGroup(ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE, {"particle_renderer_model_animated_instance"});
+				ptComponent.instanceDescSetGroupAnimated->SetBindingUniformBuffer(*s_instanceBufferAnimated, 0u);
+				ptComponent.instanceDescSetGroupAnimated->SetBindingUniformBuffer(*wpBoneBuffer, math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
 			}
 		}
-	}
+	}*/
 }
 
 pragma::pts::CParticleRendererModel::~CParticleRendererModel()
@@ -131,7 +131,7 @@ void pragma::pts::CParticleRendererModel::PostSimulate(double tDelta)
 		if(animComponent.expired())
 			continue;
 		animComponent->MaintainAnimations(get_cgame()->DeltaTime());
-		animComponent->UpdateBoneBuffer(*drawCmd);
+		animComponent->UpdateBoneBuffer();
 	}
 }
 

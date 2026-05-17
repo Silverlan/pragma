@@ -339,8 +339,10 @@ void CRenderComponent::OnEntityComponentRemoved(BaseEntityComponent &component)
 	BaseRenderComponent::OnEntityComponentRemoved(component);
 	if(typeid(component) == typeid(CAttachmentComponent))
 		m_attachmentComponent = nullptr;
-	else if(typeid(component) == typeid(CAnimatedComponent))
+	else if(typeid(component) == typeid(CAnimatedComponent)) {
 		m_animComponent = nullptr;
+		UpdateAnimationBufferDescriptorBinding();
+	}
 	else if(typeid(component) == typeid(CLightMapReceiverComponent)) {
 		m_stateFlags &= ~StateFlags::RenderBufferDirty;
 		m_lightMapReceiverComponent = nullptr;
@@ -588,7 +590,25 @@ void CRenderComponent::SetExemptFromOcclusionCulling(bool exempt)
 bool CRenderComponent::IsExemptFromOcclusionCulling() const { return math::is_flag_set(m_stateFlags, StateFlags::ExemptFromOcclusionCulling); }
 void CRenderComponent::SetRenderBufferDirty() { math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty); }
 void CRenderComponent::SetRenderBoundsDirty() { math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty); }
-void CRenderComponent::UpdateRenderBufferDsgStateMT() {
+void CRenderComponent::UpdateAnimationBufferDescriptorBinding()
+{
+	// Not using GetAnimatedComponent here, as it may not be cached at this point in time yet and may return null despite
+	// the component existing.
+	auto animC = GetEntity().GetComponent<CAnimatedComponent>();
+	uint32_t boneBufferSize = 0;
+	if(animC.valid())
+		boneBufferSize = animC->GetBoneBufferSize();
+	boneBufferSize = math::max(boneBufferSize, 1u); // Size needs to be at least 1 even if we don't use the buffer
+	m_renderDescSetGroup->SetBindingDynamicStorageBuffer(get_instance_bone_buffer()->GetBaseBuffer(), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices), 0ull, boneBufferSize);
+	SetRenderDescriptorSetsDirty();
+}
+void CRenderComponent::SetRenderDescriptorSetsDirty()
+{
+	auto &context = get_cengine()->GetRenderContext();
+	m_dirtyRenderDescriptorSets = (1 << context.GetMaxNumberOfFramesInFlight()) - 1;
+}
+void CRenderComponent::UpdateRenderBufferDsgStateMT()
+{
 	// Commented because render buffers must not be initialized on a non-main thread
 	// InitializeRenderBuffers();
 
@@ -624,17 +644,23 @@ void CRenderComponent::UpdateRenderBufferDsgStateMT() {
 		auto change = m_renderBuffer->UpdateBufferMode(0, sizeof(m_instanceData), &m_instanceData);
 		if(change && *change != prosper::FrameScopedBuffer::BufferChange::NoChange) {
 			// Underlying buffers have changed, we need to update our descriptor sets
-			m_dirtyRenderBufferDescriptorSetBindings = (1 << context.GetMaxNumberOfFramesInFlight()) - 1;
+			SetRenderDescriptorSetsDirty();
+
+			for(size_t i=0;i<context.GetMaxNumberOfFramesInFlight();++i) {
+				auto &ds = m_renderDescSetGroup->GetDescriptorSet(i);
+				// This will *not* update the underlying descriptor set right away (which we wouldn't want anyway).
+				// Instead, it will be updated further below when actually needed by the current frame-in-flight.
+				ds.SetBindingUniformBuffer(m_renderBuffer->GetBuffer(i), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance));
+			}
 		}
 	}
 
-	// Update render buffer descriptor set bindings if necessary
 	auto resourceIdx = context.GetFrameResourceIndex();
 	auto resourceFlag = context.GetFrameResourceFlag(resourceIdx);
-	if(math::is_flag_set(m_dirtyRenderBufferDescriptorSetBindings, resourceFlag)) {
-		math::set_flag(m_dirtyRenderBufferDescriptorSetBindings, resourceFlag, false);
+	if(math::is_flag_set(m_dirtyRenderDescriptorSets, resourceFlag)) {
+		math::set_flag(m_dirtyRenderDescriptorSets, resourceFlag, false);
+		// std::cout << std::format("Update descriptor set {} of entity {}...", resourceIdx, GetEntity().GetLocalIndex()) << std::endl;
 		auto &ds = m_renderDescSetGroup->GetDescriptorSet(resourceIdx);
-		ds.SetBindingUniformBuffer(m_renderBuffer->GetBuffer(resourceIdx), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance));
 		ds.Update();
 	}
 }
@@ -835,13 +861,13 @@ void CRenderComponent::InitializeRenderBuffers()
 	// while the command buffers are being recorded on the render threads.
 	m_renderDescSetGroup = context.CreateSwapDescriptorSetGroup(ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE, {"ent_instance"});
 	//auto &boneRingBuf = get_bone_ring_buffer();
-	m_renderDescSetGroup->SetBindingDynamicUniformBuffer(get_instance_bone_buffer()->GetBaseBuffer(), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices));
+	UpdateAnimationBufferDescriptorBinding();
 	for(size_t i = 0; i < context.GetMaxNumberOfFramesInFlight(); ++i) {
 		auto &ds = m_renderDescSetGroup->GetDescriptorSet(i);
 		ds.SetBindingUniformBuffer(m_renderBuffer->GetBuffer(i), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance));
 		ds.Update();
 	}
-	m_dirtyRenderBufferDescriptorSetBindings = 0;
+	m_dirtyRenderDescriptorSets = 0;
 
 	UpdateInstantiability();
 

@@ -69,6 +69,8 @@ export namespace pragma {
 		bool IsRenderBufferValid() const { return m_renderBuffer != nullptr; }
 		prosper::IDescriptorSet *GetCurrentFrameRenderDescriptorSet() const;
 		prosper::SwapDescriptorSetGroup *GetRenderDescriptorSetGroup() const;
+		void SetRenderDescriptorSetsDirty();
+		void UpdateAnimationBufferDescriptorBinding();
 
 		static const std::vector<CRenderComponent *> &GetEntitiesExemptFromOcclusionCulling();
 		static const std::shared_ptr<prosper::IUniformResizableBuffer> &GetInstanceBuffer();
@@ -242,7 +244,7 @@ export namespace pragma {
 		rendering::InstanceData m_instanceData {};
 		std::shared_ptr<prosper::FrameScopedBuffer> m_renderBuffer = nullptr;
 		std::shared_ptr<prosper::SwapDescriptorSetGroup> m_renderDescSetGroup = nullptr;
-		uint8_t m_dirtyRenderBufferDescriptorSetBindings = 0;
+		uint8_t m_dirtyRenderDescriptorSets = 0;
 		std::optional<double> m_translucencyPassDistanceOverrideSqr {};
 	};
 

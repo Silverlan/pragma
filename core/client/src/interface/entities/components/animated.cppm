@@ -45,6 +45,7 @@ export namespace pragma {
 		std::vector<Mat4> &GetBoneMatrices();
 		void UpdateBoneMatricesMT();
 		void UpdateBoneBuffer(bool flagAsDirty = false);
+		size_t GetBoneBufferSize() const;
 		std::optional<Mat4> GetVertexTransformMatrix(const geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset = nullptr, float *optOutDelta = nullptr) const;
 		virtual std::optional<Mat4> GetVertexTransformMatrix(const geometry::ModelSubMesh &subMesh, uint32_t vertexId) const override;
 		virtual bool GetVertexTransformMatrix(const geometry::ModelSubMesh &subMesh, uint32_t vertexId, math::ScaledTransform &outPose) const override;

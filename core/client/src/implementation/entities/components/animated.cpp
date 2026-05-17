@@ -28,21 +28,15 @@ const std::shared_ptr<prosper::LinearBuffer> &pragma::get_instance_bone_buffer()
 //const std::shared_ptr<prosper::FrameScopedRingBuffer> &pragma::get_bone_ring_buffer() { return s_boneRingBuffer; }
 constexpr size_t SIZEOF_BONE_BUFFER_BONE = sizeof(Mat4);
 // Start with 1024 bones total per frame. The buffer will re-allocate automatically if more are required.
-constexpr size_t SIZEOF_INITIAL_BONE_RING_BUFFER_PER_FRAME_IN_FLIGHT = SIZEOF_BONE_BUFFER_BONE *1'024;
-static prosper::BufferUsageFlags get_bone_buffer_usage_flags()
-{
-	prosper::BufferUsageFlags usageFlags = prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
-#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
-#endif
-	return usageFlags;
-}
+constexpr size_t SIZEOF_INITIAL_BONE_RING_BUFFER_PER_FRAME_IN_FLIGHT = SIZEOF_BONE_BUFFER_BONE * 1'024;
+static prosper::BufferUsageFlags get_bone_buffer_usage_flags() { return prosper::BufferUsageFlags::StorageBufferBit; }
 void pragma::initialize_articulated_buffers()
 {
 	// Memory usage (approximately): MAX_BASE_NUMBER_OF_SKINNED_INSTANCES *MAX_BASE_NUMBER_OF_BONES_PER_INSTANCE *SIZEOF_BONE_BUFFER_BONE
 	// 200 *64 *64 = 800 KiB
 	// Depending on the device's alignment requirements, the actual memory usage may be larger.
 
+	// TODO
 	prosper::util::BufferCreateInfo createInfo {};
 	createInfo.usageFlags = get_bone_buffer_usage_flags();
 
@@ -53,7 +47,7 @@ void pragma::initialize_articulated_buffers()
 	}
 	else
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
-	createInfo.size = SIZEOF_INITIAL_BONE_RING_BUFFER_PER_FRAME_IN_FLIGHT *context.GetMaxNumberOfFramesInFlight();
+	createInfo.size = SIZEOF_INITIAL_BONE_RING_BUFFER_PER_FRAME_IN_FLIGHT * context.GetMaxNumberOfFramesInFlight();
 	createInfo.debugName = "entity_anim_bone_buf";
 	auto baseBuffer = context.CreateBuffer(createInfo);
 	s_baseBoneBuffer = prosper::LinearBuffer::Create(*baseBuffer);
@@ -155,9 +149,24 @@ void CAnimatedComponent::OnModelChanged(const std::shared_ptr<asset::Model> &mdl
 
 bool CAnimatedComponent::HasBones() const { return !m_boneMatrices.empty(); }
 
+size_t CAnimatedComponent::GetBoneBufferSize() const { return m_boneMatrices.size() * SIZEOF_BONE_BUFFER_BONE; }
+
 void CAnimatedComponent::ResetAnimation(const std::shared_ptr<asset::Model> &mdl)
 {
 	BaseAnimatedComponent::ResetAnimation(mdl);
+
+	auto numBonesPrev = m_boneMatrices.size();
+	util::ScopeGuard sg {[&]() {
+		if(m_boneMatrices.size() == numBonesPrev)
+			return;
+		// Number of bone matrices has changed, we need to inform the render component that the
+		// descriptor set needs updating
+		auto &ent = GetEntity();
+		auto pRenderComponent = ent.GetComponent<CRenderComponent>();
+		if(pRenderComponent.valid())
+			pRenderComponent->UpdateAnimationBufferDescriptorBinding();
+	}};
+
 	m_boneMatrices.clear();
 	if(mdl == nullptr || GetBoneCount() == 0)
 		return;
@@ -215,12 +224,12 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<asset::Model> &mdl
 
 void CAnimatedComponent::UpdateBoneBuffer(bool flagAsDirty)
 {
-	auto numBones = GetBoneCount();
-	auto size =numBones * SIZEOF_BONE_BUFFER_BONE;
+	auto size = GetBoneBufferSize();
 	if(size == 0) {
 		m_boneBufferOffset = {};
 		return;
 	}
+
 	m_boneBufferOffset = s_baseBoneBuffer->Allocate(size, m_boneMatrices.data());
 	//if(m_boneBuffer && (flagAsDirty || m_boneBuffer->IsCurrentBufferDirty()) && numBones > 0u && m_boneMatrices.empty() == false)
 	//	m_boneBuffer->Write(0ull, numBones * SIZEOF_BONE_BUFFER_BONE, m_boneMatrices.data(), flagAsDirty);
@@ -267,7 +276,7 @@ void CAnimatedComponent::UpdateBoneMatricesMT()
 
 	auto &refFrame = *bindPose;
 	auto numBones = GetBoneCount();
-	if(numBones != m_processedBones.size()) {
+	if(numBones != m_processedBones.size() || numBones != m_boneMatrices.size()) {
 		Con::CWAR << "Bone count mismatch between processed bones and actual bones for entity " << GetEntity() << Con::endl;
 		return;
 	}

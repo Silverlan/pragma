@@ -8,7 +8,7 @@ export import :model.mesh;
 export namespace pragma {
 	DLLCLIENT void initialize_vertex_animation_buffer();
 	DLLCLIENT void clear_vertex_animation_buffer();
-	DLLCLIENT const std::shared_ptr<prosper::IDynamicResizableBuffer> &get_vertex_animation_buffer();
+	DLLCLIENT const std::shared_ptr<prosper::LinearBuffer> &get_vertex_animation_buffer();
 	class DLLCLIENT CVertexAnimatedComponent final : public BaseEntityComponent {
 	  public:
 		static void RegisterLuaBindings(lua::State *l, luabind::module_ &modEnts);
@@ -27,9 +27,9 @@ export namespace pragma {
 		virtual void Initialize() override;
 		void UpdateVertexAnimationDataMT();
 		void UpdateVertexAnimationBuffer();
-		prosper::SwapBuffer *GetVertexAnimationBuffer() const;
-		prosper::IBuffer *GetCurrentFrameVertexAnimationBuffer() const;
 		bool GetVertexAnimationBufferMeshOffset(geometry::CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const;
+		std::optional<prosper::LinearBuffer::BufferOffset> GetCurrentFrameVertexAnimationBufferOffset() const { return m_vertexAnimationBufferOffset; }
+		size_t GetVertexAnimationBufferSize() const;
 		bool GetLocalVertexPosition(const geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 &pos, Vector3 *optOutNormal = nullptr, float *optOutDelta = nullptr) const;
 		virtual void InitializeLuaObject(lua::State *l) override;
 	  protected:
@@ -53,7 +53,7 @@ export namespace pragma {
 		uint32_t m_maxVertexAnimations = 0u;
 		uint32_t m_activeVertexAnimations = 0u;
 		uint32_t m_vertexAnimationBufferDataCount = 0;
-		std::shared_ptr<prosper::SwapBuffer> m_vertexAnimationBuffer = nullptr;
+		std::optional<prosper::LinearBuffer::BufferOffset> m_vertexAnimationBufferOffset {};
 		bool m_bufferUpdateRequired = false;
 		void InitializeVertexAnimationBuffer();
 		void DestroyVertexAnimationBuffer();

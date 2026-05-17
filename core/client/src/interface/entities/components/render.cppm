@@ -71,6 +71,7 @@ export namespace pragma {
 		prosper::SwapDescriptorSetGroup *GetRenderDescriptorSetGroup() const;
 		void SetRenderDescriptorSetsDirty();
 		void UpdateAnimationBufferDescriptorBinding();
+		void UpdateVertexAnimationBufferDescriptorBinding();
 
 		static const std::vector<CRenderComponent *> &GetEntitiesExemptFromOcclusionCulling();
 		static const std::shared_ptr<prosper::IUniformResizableBuffer> &GetInstanceBuffer();

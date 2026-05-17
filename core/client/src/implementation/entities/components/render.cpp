@@ -602,6 +602,22 @@ void CRenderComponent::UpdateAnimationBufferDescriptorBinding()
 	m_renderDescSetGroup->SetBindingDynamicStorageBuffer(get_instance_bone_buffer()->GetBaseBuffer(), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices), 0ull, boneBufferSize);
 	SetRenderDescriptorSetsDirty();
 }
+void CRenderComponent::UpdateVertexAnimationBufferDescriptorBinding() {
+	prosper::IBuffer *vertexAnimBuffer = nullptr;
+	auto &mdl = GetEntity().GetModel();
+	if(mdl)
+		vertexAnimBuffer = static_cast<asset::CModel &>(*mdl).GetVertexAnimationBuffer().get();
+	if (!vertexAnimBuffer)
+		vertexAnimBuffer = get_cengine()->GetRenderContext().GetDummyBuffer().get();
+	auto vanimC = GetEntity().GetComponent<CVertexAnimatedComponent>();
+	uint32_t vertexAnimBufferSize = 0;
+	if(vanimC.valid())
+		vertexAnimBufferSize = vanimC->GetVertexAnimationBufferSize();
+	vertexAnimBufferSize = math::max(vertexAnimBufferSize, 1u); // Size needs to be at least 1 even if we don't use the buffer
+	m_renderDescSetGroup->SetBindingDynamicStorageBuffer(get_vertex_animation_buffer()->GetBaseBuffer(), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::VertexAnimationFrameData), 0ull, vertexAnimBufferSize);
+	m_renderDescSetGroup->SetBindingStorageBuffer(*vertexAnimBuffer, math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::VertexAnimations));
+	SetRenderDescriptorSetsDirty();
+}
 void CRenderComponent::SetRenderDescriptorSetsDirty()
 {
 	auto &context = get_cengine()->GetRenderContext();
@@ -862,6 +878,7 @@ void CRenderComponent::InitializeRenderBuffers()
 	m_renderDescSetGroup = context.CreateSwapDescriptorSetGroup(ShaderGameWorldLightingPass::DESCRIPTOR_SET_INSTANCE, {"ent_instance"});
 	//auto &boneRingBuf = get_bone_ring_buffer();
 	UpdateAnimationBufferDescriptorBinding();
+	UpdateVertexAnimationBufferDescriptorBinding();
 	for(size_t i = 0; i < context.GetMaxNumberOfFramesInFlight(); ++i) {
 		auto &ds = m_renderDescSetGroup->GetDescriptorSet(i);
 		ds.SetBindingUniformBuffer(m_renderBuffer->GetBuffer(i), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance));

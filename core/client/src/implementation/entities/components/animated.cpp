@@ -42,7 +42,7 @@ void pragma::initialize_articulated_buffers()
 
 	auto &context = get_cengine()->GetRenderContext();
 	if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA) {
-		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent | prosper::MemoryFeatureFlags::DeviceLocal;
 		createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	}
 	else
@@ -50,7 +50,8 @@ void pragma::initialize_articulated_buffers()
 	createInfo.size = SIZEOF_INITIAL_BONE_RING_BUFFER_PER_FRAME_IN_FLIGHT * context.GetMaxNumberOfFramesInFlight();
 	createInfo.debugName = "entity_anim_bone_buf";
 	auto baseBuffer = context.CreateBuffer(createInfo);
-	s_baseBoneBuffer = prosper::LinearBuffer::Create(*baseBuffer);
+	auto alignment = context.CalcBufferAlignment(baseBuffer->GetUsageFlags());
+	s_baseBoneBuffer = prosper::LinearBuffer::Create(*baseBuffer, alignment);
 
 	if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA)
 		s_baseBoneBuffer->GetBaseBuffer().SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);

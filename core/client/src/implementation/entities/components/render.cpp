@@ -63,7 +63,7 @@ void CRenderComponent::InitializeBuffers()
 	constexpr uint32_t instanceCount = 32'768u; // Not an absolute limit, but exceeding it will trigger re-allocation
 	prosper::util::BufferCreateInfo createInfo {};
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA) {
-		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent | prosper::MemoryFeatureFlags::DeviceLocal;
 		createInfo.flags = createInfo.flags | prosper::util::BufferCreateInfo::Flags::Persistent;
 	}
 	else

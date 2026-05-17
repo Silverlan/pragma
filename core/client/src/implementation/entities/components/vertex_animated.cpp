@@ -28,14 +28,14 @@ void pragma::initialize_vertex_animation_buffer()
 	}
 	auto instanceSize = sizeof(CVertexAnimatedComponent::VertexAnimationData);
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent | prosper::MemoryFeatureFlags::DeviceLocal;
 	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	createInfo.size = 1 * 1'024 * 1'024; // 1 MiB
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit;
 
 	createInfo.debugName = "entity_vertex_anim_bone_buf";
 	auto baseBuffer = context.CreateBuffer(createInfo);
-	g_vertexAnimationBuffer = prosper::LinearBuffer::Create(*baseBuffer);
+	g_vertexAnimationBuffer = prosper::LinearBuffer::Create(*baseBuffer, alignment);
 	g_vertexAnimationBuffer->GetBaseBuffer().SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
 	assert(g_vertexAnimationBuffer->GetAlignment() == 0 || (sizeof(CVertexAnimatedComponent::VertexAnimationData) % g_vertexAnimationBuffer->GetAlignment()) == 0);
 }

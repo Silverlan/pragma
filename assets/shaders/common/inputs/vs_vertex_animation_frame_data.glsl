@@ -18,7 +18,7 @@ struct VertexAnimationFrameData {
 	float padding4;
 };
 
-layout(std430, LAYOUT_ID(INSTANCE, VERTEX_ANIMATION_FRAME_DATA)) buffer VAFrameData { VertexAnimationFrameData data[]; }
+layout(std430, LAYOUT_ID(INSTANCE, VERTEX_ANIMATION_FRAME_DATA)) readonly buffer VAFrameData { VertexAnimationFrameData data[]; }
 vaFrameData;
 
 #endif

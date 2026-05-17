@@ -1,10 +1,16 @@
 #ifndef F_SH_VIS_LIGHT_BUFFER_GLS
 #define F_SH_VIS_LIGHT_BUFFER_GLS
 
+#ifdef VISIBLE_LIGHT_TILE_INDICES_BUFFER_WRITE_ACCESS_ENABLED
+#define VISIBLE_LIGHT_TILE_INDICES_BUFFER_ATTRIBUTES
+#else
+#define VISIBLE_LIGHT_TILE_INDICES_BUFFER_ATTRIBUTES readonly
+#endif
+
 struct VisibleIndex {
 	int index;
 };
-layout(std430, LAYOUT_ID(RENDERER, VISIBLE_LIGHT_TILE_INDEX_BUFFER)) buffer VisibleLightTileIndicesBuffer { VisibleIndex data[]; }
+layout(std430, LAYOUT_ID(RENDERER, VISIBLE_LIGHT_TILE_INDEX_BUFFER)) VISIBLE_LIGHT_TILE_INDICES_BUFFER_ATTRIBUTES buffer VisibleLightTileIndicesBuffer { VisibleIndex data[]; }
 visibleLightTileIndicesBuffer;
 
 #endif

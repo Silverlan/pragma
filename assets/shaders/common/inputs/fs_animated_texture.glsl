@@ -8,7 +8,7 @@ struct TextureAnimationFrame {
 	vec2 uvEnd;
 };
 
-layout(std430, LAYOUT_ID(ANIMATION,ANIMATION_DATA)) buffer TextureAnimation { TextureAnimationFrame frames[]; }
+layout(std430, LAYOUT_ID(ANIMATION,ANIMATION_DATA)) readonly buffer TextureAnimation { TextureAnimationFrame frames[]; }
 u_animation;
 
 #endif

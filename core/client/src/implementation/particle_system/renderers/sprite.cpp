@@ -57,10 +57,10 @@ void pragma::pts::CParticleRendererSprite::RecordRender(prosper::ICommandBuffer 
 	auto layout = get_cengine()->GetRenderContext().GetShaderPipelineLayout(*shader, *pipelineIdx);
 	assert(layout != nullptr);
 	auto *dsScene = scene.GetCameraDescriptorSetGraphics();
-	auto *dsRenderer = renderer.GetRendererDescriptorSet();
+	auto *dsgRenderer = renderer.GetRendererDescriptorSetGroup();
 	auto &dsRenderSettings = get_cgame()->GetCurrentFrameGlobalRenderSettingsDescriptorSet();
 	auto *dsShadows = CShadowComponent::GetDescriptorSet();
-	shader->RecordBindScene(bindState.commandBuffer, *layout, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsShadows);
+	shader->RecordBindScene(bindState.commandBuffer, *layout, scene, renderer, *dsScene, dsgRenderer->GetCurrentDescriptorSet(), dsRenderSettings, *dsShadows);
 	auto orientationType = (m_rotationalBuffer != nullptr && m_rotationalBuffer->ShouldRotationAlignVelocity()) ? ParticleOrientationType::Velocity : m_particleSystem->GetOrientationType();
 	shader->RecordDraw(bindState, scene, renderer, *m_particleSystem, orientationType, renderFlags);
 	shader->RecordEndDraw(bindState);

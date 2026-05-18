@@ -37,7 +37,7 @@ decltype(ShaderScene::DESCRIPTOR_SET_RENDERER) ShaderScene::DESCRIPTOR_SET_RENDE
   {prosper::DescriptorSetInfo::Binding {"RENDERER", prosper::DescriptorType::UniformBuffer, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"SSAO_MAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"LIGHT_BUFFERS", LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"VISIBLE_LIGHT_TILE_INDEX_BUFFER", prosper::DescriptorType::StorageBuffer, prosper::ShaderStageFlags::FragmentBit | prosper::ShaderStageFlags::VertexBit},
-    prosper::DescriptorSetInfo::Binding {"SHADOW_BUFFERS", LIGHT_SOURCE_BUFFER_TYPE, prosper::ShaderStageFlags::FragmentBit},
+    prosper::DescriptorSetInfo::Binding {"SHADOW_BUFFERS", SHADOW_BUFFER_TYPE, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"CSM_MAPS", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit, math::to_integral(GameLimits::MaxCSMCascades)},
     prosper::DescriptorSetInfo::Binding {"LIGHTMAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}, prosper::DescriptorSetInfo::Binding {"INDIRECT_LIGHTMAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit},
     prosper::DescriptorSetInfo::Binding {"DIRECTIONAL_LIGHTMAP", prosper::DescriptorType::CombinedImageSampler, prosper::ShaderStageFlags::FragmentBit}},

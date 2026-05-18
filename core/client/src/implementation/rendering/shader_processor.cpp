@@ -22,7 +22,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const CSceneComponent &
 		return false;
 	}
 	auto *dsScene = view ? scene.GetViewCameraDescriptorSet() : scene.GetCameraDescriptorSetGraphics();
-	auto *dsRenderer = renderer.GetRendererDescriptorSet();
+	auto *dsgRenderer = renderer.GetRendererDescriptorSetGroup();
 	auto &dsRenderSettings = get_cgame()->GetCurrentFrameGlobalRenderSettingsDescriptorSet();
 	auto *dsShadows = CShadowComponent::GetDescriptorSet();
 	assert(dsScene);
@@ -32,7 +32,7 @@ bool pragma::rendering::ShaderProcessor::RecordBindScene(const CSceneComponent &
 	m_rendererC = &renderer;
 	m_visibilityMask &= hCam->GetVisibilityMask();
 	// m_sceneFlags = ShaderGameWorld::SceneFlags::None;
-	shader.RecordBindScene(*this, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsShadows, m_drawOrigin, m_sceneFlags);
+	shader.RecordBindScene(*this, scene, renderer, *dsScene, dsgRenderer->GetCurrentDescriptorSet(), dsRenderSettings, *dsShadows, m_drawOrigin, m_sceneFlags);
 	return true;
 }
 void pragma::rendering::ShaderProcessor::SetDrawOrigin(const Vector4 &drawOrigin) { m_drawOrigin = drawOrigin; }

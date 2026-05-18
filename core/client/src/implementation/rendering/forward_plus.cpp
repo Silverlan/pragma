@@ -98,12 +98,12 @@ bool pragma::rendering::ForwardPlusInstance::Initialize(prosper::IPrContext &con
 	m_bufVisLightIndex = context.CreateBuffer(createInfo, m_shadowLightBits.data());
 	m_bufVisLightIndex->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::ReadBit);
 
-	m_rasterizer.GetRendererDescriptorSet()->SetBindingStorageBuffer(*m_bufTileVisLightIndex, math::to_integral(ShaderGameWorldLightingPass::RendererBinding::TileVisLightIndexBuffer));
+	m_rasterizer.GetRendererDescriptorSetGroup()->SetBindingStorageBuffer(*m_bufTileVisLightIndex, math::to_integral(ShaderGameWorldLightingPass::RendererBinding::TileVisLightIndexBuffer));
 
-	auto &descSetCompute = *m_rasterizer.GetLightSourceDescriptorSetCompute();
-	descSetCompute.SetBindingStorageBuffer(*m_bufTileVisLightIndex, math::to_integral(ShaderForwardPLightCulling::LightBinding::TileVisLightIndexBuffer));
-	descSetCompute.SetBindingTexture(depthTexture, math::to_integral(ShaderForwardPLightCulling::LightBinding::DepthMap));
-	descSetCompute.SetBindingStorageBuffer(*m_bufVisLightIndex, math::to_integral(ShaderForwardPLightCulling::LightBinding::VisLightIndexBuffer));
+	auto &descSetGroupCompute = *m_rasterizer.GetLightSourceDescriptorSetGroupCompute();
+	descSetGroupCompute.SetBindingStorageBuffer(*m_bufTileVisLightIndex, math::to_integral(ShaderForwardPLightCulling::LightBinding::TileVisLightIndexBuffer));
+	descSetGroupCompute.SetBindingTexture(depthTexture, math::to_integral(ShaderForwardPLightCulling::LightBinding::DepthMap));
+	descSetGroupCompute.SetBindingStorageBuffer(*m_bufVisLightIndex, math::to_integral(ShaderForwardPLightCulling::LightBinding::VisLightIndexBuffer));
 	return true;
 }
 
@@ -119,11 +119,11 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuf
 	auto &bufLightSources = CLightComponent::GetGlobalRenderBuffer();
 	auto &bufShadowData = CLightComponent::GetGlobalShadowBuffer();
 	// Light source data barrier
-	cmdBuffer.RecordBufferBarrier(bufLightSources, prosper::PipelineStageFlags::ComputeShaderBit | prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit,
-	  prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+	//cmdBuffer.RecordBufferBarrier(bufLightSources, prosper::PipelineStageFlags::ComputeShaderBit | prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit,
+	//  prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 	// Shadow data barrier
-	cmdBuffer.RecordBufferBarrier(bufShadowData, prosper::PipelineStageFlags::ComputeShaderBit | prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit,
-	  prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+	//cmdBuffer.RecordBufferBarrier(bufShadowData, prosper::PipelineStageFlags::ComputeShaderBit | prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit,
+	//  prosper::AccessFlags::ShaderReadBit | prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	// Visible light tile index buffer
 	cmdBuffer.RecordBufferBarrier(*m_rasterizer.GetForwardPlusInstance().GetTileVisLightIndexBuffer(), prosper::PipelineStageFlags::FragmentShaderBit, prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::ShaderReadBit, prosper::AccessFlags::ShaderWriteBit);
@@ -136,7 +136,7 @@ void pragma::rendering::ForwardPlusInstance::Compute(prosper::IPrimaryCommandBuf
 	auto vpWidth = m_rasterizer.GetWidth();
 	auto vpHeight = m_rasterizer.GetHeight();
 	auto &instance = LightDataBufferManager::GetInstance();
-	if(shaderLightCulling.RecordCompute(bindState, *m_rasterizer.GetLightSourceDescriptorSetCompute(), descSetCam, vpWidth, vpHeight, workGroupCount.first, workGroupCount.second, instance.GetLightDataBufferCount(), sceneIndex) == false)
+	if(shaderLightCulling.RecordCompute(bindState, m_rasterizer.GetLightSourceDescriptorSetGroupCompute()->GetCurrentDescriptorSet(), descSetCam, vpWidth, vpHeight, workGroupCount.first, workGroupCount.second, instance.GetLightDataBufferCount(), sceneIndex) == false)
 		return;
 
 	// Visible light index buffer

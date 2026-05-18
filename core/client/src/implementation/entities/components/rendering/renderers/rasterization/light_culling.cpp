@@ -14,6 +14,7 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const DrawSceneIn
 	auto &shaderSettings = get_client_state()->GetGameWorldShaderSettings();
 	if(drawSceneInfo.scene.expired() || shaderSettings.dynamicLightingEnabled == false)
 		return;
+	CLightComponent::UpdateDirtyLightBuffers();
 	auto &scene = *drawSceneInfo.scene;
 	auto &prepass = GetPrepass();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -62,13 +63,13 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const DrawSceneIn
 						continue;
 					m_visLightSources.push_back(l);
 
-					auto &renderBuffer = l->GetRenderBuffer();
-					if(renderBuffer) {
-						drawCmd->RecordBufferBarrier(*renderBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
-					}
-					auto &shadowBuffer = l->GetShadowBuffer();
-					if(shadowBuffer) {
-						drawCmd->RecordBufferBarrier(*shadowBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+					//auto &renderBuffer = l->GetRenderBuffer();
+					//if(renderBuffer) {
+					//	drawCmd->RecordBufferBarrier(*renderBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+					//}
+					auto shadowBufferIndex = l->GetShadowBufferIndex();
+					if(shadowBufferIndex) {
+						//drawCmd->RecordBufferBarrier(*shadowBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 						// Determine light sources that should actually cast shadows
 						if(l->ShouldCastShadows()) {

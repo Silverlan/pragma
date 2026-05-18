@@ -184,12 +184,12 @@ void pragma::CRasterizationRendererComponent::ExecuteLightingPass(const DrawScen
 	auto &bufLightSources = CLightComponent::GetGlobalRenderBuffer();
 	auto &bufShadowData = CLightComponent::GetGlobalShadowBuffer();
 	// Light source data barrier
-	drawCmd->RecordBufferBarrier(bufLightSources, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit,
-	  prosper::AccessFlags::ShaderReadBit);
+	//drawCmd->RecordBufferBarrier(bufLightSources, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit,
+	//  prosper::AccessFlags::ShaderReadBit);
 
 	// Shadow data barrier
-	drawCmd->RecordBufferBarrier(bufShadowData, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit,
-	  prosper::AccessFlags::ShaderReadBit);
+	//drawCmd->RecordBufferBarrier(bufShadowData, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit,
+	//  prosper::AccessFlags::ShaderReadBit);
 
 	auto &renderSettingsBufferData = get_cgame()->GetGlobalRenderSettingsBufferData();
 	// Debug buffer barrier

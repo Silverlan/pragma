@@ -182,9 +182,5 @@ void CLightPointComponent::UpdateTransformationMatrix(unsigned int j) // TODO Th
 	auto pLightComponent = GetEntity().GetComponent<CLightComponent>();
 	if(pLightComponent.expired())
 		return;
-	auto &shadowBuffer = pLightComponent->GetShadowBuffer();
-	if(shadowBuffer == nullptr)
-		return;
-	std::array<Mat4, 3> matrices = {GetBiasTransformationMatrix(), GetViewMatrix(4), GetProjectionMatrix()};
-	get_cengine()->GetRenderContext().ScheduleRecordUpdateBuffer(*shadowBuffer, 0ull, matrices);
+	pLightComponent->UpdateTransformationMatrix(GetBiasTransformationMatrix(), GetViewMatrix(), GetProjectionMatrix());
 }

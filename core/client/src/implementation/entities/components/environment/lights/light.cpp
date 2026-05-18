@@ -130,14 +130,14 @@ void CLightComponent::WriteBufferData(prosper::IBuffer::Offset offset, prosper::
 	math::set_flag(m_stateFlags, StateFlags::BufferDirty);
 }
 
-static std::queue<prosper::InFlightIndexedBuffer::Index> g_dirtyLights;
+static std::queue<prosper::InFlightIndexedBuffer::Index> g_dirtyLightBuffers;
 void CLightComponent::SetBufferDirty()
 {
 	math::set_flag(m_stateFlags, StateFlags::BufferDirty);
 	auto bufIdx = GetRenderBufferIndex();
 	if(!bufIdx)
 		return;
-	g_dirtyLights.push(*bufIdx);
+	g_dirtyLightBuffers.push(*bufIdx);
 }
 
 static std::queue<prosper::InFlightIndexedBuffer::Index> g_dirtyShadowBuffers;
@@ -152,9 +152,9 @@ void CLightComponent::SetShadowBufferDirty()
 
 void CLightComponent::UpdateDirtyLightBuffers()
 {
-	while(!g_dirtyLights.empty()) {
-		auto idx = g_dirtyLights.front();
-		g_dirtyLights.pop();
+	while(!g_dirtyLightBuffers.empty()) {
+		auto idx = g_dirtyLightBuffers.front();
+		g_dirtyLightBuffers.pop();
 		auto *light = GetLightByBufferIndex(idx);
 		if(!light)
 			continue;

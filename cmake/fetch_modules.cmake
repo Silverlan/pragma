@@ -22,7 +22,7 @@ endfunction()
 pr_fetch_module("interfaces"                      "https://github.com/Silverlan/pragma_interfaces.git"      "adda2aba1fbf570cf5f251ec5c1a503bab89544b")
 
 if(PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES)
-    pr_fetch_module("pr_prosper_vulkan"           "https://github.com/Silverlan/pr_prosper_vulkan.git"      "38561612bbfc8e8d594a3f7bc08cf91849823f21")
+    pr_fetch_module("pr_prosper_vulkan"           "https://github.com/Silverlan/pr_prosper_vulkan.git"      "d3866bbbbf9caf53a964a8a1ac97e112ea036995")
     pr_fetch_module("pr_nsight_aftermath"         "https://github.com/Silverlan/pr_nsight_aftermath.git"    "66615caf80d9bff53d8347055a8c00d820fdd585")
 endif()
 

@@ -13,7 +13,10 @@ std::optional<uint32_t> g_launchParamHeight {};
 std::optional<Color> g_titleBarColor {};
 std::optional<Color> g_borderColor {};
 bool g_cpuRendering = false;
+std::optional<pragma::platform::Platform> g_windowBackend = {};
 bool g_windowless = false;
+bool g_forceSingleThreadedMode = false;
+bool g_waitIdleBetweenFrames = false;
 bool g_cli = false;
 static void LPARAM_windowed(const std::vector<std::string> &argv) { g_launchParamWindowedMode = true; }
 
@@ -83,6 +86,22 @@ static void LPARAM_windowless(const std::vector<std::string> &argv)
 	g_windowless = windowless;
 }
 
+static void LPARAM_force_single_threaded_mode(const std::vector<std::string> &argv)
+{
+	auto forceSingleThreadedMode = true;
+	if(!argv.empty())
+		forceSingleThreadedMode = pragma::util::to_boolean(argv.front());
+	g_forceSingleThreadedMode = forceSingleThreadedMode;
+}
+
+static void LPARAM_wait_idle_between_frames(const std::vector<std::string> &argv)
+{
+	auto waitIdleBetweenFrames = true;
+	if(!argv.empty())
+		waitIdleBetweenFrames = pragma::util::to_boolean(argv.front());
+	g_waitIdleBetweenFrames = waitIdleBetweenFrames;
+}
+
 static void LPARAM_title_bar_color(const std::vector<std::string> &argv)
 {
 	if(argv.empty())
@@ -104,6 +123,27 @@ static void LPARAM_border_bar_color(const std::vector<std::string> &argv)
 }
 
 static void LPARAM_cpu_rendering(const std::vector<std::string> &argv) { g_cpuRendering = (argv.empty() || pragma::util::to_boolean(argv.front())); }
+
+static void LPARAM_window_backend(const std::vector<std::string> &argv)
+{
+	if(argv.empty()) {
+		g_windowBackend = {};
+		return;
+	}
+	auto platform = magic_enum::enum_cast<pragma::platform::Platform>(argv.front());
+	if(!platform) {
+		Con::CERR << std::format("Unknown platform {}. Valid platform values are:\n", argv.front());
+		auto values = magic_enum::enum_values<pragma::platform::Platform>();
+		for(auto val : values) {
+			if(val == pragma::platform::Platform::Count || val == pragma::platform::Platform::Unknown)
+				continue;
+			Con::CERR << magic_enum::enum_name(val) << "\n";
+		}
+		Con::CERR << Con::endl;
+		return;
+	}
+	g_windowBackend = *platform;
+}
 
 static void LPARAM_cli(const std::vector<std::string> &argv)
 {
@@ -155,9 +195,12 @@ void pragma::register_client_launch_parameters(LaunchParaMap &map)
 	map.RegisterParameterHelp("-audio_api", &LPARAM_audio_api, "<moduleName>", "Changes the audio API to use for audio playback.");
 	map.RegisterParameterHelp("-auto_exec", &LPARAM_auto_exec, "<script>", "Auto-execute this Lua-script on launch.");
 	map.RegisterParameterHelp("-windowless", &LPARAM_windowless, "<1/0>", "If enabled, Pragma will be launched without a visible window.");
+	map.RegisterParameterHelp("-force_single_threaded_rendering", &LPARAM_force_single_threaded_mode, "<1/0>", "If enabled, render command buffers will be filled sequentially. This will significantly hurt frame rate and should only be used for debugging purposes.");
+	map.RegisterParameterHelp("-wait_idle_between_frames", &LPARAM_wait_idle_between_frames, "<1/0>", "If enabled, the GPU will be forced to wait idle between frames, clearing out the queue. This will significantly hurt frame rate and should only be used for debugging purposes.");
 	map.RegisterParameterHelp("-title_bar_color", &LPARAM_title_bar_color, "<hexColor>", "Hex color for the window title bar.");
 	map.RegisterParameterHelp("-border_color", &LPARAM_border_bar_color, "<hexColor>", "Hex color for the window border.");
 	map.RegisterParameterHelp("-cpu_rendering", &LPARAM_cpu_rendering, "<1/0>", "If enabled, the CPU will be used for rendering instead of GPU.");
+	map.RegisterParameterHelp("-window_backend", &LPARAM_window_backend, "<Win32/Cocoa/Wayland/X11/Windowless>", "Uses the specified window backend system for window creation.");
 	map.RegisterParameterHelp("-cli", &LPARAM_cli, "<1/0>", "If enabled, will automatically enable the options needed to run Pragma in a command-line-interface-only environment.");
 	map.RegisterParameterHelp("-wayland_libdecor_plugin", &LPARAM_wayland_libdecor_plugin, "", "If specified, this libdecor plugin will be used for window decoration drawing on Linux with wayland.");
 }

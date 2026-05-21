@@ -16,6 +16,7 @@ rendering::RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vu
 rendering::RenderContext::~RenderContext() {}
 std::optional<std::string> g_customTitle;
 extern bool g_cpuRendering;
+extern std::optional<pragma::platform::Platform> g_windowBackend;
 void rendering::RenderContext::InitializeRenderAPI()
 {
 	auto &renderAPI = GetRenderAPI();
@@ -142,9 +143,17 @@ void rendering::RenderContext::InitializeRenderAPI()
 		LOGGER_VALIDATION.error("{}", msg);
 	});
 	err.clear();
-	if(!platform::initialize(err, get_cengine()->IsWindowless())) {
-		LOGGER.critical("Failed to initialize GLFW: {}", err);
-		throw std::runtime_error {"Failed to initialize GLFW: " + err};
+	platform::InitInfo initInfo {};
+	initInfo.headless = get_cengine()->IsWindowless();
+	if (initInfo.headless)
+		LOGGER.info("Headless mode is enabled! No windows will be created.");
+	else if (g_windowBackend) {
+		LOGGER.info("Overriding default window backend system with '{}'.", magic_enum::enum_name(*g_windowBackend));
+		initInfo.platform = *g_windowBackend;
+	}
+	if(auto res = platform::initialize(initInfo); !res) {
+		LOGGER.critical("Failed to initialize GLFW: {}", res.error());
+		throw std::runtime_error {"Failed to initialize GLFW: " + res.error()};
 	}
 
 	if(GetRenderContext().IsValidationEnabled()) {

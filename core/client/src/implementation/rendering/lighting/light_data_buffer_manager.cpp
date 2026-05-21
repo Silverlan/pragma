@@ -33,14 +33,14 @@ CLightComponent *BaseLightBufferManager::GetLightByBufferIndex(ShadowBufferIndex
 std::size_t BaseLightBufferManager::GetMaxCount() const { return m_maxCount; }
 prosper::InFlightIndexedBuffer &BaseLightBufferManager::GetGlobalRenderBuffer() { return *m_masterBuffer; }
 
-void BaseLightBufferManager::WriteBufferData(prosper::InFlightIndexedBuffer::Index index, prosper::IBuffer::Offset offset, prosper::IBuffer::Size size, const void *data) { m_masterBuffer->Write(index, offset, size, data); }
+void BaseLightBufferManager::SyncDataToGpu(prosper::InFlightIndexedBuffer::Index index) { m_masterBuffer->SyncDataToGpu(index); }
 
-std::optional<prosper::InFlightIndexedBuffer::Index> BaseLightBufferManager::Request(CLightComponent &lightSource, const void *data, size_t dataSize)
+std::optional<prosper::InFlightIndexedBuffer::Index> BaseLightBufferManager::Request(CLightComponent &lightSource, const void *data)
 {
 	auto index = m_masterBuffer->Allocate(data);
 	if(!index)
 		return {};
-	m_masterBuffer->Write(*index, 0, dataSize, data);
+	m_masterBuffer->SyncDataToGpu(*index);
 	m_bufferIndexToLightSource[*index] = &lightSource;
 	return index;
 }
@@ -84,7 +84,7 @@ void ShadowDataBufferManager::DoInitialize()
 
 	m_bufferIndexToLightSource.resize(m_maxCount, nullptr);
 }
-std::optional<prosper::InFlightIndexedBuffer::Index> ShadowDataBufferManager::Request(CLightComponent &lightSource, const ShadowBufferData &bufferData) { return BaseLightBufferManager::Request(lightSource, &bufferData, sizeof(bufferData)); }
+std::optional<prosper::InFlightIndexedBuffer::Index> ShadowDataBufferManager::Request(CLightComponent &lightSource, const ShadowBufferData &bufferData) { return BaseLightBufferManager::Request(lightSource, &bufferData); }
 
 ////////////////////
 
@@ -137,4 +137,4 @@ void LightDataBufferManager::DoInitialize()
 }
 void LightDataBufferManager::Reset() { BaseLightBufferManager::Reset(); }
 size_t LightDataBufferManager::GetLightDataBufferCount() const { return m_masterBuffer->GetAllocatedBufferCount(); }
-std::optional<prosper::InFlightIndexedBuffer::Index> LightDataBufferManager::Request(CLightComponent &lightSource, const LightBufferData &bufferData) { return BaseLightBufferManager::Request(lightSource, &bufferData, sizeof(bufferData)); }
+std::optional<prosper::InFlightIndexedBuffer::Index> LightDataBufferManager::Request(CLightComponent &lightSource, const LightBufferData &bufferData) { return BaseLightBufferManager::Request(lightSource, &bufferData); }

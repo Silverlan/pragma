@@ -602,12 +602,13 @@ void CRenderComponent::UpdateAnimationBufferDescriptorBinding()
 	m_renderDescSetGroup->SetBindingDynamicStorageBuffer(get_instance_bone_buffer()->GetBaseBuffer(), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::BoneMatrices), 0ull, boneBufferSize);
 	SetRenderDescriptorSetsDirty();
 }
-void CRenderComponent::UpdateVertexAnimationBufferDescriptorBinding() {
+void CRenderComponent::UpdateVertexAnimationBufferDescriptorBinding()
+{
 	prosper::IBuffer *vertexAnimBuffer = nullptr;
 	auto &mdl = GetEntity().GetModel();
 	if(mdl)
 		vertexAnimBuffer = static_cast<asset::CModel &>(*mdl).GetVertexAnimationBuffer().get();
-	if (!vertexAnimBuffer)
+	if(!vertexAnimBuffer)
 		vertexAnimBuffer = get_cengine()->GetRenderContext().GetDummyBuffer().get();
 	auto vanimC = GetEntity().GetComponent<CVertexAnimatedComponent>();
 	uint32_t vertexAnimBufferSize = 0;
@@ -629,7 +630,9 @@ void CRenderComponent::UpdateRenderBufferDsgStateMT()
 	// InitializeRenderBuffers();
 
 	auto &context = get_cengine()->GetRenderContext();
+	//math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty);
 	auto updateRenderBuffer = math::is_flag_set(m_stateFlags, StateFlags::RenderBufferDirty);
+	auto descriptorUpdateNeeded = false;
 	if(updateRenderBuffer) {
 		//math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty, false);
 		UpdateMatrices();
@@ -657,17 +660,25 @@ void CRenderComponent::UpdateRenderBufferDsgStateMT()
 		m_instanceData.renderFlags = renderFlags;
 		m_instanceData.entityIndex = GetEntity().GetLocalIndex();
 
-		auto change = m_renderBuffer->UpdateBufferMode(0, sizeof(m_instanceData), &m_instanceData);
-		if(change && *change != prosper::FrameScopedBuffer::BufferChange::NoChange) {
-			// Underlying buffers have changed, we need to update our descriptor sets
-			SetRenderDescriptorSetsDirty();
+		// Switch to dynamic buffer mode
+		// TODO: Check m_instanceData for changes?
+		if(m_renderBuffer->GetBufferMode() == prosper::FrameScopedBuffer::BufferMode::Static) {
+			m_renderBuffer->ChangeBufferMode(prosper::FrameScopedBuffer::BufferMode::Dynamic);
+			descriptorUpdateNeeded = true;
+		}
+	}
+	else if(m_renderBuffer->CollapseToSingle())
+		descriptorUpdateNeeded = true;
 
-			for(size_t i=0;i<context.GetMaxNumberOfFramesInFlight();++i) {
-				auto &ds = m_renderDescSetGroup->GetDescriptorSet(i);
-				// This will *not* update the underlying descriptor set right away (which we wouldn't want anyway).
-				// Instead, it will be updated further below when actually needed by the current frame-in-flight.
-				ds.SetBindingUniformBuffer(m_renderBuffer->GetBuffer(i), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance));
-			}
+	if(descriptorUpdateNeeded) {
+		// Underlying buffers have changed, we need to update our descriptor sets
+		SetRenderDescriptorSetsDirty();
+
+		for(size_t i = 0; i < context.GetMaxNumberOfFramesInFlight(); ++i) {
+			auto &ds = m_renderDescSetGroup->GetDescriptorSet(i);
+			// This will *not* update the underlying descriptor set right away (which we wouldn't want anyway).
+			// Instead, it will be updated further below when actually needed by the current frame-in-flight.
+			ds.SetBindingUniformBuffer(m_renderBuffer->GetBuffer(i), math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance));
 		}
 	}
 
@@ -696,9 +707,11 @@ void CRenderComponent::UpdateRenderBuffersMT()
 	if(updateRenderBuffer) {
 		math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty, false);
 
-		m_renderBuffer->Write(0, sizeof(m_instanceData), &m_instanceData);
+		auto bufferChange = m_renderBuffer->SyncDataToGpu();
+		if(bufferChange != prosper::FrameScopedBuffer::BufferChange::NoChange)
+			throw std::runtime_error {"Buffer change occured during data update!"};
 	}
-	m_renderBuffer->Update();
+	m_renderBuffer->UpdateCurrentBuffer();
 
 	CEOnUpdateRenderBuffers evData {};
 	InvokeEventCallbacks(cRenderComponent::EVENT_ON_UPDATE_RENDER_BUFFERS_MT, evData);
@@ -714,7 +727,6 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 		return; // Only update once per frame
 	}
 	m_lastRender = frameId;
-	m_renderDataMutex.unlock();
 
 	UpdateAbsoluteRenderBounds();
 
@@ -734,6 +746,7 @@ void CRenderComponent::UpdateRenderDataMT(const CSceneComponent &scene, const CC
 	}
 
 	UpdateRenderBufferDsgStateMT();
+	m_renderDataMutex.unlock();
 }
 
 bool CRenderComponent::AddToRenderGroup(const std::string &name)
@@ -870,7 +883,7 @@ void CRenderComponent::InitializeRenderBuffers()
 	auto &context = get_cengine()->GetRenderContext();
 	context.WaitIdle();
 	math::set_flag(m_stateFlags, StateFlags::RenderBufferDirty);
-	m_renderBuffer = prosper::FrameScopedBuffer::Create(*s_instanceBuffer);
+	m_renderBuffer = prosper::FrameScopedBuffer::Create(*s_instanceBuffer, &m_instanceData);
 	if(!m_renderBuffer)
 		return;
 	// We need the UpdateAfterBind flag because the descriptor sets may get updated when render buffers are being updated on the main thread
@@ -1101,9 +1114,12 @@ static void debug_entity_render_buffer(NetworkState *state, BasePlayerComponent 
 		Con::COUT << "Instance data:" << Con::endl;
 		printInstanceData(instanceData);
 
-		auto *buf = renderC->GetRenderBuffer();
+		//auto *buf = renderC->GetRenderBuffer();
 		rendering::InstanceData bufData;
-		if(!buf || !buf->GetCurrentBuffer().Read(0, sizeof(bufData), &bufData))
+		auto *dsg = renderC->GetRenderDescriptorSetGroup();
+		uint64_t startOffset, size;
+		auto *buf = dsg->GetDescriptorSet(0).GetBoundBuffer(math::to_integral(ShaderGameWorldLightingPass::InstanceBinding::Instance), &startOffset, &size);
+		if(!buf || !buf->Read(startOffset, math::min(sizeof(bufData), size), &bufData))
 			Con::CWAR << "Failed to read buffer data!" << Con::endl;
 		else {
 			if(memcmp(&instanceData, &bufData, sizeof(bufData)) != 0) {

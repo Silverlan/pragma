@@ -109,7 +109,7 @@ void CLightComponent::UpdateBuffer()
 	math::set_flag(m_stateFlags, StateFlags::BufferDirty, false);
 	if(!m_renderBufferIndex)
 		return;
-	LightDataBufferManager::GetInstance().WriteBufferData(*m_renderBufferIndex, 0ull, sizeof(m_bufferData), &m_bufferData);
+	LightDataBufferManager::GetInstance().SyncDataToGpu(*m_renderBufferIndex);
 }
 
 void CLightComponent::UpdateShadowBuffer()
@@ -119,7 +119,7 @@ void CLightComponent::UpdateShadowBuffer()
 	math::set_flag(m_stateFlags, StateFlags::ShadowBufferDirty, false);
 	if(!m_shadowBufferIndex)
 		return;
-	ShadowDataBufferManager::GetInstance().WriteBufferData(*m_shadowBufferIndex, 0ull, sizeof(m_shadowBufferData), m_shadowBufferData.get());
+	ShadowDataBufferManager::GetInstance().SyncDataToGpu(*m_shadowBufferIndex);
 }
 
 void CLightComponent::WriteBufferData(prosper::IBuffer::Offset offset, prosper::IBuffer::Size size, const void *data)

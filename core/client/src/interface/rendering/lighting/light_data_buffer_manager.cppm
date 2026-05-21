@@ -20,13 +20,13 @@ export namespace pragma {
 		CLightComponent *GetLightByBufferIndex(LightBufferIndex idx);
 		std::size_t GetMaxCount() const;
 		prosper::InFlightIndexedBuffer &GetGlobalRenderBuffer();
-		void WriteBufferData(prosper::InFlightIndexedBuffer::Index index, prosper::IBuffer::Offset offset, prosper::IBuffer::Size size, const void *data);
+		void SyncDataToGpu(prosper::InFlightIndexedBuffer::Index index);
 
 		void Free(prosper::InFlightIndexedBuffer::Index index);
 	  protected:
 		BaseLightBufferManager() = default;
 		virtual void DoInitialize() = 0;
-		std::optional<prosper::InFlightIndexedBuffer::Index> Request(CLightComponent &lightSource, const void *data, size_t dataSize);
+		std::optional<prosper::InFlightIndexedBuffer::Index> Request(CLightComponent &lightSource, const void *data);
 
 		std::shared_ptr<prosper::InFlightIndexedBuffer> m_masterBuffer = nullptr;
 		std::vector<CLightComponent *> m_bufferIndexToLightSource;

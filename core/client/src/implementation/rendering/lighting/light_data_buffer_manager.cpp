@@ -119,19 +119,8 @@ void LightDataBufferManager::DoInitialize()
 	auto baseBuf = context.CreateResizableBuffer(createInfo);
 	baseBuf->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit | prosper::IBuffer::MapFlags::Unsynchronized);
 
-	std::vector<uint8_t> initialLightBufferData {};
-	{
-		auto stride = prosper::util::get_aligned_size(lightDataSize, alignment);
-		initialLightBufferData.resize(baseSize);
-		LightBufferData initial {};
-		auto *data = initialLightBufferData.data();
-		for(auto i = decltype(m_maxCount) {0u}; i < m_maxCount; ++i) {
-			memcpy(data, &initial, sizeof(initial));
-			data += stride;
-		}
-	}
-
-	m_masterBuffer = prosper::InFlightIndexedBuffer::Create(*baseBuf, lightDataSize, alignment, initialLightBufferData.data());
+	LightBufferData initial {};
+	m_masterBuffer = prosper::InFlightIndexedBuffer::Create(*baseBuf, lightDataSize, alignment, &initial);
 
 	m_bufferIndexToLightSource.resize(m_maxCount, nullptr);
 }

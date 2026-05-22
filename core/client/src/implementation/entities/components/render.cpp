@@ -63,19 +63,18 @@ void CRenderComponent::InitializeBuffers()
 	constexpr uint32_t instanceCount = 32'768u; // Not an absolute limit, but exceeding it will trigger re-allocation
 	prosper::util::BufferCreateInfo createInfo {};
 	if constexpr(USE_HOST_MEMORY_FOR_RENDER_DATA) {
-		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent | prosper::MemoryFeatureFlags::DeviceLocal;
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 		createInfo.flags = createInfo.flags | prosper::util::BufferCreateInfo::Flags::Persistent;
 	}
-	else
+	else {
 		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
+		createInfo.usageFlags |= prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit;
+	}
 	createInfo.size = instanceSize * instanceCount;
-	createInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
-	createInfo.usageFlags = createInfo.usageFlags | prosper::BufferUsageFlags::StorageBufferBit;
-#ifdef ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER
-	createInfo.usageFlags = createInfo.usageFlags | prosper::BufferUsageFlags::StorageBufferBit;
-#endif
+	createInfo.usageFlags |= prosper::BufferUsageFlags::UniformBufferBit;
+	createInfo.usageFlags |= prosper::BufferUsageFlags::StorageBufferBit;
 	constexpr prosper::DeviceSize alignment = 256; // See https://vulkan.gpuinfo.org/displaydevicelimit.php?name=minUniformBufferOffsetAlignment
-	auto internalAlignment = get_cengine()->GetRenderContext().CalcBufferAlignment(prosper::BufferUsageFlags::UniformBufferBit | prosper::BufferUsageFlags::StorageBufferBit);
+	auto internalAlignment = get_cengine()->GetRenderContext().CalcBufferAlignment(createInfo.usageFlags);
 	if(internalAlignment > alignment)
 		throw std::runtime_error {"Unsupported minimum uniform buffer alignment (" + util::to_string(internalAlignment) + "!"};
 	createInfo.debugName = "entity_instance_data_buf";
@@ -90,6 +89,26 @@ const prosper::FrameScopedBuffer *CRenderComponent::GetRenderBuffer() const { re
 prosper::SwapDescriptorSetGroup *CRenderComponent::GetRenderDescriptorSetGroup() const { return m_renderDescSetGroup.get(); }
 std::optional<RenderBufferIndex> CRenderComponent::GetCurrentFrameRenderBufferIndex() const { return m_renderBuffer ? m_renderBuffer->GetCurrentBuffer().GetBaseIndex() : std::optional<RenderBufferIndex> {}; }
 prosper::IDescriptorSet *CRenderComponent::GetCurrentFrameRenderDescriptorSet() const { return (m_renderDescSetGroup != nullptr) ? &m_renderDescSetGroup->GetCurrentDescriptorSet() : nullptr; }
+const std::array<uint32_t, 2> &CRenderComponent::GetRenderDescriptorSetDynamicOffsets() const { return m_renderDescriptorSetDynamicOffsets; }
+void CRenderComponent::UpdateRenderDescriptorSetDynamicOffsets()
+{
+	m_renderDescriptorSetDynamicOffsets = {};
+	auto &animationBufferOffset = m_renderDescriptorSetDynamicOffsets[0];
+	auto *animC = GetAnimatedComponent();
+	if(animC) {
+		auto offset = animC->GetCurrentFrameBoneBufferOffset();
+		if(offset)
+			animationBufferOffset = *offset;
+	}
+
+	auto &vertexAnimationBufferOffset = m_renderDescriptorSetDynamicOffsets[1];
+	auto vertAnimC = GetEntity().GetComponent<CVertexAnimatedComponent>();
+	if(vertAnimC.valid()) {
+		auto offset = vertAnimC->GetCurrentFrameVertexAnimationBufferOffset();
+		if(offset)
+			vertexAnimationBufferOffset = *offset;
+	}
+}
 CRenderComponent::StateFlags CRenderComponent::GetStateFlags() const { return m_stateFlags; }
 util::EventReply CRenderComponent::HandleEvent(ComponentEventId eventId, ComponentEvent &evData)
 {

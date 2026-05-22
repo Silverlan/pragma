@@ -42,7 +42,7 @@ void pragma::initialize_articulated_buffers()
 
 	auto &context = get_cengine()->GetRenderContext();
 	if constexpr(CRenderComponent::USE_HOST_MEMORY_FOR_RENDER_DATA) {
-		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent | prosper::MemoryFeatureFlags::DeviceLocal;
+		createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 		createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	}
 	else
@@ -97,6 +97,7 @@ void CAnimatedComponent::Initialize()
 	if(pRenderComponent.valid()) {
 		pRenderComponent->SetRenderBufferDirty();
 		pRenderComponent->UpdateInstantiability();
+		pRenderComponent->UpdateRenderDescriptorSetDynamicOffsets();
 	}
 }
 
@@ -104,8 +105,10 @@ void CAnimatedComponent::OnRemove()
 {
 	BaseAnimatedComponent::OnRemove();
 	auto pRenderComponent = GetEntity().GetComponent<CRenderComponent>();
-	if(pRenderComponent.valid())
+	if(pRenderComponent.valid()) {
 		pRenderComponent->SetRenderBufferDirty();
+		pRenderComponent->UpdateRenderDescriptorSetDynamicOffsets();
+	}
 }
 
 void CAnimatedComponent::PlayAnimation(int animation, FPlayAnim flags)
@@ -223,17 +226,26 @@ void CAnimatedComponent::ResetAnimation(const std::shared_ptr<asset::Model> &mdl
 	}
 }
 
+void CAnimatedComponent::SetCurrentFrameBoneBufferOffset(std::optional<prosper::LinearBuffer::BufferOffset> offset)
+{
+	if(offset == m_boneBufferOffset)
+		return;
+	m_boneBufferOffset = offset;
+	auto renderC = GetEntity().GetComponent<CRenderComponent>();
+	if(renderC.expired())
+		return;
+	renderC->UpdateRenderDescriptorSetDynamicOffsets();
+}
+
 void CAnimatedComponent::UpdateBoneBuffer(bool flagAsDirty)
 {
 	auto size = GetBoneBufferSize();
 	if(size == 0) {
-		m_boneBufferOffset = {};
+		SetCurrentFrameBoneBufferOffset({});
 		return;
 	}
 
-	m_boneBufferOffset = s_baseBoneBuffer->Allocate(size, m_boneMatrices.data());
-	//if(m_boneBuffer && (flagAsDirty || m_boneBuffer->IsCurrentBufferDirty()) && numBones > 0u && m_boneMatrices.empty() == false)
-	//	m_boneBuffer->Write(0ull, numBones * SIZEOF_BONE_BUFFER_BONE, m_boneMatrices.data(), flagAsDirty);
+	SetCurrentFrameBoneBufferOffset(s_baseBoneBuffer->Allocate(size, m_boneMatrices.data()));
 }
 const std::vector<Mat4> &CAnimatedComponent::GetBoneMatrices() const { return const_cast<CAnimatedComponent *>(this)->GetBoneMatrices(); }
 std::vector<Mat4> &CAnimatedComponent::GetBoneMatrices() { return m_boneMatrices; }

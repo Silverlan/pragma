@@ -25,6 +25,7 @@ export namespace pragma {
 		CVertexAnimatedComponent(ecs::BaseEntity &ent) : BaseEntityComponent(ent) {}
 		virtual ~CVertexAnimatedComponent() override;
 		virtual void Initialize() override;
+		virtual void OnRemove() override;
 		void UpdateVertexAnimationDataMT();
 		void UpdateVertexAnimationBuffer();
 		bool GetVertexAnimationBufferMeshOffset(geometry::CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const;
@@ -55,6 +56,7 @@ export namespace pragma {
 		uint32_t m_vertexAnimationBufferDataCount = 0;
 		std::optional<prosper::LinearBuffer::BufferOffset> m_vertexAnimationBufferOffset {};
 		bool m_bufferUpdateRequired = false;
+		void SetCurrentFrameVertexAnimationBufferOffset(std::optional<prosper::LinearBuffer::BufferOffset> offset);
 		void InitializeVertexAnimationBuffer();
 		void DestroyVertexAnimationBuffer();
 	};

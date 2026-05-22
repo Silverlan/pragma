@@ -195,24 +195,8 @@ void ShaderGameWorld::RecordSceneFlags(rendering::ShaderProcessor &shaderProcess
 
 bool ShaderGameWorld::RecordBindEntity(rendering::ShaderProcessor &shaderProcessor, CRenderComponent &renderC, prosper::IShaderPipelineLayout &layout, uint32_t entityInstanceDescriptorSetIndex) const
 {
-	std::array<uint32_t, 2> dynamicOffsets {0, 0};
-	// TODO: CLean this up
-	auto &animationBufferOffset = dynamicOffsets[0];
-	auto *animC = renderC.GetAnimatedComponent();
-	if(animC) {
-		auto tmpOffset = animC->GetCurrentFrameBoneBufferOffset();
-		if(tmpOffset)
-			animationBufferOffset = *tmpOffset;
-	}
-
-	auto &vertexAnimationBufferOffset = dynamicOffsets[1];
-	auto vertAnimC = renderC.GetEntity().GetComponent<CVertexAnimatedComponent>();
-	if(vertAnimC.valid()) {
-		auto tmpOffset = vertAnimC->GetCurrentFrameVertexAnimationBufferOffset();
-		if(tmpOffset)
-			vertexAnimationBufferOffset = *tmpOffset;
-	}
 	std::array<prosper::IDescriptorSet*, 1> descSets {renderC.GetCurrentFrameRenderDescriptorSet()};
+	auto &dynamicOffsets = renderC.GetRenderDescriptorSetDynamicOffsets();
 	return shaderProcessor.GetCommandBuffer().RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, layout, entityInstanceDescriptorSetIndex, descSets.size(), descSets.data(), dynamicOffsets.size(), dynamicOffsets.data());
 }
 

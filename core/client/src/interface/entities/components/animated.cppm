@@ -62,6 +62,7 @@ export namespace pragma {
 		virtual void ResetAnimation(const std::shared_ptr<asset::Model> &mdl) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	  private:
+		void SetCurrentFrameBoneBufferOffset(std::optional<prosper::LinearBuffer::BufferOffset> offset);
 		std::vector<Mat4> m_boneMatrices;
 		StateFlags m_stateFlags = StateFlags::BoneBufferDirty;
 		std::optional<prosper::LinearBuffer::BufferOffset> m_boneBufferOffset {};

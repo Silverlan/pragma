@@ -68,6 +68,8 @@ export namespace pragma {
 		std::optional<RenderBufferIndex> GetCurrentFrameRenderBufferIndex() const;
 		bool IsRenderBufferValid() const { return m_renderBuffer != nullptr; }
 		prosper::IDescriptorSet *GetCurrentFrameRenderDescriptorSet() const;
+		const std::array<uint32_t, 2> &GetRenderDescriptorSetDynamicOffsets() const;
+		void UpdateRenderDescriptorSetDynamicOffsets();
 		prosper::SwapDescriptorSetGroup *GetRenderDescriptorSetGroup() const;
 		void SetRenderDescriptorSetsDirty();
 		void UpdateAnimationBufferDescriptorBinding();
@@ -246,6 +248,7 @@ export namespace pragma {
 		std::shared_ptr<prosper::FrameScopedBuffer> m_renderBuffer = nullptr;
 		std::shared_ptr<prosper::SwapDescriptorSetGroup> m_renderDescSetGroup = nullptr;
 		uint8_t m_dirtyRenderDescriptorSets = 0;
+		std::array<uint32_t, 2> m_renderDescriptorSetDynamicOffsets = {0, 0};
 		std::optional<double> m_translucencyPassDistanceOverrideSqr {};
 	};
 

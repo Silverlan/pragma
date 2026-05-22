@@ -28,7 +28,7 @@ void pragma::initialize_vertex_animation_buffer()
 	}
 	auto instanceSize = sizeof(CVertexAnimatedComponent::VertexAnimationData);
 	prosper::util::BufferCreateInfo createInfo {};
-	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::HostAccessable | prosper::MemoryFeatureFlags::HostCoherent | prosper::MemoryFeatureFlags::DeviceLocal;
+	createInfo.memoryFeatures = prosper::MemoryFeatureFlags::CPUToGPU;
 	createInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
 	createInfo.size = 1 * 1'024 * 1'024; // 1 MiB
 	createInfo.usageFlags = prosper::BufferUsageFlags::StorageBufferBit;
@@ -69,7 +69,15 @@ void CVertexAnimatedComponent::Initialize()
 	if(whRenderComponent.valid() && whRenderComponent->GetRenderBuffer()) {
 		InitializeVertexAnimationBuffer();
 		whRenderComponent->UpdateInstantiability();
+		whRenderComponent->UpdateRenderDescriptorSetDynamicOffsets();
 	}
+}
+void CVertexAnimatedComponent::OnRemove()
+{
+	BaseEntityComponent::OnRemove();
+	auto pRenderComponent = GetEntity().GetComponent<CRenderComponent>();
+	if(pRenderComponent.valid())
+		pRenderComponent->UpdateRenderDescriptorSetDynamicOffsets();
 }
 void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 {
@@ -100,9 +108,20 @@ void CVertexAnimatedComponent::InitializeVertexAnimationBuffer()
 
 size_t CVertexAnimatedComponent::GetVertexAnimationBufferSize() const { return m_maxVertexAnimations * sizeof(VertexAnimationData); }
 
+void CVertexAnimatedComponent::SetCurrentFrameVertexAnimationBufferOffset(std::optional<prosper::LinearBuffer::BufferOffset> offset)
+{
+	if(offset == m_vertexAnimationBufferOffset)
+		return;
+	m_vertexAnimationBufferOffset = offset;
+	auto renderC = GetEntity().GetComponent<CRenderComponent>();
+	if(renderC.expired())
+		return;
+	renderC->UpdateRenderDescriptorSetDynamicOffsets();
+}
+
 void CVertexAnimatedComponent::DestroyVertexAnimationBuffer()
 {
-	m_vertexAnimationBufferOffset = {};
+	SetCurrentFrameVertexAnimationBufferOffset({});
 	m_maxVertexAnimations = 0u;
 	m_activeVertexAnimations = 0u;
 	m_vertexAnimationMeshBufferOffsets.clear();
@@ -225,10 +244,10 @@ void CVertexAnimatedComponent::UpdateVertexAnimationBuffer()
 {
 	if(m_vertexAnimationBufferDataCount > 0 && m_bufferUpdateRequired) {
 		auto size = m_vertexAnimationBufferDataCount * sizeof(m_vertexAnimationBufferData.front());
-		m_vertexAnimationBufferOffset = g_vertexAnimationBuffer->Allocate(size, m_vertexAnimationBufferData.data());
+		SetCurrentFrameVertexAnimationBufferOffset(g_vertexAnimationBuffer->Allocate(size, m_vertexAnimationBufferData.data()));
 	}
 	else
-		m_vertexAnimationBufferOffset = {};
+		SetCurrentFrameVertexAnimationBufferOffset({});
 }
 
 bool CVertexAnimatedComponent::GetVertexAnimationBufferMeshOffset(geometry::CModelSubMesh &mesh, uint32_t &offset, uint32_t &animCount) const

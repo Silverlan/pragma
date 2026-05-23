@@ -42,7 +42,7 @@ bool CRaytracingComponent::InitializeBuffers()
 	ds.SetBindingStorageBuffer(*s_materialDescriptorArrayManager->GetMaterialInfoBuffer(), math::to_integral(ShaderRayTracing::GameSceneBinding::MaterialInfos));
 	ds.SetBindingStorageBuffer(*s_entityMeshInfoBuffer, math::to_integral(ShaderRayTracing::GameSceneBinding::SubMeshInfos));
 	ds.SetBindingStorageBuffer(*CRenderComponent::GetInstanceBuffer(), math::to_integral(ShaderRayTracing::GameSceneBinding::EntityInstanceData));
-	ds.SetBindingStorageBuffer(*get_instance_bone_buffer(), math::to_integral(ShaderRayTracing::GameSceneBinding::BoneMatrices));
+	//ds.SetBindingStorageBuffer(*get_instance_bone_buffer(), math::to_integral(ShaderRayTracing::GameSceneBinding::BoneMatrices));
 	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalVertexBuffer(), math::to_integral(ShaderRayTracing::GameSceneBinding::VertexBuffer));
 	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalIndexBuffer(), math::to_integral(ShaderRayTracing::GameSceneBinding::IndexBuffer));
 	ds.SetBindingStorageBuffer(*geometry::CModelSubMesh::GetGlobalVertexWeightBuffer(), math::to_integral(ShaderRayTracing::GameSceneBinding::VertexWeightBuffer));
@@ -175,14 +175,14 @@ void CRaytracingComponent::UpdateBuffers(prosper::IPrimaryCommandBuffer &cmd)
 		for(auto &buf : m_subMeshBuffers)
 			cmd.RecordUpdateGenericShaderReadBuffer(*buf, offsetof(SubMeshRenderInfoBufferData, entityBufferIndex), sizeof(index), &index);
 	}
-	if(math::is_flag_set(m_stateFlags, StateFlags::BoneBufferDirty)) {
+	/*if(math::is_flag_set(m_stateFlags, StateFlags::BoneBufferDirty)) {
 		auto whAnimatedComponent = GetEntity().GetComponent<CAnimatedComponent>();
 		math::set_flag(m_stateFlags, StateFlags::BoneBufferDirty, false);
-		auto wpBoneBuffer = whAnimatedComponent->GetBoneBuffer(); //whAnimatedComponent.valid() ? whAnimatedComponent->GetBoneBuffer() : std::weak_ptr<prosper::IBuffer>{};
+		auto wpBoneBuffer = whAnimatedComponent->GetCurrentFrameBoneBuffer(); //whAnimatedComponent.valid() ? whAnimatedComponent->GetBoneBuffer() : std::weak_ptr<prosper::IBuffer>{};
 		auto index = wpBoneBuffer ? static_cast<prosper::IBuffer::SmallOffset>(wpBoneBuffer->GetBaseIndex()) : prosper::IBuffer::INVALID_SMALL_OFFSET;
 		for(auto &buf : m_subMeshBuffers)
 			cmd.RecordUpdateGenericShaderReadBuffer(*buf, offsetof(SubMeshRenderInfoBufferData, boneBufferStartIndex), sizeof(index), &index);
-	}
+	}*/
 	if(m_cbUpdateBuffers.IsValid())
 		m_cbUpdateBuffers.Remove();
 }

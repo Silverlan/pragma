@@ -252,7 +252,8 @@ export namespace pragma {
 		prosper::IDescriptorSet *GetDepthDescriptorSet() const;
 		void SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup);
 		const std::shared_ptr<prosper::IDescriptorSetGroup> &GetFogOverride() const;
-		prosper::IDescriptorSet *GetRendererDescriptorSet() const;
+		prosper::SwapDescriptorSetGroup *GetRendererDescriptorSetGroup() const;
+		prosper::IDescriptorSet *GetCurrentFrameRendererDescriptorSet() const;
 
 		rendering::Prepass &GetPrepass();
 		const rendering::ForwardPlusInstance &GetForwardPlusInstance() const;
@@ -277,7 +278,8 @@ export namespace pragma {
 		// rendering has finished.
 		void SetFrameDepthBufferSamplingRequired();
 
-		prosper::IDescriptorSet *GetLightSourceDescriptorSetCompute() const;
+		prosper::SwapDescriptorSetGroup *GetLightSourceDescriptorSetGroupCompute() const;
+		prosper::IDescriptorSet *GetCurrentFrameLightSourceDescriptorSetCompute() const;
 
 		prosper::Shader *GetWireframeShader() const;
 		void UpdateCSMDescriptorSet(BaseEnvLightDirectionalComponent &lightSource);
@@ -344,7 +346,7 @@ export namespace pragma {
 
 		LightMapInfo m_lightMapInfo = {};
 		bool m_bFrameDepthBufferSamplingRequired = false;
-		std::shared_ptr<prosper::IDescriptorSetGroup> m_dsgLightsCompute;
+		std::shared_ptr<prosper::SwapDescriptorSetGroup> m_dsgLightsCompute;
 
 		std::vector<CLightComponent *> m_visLightSources;
 		std::vector<ComponentHandle<CLightComponent>> m_visShadowedLights;
@@ -361,7 +363,7 @@ export namespace pragma {
 
 		RendererData m_rendererData {};
 		std::shared_ptr<prosper::IBuffer> m_rendererBuffer = nullptr;
-		std::shared_ptr<prosper::IDescriptorSetGroup> m_descSetGroupRenderer = nullptr;
+		std::shared_ptr<prosper::SwapDescriptorSetGroup> m_descSetGroupRenderer = nullptr;
 
 		std::unordered_map<size_t, util::WeakHandle<prosper::Shader>> m_shaderOverrides;
 		mutable util::WeakHandle<prosper::Shader> m_whShaderWireframe = {};

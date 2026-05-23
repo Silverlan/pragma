@@ -43,7 +43,6 @@ pr_add_compile_definitions(
 pr_add_compile_definitions(
     ${PROJ_NAME}
         -DDEBUG_RENDER_PERFORMANCE_TEST_ENABLED=0
-        -DUSE_LIGHT_SOURCE_UNIFORM_BUFFER=1
 
         PUBLIC
 )

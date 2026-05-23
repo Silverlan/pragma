@@ -58,10 +58,6 @@ static void initialize_material_settings_cache()
 {
 	if(g_materialSettingsBuffer)
 		return;
-	// Note: Using a uniform resizable buffer for this doesn't work, because the buffers are used by
-	// descriptor sets, which would have to be updated whenever the buffer is re-allocated (which currently
-	// does not happen automatically). TODO: Implement this? On the other hand, material data
-	// isn't that big to begin with, so maybe just make sure the buffer is large enough for all use cases?
 	constexpr auto matSize = rendering::shader_material::MAX_MATERIAL_SIZE;
 	prosper::util::BufferCreateInfo bufCreateInfo {};
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::GPUBulk;
@@ -69,6 +65,7 @@ static void initialize_material_settings_cache()
 	bufCreateInfo.size = pragma::console::get_con_var_value_bytes(*pragma::get_client_state(), "render_material_settings_buffer_initial_capacity", MATERIAL_SETTINGS_BUFFER_DEFAULT_INITIAL_SIZE);
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::TransferSrcBit | prosper::BufferUsageFlags::TransferDstBit | prosper::BufferUsageFlags::UniformBufferBit;
 	bufCreateInfo.flags |= prosper::util::BufferCreateInfo::Flags::Persistent;
+	bufCreateInfo.debugName = "material_settings";
 	g_materialSettingsBuffer = get_cengine()->GetRenderContext().CreateUniformResizableBuffer(bufCreateInfo, matSize);
 	g_materialSettingsBuffer->SetPermanentlyMapped(true, prosper::IBuffer::MapFlags::WriteBit);
 }

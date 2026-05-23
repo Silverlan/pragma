@@ -4,7 +4,7 @@
 #include "/math/half_float.glsl"
 #include "/common/inputs/vs_vertex_animation_frame_data.glsl"
 
-layout(std430, LAYOUT_ID(INSTANCE, VERTEX_ANIMATIONS)) buffer VertexAnimation { ivec4 verts[]; }
+layout(std430, LAYOUT_ID(INSTANCE, VERTEX_ANIMATIONS)) readonly buffer VertexAnimation { ivec4 verts[]; }
 vertexAnimation;
 
 void get_vertex_anim_vertex_position(uint frameOffset, out vec3 vpos, out vec3 vnorm, out float vwrinkle)

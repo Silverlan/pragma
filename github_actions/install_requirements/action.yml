@@ -43,6 +43,13 @@ runs:
       id: install-numpy
       run: |
         pip install numpy
+
+    # (Optional) Needed to generate a GPU memory dump visualization in crash dumps
+    - name: Install Pillow
+      shell: bash
+      id: install-pillow
+      run: |
+        pip install Pillow
   
     - name: Print Disk Space
       shell: bash

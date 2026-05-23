@@ -465,7 +465,7 @@ void LightShadowRenderer::Render(const rendering::DrawSceneInfo &drawSceneInfo)
 	drawCmd->RecordImageBarrier(img, prosper::ImageLayout::ShaderReadOnlyOptimal, prosper::ImageLayout::DepthStencilAttachmentOptimal);
 
 	for(auto layerId = decltype(numLayers) {0}; layerId < numLayers; ++layerId)
-		CSceneComponent::UpdateRenderBuffers(drawCmd, *m_renderQueues.at(layerId), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::ShadowPass) : nullptr);
+		CSceneComponent::UpdateRenderBuffersMT(*m_renderQueues.at(layerId), drawSceneInfo.renderStats ? &drawSceneInfo.renderStats->GetPassStats(rendering::RenderStats::RenderPass::ShadowPass) : nullptr);
 
 	auto pipeline = m_hLight->AreMorphTargetsInShadowsEnabled() ? ShaderShadow::Pipeline::WithMorphTargetAnimations : ShaderShadow::Pipeline::Default;
 

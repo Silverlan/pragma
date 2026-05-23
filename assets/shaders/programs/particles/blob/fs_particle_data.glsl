@@ -18,7 +18,7 @@ struct ParticleData {
 	uint lengthRotationYaw; // length, rotationYaw, each = 2 bytes
 };
 
-layout(std140, LAYOUT_ID(PARTICLES, DATA)) buffer FS_PARTICLE_DATA { ParticleData particles[]; }
+layout(std140, LAYOUT_ID(PARTICLES, DATA)) readonly buffer FS_PARTICLE_DATA { ParticleData particles[]; }
 u_particleData;
 
 vec4 get_particle_blob_color(uint id)

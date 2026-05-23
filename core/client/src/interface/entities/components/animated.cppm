@@ -13,12 +13,11 @@ export import pragma.prosper;
 export namespace pragma {
 	void initialize_articulated_buffers();
 	void clear_articulated_buffers();
-	const std::shared_ptr<prosper::IDynamicResizableBuffer> &get_instance_bone_buffer();
+	const std::shared_ptr<prosper::LinearBuffer> &get_instance_bone_buffer();
 
 	namespace cAnimatedComponent {
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_SKELETON_UPDATED;
 		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BONE_MATRICES_UPDATED;
-		CLASS_ENUM_COMPAT ComponentEventId EVENT_ON_BONE_BUFFER_INITIALIZED;
 	}
 	namespace cAnimatedComponent {
 		using namespace baseAnimatedComponent;
@@ -42,12 +41,11 @@ export namespace pragma {
 		using BaseAnimatedComponent::PlayAnimation;
 
 		virtual bool UpdateBonePoses() override;
-		const prosper::IBuffer *GetBoneBuffer() const;
 		const std::vector<Mat4> &GetBoneMatrices() const;
 		std::vector<Mat4> &GetBoneMatrices();
 		void UpdateBoneMatricesMT();
-		void UpdateBoneBuffer(prosper::IPrimaryCommandBuffer &commandBuffer, bool flagAsDirty = false);
-		void InitializeBoneBuffer();
+		void UpdateBoneBuffer(bool flagAsDirty = false);
+		size_t GetBoneBufferSize() const;
 		std::optional<Mat4> GetVertexTransformMatrix(const geometry::ModelSubMesh &subMesh, uint32_t vertexId, Vector3 *optOutNormalOffset = nullptr, float *optOutDelta = nullptr) const;
 		virtual std::optional<Mat4> GetVertexTransformMatrix(const geometry::ModelSubMesh &subMesh, uint32_t vertexId) const override;
 		virtual bool GetVertexTransformMatrix(const geometry::ModelSubMesh &subMesh, uint32_t vertexId, math::ScaledTransform &outPose) const override;
@@ -58,14 +56,16 @@ export namespace pragma {
 		void SetSkeletonUpdateCallbacksEnabled(bool enabled);
 		bool AreSkeletonUpdateCallbacksEnabled() const;
 		void SetBoneBufferDirty();
+		std::optional<prosper::LinearBuffer::BufferOffset> GetCurrentFrameBoneBufferOffset() const { return m_boneBufferOffset; }
 	  protected:
 		virtual void OnModelChanged(const std::shared_ptr<asset::Model> &mdl) override;
 		virtual void ResetAnimation(const std::shared_ptr<asset::Model> &mdl) override;
 		virtual void GetBaseTypeIndex(std::type_index &outTypeIndex) const override;
 	  private:
-		std::shared_ptr<prosper::IBuffer> m_boneBuffer = nullptr;
+		void SetCurrentFrameBoneBufferOffset(std::optional<prosper::LinearBuffer::BufferOffset> offset);
 		std::vector<Mat4> m_boneMatrices;
 		StateFlags m_stateFlags = StateFlags::BoneBufferDirty;
+		std::optional<prosper::LinearBuffer::BufferOffset> m_boneBufferOffset {};
 	};
 
 	// Events
@@ -79,9 +79,9 @@ export namespace pragma {
 	};
 
 	struct DLLCLIENT CEOnBoneBufferInitialized : public ComponentEvent {
-		CEOnBoneBufferInitialized(const std::shared_ptr<prosper::IBuffer> &buffer);
+		CEOnBoneBufferInitialized(const std::shared_ptr<prosper::SwapBuffer> &buffer);
 		virtual void PushArguments(lua::State *l) override;
-		std::shared_ptr<prosper::IBuffer> buffer;
+		std::shared_ptr<prosper::SwapBuffer> buffer;
 	};
 	using namespace pragma::math::scoped_enum::bitwise;
 };

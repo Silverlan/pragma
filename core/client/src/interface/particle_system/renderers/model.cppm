@@ -31,7 +31,7 @@ export namespace pragma::pts {
 
 		struct ParticleModelComponent {
 			ComponentHandle<CAnimatedComponent> animatedComponent;
-			std::shared_ptr<prosper::IDescriptorSetGroup> instanceDescSetGroupAnimated;
+			std::shared_ptr<prosper::SwapDescriptorSetGroup> instanceDescSetGroupAnimated;
 		};
 		ParticleModelComponent &GetParticleComponent(uint32_t particleIdx);
 		std::vector<ParticleModelComponent> m_particleComponents;

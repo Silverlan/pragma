@@ -611,6 +611,8 @@ void CRenderComponent::SetRenderBufferDirty() { math::set_flag(m_stateFlags, Sta
 void CRenderComponent::SetRenderBoundsDirty() { math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty); }
 void CRenderComponent::UpdateAnimationBufferDescriptorBinding()
 {
+	if(!m_renderDescSetGroup)
+		return;
 	// Not using GetAnimatedComponent here, as it may not be cached at this point in time yet and may return null despite
 	// the component existing.
 	auto animC = GetEntity().GetComponent<CAnimatedComponent>();
@@ -623,6 +625,8 @@ void CRenderComponent::UpdateAnimationBufferDescriptorBinding()
 }
 void CRenderComponent::UpdateVertexAnimationBufferDescriptorBinding()
 {
+	if(!m_renderDescSetGroup)
+		return;
 	prosper::IBuffer *vertexAnimBuffer = nullptr;
 	auto &mdl = GetEntity().GetModel();
 	if(mdl)

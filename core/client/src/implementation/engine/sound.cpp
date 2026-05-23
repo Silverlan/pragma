@@ -70,6 +70,7 @@ pragma::audio::ISoundSystem *pragma::CEngine::InitializeSoundEngine()
 		m_audioAPI = audioAPI;
 		m_soundSystem = info.soundSystem;
 		m_audioAPILib = info.library;
+		break;
 	}
 
 	if(!m_soundSystem) {

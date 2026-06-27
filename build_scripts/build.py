@@ -458,7 +458,8 @@ if platform == "linux":
 				"cmake",
 				"ninja",
 				"base-devel",
-				"freetype-devel"
+				"freetype-devel",
+				"libnotify-devel"
 			]
 
 			# glfw
@@ -511,7 +512,8 @@ if platform == "linux":
 				"ninja",
 				"gcc",
 				"g++",
-				"freetype-devel"
+				"freetype-devel",
+				"libnotify-devel"
 			]
 
 			# glfw
@@ -563,7 +565,8 @@ if platform == "linux":
 		elif(prefer_pacman()): # Arch / pacman
 			packages = [
 				"cmake",
-				"ninja"
+				"ninja",
+				"libnotify"
 			]
 
 			if build_all:
@@ -586,7 +589,8 @@ if platform == "linux":
 				"ninja-build",
 				"gcc",
 				"g++",
-				"libfreetype6-dev"
+				"libfreetype6-dev",
+				"libnotify-dev"
 			]
 
 			# glfw

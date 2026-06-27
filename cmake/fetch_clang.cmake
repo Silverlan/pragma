@@ -11,7 +11,7 @@ function(pr_fetch_clang)
 		set(minimum_required_version "22.1.0")
 
 		# Install the latest version if no supported version of clang was found (this should be updated from time to time)
-		set(install_version "22.1.1")
+		set(install_version "22.1.8")
 	endif()
 
 	find_program(CLANG_EXECUTABLE clang)

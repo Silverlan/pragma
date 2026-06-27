@@ -20,8 +20,10 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - os: ubuntu-latest
-            name: "Linux (Clang)"
+          - os: ubuntu-26.04
+            name: "Linux Ubuntu 26.04 (Clang)"
+          - os: ubuntu-24.04
+            name: "Linux Ubuntu 24.04 (Clang)"
     steps:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@develop

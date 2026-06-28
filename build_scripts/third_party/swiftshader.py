@@ -11,7 +11,7 @@ def main(build_swiftshader=False):
 
 	swiftshader_bin_dir = swiftshader_root +"/build/bin/"
 	if build_swiftshader:
-		commit_sha = "dc1d9063cd83b2f72d7db157512bf687abed7c21"
+		commit_sha = "606242547e06da94f2d283e9009006f19d11dc43"
 		if not check_repository_commit(swiftshader_root, commit_sha, "swiftshader"):
 			if not Path(swiftshader_root).is_dir():
 				print_msg("SwiftShader not found. Downloading...")
@@ -28,7 +28,7 @@ def main(build_swiftshader=False):
 			mkpath(swiftshader_bin_dir)
 			os.chdir(swiftshader_bin_dir)
 			print_msg("Downloading prebuilt SwiftShader...")
-			base_url = "https://github.com/Silverlan/swiftshader/releases/download/2025-07-31/" # Should match commit id above
+			base_url = "https://github.com/Silverlan/swiftshader/releases/download/2026-06-28/" # Should match commit id above
 			if platform == "win32":
 				http_extract(base_url +"swiftshader.zip")
 			else:

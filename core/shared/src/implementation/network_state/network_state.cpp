@@ -344,6 +344,7 @@ pragma::console::CVarHandler::SetConVarResult pragma::NetworkState::SetConVar(st
 	if(cv->GetType() != console::ConType::Var)
 		return result;
 	auto *cvar = static_cast<console::ConVar *>(cv);
+	result.conVar = cvar;
 	auto prev = cvar->GetString();
 	if(bApplyIfEqual == false && prev == value)
 		return result;

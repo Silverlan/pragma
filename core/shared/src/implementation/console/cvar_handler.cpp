@@ -130,6 +130,7 @@ pragma::console::CVarHandler::SetConVarResult pragma::console::CVarHandler::SetC
 	if(cv->GetType() != ConType::Var)
 		return result;
 	ConVar *cvar = static_cast<ConVar *>(cv);
+	result.conVar = cvar;
 	std::string prev = cvar->GetString();
 	if(bApplyIfEqual == false && prev == value)
 		return result;

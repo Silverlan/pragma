@@ -59,27 +59,35 @@ Build Requirements
 - ~30 GiB of disk space
 
 Supported Distros:
-- Ubuntu 24.04 or newer
+- Ubuntu 24.04 or newer (recommended)
 - Arch with up-to-date packages
 - Fedora 43 or newer
+- Void Linux with up-to-date-packages
 
+Please note that the automated GitHub workflows currently only test for Ubuntu, so this is the recommended distribution for the smoothest build experience. Other listed distros *should* work as well, but you *may* encounter issues.
 The following system packages have to be installed (these will be installed automatically if you're using the build script):
 
-**Ubuntu**:
+**Ubuntu / apt**:
 ```bash
 sudo apt update
-sudo apt install cmake ninja-build gcc g++ libfreetype6-dev libwayland-dev libx11-dev libxkbcommon-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev pkg-config libxcb-keysyms1-dev libx11-xcb-dev libssl-dev
+sudo apt install cmake ninja-build gcc g++ libfreetype6-dev libnotify-dev libwayland-dev libx11-dev libxkbcommon-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev pkg-config libxcb-keysyms1-dev libx11-xcb-dev libssl-dev
 ```
 (`libssl-dev` is only required if you're building with PFM.)
 
-**Arch**:
+**Arch / pacman**:
 ```bash
-sudo pacman -Sy --needed cmake ninja
+sudo pacman -Sy --needed cmake ninja libnotify
 ```
 
-**Fedora**:
+**Fedora / dnf**:
 ```bash
-dnf install cmake ninja gcc g++ freetype-devel wayland-devel libxkbcommon-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel xcb-util-keysyms-devel openssl-devel
+sudo dnf install cmake ninja gcc g++ freetype-devel libnotify-devel wayland-devel libxkbcommon-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel xcb-util-keysyms-devel openssl-devel
+```
+(`openssl-devel` is only required if you're building with PFM.)
+
+**Void Linux / xbps**:
+```bash
+sudo xbps-install -S cmake ninja base-devel freetype-devel libnotify-devel wayland-devel libxkbcommon-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel xcb-util-keysyms-devel openssl-devel
 ```
 (`openssl-devel` is only required if you're building with PFM.)
 

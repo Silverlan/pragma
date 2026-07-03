@@ -2,8 +2,33 @@ cmake_minimum_required(VERSION 4.2.0)
 
 message(STATUS "CMake version: ${CMAKE_VERSION}")
 
-# Required for "import std;" as long as its experimental in CMake
-set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
+# "import std;" support is still experimental with CMake, so we need to define
+# CMAKE_EXPERIMENTAL_CXX_IMPORT_STD depending on the CMake version that is being used.
+# Note that the build cache will likely have to be deleted whenever this value changes or there
+# may be configuration errors.
+
+set(LATEST_KNOWN_CMAKE_VERSION "4.4.0")
+if(CMAKE_VERSION VERSION_LESS_EQUAL "4.2.7")
+    set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
+elseif(CMAKE_VERSION VERSION_LESS_EQUAL "4.3.4")
+    set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "451f2fe2-a8a2-47c3-bc32-94786d8fc91b")
+elseif(CMAKE_VERSION VERSION_LESS_EQUAL "4.4.0")
+    set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
+else()
+    # CMake is a newer version than is available at the time of writing
+    message(WARNING 
+        "CMake version ${CMAKE_VERSION} is newer than this script was updated for "
+        "(tested up to ${LATEST_KNOWN_CMAKE_VERSION}). The experimental UUID for "
+        "CMAKE_EXPERIMENTAL_CXX_IMPORT_STD might have changed, or the feature might "
+        "now be officially supported without a UUID. If your build fails, please update "
+        "the CMakeLists.txt with the new UUID."
+        "See https://github.com/Kitware/CMake/blob/master/Help/dev/experimental.rst#c-import-std-support for more information."
+    )
+    
+    # Just try the latest ID as fallback.
+    set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
+endif()
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_MODULE_STD 1)
 

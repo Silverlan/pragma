@@ -29,6 +29,8 @@ else()
     set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
 endif()
 
+message("CMAKE_EXPERIMENTAL_CXX_IMPORT_STD has been set to ${CMAKE_EXPERIMENTAL_CXX_IMPORT_STD}.")
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_MODULE_STD 1)
 
@@ -64,8 +66,35 @@ endif()
 set(PRAGMA_DEPS_DIR "${CMAKE_SOURCE_DIR}/deps/staging/" CACHE PATH "Directory where dependencies will be extracted to.")
 set(PRAGMA_BUILD_TOOLS_DIR "${CMAKE_SOURCE_DIR}/build_tools/" CACHE PATH "Directory where additional build tool dependencies will be extracted to.")
 
-if(NOT PRAGMA_DISABLE_BUILD_FETCH)
-    include("cmake/fetch_clang.cmake")
+# Compiler may already be defined from cache or command-line, if not, we'll handle it
+if(NOT DEFINED CMAKE_CXX_COMPILER)
+    if(NOT DEFINED PRAGMA_DEFAULT_COMPILER)
+        set(PRAGMA_DEFAULT_COMPILER "clang")
+    endif()
+
+    if(PRAGMA_DEFAULT_COMPILER STREQUAL "clang")
+        if(NOT PRAGMA_DISABLE_BUILD_FETCH)
+            # Fetch newer version of clang if system version is insufficient
+            include("cmake/fetch_clang.cmake")
+        endif()
+    endif()
+
+    # fetch_clang will set compiler vars. If they haven't been set, that means we have to use
+    # system compiler.
+    if(NOT DEFINED CMAKE_CXX_COMPILER)
+        if(PRAGMA_DEFAULT_COMPILER STREQUAL "clang")
+            if(WIN32)
+                set(CMAKE_C_COMPILER   "clang.exe"   CACHE FILEPATH "C compiler"   FORCE)
+                set(CMAKE_CXX_COMPILER "clang++.exe" CACHE FILEPATH "C++ compiler" FORCE)
+            else()
+                set(CMAKE_C_COMPILER   "clang"   CACHE FILEPATH "C compiler"   FORCE)
+                set(CMAKE_CXX_COMPILER "clang++" CACHE FILEPATH "C++ compiler" FORCE)
+            endif()
+        elseif(PRAGMA_DEFAULT_COMPILER STREQUAL "msvc")
+			set(CMAKE_C_COMPILER   "cl.exe"   CACHE FILEPATH "C compiler"   FORCE)
+			set(CMAKE_CXX_COMPILER "cl.exe" CACHE FILEPATH "C++ compiler" FORCE)
+        endif()
+    endif()
 endif()
 
 if(UNIX)

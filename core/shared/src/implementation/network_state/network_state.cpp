@@ -6,8 +6,6 @@ module;
 
 module pragma.shared;
 
-#define DLLSPEC_ISTEAMWORKS DLLNETWORK
-
 import :network_state;
 
 pragma::console::ConVarHandle pragma::NetworkState::GetConVarHandle(string::StringMap<std::shared_ptr<console::PtrConVar>> &ptrs, std::string_view scvar) { return CVarHandler::GetConVarHandle(ptrs, scvar); }

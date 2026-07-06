@@ -3,8 +3,6 @@
 
 module pragma.client;
 
-#define DLLSPEC_ISTEAMWORKS DLLNETWORK
-
 #undef PlaySound
 
 import :gui.main_menu;

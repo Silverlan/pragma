@@ -8,11 +8,11 @@ message(STATUS "CMake version: ${CMAKE_VERSION}")
 # may be configuration errors.
 
 set(LATEST_KNOWN_CMAKE_VERSION "4.4.0")
-if(CMAKE_VERSION VERSION_LESS_EQUAL "4.2.7")
+if(CMAKE_VERSION VERSION_LESS "4.3.0")
     set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
-elseif(CMAKE_VERSION VERSION_LESS_EQUAL "4.3.4")
+elseif(CMAKE_VERSION VERSION_LESS "4.4.0")
     set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "451f2fe2-a8a2-47c3-bc32-94786d8fc91b")
-elseif(CMAKE_VERSION VERSION_LESS_EQUAL "4.4.0")
+elseif(CMAKE_VERSION VERSION_LESS "4.5.0")
     set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "f35a9ac6-8463-4d38-8eec-5d6008153e7d")
 else()
     # CMake is a newer version than is available at the time of writing

@@ -3,9 +3,6 @@
 
 module;
 
-#ifdef PRAGMA_CHROMIUM_ENABLED
-#include <../../../modules/pr_chromium/include/util_javascript.hpp>
-#endif
 #include <cassert>
 
 module pragma.client;

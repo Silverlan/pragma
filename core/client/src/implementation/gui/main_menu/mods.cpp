@@ -3,10 +3,6 @@
 
 module;
 
-#ifdef PRAGMA_CHROMIUM_ENABLED
-#include <../../../modules/pr_chromium/include/util_javascript.hpp>
-#endif
-
 #define PAD_ADDON_VERBOSE 1
 
 module pragma.client;
@@ -118,33 +114,6 @@ void pragma::gui::types::WIMainMenuMods::OnVisibilityChanged(bool bVisible)
 void pragma::gui::types::WIMainMenuMods::InitializeJavascript()
 {
 	WIChromiumPage::InitializeJavascript();
-#ifdef PRAGMA_CHROMIUM_ENABLED
-	auto hThis = GetHandle();
-	RegisterJavascriptFunction("set_addon_subscription", [hThis](const std::vector<pragma::JSValue> &args) -> std::unique_ptr<pragma::JSValue> {
-		auto r = std::make_unique<pragma::JSValue>();
-		r->type = pragma::JSValueType::Bool;
-		r->data = pragma::util::make_shared<bool>(false);
-		if(hThis.IsValid() == false || args.size() < 2 || args.at(0).type != pragma::JSValueType::String || args.at(1).type != pragma::JSValueType::Bool)
-			return r;
-		auto &uniqueId = *static_cast<std::string *>(args.at(0).data.get());
-		if(static_cast<WIMainMenuMods *>(hThis.get())->SetAddonSubscription(uniqueId, *static_cast<bool *>(args.at(1).data.get())) == true)
-			*static_cast<bool *>(r->data.get()) = true;
-		return r;
-	});
-	RegisterJavascriptFunction("is_subscribed_to_addon", [](const std::vector<pragma::JSValue> &args) -> std::unique_ptr<pragma::JSValue> {
-		auto r = std::make_unique<pragma::JSValue>();
-		r->type = pragma::JSValueType::Bool;
-		r->data = pragma::util::make_shared<bool>(false);
-		if(args.empty() == true || args.front().type != pragma::JSValueType::String)
-			return r;
-		auto &uniqueId = *static_cast<std::string *>(args.at(0).data.get());
-		auto &addons = AddonSystem::GetMountedAddons();
-		auto it = std::find_if(addons.begin(), addons.end(), [&uniqueId](const AddonInfo &addon) { return (addon.GetUniqueId() == uniqueId) ? true : false; });
-		if(it != addons.end())
-			*static_cast<bool *>(r->data.get()) = true;
-		return r;
-	});
-#endif
 }
 
 void pragma::gui::types::WIMainMenuMods::Initialize()

@@ -111,6 +111,7 @@ void RenderQueue::Clear()
 {
 	queue.clear();
 	sortedItemIndices.clear();
+	renderBuffersUpdated = false;
 }
 void RenderQueue::Add(ecs::CBaseEntity &ent, RenderMeshIndex meshIdx, material::CMaterial &mat, prosper::PipelineID pipelineId, const CCameraComponent *optCam)
 {

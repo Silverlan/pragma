@@ -31,7 +31,7 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             name: "Linux (Clang)"
     steps:
       - name: Setup Pragma

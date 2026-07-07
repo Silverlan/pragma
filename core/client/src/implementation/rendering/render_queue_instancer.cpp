@@ -54,7 +54,7 @@ void rendering::RenderQueueInstancer::ProcessInstantiableList(uint32_t endIndex,
 	std::vector<RenderBufferIndex> renderBufferIndices {};
 	renderBufferIndices.reserve(numInstantiableEntities);
 	for(auto i = decltype(sortedInstantiableEntityIndices.size()) {0u}; i < sortedInstantiableEntityIndices.size(); ++i) {
-		auto renderBufferIndex = static_cast<ecs::CBaseEntity *>(get_cgame()->GetEntityByLocalIndex(m_instantiableEntityList[i]))->GetRenderComponent()->GetRenderBufferIndex();
+		auto renderBufferIndex = static_cast<ecs::CBaseEntity *>(get_cgame()->GetEntityByLocalIndex(m_instantiableEntityList[i]))->GetRenderComponent()->GetCurrentFrameRenderBufferIndex();
 		renderBufferIndices.push_back(*renderBufferIndex);
 
 		// Note: Hash has to be in the right order for frame coherence, which is not necessarily the same order as the queue (since the entity index

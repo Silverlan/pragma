@@ -63,8 +63,7 @@
       "displayName": "[Linux] Configure - Clang (Core Features)",
       "inherits": ["base-ninja", "platform-linux"],
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++"
+        "PRAGMA_DEFAULT_COMPILER": "clang"
       }
     },
     {
@@ -78,8 +77,7 @@
       "displayName": "[Windows] Configure - Clang with Ninja (Core Features)",
       "inherits": ["base-ninja", "platform-windows"],
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang.exe",
-        "CMAKE_CXX_COMPILER": "clang++.exe"
+        "PRAGMA_DEFAULT_COMPILER": "clang"
       }
     },
     {
@@ -94,8 +92,7 @@
       "inherits": ["base-ninja", "platform-windows"],
       "cmakeExecutable": "${sourceDir}/deps/staging/cmake/bin/cmake.exe",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "cl.exe",
-        "CMAKE_CXX_COMPILER": "cl.exe"
+        "PRAGMA_DEFAULT_COMPILER": "msvc"
       },
       "vendor": {
         "jetbrains.com/clion": {

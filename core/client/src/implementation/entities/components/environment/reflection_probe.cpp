@@ -830,12 +830,19 @@ bool CReflectionProbeComponent::LoadIBLReflectionsFromFile()
 		samplerCreateInfo.addressModeW = prosper::SamplerAddressMode::ClampToEdge;
 		samplerCreateInfo.minFilter = prosper::Filter::Linear;
 		samplerCreateInfo.magFilter = prosper::Filter::Linear;
-		auto sampler = get_cengine()->GetRenderContext().CreateSampler(samplerCreateInfo);
+		auto &context = get_cengine()->GetRenderContext();
+
+		// Make sure to keep the previous samplers alive in case they're still in use
+		context.KeepResourceAliveUntilPresentationComplete(texIrradiance->GetVkTexture()->GetSampler()->shared_from_this());
+		context.KeepResourceAliveUntilPresentationComplete(texBrdf->GetVkTexture()->GetSampler()->shared_from_this());
+		context.KeepResourceAliveUntilPresentationComplete(texPrefilter->GetVkTexture()->GetSampler()->shared_from_this());
+
+		auto sampler = context.CreateSampler(samplerCreateInfo);
 		texIrradiance->GetVkTexture()->SetSampler(*sampler);
 		texBrdf->GetVkTexture()->SetSampler(*sampler);
 
 		samplerCreateInfo.mipmapMode = prosper::SamplerMipmapMode::Linear;
-		sampler = get_cengine()->GetRenderContext().CreateSampler(samplerCreateInfo);
+		sampler = context.CreateSampler(samplerCreateInfo);
 		texPrefilter->GetVkTexture()->SetSampler(*sampler);
 	}
 

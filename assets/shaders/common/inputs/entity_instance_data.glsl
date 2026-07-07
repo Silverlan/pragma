@@ -9,7 +9,7 @@ struct StorageEntityInstanceData {
 };
 
 // Storage buffer containing instance data for *all* entities; can be indexed
-layout(std140, LAYOUT_ID(RENDER_SETTINGS, GLOBAL_ENTITY_INSTANCE_DATA)) buffer Instances { StorageEntityInstanceData data[]; }
+layout(std140, LAYOUT_ID(RENDER_SETTINGS, GLOBAL_ENTITY_INSTANCE_DATA)) readonly buffer Instances { StorageEntityInstanceData data[]; }
 u_instances;
 
 #endif

@@ -52,11 +52,6 @@ export namespace pragma {
 		virtual void PushArguments(lua::State *l) override;
 		BaseEntityComponent *resultShadow = nullptr;
 	};
-	struct DLLCLIENT CEOnShadowBufferInitialized : public ComponentEvent {
-		CEOnShadowBufferInitialized(prosper::IBuffer &shadowBuffer);
-		virtual void PushArguments(lua::State *l) override;
-		prosper::IBuffer &shadowBuffer;
-	};
 	class DLLCLIENT CBaseLightComponent : public BaseEnvLightComponent, public CBaseNetComponent {
 	  public:
 		CBaseLightComponent(ecs::BaseEntity &ent);
@@ -90,8 +85,8 @@ export namespace pragma {
 	  public:
 		static void RegisterEvents(EntityComponentManager &componentManager, TRegisterComponentEvent registerEvent);
 
-		static prosper::IUniformResizableBuffer &GetGlobalRenderBuffer();
-		static prosper::IUniformResizableBuffer &GetGlobalShadowBuffer();
+		static prosper::InFlightIndexedBuffer &GetGlobalRenderBuffer();
+		static prosper::InFlightIndexedBuffer &GetGlobalShadowBuffer();
 		static CLightComponent *GetLightByBufferIndex(LightBufferIndex idx);
 		static CLightComponent *GetLightByShadowBufferIndex(ShadowBufferIndex idx);
 		static uint32_t GetMaxLightCount();
@@ -99,11 +94,22 @@ export namespace pragma {
 		static uint32_t GetLightCount();
 		static void InitializeBuffers();
 		static void ClearBuffers();
-		const std::shared_ptr<prosper::IBuffer> &GetRenderBuffer() const;
-		const std::shared_ptr<prosper::IBuffer> &GetShadowBuffer() const;
+		static void UpdateDirtyLightBuffers();
+		std::optional<prosper::InFlightIndexedBuffer::Index> GetRenderBufferIndex() const;
+		std::optional<prosper::InFlightIndexedBuffer::Index> GetShadowBufferIndex() const;
+		std::optional<prosper::BufferView> GetCurrentFrameRenderBufferView() const;
 		virtual void SetBaked(bool baked) override;
 
-		enum class StateFlags : uint32_t { None = 0u, StaticUpdateRequired = 1u, DynamicUpdateRequired = StaticUpdateRequired << 1u, FullUpdateRequired = StaticUpdateRequired << 1u, AddToGameScene = FullUpdateRequired << 1u, EnableMorphTargetsInShadows = AddToGameScene << 1u };
+		enum class StateFlags : uint32_t {
+			None = 0u,
+			StaticUpdateRequired = 1u,
+			DynamicUpdateRequired = StaticUpdateRequired << 1u,
+			FullUpdateRequired = StaticUpdateRequired << 1u,
+			AddToGameScene = FullUpdateRequired << 1u,
+			EnableMorphTargetsInShadows = AddToGameScene << 1u,
+			BufferDirty = EnableMorphTargetsInShadows << 1u,
+			ShadowBufferDirty = BufferDirty << 1u,
+		};
 
 		CLightComponent(ecs::BaseEntity &ent);
 		virtual ~CLightComponent() override;
@@ -150,6 +156,8 @@ export namespace pragma {
 		// Used for debug purposes only
 		void UpdateBuffers();
 
+		void SetBufferDirty();
+		void SetShadowBufferDirty();
 		const LightBufferData &GetBufferData() const;
 		LightBufferData &GetBufferData();
 		const ShadowBufferData *GetShadowBufferData() const;
@@ -162,8 +170,6 @@ export namespace pragma {
 		virtual void SetFalloffExponent(float falloffExponent) override;
 
 		// For internal use only!
-		void SetRenderBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer, bool freeBuffer = true);
-		void SetShadowBuffer(const std::shared_ptr<prosper::IBuffer> &renderBuffer, bool freeBuffer = true);
 		void UpdateShadowTypes();
 	  protected:
 		static std::size_t s_lightCount;
@@ -171,6 +177,14 @@ export namespace pragma {
 		void InitializeShadowBuffer();
 		void DestroyRenderBuffer(bool freeBuffer = true);
 		void DestroyShadowBuffer(bool freeBuffer = true);
+		void UpdateBuffer();
+		void UpdateShadowBuffer();
+		template<typename T>
+		void WriteBufferData(prosper::IBuffer::Offset offset, const T &value)
+		{
+			WriteBufferData(offset, sizeof(T), &value);
+		}
+		void WriteBufferData(prosper::IBuffer::Offset offset, prosper::IBuffer::Size size, const void *data);
 		void UpdatePos();
 		void UpdateDir();
 		void UpdateColor();
@@ -181,8 +195,8 @@ export namespace pragma {
 
 		LightBufferData m_bufferData {};
 		std::unique_ptr<ShadowBufferData> m_shadowBufferData = nullptr;
-		std::shared_ptr<prosper::IBuffer> m_renderBuffer = nullptr;
-		std::shared_ptr<prosper::IBuffer> m_shadowBuffer = nullptr;
+		std::optional<prosper::InFlightIndexedBuffer::Index> m_renderBufferIndex = {};
+		std::optional<prosper::InFlightIndexedBuffer::Index> m_shadowBufferIndex = {};
 
 		enum class DataSlot : uint32_t {
 			Flags = 0u,

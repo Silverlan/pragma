@@ -602,7 +602,9 @@ uint32_t pragma::rendering::BaseRenderProcessor::Render(const RenderQueue &rende
 	if(optStats)
 		t = std::chrono::steady_clock::now();
 
-	renderQueue.WaitForCompletion(optStats);
+	// This will wait for the render queue to complete, and ensure all buffers and descriptor sets have been updated
+	// TODO: We could probably get away with delaying the buffer update until RecordBindEntity, and only wait for the queue completion here?
+	CSceneComponent::UpdateRenderBuffersMT(renderQueue, optStats);
 	auto isDepthPass = (pass == RenderPass::Prepass || pass == RenderPass::Shadow);
 	if(m_renderer == nullptr || (isDepthPass && math::is_flag_set(m_stateFlags, StateFlags::ShaderBound) == false))
 		return 0;

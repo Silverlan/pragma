@@ -4,6 +4,8 @@
 // https://github.com/bcrusco/Forward-Plus-Renderer
 // https://github.com/WindyDarian/Vulkan-Forward-Plus-Renderer
 
+#define VISIBLE_LIGHT_TILE_INDICES_BUFFER_WRITE_ACCESS_ENABLED
+
 #include "/common/conditionals.glsl"
 #include "/common/light_source.glsl"
 #include "/common/inputs/camera.glsl"

@@ -10,29 +10,16 @@ const int LIGHT_TYPE_DIRECTIONAL = 1;
 const int LIGHT_TYPE_POINT = 2;
 const int LIGHT_TYPE_SPOT = 3;
 
-#define USE_LIGHT_SOURCE_UNIFORM_BUFFER 1
-
 struct ShadowData {
 	mat4 depthVP;
 	mat4 view;
 	mat4 projection;
 };
 
-#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 0
-
 layout(std430, LAYOUT_ID(RENDERER, LIGHT_BUFFERS)) readonly buffer LightBuffer { LightSourceData data[]; }
-lightBuffer;
-layout(std430, LAYOUT_ID(RENDERER, SHADOW_BUFFERS)) readonly buffer ShadowBuffer { ShadowData data[]; }
-shadowBuffer;
-
-#else
-
-layout(std140, LAYOUT_ID(RENDERER, LIGHT_BUFFERS)) uniform LightBuffer { LightSourceData data[MAX_SCENE_LIGHTS]; }
 lightBuffer;
 layout(std140, LAYOUT_ID(RENDERER, SHADOW_BUFFERS)) uniform ShadowBuffer { ShadowData data[MAX_ACTIVE_SHADOW_SOURCES]; }
 shadowBuffer;
-
-#endif
 
 LightSourceData get_light_source(uint i) { return lightBuffer.data[i]; }
 

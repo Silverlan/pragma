@@ -648,6 +648,8 @@ extern std::optional<uint32_t> g_launchParamHeight;
 extern std::optional<Color> g_titleBarColor;
 extern std::optional<Color> g_borderColor;
 extern bool g_windowless;
+extern bool g_forceSingleThreadedMode;
+extern bool g_waitIdleBetweenFrames;
 extern bool g_cpuRendering;
 void register_game_shaders();
 
@@ -737,6 +739,8 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	contextCreateInfo.width = 1280;
 	contextCreateInfo.height = 1024;
 	contextCreateInfo.windowless = g_windowless;
+	contextCreateInfo.forceSingleThreadedMode = g_forceSingleThreadedMode;
+	contextCreateInfo.waitIdleBetweenFrames = g_waitIdleBetweenFrames;
 	contextCreateInfo.enableDiagnostics = IsGfxDiagnosticsModeEnabled();
 
 	std::shared_ptr<udm::Data> renderApiData {};
@@ -1252,7 +1256,6 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 			}
 		}
 	}
-
 	return true;
 }
 

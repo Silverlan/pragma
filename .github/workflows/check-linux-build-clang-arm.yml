@@ -1,8 +1,7 @@
-name: Check Linux Build (Clang)
+name: Check Linux Build (Clang, ARM)
+# Note: This workflow is merely experimental. ARM is currently not supported.
 on:
-  push:
-    branches-ignore:
-      - main
+  workflow_dispatch:
 
 concurrency:
   group: check-build-lin-clang-${{ github.ref }}
@@ -20,10 +19,8 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - os: ubuntu-26.04
-            name: "Linux Ubuntu 26.04 (Clang)"
-          - os: ubuntu-24.04
-            name: "Linux Ubuntu 24.04 (Clang)"
+          - os: ubuntu-24.04-arm
+            name: "Linux Ubuntu 24.04 ARM (Clang)"
     steps:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@develop

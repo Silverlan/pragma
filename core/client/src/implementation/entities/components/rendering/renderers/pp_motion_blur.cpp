@@ -240,12 +240,12 @@ void CRendererPpMotionBlurComponent::DoUpdatePoses(const CMotionBlurDataComponen
 		auto it = motionBlurData.curModelMatrices.find(ent);
 
 		auto *animC = static_cast<CAnimatedComponent *>(ent->GetAnimatedComponent().get());
-		auto curBoneBuffer = animC ? animC->GetBoneBuffer() : nullptr;
+		/*auto curBoneBuffer = animC ? animC->GetCurrentFrameBoneBuffer() : nullptr;
 		if(curBoneBuffer) {
 			auto it = motionBlurData.prevModelMatrices.find(ent);
 			if(it != motionBlurData.prevModelMatrices.end()) {
 				auto &bufferDst = *it->second.boneBuffer;
-				auto &bufferSrc = const_cast<prosper::IBuffer &>(*curBoneBuffer);
+				auto &bufferSrc = *curBoneBuffer;
 				if(bufferDst.GetSize() >= bufferSrc.GetSize()) {
 					cmd.RecordBufferBarrier(bufferSrc, prosper::PipelineStageFlags::VertexShaderBit, prosper::PipelineStageFlags::TransferBit, prosper::AccessFlags::UniformReadBit, prosper::AccessFlags::TransferReadBit);
 					cmd.RecordBufferBarrier(bufferDst, prosper::PipelineStageFlags::VertexShaderBit, prosper::PipelineStageFlags::TransferBit, prosper::AccessFlags::UniformReadBit, prosper::AccessFlags::TransferWriteBit);
@@ -256,7 +256,7 @@ void CRendererPpMotionBlurComponent::DoUpdatePoses(const CMotionBlurDataComponen
 					cmd.RecordBufferBarrier(bufferDst, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::VertexShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::UniformReadBit);
 				}
 			}
-		}
+		}*/
 	}
 }
 void CRendererPpMotionBlurComponent::OnRemove()

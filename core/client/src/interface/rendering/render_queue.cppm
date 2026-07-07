@@ -84,6 +84,8 @@ export namespace pragma::rendering {
 		std::vector<RenderQueueItem> queue;
 		RenderQueueSortList sortedItemIndices;
 		std::vector<InstanceSet> instanceSets;
+		mutable std::mutex renderBufferUpdateMutex;
+		mutable bool renderBuffersUpdated = false;
 
 		void Lock();
 		void Unlock();

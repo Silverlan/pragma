@@ -153,7 +153,10 @@ static bool pcb_record_bind_descriptor_set(prosper::util::PreparedCommandBuffer 
 		  auto &pipelineLayout = recordState.userData.Get<prosper::IShaderPipelineLayout>(BIND_PIPELINE_LAYOUT);
 
 		  auto dynOffset = recordState.GetArgument<uint32_t>(1);
-		  return recordState.commandBuffer.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, pipelineLayout, recordState.GetArgument<uint32_t>(0), *descSet->GetDescriptorSet(), &dynOffset);
+		  auto *pOffset = &dynOffset;
+		  if(dynOffset == std::numeric_limits<uint32_t>::max()) // Special value indicating no offset
+			  pOffset = nullptr;
+		  return recordState.commandBuffer.RecordBindDescriptorSets(prosper::PipelineBindPoint::Graphics, pipelineLayout, recordState.GetArgument<uint32_t>(0), *descSet->GetDescriptorSet(), pOffset);
 	  },
 	  std::move(pragma::util::make_vector<PcbArg>(Lua::Vulkan::make_pcb_arg<uint32_t>(firstSet), Lua::Vulkan::make_pcb_arg<uint32_t>(dynamicOffset))));
 	return true;
@@ -506,8 +509,9 @@ bool Lua::Vulkan::VKCommandBuffer::RecordBindVertexBuffers(
 	  });
 	defPcb.def("RecordBindDescriptorSet", &pcb_record_bind_descriptor_set);
 	defPcb.def(
-	  "RecordBindDescriptorSet",
-	  +[](lua::State *l, prosper::util::PreparedCommandBuffer &pcb, const std::shared_ptr<prosper::IDescriptorSetGroup> &descSet, const PcbLuaArg &firstSet) -> bool { return pcb_record_bind_descriptor_set(pcb, descSet, firstSet, PcbLuaArg::CreateValue<uint32_t>(l, 0)); });
+	  "RecordBindDescriptorSet", +[](lua::State *l, prosper::util::PreparedCommandBuffer &pcb, const std::shared_ptr<prosper::IDescriptorSetGroup> &descSet, const PcbLuaArg &firstSet) -> bool {
+		  return pcb_record_bind_descriptor_set(pcb, descSet, firstSet, PcbLuaArg::CreateValue<uint32_t>(l, std::numeric_limits<uint32_t>::max()));
+	  });
 	defPcb.def(
 	  "RecordBindDescriptorSet",
 	  +[](lua::State *l, prosper::util::PreparedCommandBuffer &pcb, const std::shared_ptr<prosper::IDescriptorSetGroup> &descSet) -> bool { return pcb_record_bind_descriptor_set(pcb, descSet, PcbLuaArg::CreateValue<uint32_t>(l, 0), PcbLuaArg::CreateValue<uint32_t>(l, 0)); });

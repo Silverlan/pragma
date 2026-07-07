@@ -210,6 +210,16 @@ void pragma::CEngine::RegisterConsoleCommands()
 	  },
 	  console::ConVarFlags::None, "Prints statistics about the current GPU memory usage.");
 	conVarMap.RegisterConCommand(
+	  "debug_dump_buffer_memory_usage",
+	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  auto str = get_cengine()->GetRenderContext().DumpBufferMemoryUsage();
+		  if(!str)
+			  Con::COUT << "No data available!" << Con::endl;
+		  else
+			  Con::COUT << *str << Con::endl;
+	  },
+	  console::ConVarFlags::None, "Prints debug info about the current GPU buffer memory usage.");
+	conVarMap.RegisterConCommand(
 	  "debug_dump_shader_code",
 	  [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) {
 		  if(argv.empty()) {

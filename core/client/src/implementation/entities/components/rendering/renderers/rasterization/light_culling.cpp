@@ -14,6 +14,7 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const DrawSceneIn
 	auto &shaderSettings = get_client_state()->GetGameWorldShaderSettings();
 	if(drawSceneInfo.scene.expired() || shaderSettings.dynamicLightingEnabled == false)
 		return;
+	CLightComponent::UpdateDirtyLightBuffers();
 	auto &scene = *drawSceneInfo.scene;
 	auto &prepass = GetPrepass();
 	auto &drawCmd = drawSceneInfo.commandBuffer;
@@ -37,10 +38,10 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const DrawSceneIn
 		auto &fp = GetForwardPlusInstance();
 
 		// Camera buffer
-		drawCmd->RecordBufferBarrier(*scene.GetCurrentFrameCameraBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+		//drawCmd->RecordBufferBarrier(*scene.GetCurrentFrameCameraBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 		// Render settings buffer
-		drawCmd->RecordBufferBarrier(*scene.GetRenderSettingsBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+		//drawCmd->RecordBufferBarrier(*scene.GetRenderSettingsBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 		auto *worldEnv = scene.GetWorldEnvironment();
 		if(worldEnv && worldEnv->IsUnlit() == false) {
@@ -62,13 +63,13 @@ void pragma::CRasterizationRendererComponent::CullLightSources(const DrawSceneIn
 						continue;
 					m_visLightSources.push_back(l);
 
-					auto &renderBuffer = l->GetRenderBuffer();
-					if(renderBuffer) {
-						drawCmd->RecordBufferBarrier(*renderBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
-					}
-					auto &shadowBuffer = l->GetShadowBuffer();
-					if(shadowBuffer) {
-						drawCmd->RecordBufferBarrier(*shadowBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+					//auto &renderBuffer = l->GetRenderBuffer();
+					//if(renderBuffer) {
+					//	drawCmd->RecordBufferBarrier(*renderBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+					//}
+					auto shadowBufferIndex = l->GetShadowBufferIndex();
+					if(shadowBufferIndex) {
+						//drawCmd->RecordBufferBarrier(*shadowBuffer, prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit, prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 						// Determine light sources that should actually cast shadows
 						if(l->ShouldCastShadows()) {
@@ -118,12 +119,12 @@ void pragma::CRasterizationRendererComponent::RenderShadows(const DrawSceneInfo 
 	//pragma::get_cengine()->StartGPUTimer(GPUTimerEvent::Shadow); // TODO: Only for main scene // prosper TODO
 
 	// Entity instance buffer barrier
-	drawCmd->RecordBufferBarrier(*CRenderComponent::GetInstanceBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
-	  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
+	//drawCmd->RecordBufferBarrier(*CRenderComponent::GetInstanceBuffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit,
+	//  prosper::AccessFlags::TransferWriteBit, prosper::AccessFlags::ShaderReadBit);
 
 	// Entity bone buffer barrier
-	drawCmd->RecordBufferBarrier(*get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit,
-	  prosper::AccessFlags::ShaderReadBit);
+	//drawCmd->RecordBufferBarrier(*get_instance_bone_buffer(), prosper::PipelineStageFlags::TransferBit, prosper::PipelineStageFlags::FragmentShaderBit | prosper::PipelineStageFlags::VertexShaderBit | prosper::PipelineStageFlags::ComputeShaderBit, prosper::AccessFlags::TransferWriteBit,
+	//  prosper::AccessFlags::ShaderReadBit);
 
 	auto *worldEnv = scene.GetWorldEnvironment();
 	if(worldEnv && worldEnv->IsUnlit() == false && shaderSettings.dynamicShadowsEnabled) {

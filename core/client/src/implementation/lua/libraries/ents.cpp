@@ -58,6 +58,6 @@ int Lua::ents::Client::get_instance_buffer(lua::State *l)
 int Lua::ents::Client::get_instance_bone_buffer(lua::State *l)
 {
 	auto &instanceBuffer = pragma::get_instance_bone_buffer();
-	Lua::Push<std::shared_ptr<prosper::IBuffer>>(l, instanceBuffer);
+	Lua::Push<std::shared_ptr<prosper::IBuffer>>(l, instanceBuffer->GetBaseBuffer().shared_from_this());
 	return 1;
 }

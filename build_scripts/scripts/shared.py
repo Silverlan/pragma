@@ -872,6 +872,9 @@ def prefer_pacman():
 def prefer_dnf():
 	return shutil.which("dnf") is not None
 
+def prefer_xbps():
+	return shutil.which("xbps-install") is not None
+
 def apply_patch(path_path: str):
 	print_msg("Applying patch '{path_path}'...")
 	subprocess.run(["git","apply",path_path],check=False)

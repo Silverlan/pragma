@@ -473,10 +473,10 @@ void pragma::pts::CParticleRendererBlob::RecordRender(prosper::ICommandBuffer &d
 	auto layout = get_cengine()->GetRenderContext().GetShaderPipelineLayout(*shader, *pipelineIdx);
 	assert(layout != nullptr);
 	auto *dsScene = scene.GetCameraDescriptorSetGraphics();
-	auto *dsRenderer = renderer.GetRendererDescriptorSet();
+	auto *dsgRenderer = renderer.GetRendererDescriptorSetGroup();
 	auto &dsRenderSettings = get_cgame()->GetCurrentFrameGlobalRenderSettingsDescriptorSet();
 	auto *dsShadows = CShadowComponent::GetDescriptorSet();
-	shader->RecordBindScene(bindState.commandBuffer, *layout, scene, renderer, *dsScene, *dsRenderer, dsRenderSettings, *dsShadows);
+	shader->RecordBindScene(bindState.commandBuffer, *layout, scene, renderer, *dsScene, dsgRenderer->GetCurrentDescriptorSet(), dsRenderSettings, *dsShadows);
 	shader->RecordDraw(bindState, scene, renderer, *m_particleSystem, m_particleSystem->GetOrientationType(), renderFlags, blobIndexBuffer, *s_dsParticles->GetDescriptorSet(), m_particleSystem->GetParticleBuffer()->GetStartOffset());
 	shader->RecordEndDraw(bindState);
 }

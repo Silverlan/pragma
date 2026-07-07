@@ -6,8 +6,6 @@ module;
 
 module pragma.shared;
 
-#define DLLSPEC_ISTEAMWORKS DLLNETWORK
-
 import :network_state;
 
 pragma::console::ConVarHandle pragma::NetworkState::GetConVarHandle(string::StringMap<std::shared_ptr<console::PtrConVar>> &ptrs, std::string_view scvar) { return CVarHandler::GetConVarHandle(ptrs, scvar); }
@@ -344,6 +342,7 @@ pragma::console::CVarHandler::SetConVarResult pragma::NetworkState::SetConVar(st
 	if(cv->GetType() != console::ConType::Var)
 		return result;
 	auto *cvar = static_cast<console::ConVar *>(cv);
+	result.conVar = cvar;
 	auto prev = cvar->GetString();
 	if(bApplyIfEqual == false && prev == value)
 		return result;

@@ -19,8 +19,10 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - os: ubuntu-latest
-            name: "Linux (GCC)"
+          - os: ubuntu-26.04
+            name: "Linux Ubuntu 26.04 (GCC)"
+          - os: ubuntu-24.04
+            name: "Linux Ubuntu 24.04 (GCC)"
     steps:
       - name: Setup Pragma
         uses: Silverlan/pragma/github_actions/setup@develop

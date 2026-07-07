@@ -104,13 +104,14 @@ CRasterizationRendererComponent::CRasterizationRendererComponent(ecs::BaseEntity
 	bufCreateInfo.size = sizeof(m_rendererData);
 	bufCreateInfo.memoryFeatures = prosper::MemoryFeatureFlags::DeviceLocal;
 	bufCreateInfo.usageFlags = prosper::BufferUsageFlags::UniformBufferBit;
-	m_rendererBuffer = get_cengine()->GetRenderContext().CreateBuffer(bufCreateInfo, &m_rendererData);
+	auto &context = get_cengine()->GetRenderContext();
+	m_rendererBuffer = context.CreateBuffer(bufCreateInfo, &m_rendererData);
 
 	auto *shaderPbr = static_cast<ShaderPBR *>(get_cengine()->GetShader("pbr").get());
 	assert(shaderPbr);
 	if(shaderPbr) {
-		m_descSetGroupRenderer = shaderPbr->CreateDescriptorSetGroup(ShaderPBR::DESCRIPTOR_SET_RENDERER.setIndex);
-		m_descSetGroupRenderer->GetDescriptorSet()->SetBindingUniformBuffer(*m_rendererBuffer, math::to_integral(ShaderScene::RendererBinding::Renderer));
+		m_descSetGroupRenderer = context.CreateSwapDescriptorSetGroup(ShaderPBR::DESCRIPTOR_SET_RENDERER, {"renderer"});
+		m_descSetGroupRenderer->SetBindingUniformBuffer(*m_rendererBuffer, math::to_integral(ShaderScene::RendererBinding::Renderer));
 	}
 
 	InitializeLightDescriptorSets();
@@ -172,9 +173,11 @@ void CRasterizationRendererComponent::UpdateRendererBuffer(std::shared_ptr<prosp
 }
 
 prosper::IDescriptorSet *CRasterizationRendererComponent::GetDepthDescriptorSet() const { return (m_hdrInfo.dsgSceneDepth != nullptr) ? m_hdrInfo.dsgSceneDepth->GetDescriptorSet() : nullptr; }
-prosper::IDescriptorSet *CRasterizationRendererComponent::GetRendererDescriptorSet() const { return m_descSetGroupRenderer->GetDescriptorSet(); }
+prosper::SwapDescriptorSetGroup *CRasterizationRendererComponent::GetRendererDescriptorSetGroup() const { return m_descSetGroupRenderer.get(); }
+prosper::IDescriptorSet *CRasterizationRendererComponent::GetCurrentFrameRendererDescriptorSet() const { return m_descSetGroupRenderer ? &m_descSetGroupRenderer->GetCurrentDescriptorSet() : nullptr; }
 
-prosper::IDescriptorSet *CRasterizationRendererComponent::GetLightSourceDescriptorSetCompute() const { return m_dsgLightsCompute->GetDescriptorSet(); }
+prosper::SwapDescriptorSetGroup *CRasterizationRendererComponent::GetLightSourceDescriptorSetGroupCompute() const { return m_dsgLightsCompute.get(); }
+prosper::IDescriptorSet *CRasterizationRendererComponent::GetCurrentFrameLightSourceDescriptorSetCompute() const { return m_dsgLightsCompute ? &m_dsgLightsCompute->GetCurrentDescriptorSet() : nullptr; }
 
 void CRasterizationRendererComponent::InitializeCommandBufferGroups()
 {
@@ -193,39 +196,29 @@ void CRasterizationRendererComponent::InitializeLightDescriptorSets()
 	if(ShaderGameWorldLightingPass::DESCRIPTOR_SET_RENDERER.IsValid()) {
 		auto &bufLightSources = CLightComponent::GetGlobalRenderBuffer();
 		auto &bufShadowData = CLightComponent::GetGlobalShadowBuffer();
-		auto &ds = *GetRendererDescriptorSet();
-#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
-		ds.SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), math::to_integral(ShaderGameWorldLightingPass::RendererBinding::LightBuffers));
-		ds.SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), math::to_integral(ShaderGameWorldLightingPass::RendererBinding::ShadowData));
-#else
-		ds.SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::RendererBinding::LightBuffers));
-		ds.SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), pragma::math::to_integral(pragma::ShaderGameWorldLightingPass::RendererBinding::ShadowData));
-#endif
+		auto &dsg = *GetRendererDescriptorSetGroup();
+		dsg.SetBindingStorageBuffer(bufLightSources, math::to_integral(ShaderGameWorldLightingPass::RendererBinding::LightBuffers));
+		dsg.SetBindingUniformBuffer(bufShadowData, math::to_integral(ShaderGameWorldLightingPass::RendererBinding::ShadowData));
 
-		m_dsgLightsCompute = get_cengine()->GetRenderContext().CreateDescriptorSetGroup(ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS);
-#if USE_LIGHT_SOURCE_UNIFORM_BUFFER == 1
-		m_dsgLightsCompute->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), math::to_integral(ShaderForwardPLightCulling::LightBinding::LightBuffers));
-		m_dsgLightsCompute->GetDescriptorSet()->SetBindingUniformBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), math::to_integral(ShaderForwardPLightCulling::LightBinding::ShadowData));
-#else
-		m_dsgLightsCompute->GetDescriptorSet()->SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufLightSources), pragma::math::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::LightBuffers));
-		m_dsgLightsCompute->GetDescriptorSet()->SetBindingStorageBuffer(const_cast<prosper::IUniformResizableBuffer &>(bufShadowData), pragma::math::to_integral(pragma::ShaderForwardPLightCulling::LightBinding::ShadowData));
-#endif
+		auto &context = get_cengine()->GetRenderContext();
+		m_dsgLightsCompute = context.CreateSwapDescriptorSetGroup(ShaderForwardPLightCulling::DESCRIPTOR_SET_LIGHTS, {"forwardp_light_culling_lights"});
+		m_dsgLightsCompute->SetBindingStorageBuffer(bufLightSources, math::to_integral(ShaderForwardPLightCulling::LightBinding::LightBuffers));
+		m_dsgLightsCompute->SetBindingUniformBuffer(bufShadowData, math::to_integral(ShaderForwardPLightCulling::LightBinding::ShadowData));
 	}
 }
 
 void CRasterizationRendererComponent::UpdateCSMDescriptorSet(BaseEnvLightDirectionalComponent &lightSource)
 {
-	auto *dsLights = GetRendererDescriptorSet();
-	if(dsLights == nullptr)
+	auto *dsgLights = GetRendererDescriptorSetGroup();
+	if(dsgLights == nullptr)
 		return;
 	auto *pShadowMap = static_cast<CLightDirectionalComponent &>(lightSource).GetShadowMap();
 	auto texture = pShadowMap ? pShadowMap->GetDepthTexture() : nullptr;
 	if(texture == nullptr)
 		return;
 	auto numLayers = pShadowMap->GetLayerCount();
-	for(auto i = decltype(numLayers) {0}; i < numLayers; ++i) {
-		dsLights->SetBindingArrayTexture(*texture, math::to_integral(ShaderSceneLit::RendererBinding::CSM), i, i);
-	}
+	for(auto i = decltype(numLayers) {0}; i < numLayers; ++i)
+		dsgLights->SetBindingArrayTexture(*texture, math::to_integral(ShaderSceneLit::RendererBinding::CSM), i, i);
 }
 
 void CRasterizationRendererComponent::SetFogOverride(const std::shared_ptr<prosper::IDescriptorSetGroup> &descSetGroup) { m_descSetGroupFogOverride = descSetGroup; }
@@ -256,14 +249,14 @@ bool CRasterizationRendererComponent::ReloadRenderTarget(uint32_t width, uint32_
 		if(ssaoBlurTexResolved->IsMSAATexture())
 			ssaoBlurTexResolved = static_cast<prosper::MSAATexture *>(ssaoBlurTexResolved)->GetResolvedTexture().get();
 
-		auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
-		ds.SetBindingTexture(*ssaoBlurTexResolved, math::to_integral(ShaderScene::RendererBinding::SSAOMap));
+		auto &dsg = *m_descSetGroupRenderer;
+		dsg.SetBindingTexture(*ssaoBlurTexResolved, math::to_integral(ShaderScene::RendererBinding::SSAOMap));
 	}
 	auto &dummyTex = get_cengine()->GetRenderContext().GetDummyTexture();
-	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
-	ds.SetBindingTexture(*dummyTex, math::to_integral(ShaderScene::RendererBinding::LightMapDiffuse));
-	ds.SetBindingTexture(*dummyTex, math::to_integral(ShaderScene::RendererBinding::LightMapDiffuseIndirect));
-	ds.SetBindingTexture(*dummyTex, math::to_integral(ShaderScene::RendererBinding::LightMapDominantDirection));
+	auto &dsg = *m_descSetGroupRenderer;
+	dsg.SetBindingTexture(*dummyTex, math::to_integral(ShaderScene::RendererBinding::LightMapDiffuse));
+	dsg.SetBindingTexture(*dummyTex, math::to_integral(ShaderScene::RendererBinding::LightMapDiffuseIndirect));
+	dsg.SetBindingTexture(*dummyTex, math::to_integral(ShaderScene::RendererBinding::LightMapDominantDirection));
 
 	m_lightMapInfo.lightMapTexture = nullptr;
 	if(g_lightmapC.expired() == false)
@@ -476,13 +469,13 @@ void CRasterizationRendererComponent::SetLightMap(CLightMapComponent &lightMapC)
 		CLightMapComponent::LOGGER.warn("Lightmap component has no light map texture!");
 		return;
 	}
-	auto &ds = *m_descSetGroupRenderer->GetDescriptorSet();
+	auto &dsg = *m_descSetGroupRenderer;
 
 	auto &dummyTex = get_cengine()->GetRenderContext().GetDummyTexture();
 	auto getTex = [&dummyTex](const std::shared_ptr<prosper::Texture> &tex) { return tex ? tex : dummyTex; };
-	ds.SetBindingTexture(*getTex(m_lightMapInfo.lightMapTexture), math::to_integral(ShaderScene::RendererBinding::LightMapDiffuse));
-	ds.SetBindingTexture(*getTex(m_lightMapInfo.lightMapIndirectTexture), math::to_integral(ShaderScene::RendererBinding::LightMapDiffuseIndirect));
-	ds.SetBindingTexture(*getTex(m_lightMapInfo.lightMapDominantDirectionTexture), math::to_integral(ShaderScene::RendererBinding::LightMapDominantDirection));
+	dsg.SetBindingTexture(*getTex(m_lightMapInfo.lightMapTexture), math::to_integral(ShaderScene::RendererBinding::LightMapDiffuse));
+	dsg.SetBindingTexture(*getTex(m_lightMapInfo.lightMapIndirectTexture), math::to_integral(ShaderScene::RendererBinding::LightMapDiffuseIndirect));
+	dsg.SetBindingTexture(*getTex(m_lightMapInfo.lightMapDominantDirectionTexture), math::to_integral(ShaderScene::RendererBinding::LightMapDominantDirection));
 }
 const ComponentHandle<CLightMapComponent> &CRasterizationRendererComponent::GetLightMap() const { return m_lightMapInfo.lightMapComponent; }
 bool CRasterizationRendererComponent::HasIndirectLightmap() const { return m_lightMapInfo.lightMapIndirectTexture != nullptr; }

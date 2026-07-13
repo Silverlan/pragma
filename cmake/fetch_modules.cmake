@@ -56,7 +56,7 @@ if(PRAGMA_WITH_VR)
 endif()
 
 if(PRAGMA_WITH_NETWORKING)
-    pr_fetch_module("pr_steam_networking_sockets" "https://github.com/Silverlan/pr_steam_networking_sockets.git" "6a0d9072748b21912ae6e7743544f5f85502e4ec")
+    pr_fetch_module("pr_steam_networking_sockets" "https://github.com/Silverlan/pr_steam_networking_sockets.git" "584e4190b345d89bf69b8bc89b85f49f3e0b7864")
 endif()
 
 foreach(MODULE_NAME ${PRAGMA_ADDITIONAL_MODULES})

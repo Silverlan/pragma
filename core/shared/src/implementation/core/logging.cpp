@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: MIT
 module;
 
+#include "spdlog/sinks/basic_file_sink.h"
+
 module pragma.shared;
 
 import :console.enums;
@@ -236,7 +238,7 @@ std::optional<std::string> pragma::detail::get_log_file_name() { return g_logFil
 void pragma::detail::close_logger()
 {
 	static auto loggerClosed = false;
-	if (loggerClosed)
+	if(loggerClosed)
 		return;
 	loggerClosed = true;
 
@@ -437,23 +439,28 @@ void pragma::detail::initialize_logger(util::LogSeverity conLogLevel, util::LogS
 	sinks.push_back(consoleSink);
 	if(logFile.has_value()) {
 		auto fullLogFilePath = util::FilePath(fs::get_program_write_path(), *logFile);
-		auto fileSink = pragma::util::make_shared<spdlog::sinks::basic_file_sink_mt>(fullLogFilePath.GetString(), true);
-		fileSink->set_level(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(fileLogLevel)));
-		auto formatter = std::make_unique<spdlog::pattern_formatter>();
-		formatter->add_flag<short_level_formatter_c>('q');
-		formatter->add_flag<color_reset_formatter>('Q');
-		formatter->add_flag<color_formatter>('w');
-		formatter->add_flag<category_name_formatter>('j');
-		formatter->set_pattern("[%H:%M:%S.%e] [%^%q%$] %j%w%v%Q");
-		fileSink->set_formatter(std::move(formatter));
+		try {
+			auto fileSink = util::make_shared<spdlog::sinks::basic_file_sink_mt>(fullLogFilePath.GetString(), true);
+			fileSink->set_level(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(fileLogLevel)));
+			auto formatter = std::make_unique<spdlog::pattern_formatter>();
+			formatter->add_flag<short_level_formatter_c>('q');
+			formatter->add_flag<color_reset_formatter>('Q');
+			formatter->add_flag<color_formatter>('w');
+			formatter->add_flag<category_name_formatter>('j');
+			formatter->set_pattern("[%H:%M:%S.%e] [%^%q%$] %j%w%v%Q");
+			fileSink->set_formatter(std::move(formatter));
 
-		sinks.push_back(fileSink);
+			sinks.push_back(fileSink);
 
-		// We want to log all regular console output to file, so we'll create an additional logger to handle that
-		auto conFileLogger = pragma::util::make_shared<spdlog::logger>(PRAGMA_FILE_LOGGER_NAME, spdlog::sinks_init_list {fileSink});
-		conFileLogger->set_level(spdlog::level::trace); // Always log all regular console output to file
-		logging::detail::set_should_log_output(true);
-		logging::detail::consoleOutputLogger = conFileLogger;
+			// We want to log all regular console output to file, so we'll create an additional logger to handle that
+			auto conFileLogger = pragma::util::make_shared<spdlog::logger>(PRAGMA_FILE_LOGGER_NAME, spdlog::sinks_init_list {fileSink});
+			conFileLogger->set_level(spdlog::level::trace); // Always log all regular console output to file
+			logging::detail::set_should_log_output(true);
+			logging::detail::consoleOutputLogger = conFileLogger;
+		}
+		catch(const spdlog::spdlog_ex &err) {
+			std::cerr << "Failed to create file logger: " << err.what() << std::endl;
+		}
 	}
 
 	auto logger = pragma::util::make_shared<spdlog::logger>(PRAGMA_LOGGER_NAME, sinks.begin(), sinks.end());

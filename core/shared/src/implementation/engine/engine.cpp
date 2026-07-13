@@ -684,17 +684,22 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	if(g_lpSandboxed)
 		SetSandboxed(true);
 
-	detail::initialize_logger(g_lpLogLevelCon, g_lpLogLevelFile, g_lpLogFile);
-	spdlog::info("Engine Version: {}", get_pretty_engine_version());
-
 	// Initialize file system
 	{
 		if(!g_lpUserDataDir.empty()) {
-			spdlog::debug("Using user-data directory '{}'...", g_lpUserDataDir);
+			// std::cout << "Using user-data directory " << g_lpUserDataDir << std::endl;
 			fs::set_absolute_root_path(g_lpUserDataDir, 0 /* priority */);
 		}
 		else
 			fs::set_absolute_root_path(util::get_program_path());
+
+		// Logger has to be initialized *after* user-data directory has been specified, otherwise it
+		// may try (and fail) to write into read-only directory.
+		detail::initialize_logger(g_lpLogLevelCon, g_lpLogLevelFile, g_lpLogFile);
+		spdlog::info("Engine Version: {}", get_pretty_engine_version());
+
+		if(!g_lpUserDataDir.empty())
+			spdlog::debug("Using user-data directory '{}'...", g_lpUserDataDir);
 
 		// TODO: File cache doesn't work with absolute paths at the moment
 		// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)

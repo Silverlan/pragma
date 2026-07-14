@@ -85,9 +85,9 @@ def main():
     existing_ld_path = os.environ.get("LD_LIBRARY_PATH", "")
 
     if existing_ld_path:
-        os.environ["LD_LIBRARY_PATH"] = f"{appdir_lib_path}:{existing_ld_path}"
+        os.environ["LD_LIBRARY_PATH"] = f"{ld_path_string}:{existing_ld_path}"
     else:
-        os.environ["LD_LIBRARY_PATH"] = appdir_lib_path
+        os.environ["LD_LIBRARY_PATH"] = ld_path_string
 
     if no_strip:
         os.environ["NO_STRIP"] = "1"

@@ -7,6 +7,10 @@ case "$1" in
         shift
         exec "$CUR_DIR/usr/bin/pragma" -user_data_dir "~/.local/share/pfm" "$@"
         ;;
+    pragma_server)
+        shift
+        exec "$CUR_DIR/usr/bin/pragma_server" -user_data_dir "~/.local/share/pfm" "$@"
+        ;;
     prad)
         shift
         exec "$CUR_DIR/usr/bin/lib/prad" "$@"

@@ -99,16 +99,16 @@ set(ENABLE_TESTS OFF CACHE BOOL OFF FORCE)
 set(ENABLE_DOCS OFF CACHE BOOL OFF FORCE)
 
 # Misc
-pr_fetch_third_party_repository("bvh"                 "https://github.com/madmann91/bvh"                    "ac41ab8")
-pr_fetch_third_party_repository("exprtk"              "https://github.com/ArashPartow/exprtk"               "f46bffcd6966d38a09023fb37ba9335214c9b959")
+pr_fetch_third_party_repository("bvh"                 "https://github.com/madmann91/bvh"                    "5a9d759c51d9028130b5f25733e2b4b2dc67718b") # Last updated: 26-07-14
+pr_fetch_third_party_repository("exprtk"              "https://github.com/ArashPartow/exprtk"               "66883f0ddb034371ef38f2799f772c05bc904571") # Last updated: 26-07-14
 pr_fetch_third_party_repository("miniball"            "https://github.com/Silverlan/miniball"               "609fbf16e7a9cc3dc8f88e4d1c7a1d8ead842bb1")
 
 if(WIN32)
-    pr_fetch_third_party_repository("nvtt"            "https://github.com/castano/nvidia-texture-tools"     "aeddd65f81d36d8cb7b169b469ef25156666077e")
+    pr_fetch_third_party_repository("nvtt"            "https://github.com/castano/nvidia-texture-tools"     "aeddd65f81d36d8cb7b169b469ef25156666077e") # archived in 2020-12-31
 endif()
 
 pr_fetch_third_party_repository("spdlog"              "https://github.com/Silverlan/spdlog"                 "d1ebfb9")                                  # Branch: "v1.x"
-pr_fetch_third_party_repository("squish"              "https://github.com/ivan-kulikov-dev/squish"          "aeb01b8f88f97c994baff8453870f3e8a347afd7")
+pr_fetch_third_party_repository("squish"              "https://github.com/ivan-kulikov-dev/squish"          "aeb01b8f88f97c994baff8453870f3e8a347afd7") # unmaintained since 2020-05-22
 
 # Luabind
 set(BUILD_SHARED_LIBS
@@ -133,7 +133,7 @@ set(VERBOSE
 set(EFSW_INSTALL
     OFF
     CACHE BOOL OFF FORCE)
-pr_fetch_third_party_lib("efsw" INC "efsw" "https://github.com/SpartanJ/efsw" "1bb814c")
+pr_fetch_third_party_lib("efsw" INC "efsw" "https://github.com/SpartanJ/efsw" "3535c3a382c505d8b9dae4b59061ac3ff94470fb") # v1.6.3,  Last updated: 26-07-14
 pr_set_target_folder(efsw third_party_libs)
 #
 
@@ -214,7 +214,7 @@ pr_set_target_folder(poly2tri-static third_party_libs/clip2tri)
 # BUG: M_LIBRARY is not restored to previous value breaking anything using it.
 
 # eigen
-pr_fetch_third_party_repository("eigen" "https://gitlab.com/libeigen/eigen.git" "b66188b5") # v3.4.1
+pr_fetch_third_party_repository("eigen" "https://gitlab.com/libeigen/eigen.git" "bc3b39870ecb690a623a3f49149a358b95c5781d") # v5.0.1, Last updated: 26-07-14
 #
 
 # glfw
@@ -244,7 +244,7 @@ pr_set_target_folder(glfw third_party_libs/glfw)
 #
 
 # libogg
-pr_fetch_third_party_lib("ogg" "https://github.com/xiph/ogg" "be05b13") # v1.3.6
+pr_fetch_third_party_lib("ogg" "https://github.com/xiph/ogg" "06a5e0262cdc28aa4ae6797627a783b5010440f0") # Last updated: 26-07-14
 pr_set_target_folder(ogg third_party_libs)
 set(OGG_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/third_party_libs/ogg/include" CACHE STRING "" FORCE)
 set(OGG_LIBRARIES "$<TARGET_LINKER_FILE:ogg>" CACHE STRING "" FORCE)
@@ -252,7 +252,7 @@ target_include_directories(ogg INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINA
 #
 
 # libvorbis
-pr_fetch_third_party_lib("vorbis" TARGET vorbis "https://github.com/xiph/vorbis" "43bbff0141028e58d476c1d5fd45dd5573db576d")
+pr_fetch_third_party_lib("vorbis" TARGET vorbis "https://github.com/xiph/vorbis" "e3c9861ff096d52378e131ff8c334552e09cdffa") # Last updated: 26-07-14
 pr_fetch_third_party_lib(TARGET vorbisfile)
 pr_set_target_folder(vorbis third_party_libs/vorbis)
 pr_set_target_folder(vorbisenc third_party_libs/vorbis)
@@ -299,7 +299,7 @@ pr_find_library(libnoiseutils NAMES "noiseutils-static" PATHS "third_party_libs/
 #
 
 # lunasvg
-pr_fetch_third_party_lib("lunasvg" "https://github.com/sammycage/lunasvg" "7b6970f") # Branch: v3.4.0
+pr_fetch_third_party_lib("lunasvg" "https://github.com/sammycage/lunasvg" "2872affa1027cad92a05408a7e6f2547efa7f364") # Last updated: 26-07-14
 pr_set_target_folder(lunasvg third_party_libs/lunasvg)
 pr_set_target_folder(plutovg third_party_libs/lunasvg)
 pr_set_target_folder(smiley third_party_libs/lunasvg)
@@ -310,7 +310,7 @@ pr_set_target_folder(svg2png third_party_libs/lunasvg)
 set(BUILD_SHARED_LIBS
     OFF
     CACHE BOOL OFF FORCE)
-pr_fetch_third_party_lib("libsamplerate" TARGET samplerate INC "libsamplerate/src" "https://github.com/libsndfile/libsamplerate" "15c392d")
+pr_fetch_third_party_lib("libsamplerate" TARGET samplerate INC "libsamplerate/src" "https://github.com/libsndfile/libsamplerate" "2ccde9568cca73c7b32c97fefca2e418c16ae5e3") # Last updated: 26-07-14
 set(BUILD_SHARED_LIBS
     ON
     CACHE BOOL ON FORCE)
@@ -369,7 +369,7 @@ set(RECASTNAVIGATION_TESTS
 set(BUILD_SHARED_LIBS
     OFF
     CACHE BOOL OFF FORCE)
-pr_fetch_third_party_lib("recastnavigation" TARGET Recast INC "recastnavigation/Recast/Include" "https://github.com/recastnavigation/recastnavigation" "1078bfe346d9bb560faa748c8fde2e7aae73a3ab") # Trunk
+pr_fetch_third_party_lib("recastnavigation" TARGET Recast INC "recastnavigation/Recast/Include" "https://github.com/recastnavigation/recastnavigation" "9f4ce64458dfae86e1239c525ddc219c4e9e06f1") # Trunk, Last updated: 26-07-14
 pr_fetch_third_party_lib(TARGET Detour INC "recastnavigation/Detour/Include")
 set(BUILD_SHARED_LIBS
     ON
@@ -391,7 +391,7 @@ pr_find_library(rectanglebinpack NAMES "rectangle_bin_pack" PATHS "${rectangle_b
 #
 
 # RapidXml
-pr_fetch_third_party_repository("rapidxml" "https://github.com/discord/rapidxml" "2ae4b2888165a393dfb6382168825fddf00c27b9")
+pr_fetch_third_party_repository("rapidxml" "https://github.com/discord/rapidxml" "2ae4b2888165a393dfb6382168825fddf00c27b9") # unmaintained since 2016-06-16
 pr_set_include_path(rapidxml "${CMAKE_SOURCE_DIR}/third_party_libs/rapidxml")
 #
 
@@ -410,7 +410,7 @@ pr_set_target_folder(OpenFBX third_party_libs)
 set(BUILD_SHARED_LIBS
     OFF
     CACHE BOOL OFF FORCE)
-pr_fetch_third_party_lib("tinygltf" "https://github.com/syoyo/tinygltf" "37250b3") # v2.9.6 Branch: "release"
+pr_fetch_third_party_lib("tinygltf" "https://github.com/syoyo/tinygltf" "a434ee02066c2d9b62a3504876aed38e6e399fe0") # Branch: "release", Last updated: 26-07-14
 set(BUILD_SHARED_LIBS
     ON
     CACHE BOOL ON FORCE)
@@ -418,5 +418,6 @@ set(BUILD_SHARED_LIBS
 
 # mimalloc
 if(PRAGMA_WITH_MIMALLOC)
-    pr_fetch_third_party_lib("mimalloc" "https://github.com/microsoft/mimalloc.git" "75d69f4ab736ad9f56cdd76c7eb883f60ac48869")
+    # Last updated: 26-07-14
+    pr_fetch_third_party_lib("mimalloc" "https://github.com/microsoft/mimalloc.git" "fef6b0dd70f9d7fa0750b0d0b9fbb471203b94cd") # Last updated: 26-07-14
 endif()

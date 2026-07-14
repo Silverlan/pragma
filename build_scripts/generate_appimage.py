@@ -64,10 +64,8 @@ def main():
                 extra_execs.extend(["-e", str(file)])
 
     # Executables
-    extra_execs.extend(
-        ["-e", appimage_data_path / "usr/bin/modules/chromium/pr_chromium_subprocess"],
-        ["-e", appimage_data_path / "usr/bin/modules/chromium/chrome-sandbox"]
-    )
+    extra_execs.extend(["-e", appimage_data_path / "usr/bin/modules/chromium/pr_chromium_subprocess"])
+    extra_execs.extend(["-e", appimage_data_path / "usr/bin/modules/chromium/chrome-sandbox"])
 
     appdir_lib_path = str(appimage_data_path / "usr/bin/lib")
     existing_ld_path = os.environ.get("LD_LIBRARY_PATH", "")

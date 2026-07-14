@@ -239,7 +239,7 @@ else()
         "glfw"
         CACHE INTERNAL "" FORCE)
 endif()
-pr_fetch_third_party_lib("glfw" "https://github.com/Silverlan/glfw" "8d6f5d9bc8477057dccc1190d46b0945219e2f33") # Branch: "feat/drag-callback"
+pr_fetch_third_party_lib("glfw" "https://github.com/Silverlan/glfw" "9a646acc5f01461bb34fbc918d7e27dbf2422cd2") # Branch: "feat/drag-callback"
 pr_set_target_folder(glfw third_party_libs/glfw)
 #
 

@@ -133,7 +133,7 @@ set(VERBOSE
 set(EFSW_INSTALL
     OFF
     CACHE BOOL OFF FORCE)
-pr_fetch_third_party_lib("efsw" INC "efsw" "https://github.com/SpartanJ/efsw" "1bb814c")
+pr_fetch_third_party_lib("efsw" INC "efsw" "https://github.com/SpartanJ/efsw" "3535c3a382c505d8b9dae4b59061ac3ff94470fb")
 pr_set_target_folder(efsw third_party_libs)
 #
 

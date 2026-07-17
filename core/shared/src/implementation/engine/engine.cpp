@@ -73,12 +73,6 @@ static pragma::Engine *g_engine = nullptr;
 
 pragma::Engine *pragma::Engine::Get() { return g_engine; }
 
-extern std::optional<std::string> g_lpLogFile;
-extern pragma::util::LogSeverity g_lpLogLevelCon;
-extern pragma::util::LogSeverity g_lpLogLevelFile;
-extern bool g_lpManagedByPackageManager;
-extern bool g_lpSandboxed;
-
 pragma::Engine::Engine(int argc, char *argv[]) : CVarHandler(), m_logFile(nullptr), m_tickRate(DEFAULT_TICK_RATE), m_stateFlags {StateFlags::Running | StateFlags::MultiThreadedAssetLoadingEnabled}
 {
 	g_engine = this;
@@ -672,47 +666,52 @@ bool pragma::Engine::IsCLIOnly() const { return math::is_flag_set(m_stateFlags, 
 
 void pragma::Engine::Release() { Close(); }
 
-extern std::string g_lpUserDataDir;
-extern std::vector<std::string> g_lpResourceDirs;
-
 bool pragma::Engine::Initialize(int argc, char *argv[])
 {
 	InitLaunchOptions(argc, argv);
 
-	if(g_lpManagedByPackageManager)
+	auto packageManager = m_launchSettings.Get<udm::Boolean>("managed_by_package_manager", false);
+	if(packageManager)
 		SetManagedByPackageManager(true);
-	if(g_lpSandboxed)
+
+	auto sandboxed = m_launchSettings.Get<udm::Boolean>("sandboxed", false);
+	if(sandboxed)
 		SetSandboxed(true);
 
 	// Initialize file system
 	{
-		if(!g_lpUserDataDir.empty()) {
-			// std::cout << "Using user-data directory " << g_lpUserDataDir << std::endl;
-			fs::set_absolute_root_path(g_lpUserDataDir, 0 /* priority */);
-		}
-		else
-			fs::set_absolute_root_path(util::get_program_path());
+		auto userDataDir = m_launchSettings.Get<udm::String>("user_data_dir");
+		auto hasUserDataDir = userDataDir && !userDataDir->empty();
+		fs::set_absolute_root_path(util::get_user_data_dir().GetString(), hasUserDataDir ? 0 : -1);
 
 		// Logger has to be initialized *after* user-data directory has been specified, otherwise it
 		// may try (and fail) to write into read-only directory.
-		detail::initialize_logger(g_lpLogLevelCon, g_lpLogLevelFile, g_lpLogFile);
+		auto logFile = m_launchSettings.Get<udm::String>("log_file");
+		if(logFile) {
+			auto logLevelCon = m_launchSettings.Get<util::LogSeverity>("log_level_console");
+			auto logLevelFile = m_launchSettings.Get<util::LogSeverity>("log_level_file");
+			if(logLevelCon && logLevelFile)
+				detail::initialize_logger(*logLevelCon, *logLevelFile, *logFile);
+		}
 		spdlog::info("Engine Version: {}", get_pretty_engine_version());
 
-		if(!g_lpUserDataDir.empty())
-			spdlog::debug("Using user-data directory '{}'...", g_lpUserDataDir);
+		if(hasUserDataDir)
+			spdlog::debug("Using user-data directory '{}'...", *userDataDir);
 
 		// TODO: File cache doesn't work with absolute paths at the moment
 		// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
 		fs::set_use_file_index_cache(true);
 
-		if(!g_lpUserDataDir.empty()) {
+		if(hasUserDataDir) {
 			// If we're using a custom user-data directory, we have to add the program path as an additional mount directory
 			fs::add_secondary_absolute_read_only_root_path("core", util::get_program_path());
 		}
+
+		auto resourcesDirs = util::get_resource_dirs();
 		size_t resDirIdx = 1;
-		for(auto &resourceDir : g_lpResourceDirs) {
-			spdlog::debug("Adding read-only resource directory '{}'...", resourceDir);
-			fs::add_secondary_absolute_read_only_root_path("resource" + util::to_string(resDirIdx), resourceDir, resDirIdx /* priority */);
+		for(auto &resourceDir : resourcesDirs) {
+			spdlog::debug("Adding read-only resource directory '{}'...", resourceDir.GetString());
+			fs::add_secondary_absolute_read_only_root_path("resource" + util::to_string(resDirIdx), resourceDir.GetString(), resDirIdx /* priority */);
 			++resDirIdx;
 		}
 	}
@@ -988,19 +987,20 @@ std::optional<uint64_t> pragma::Engine::GetServerSteamId() const
 static auto cvRemoteDebugging = pragma::console::get_con_var("sh_lua_remote_debugging");
 int32_t pragma::Engine::GetRemoteDebugging() const { return cvRemoteDebugging->GetInt(); }
 
-extern std::string __lp_map;
-extern std::string __lp_gamemode;
 static auto cvMountExternalResources = pragma::console::get_con_var("sh_mount_external_game_resources");
 void pragma::Engine::Start()
 {
 	if(cvMountExternalResources->GetBool() == true)
 		SetMountExternalGameResources(true);
-	if(!__lp_gamemode.empty()) {
-		std::vector<std::string> argv = {__lp_gamemode};
+	auto startupGamemode = m_launchSettings.Get<udm::String>("gamemode");
+	if(startupGamemode && !startupGamemode->empty()) {
+		std::vector<std::string> argv = {*startupGamemode};
 		RunConsoleCommand("sv_gamemode", argv);
 	}
-	if(!__lp_map.empty())
-		StartDefaultGame(__lp_map);
+
+	auto startupMap = m_launchSettings.Get<udm::String>("map");
+	if(startupMap && !startupMap->empty())
+		StartDefaultGame(*startupMap);
 
 	RunLaunchCommands();
 
@@ -1243,6 +1243,9 @@ pragma::NetworkState *pragma::Engine::GetActiveState() { return GetServerNetwork
 bool pragma::Engine::IsActiveState(NetworkState *state) { return state == GetActiveState(); }
 
 void pragma::Engine::AddLaunchConVar(std::string cvar, std::string val) { m_launchCommands.push_back({cvar, {val}}); }
+
+pragma::LaunchSettings &pragma::Engine::GetLaunchSettings() { return m_launchSettings; }
+const pragma::LaunchSettings &pragma::Engine::GetLaunchSettings() const { return const_cast<Engine *>(this)->GetLaunchSettings(); }
 
 void pragma::Engine::ShutDown() { math::set_flag(m_stateFlags, StateFlags::Running, false); }
 

@@ -14,9 +14,6 @@ static spdlog::logger &LOGGER_VALIDATION = register_logger("prosper_validation")
 
 rendering::RenderContext::RenderContext() : m_monitor(nullptr), m_renderAPI {"vulkan"} {}
 rendering::RenderContext::~RenderContext() {}
-std::optional<std::string> g_customTitle;
-extern bool g_cpuRendering;
-extern std::optional<pragma::platform::Platform> g_windowBackend;
 void rendering::RenderContext::InitializeRenderAPI()
 {
 	auto &renderAPI = GetRenderAPI();
@@ -30,7 +27,8 @@ void rendering::RenderContext::InitializeRenderAPI()
 		getRenderApiPath(renderAPI, location, modulePath);
 
 		auto additionalSearchDirectories = util::get_default_additional_library_search_directories(modulePath);
-		if(g_cpuRendering) {
+		auto cpuRendering = get_engine()->GetLaunchSettings().Get<udm::Boolean>("cpu_rendering", false);
+		if(cpuRendering) {
 			if(renderAPI == "vulkan") {
 				if(fs::exists("modules/swiftshader/")) {
 					auto p = util::Path::CreatePath(util::get_program_path());
@@ -87,7 +85,8 @@ void rendering::RenderContext::InitializeRenderAPI()
 			err = "Symbol 'initialize_render_api' not found in library '" + location + "'!";
 		else {
 			std::string errMsg;
-			auto title = g_customTitle.has_value() ? *g_customTitle : engine_info::get_name();
+			auto customTitle = pragma::get_engine()->GetLaunchSettings().Get<udm::String>("title");
+			auto title = customTitle ? *customTitle : engine_info::get_name();
 			auto success = fInitRenderAPI(title, false, m_renderContext, errMsg);
 			if(success == false)
 				err = errMsg;
@@ -147,9 +146,12 @@ void rendering::RenderContext::InitializeRenderAPI()
 	initInfo.headless = get_cengine()->IsWindowless();
 	if (initInfo.headless)
 		LOGGER.info("Headless mode is enabled! No windows will be created.");
-	else if (g_windowBackend) {
-		LOGGER.info("Overriding default window backend system with '{}'.", magic_enum::enum_name(*g_windowBackend));
-		initInfo.platform = *g_windowBackend;
+	else {
+		auto backend = get_engine()->GetLaunchSettings().Get<platform::Platform>("window_backend", platform::Platform::Unknown);
+		if(backend != platform::Platform::Unknown) {
+			LOGGER.info("Overriding default window backend system with '{}'.", magic_enum::enum_name(backend));
+			initInfo.platform = backend;
+		}
 	}
 	if(auto res = platform::initialize(initInfo); !res) {
 		LOGGER.critical("Failed to initialize GLFW: {}", res.error());

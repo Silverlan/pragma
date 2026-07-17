@@ -640,21 +640,19 @@ void pragma::CEngine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 	}
 }
 
-extern std::optional<bool> g_launchParamWindowedMode;
-extern std::optional<int> g_launchParamRefreshRate;
-extern std::optional<bool> g_launchParamNoBorder;
-extern std::optional<uint32_t> g_launchParamWidth;
-extern std::optional<uint32_t> g_launchParamHeight;
-extern std::optional<Color> g_titleBarColor;
-extern std::optional<Color> g_borderColor;
-extern bool g_windowless;
-extern bool g_forceSingleThreadedMode;
-extern bool g_waitIdleBetweenFrames;
-extern bool g_cpuRendering;
 void register_game_shaders();
 
-bool pragma::CEngine::IsWindowless() const { return g_windowless; }
-bool pragma::CEngine::IsCPURenderingOnly() const { return g_cpuRendering; }
+bool pragma::CEngine::IsWindowless() const
+{
+	auto windowless = m_launchSettings.Get<udm::Boolean>("windowless");
+	if(windowless)
+		return *windowless;
+	return false;
+}
+bool pragma::CEngine::IsCPURenderingOnly() const
+{
+	return m_launchSettings.Get<udm::Boolean>("cpu_rendering", false);
+}
 bool pragma::CEngine::IsClosed() const { return math::is_flag_set(m_stateFlags, StateFlags::CEClosed); }
 
 void pragma::CEngine::HandleOpenGLFallback()
@@ -676,12 +674,10 @@ void pragma::CEngine::HandleOpenGLFallback()
 	pragma::util::start_process(cmdInfo);
 }
 
-std::optional<std::string> g_waylandLibdecorPlugin;
-extern bool g_cli;
 bool pragma::CEngine::Initialize(int argc, char *argv[])
 {
 	Engine::Initialize(argc, argv);
-	SetCLIOnly(g_cli);
+	SetCLIOnly(m_launchSettings.Get<udm::Boolean>("cli", false));
 
 	if(IsDeveloperModeEnabled()) {
 		spdlog::info("Developer mode is enabled. Disabling global shader file cache to allow hot-reloading of shader code.");
@@ -691,15 +687,16 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 #ifdef __linux__
 	auto xdgSessionType = util::get_env_variable("XDG_SESSION_TYPE");
 	if(!xdgSessionType || *xdgSessionType != "x11") {
-		if(!g_waylandLibdecorPlugin)
-			g_waylandLibdecorPlugin = "gtk";
-		if(g_waylandLibdecorPlugin) {
+		auto waylandLibdecorPlugin = m_launchSettings.Get<udm::String>("wayland_libdecor_plugin");
+		if(!waylandLibdecorPlugin)
+			waylandLibdecorPlugin = "gtk";
+		if(waylandLibdecorPlugin) {
 			// Note: Using cairo plugin with wayland will likely crash on startup
-			if(*g_waylandLibdecorPlugin == "cairo")
+			if(*waylandLibdecorPlugin == "cairo")
 				Con::CWAR << "Using libdecor cairo plugin may crash on startup!" << Con::endl;
 			util::set_env_variable("GDK_BACKEND", "wayland");
 
-			auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor/plugins", *g_waylandLibdecorPlugin);
+			auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor/plugins", *waylandLibdecorPlugin);
 			util::set_env_variable("LIBDECOR_PLUGIN_DIR", path.GetString());
 		}
 	}
@@ -734,13 +731,15 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		return false;
 	}
 
+	auto forceSingleThreadedMode = m_launchSettings.Get<udm::Boolean>("force_single_threaded_mode", false);
+	auto waitIdleBetweenFrames = m_launchSettings.Get<udm::Boolean>("wait_idle_between_frames", false);
 	auto windowRes = findCmdArg("cl_window_resolution");
 	prosper::IPrContext::CreateInfo contextCreateInfo {};
 	contextCreateInfo.width = 1280;
 	contextCreateInfo.height = 1024;
-	contextCreateInfo.windowless = g_windowless;
-	contextCreateInfo.forceSingleThreadedMode = g_forceSingleThreadedMode;
-	contextCreateInfo.waitIdleBetweenFrames = g_waitIdleBetweenFrames;
+	contextCreateInfo.windowless = IsWindowless();
+	contextCreateInfo.forceSingleThreadedMode = forceSingleThreadedMode;
+	contextCreateInfo.waitIdleBetweenFrames = waitIdleBetweenFrames;
 	contextCreateInfo.enableDiagnostics = IsGfxDiagnosticsModeEnabled();
 
 	std::shared_ptr<udm::Data> renderApiData {};
@@ -900,16 +899,25 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	initialWindowSettings.windowedMode = (mode != 0);
 	initialWindowSettings.decorated = ((mode == 2) ? false : true);
 
-	if(g_launchParamWindowedMode.has_value())
-		initialWindowSettings.windowedMode = *g_launchParamWindowedMode;
-	if(g_launchParamRefreshRate.has_value())
-		initialWindowSettings.refreshRate = *g_launchParamRefreshRate;
-	if(g_launchParamNoBorder.has_value())
-		initialWindowSettings.decorated = !*g_launchParamNoBorder;
-	if(g_launchParamWidth.has_value())
-		initialWindowSettings.width = *g_launchParamWidth;
-	if(g_launchParamHeight.has_value())
-		initialWindowSettings.height = *g_launchParamHeight;
+    auto windowed = m_launchSettings.Get<udm::Boolean>("windowed");
+    if (windowed)
+		initialWindowSettings.windowedMode = *windowed;
+
+	auto freq = m_launchSettings.Get<udm::Int32>("windowed");
+	if(freq)
+		initialWindowSettings.refreshRate = *freq;
+
+	auto noborder = m_launchSettings.Get<udm::Boolean>("noborder");
+	if(noborder)
+		initialWindowSettings.decorated = !*noborder;
+
+	auto w = m_launchSettings.Get<udm::Int32>("w");
+	if(w)
+		initialWindowSettings.width = *w;
+
+	auto h = m_launchSettings.Get<udm::Int32>("h");
+	if(h)
+		initialWindowSettings.height = *h;
 
 	auto renderMonitor = findCmdArg("cl_render_monitor");
 	if(renderMonitor) {
@@ -948,10 +956,15 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	}
 
 	auto &window = GetRenderContext().GetWindow();
-	if(g_titleBarColor.has_value())
-		window->SetTitleBarColor(*g_titleBarColor);
-	if(g_borderColor.has_value())
-		window->SetBorderColor(*g_borderColor);
+
+	auto titleBarColor = m_launchSettings.Get<udm::String>("title_bar_color");
+	if(titleBarColor)
+		window->SetTitleBarColor(Color::CreateFromHexColor(*titleBarColor));
+
+	auto borderBarColor = m_launchSettings.Get<udm::String>("border_bar_color");
+	if(borderBarColor.has_value())
+		window->SetBorderColor(*borderBarColor);
+
 	window.SetStagingTargetReloadCallback([this, &window]() {
 		auto size = window.GetGlfwWindow().GetSize();
 		math::set_flag(m_stateFlags, StateFlags::FirstFrame, true);
@@ -1476,10 +1489,13 @@ std::expected<std::shared_ptr<prosper::Window>, std::string> pragma::CEngine::Cr
 		return std::unexpected {res.error()};
 	auto &window = res.value();
 
-	if(g_titleBarColor.has_value())
-		(*window)->SetTitleBarColor(*g_titleBarColor);
-	if(g_borderColor.has_value())
-		(*window)->SetBorderColor(*g_borderColor);
+	auto titleBarColor = m_launchSettings.Get<udm::String>("title_bar_color");
+	if(titleBarColor)
+		(*window)->SetTitleBarColor(*titleBarColor);
+
+	auto borderBarColor = m_launchSettings.Get<udm::String>("border_bar_color");
+	if(borderBarColor)
+		(*window)->SetBorderColor(*borderBarColor);
 
 	auto *pWindow = window.get();
 	pWindow->GetStagingRenderTarget(); // This will initialize the staging target immediately

@@ -14,12 +14,11 @@ import :engine.info;
 #define PRAGMA_DISCORD_URL "https://discord.gg/Ck5BcCz"
 #define PRAGMA_STEAM_APP_ID 947'100
 
-extern std::optional<std::string> g_customTitle;
-
 std::string pragma::engine_info::get_program_title()
 {
-	if(g_customTitle)
-		return *g_customTitle;
+	auto customTitle = pragma::get_engine()->GetLaunchSettings().Get<udm::String>("title");
+	if(customTitle)
+		return *customTitle;
 	return get_name();
 }
 
@@ -32,8 +31,11 @@ std::string pragma::engine_info::get_identifier()
 
 std::string pragma::engine_info::get_name() { return PRAGMA_ENGINE_NAME; }
 
-extern pragma::util::Path g_programIcon;
-pragma::util::Path pragma::engine_info::get_icon_path() { return g_programIcon; }
+pragma::util::Path pragma::engine_info::get_icon_path()
+{
+	auto iconPath = get_engine()->GetLaunchSettings().Get<udm::String>("icon");
+	return util::FilePath(iconPath ? *iconPath : "");
+}
 
 std::string pragma::engine_info::get_executable_name()
 {

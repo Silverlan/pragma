@@ -5,13 +5,15 @@ module pragma.client;
 
 import :console.commands;
 
-void LPARAM_enable_gfx_api_dump(const std::vector<std::string> &argv)
-{
+namespace pragma::debug {
+	void enable_gfx_api_dump(const std::vector<std::string> &argv)
+	{
 #ifdef PR_DEBUG_API_DUMP
-	prosper::debug::set_api_dump_enabled(argv.empty() || pragma::util::to_boolean(argv.front()));
+		prosper::debug::set_api_dump_enabled(argv.empty() || pragma::util::to_boolean(argv.front()));
 #else
-	Con::CERR << "API dump launch parameter was set, but API dump is not enabled in this build. Build with -DENABLE_DEBUG_API_DUMP to enable it." << Con::endl;
+		Con::CERR << "API dump launch parameter was set, but API dump is not enabled in this build. Build with -DENABLE_DEBUG_API_DUMP to enable it." << Con::endl;
 #endif
+	}
 }
 
 #ifdef PR_DEBUG_API_DUMP

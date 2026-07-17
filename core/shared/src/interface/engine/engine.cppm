@@ -16,6 +16,7 @@ export import :debug.performance_profiler;
 export import :engine.enums;
 export import :engine.info;
 export import :engine.launch_para_map;
+export import :engine.launch_settings;
 export import :engine.memory;
 export import :engine.version;
 export import :input.enums;
@@ -125,6 +126,8 @@ export {
 			virtual bool Initialize(int argc, char *argv[]);
 			virtual void Start();
 			void AddLaunchConVar(std::string cvar, std::string val);
+			LaunchSettings &GetLaunchSettings();
+			const LaunchSettings &GetLaunchSettings() const;
 			virtual void DumpDebugInformation(uzip::ZIPFile &zip) const;
 			static std::unique_ptr<uzip::ZIPFile> GenerateEngineDump(const std::string &baseName, std::string &outZipFileName, std::string &outErr);
 			virtual void Close();
@@ -355,6 +358,7 @@ export {
 			std::unique_ptr<debug::ProfilingStageManager<debug::ProfilingStage>> m_profilingStageManager;
 
 			std::unordered_map<std::string, std::function<void(int, char *[])>> m_launchOptions;
+			LaunchSettings m_launchSettings;
 
 			void InitLaunchOptions(int argc, char *argv[]);
 			virtual void Think();

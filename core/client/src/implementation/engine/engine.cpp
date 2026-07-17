@@ -899,6 +899,9 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	initialWindowSettings.windowedMode = (mode != 0);
 	initialWindowSettings.decorated = ((mode == 2) ? false : true);
 
+	if(m_launchSettings.Get<udm::Boolean>("hide_window", false))
+		initialWindowSettings.visible = false;
+
     auto windowed = m_launchSettings.Get<udm::Boolean>("windowed");
     if (windowed)
 		initialWindowSettings.windowedMode = *windowed;
@@ -911,13 +914,13 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	if(noborder)
 		initialWindowSettings.decorated = !*noborder;
 
-	auto w = m_launchSettings.Get<udm::Int32>("w");
-	if(w)
-		initialWindowSettings.width = *w;
+	auto width = m_launchSettings.Get<udm::Int32>("w");
+	if(width)
+		initialWindowSettings.width = *width;
 
-	auto h = m_launchSettings.Get<udm::Int32>("h");
-	if(h)
-		initialWindowSettings.height = *h;
+	auto height = m_launchSettings.Get<udm::Int32>("h");
+	if(height)
+		initialWindowSettings.height = *height;
 
 	auto renderMonitor = findCmdArg("cl_render_monitor");
 	if(renderMonitor) {
@@ -956,13 +959,20 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	}
 
 	auto &window = GetRenderContext().GetWindow();
+	//window->Hide();
 
-	auto titleBarColor = m_launchSettings.Get<udm::String>("title_bar_color");
-	if(titleBarColor)
-		window->SetTitleBarColor(Color::CreateFromHexColor(*titleBarColor));
+	std::optional<Color> titleBarColor {};
+	auto titleBarColorStr = m_launchSettings.Get<udm::String>("title_bar_color");
+	if(titleBarColorStr)
+		titleBarColor = Color::CreateFromHexColor(*titleBarColorStr);
+	if (titleBarColor)
+		window->SetTitleBarColor(*titleBarColor);
 
-	auto borderBarColor = m_launchSettings.Get<udm::String>("border_bar_color");
-	if(borderBarColor.has_value())
+	std::optional<Color> borderBarColor {};
+	auto borderBarColorStr = m_launchSettings.Get<udm::String>("border_bar_color");
+	if(borderBarColorStr)
+		borderBarColor = Color::CreateFromHexColor(*borderBarColorStr);
+	if(borderBarColor)
 		window->SetBorderColor(*borderBarColor);
 
 	window.SetStagingTargetReloadCallback([this, &window]() {
@@ -986,16 +996,16 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 #ifdef _WIN32
 #if defined(WINVER) && (WINVER >= 0x0501)
 	auto h = GetConsoleWindow();
-	if(g_titleBarColor.has_value()) {
-		auto tmp = *g_titleBarColor;
+	if(titleBarColor.has_value()) {
+		auto tmp = *titleBarColor;
 		pragma::math::swap(tmp.r, tmp.b);
 		auto hex = tmp.ToHexColorRGB();
 		COLORREF hexCol = pragma::math::to_hex_number("0x" + hex);
 		const DWORD ATTR_CAPTION_COLOR = 35; // See DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR, can't use the enum because it may not be available and there's no way to check for it
 		DwmSetWindowAttribute(h, ATTR_CAPTION_COLOR, &hexCol, sizeof(hexCol));
 	}
-	if(g_borderColor.has_value()) {
-		auto tmp = *g_borderColor;
+	if(borderColor.has_value()) {
+		auto tmp = *borderColor;
 		pragma::math::swap(tmp.r, tmp.b);
 		auto hex = tmp.ToHexColorRGB();
 		COLORREF hexCol = pragma::math::to_hex_number("0x" + hex);

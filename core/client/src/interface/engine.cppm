@@ -229,7 +229,7 @@ export namespace pragma {
 		virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NwStateType type) override;
 	  protected:
 		friend CoreInputBindingLayer;
-		void DrawScene(std::shared_ptr<prosper::RenderTarget> &rt);
+		void DrawScene(std::shared_ptr<prosper::RenderTarget> *rt);
 		void WriteClientConfig(fs::VFilePtrReal f);
 		void OnRenderResolutionChanged(uint32_t width, uint32_t height);
 		void LoadFontSets();

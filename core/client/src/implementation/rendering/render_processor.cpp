@@ -193,9 +193,9 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 	auto first = true;
 	g_cbPreRenderScene = pragma::get_cgame()->AddCallback("OnRenderScenes", FunctionCallback<void>::Create([stats, first, full, print]() mutable {
 		auto swapchainIdx = pragma::get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
-		if(swapchainIdx >= stats->frameStats.size())
+		if(!swapchainIdx || *swapchainIdx >= stats->frameStats.size())
 			return;
-		auto &fstats = stats->frameStats[swapchainIdx];
+		auto &fstats = stats->frameStats[*swapchainIdx];
 		while(fstats.empty() == false) {
 			auto &frameStats = fstats.front();
 			if(frameStats.Available()) {
@@ -205,10 +205,10 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 				auto *l = pragma::get_cgame()->GetLuaState();
 				auto t = luabind::newtable(l);
 				auto tTimes = luabind::newtable(l);
-				tTimes["gui"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, pragma::CEngine::GPUTimer::GUI).count() / static_cast<long double>(1'000'000.0);
-				tTimes["scene"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, pragma::CEngine::GPUTimer::Scene).count() / static_cast<long double>(1'000'000.0);
-				tTimes["frame"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, pragma::CEngine::GPUTimer::Frame).count() / static_cast<long double>(1'000'000.0);
-				tTimes["present"] = pragma::get_cengine()->GetGpuExecutionTime(swapchainIdx, pragma::CEngine::GPUTimer::Present).count() / static_cast<long double>(1'000'000.0);
+				tTimes["gui"] = pragma::get_cengine()->GetGpuExecutionTime(*swapchainIdx, pragma::CEngine::GPUTimer::GUI).count() / static_cast<long double>(1'000'000.0);
+				tTimes["scene"] = pragma::get_cengine()->GetGpuExecutionTime(*swapchainIdx, pragma::CEngine::GPUTimer::Scene).count() / static_cast<long double>(1'000'000.0);
+				tTimes["frame"] = pragma::get_cengine()->GetGpuExecutionTime(*swapchainIdx, pragma::CEngine::GPUTimer::Frame).count() / static_cast<long double>(1'000'000.0);
+				tTimes["present"] = pragma::get_cengine()->GetGpuExecutionTime(*swapchainIdx, pragma::CEngine::GPUTimer::Present).count() / static_cast<long double>(1'000'000.0);
 				t["numberOfScenes"] = frameStats.stats.size();
 				t["times"] = tTimes;
 				auto tStats = luabind::newtable(l);
@@ -245,11 +245,13 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 		first = false;
 		for(auto &drawSceneInfo : pragma::get_cgame()->GetQueuedRenderScenes()) {
 			drawSceneInfo.renderStats = std::make_unique<pragma::rendering::RenderStats>();
-			drawSceneInfo.renderStats->swapchainImageIndex = swapchainIdx;
+			drawSceneInfo.renderStats->swapchainImageIndex = *swapchainIdx;
 		}
 	}));
 	g_cbPostRenderScene = pragma::get_cgame()->AddCallback("PostRenderScenes", FunctionCallback<void>::Create([full, stats]() {
 		auto swapchainIdx = pragma::get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
+		if (!swapchainIdx)
+			return;
 		auto &renderScenes = pragma::get_cgame()->GetQueuedRenderScenes();
 		FrameRenderStats frameStats {};
 		for(auto &drawSceneInfo : renderScenes) {
@@ -262,9 +264,9 @@ DLLCLIENT void debug_render_stats(bool enabled, bool full, bool print, bool cont
 			sceneStats.stats = std::move(drawSceneInfo.renderStats);
 			frameStats.stats.push_back(sceneStats);
 		}
-		if(swapchainIdx >= stats->frameStats.size())
-			stats->frameStats.resize(swapchainIdx + 1);
-		stats->frameStats[swapchainIdx].push(frameStats);
+		if(*swapchainIdx >= stats->frameStats.size())
+			stats->frameStats.resize(*swapchainIdx + 1);
+		stats->frameStats[*swapchainIdx].push(frameStats);
 	}));
 }
 

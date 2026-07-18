@@ -473,7 +473,6 @@ void pragma::ClientState::Draw(rendering::DrawSceneInfo &drawSceneInfo) //const 
 
 void pragma::ClientState::Render(rendering::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt)
 {
-	auto &drawCmd = drawSceneInfo.commandBuffer;
 	drawSceneInfo.outputImage = rt->GetTexture().GetImage().shared_from_this();
 	CallCallbacks<void, std::reference_wrapper<const rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender", std::ref(drawSceneInfo), std::ref(rt));
 	if(m_game != nullptr) {

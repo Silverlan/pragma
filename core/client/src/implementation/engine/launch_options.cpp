@@ -159,7 +159,7 @@ namespace pragma::launch_options {
 
 		auto &a = prop->GetValue<udm::Array>();
 		auto offset = a.GetSize();
-		a.Resize(a.GetSize() +argv.size());
+		a.Resize(a.GetSize() + argv.size());
 		for(auto &arg : argv)
 			a[offset++] = arg;
 

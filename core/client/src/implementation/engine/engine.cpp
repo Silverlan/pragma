@@ -649,10 +649,7 @@ bool pragma::CEngine::IsWindowless() const
 		return *windowless;
 	return false;
 }
-bool pragma::CEngine::IsCPURenderingOnly() const
-{
-	return m_launchSettings.Get<udm::Boolean>("cpu_rendering", false);
-}
+bool pragma::CEngine::IsCPURenderingOnly() const { return m_launchSettings.Get<udm::Boolean>("cpu_rendering", false); }
 bool pragma::CEngine::IsClosed() const { return math::is_flag_set(m_stateFlags, StateFlags::CEClosed); }
 
 void pragma::CEngine::HandleOpenGLFallback()
@@ -902,8 +899,8 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	if(m_launchSettings.Get<udm::Boolean>("hide_window", false))
 		initialWindowSettings.visible = false;
 
-    auto windowed = m_launchSettings.Get<udm::Boolean>("windowed");
-    if (windowed)
+	auto windowed = m_launchSettings.Get<udm::Boolean>("windowed");
+	if(windowed)
 		initialWindowSettings.windowedMode = *windowed;
 
 	auto freq = m_launchSettings.Get<udm::Int32>("windowed");
@@ -959,13 +956,12 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	}
 
 	auto &window = GetRenderContext().GetWindow();
-	//window->Hide();
 
 	std::optional<Color> titleBarColor {};
 	auto titleBarColorStr = m_launchSettings.Get<udm::String>("title_bar_color");
 	if(titleBarColorStr)
 		titleBarColor = Color::CreateFromHexColor(*titleBarColorStr);
-	if (titleBarColor)
+	if(titleBarColor)
 		window->SetTitleBarColor(*titleBarColor);
 
 	std::optional<Color> borderBarColor {};
@@ -1852,7 +1848,8 @@ void pragma::CEngine::UpdateFPS(float t)
 static auto cvProfiling = pragma::console::get_engine_con_var("debug_profiling_enabled");
 void pragma::CEngine::DrawFrame()
 {
-	auto primWindowCmd = GetWindow().GetDrawCommandBuffer();
+	auto &primDrawCmd = GetRenderContext().GetCurrentPrimaryDrawCommandBuffer();
+
 	auto perfTimers = math::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers);
 	if(perfTimers) {
 		auto n = math::to_integral(GPUTimer::Count);
@@ -1862,12 +1859,12 @@ void pragma::CEngine::DrawFrame()
 		}
 
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Frame);
-		m_gpuTimers[idx]->Begin(*primWindowCmd);
+		m_gpuTimers[idx]->Begin(*primDrawCmd);
 	}
 	m_gpuProfiler->Reset();
 	StartGPUProfilingStage("Frame");
 
-	auto ptrDrawCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(primWindowCmd);
+	auto ptrDrawCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(primDrawCmd);
 	CallCallbacks<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame", std::ref(ptrDrawCmd));
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
@@ -1880,51 +1877,55 @@ void pragma::CEngine::DrawFrame()
 
 	StartProfilingStage("GUILogic");
 	auto &gui = gui::WGUI::GetInstance();
-	gui.Think(primWindowCmd);
+	gui.Think(primDrawCmd);
 	StopProfilingStage(); // GUILogic
 
-	auto &stagingRt = GetRenderContext().GetWindow().GetStagingRenderTarget();
-	if(math::is_flag_set(m_stateFlags, StateFlags::FirstFrame))
-		math::set_flag(m_stateFlags, StateFlags::FirstFrame, false);
-	else {
-		primWindowCmd->RecordImageBarrier(stagingRt->GetTexture().GetImage(), prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
+	auto &mainWindow = GetWindow();
+	std::shared_ptr<prosper::RenderTarget> *stagingRt = nullptr;
+	if(mainWindow.IsAvailableForRendering()) {
+		auto &mainWindowDrawCmd = mainWindow.GetDrawCommandBuffer();
+		stagingRt = &mainWindow.GetStagingRenderTarget();
+		if(mainWindowDrawCmd) {
+			if(math::is_flag_set(m_stateFlags, StateFlags::FirstFrame))
+				math::set_flag(m_stateFlags, StateFlags::FirstFrame, false);
+			else
+				mainWindowDrawCmd->RecordImageBarrier((*stagingRt)->GetTexture().GetImage(), prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
+		}
 	}
 
 	DrawScene(stagingRt);
 
 	if(perfTimers) {
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Present);
-		m_gpuTimers[idx]->Begin(*primWindowCmd);
+		m_gpuTimers[idx]->Begin(*primDrawCmd);
 	}
 	for(auto &window : GetRenderContext().GetWindows()) {
 		if(window->IsValid() == false || window->GetState() != prosper::Window::State::Active)
 			continue;
 		auto &finalImg = window->GetStagingRenderTarget()->GetTexture().GetImage();
-		primWindowCmd->RecordImageBarrier(finalImg, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
+		primDrawCmd->RecordImageBarrier(finalImg, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
 
-		primWindowCmd->RecordPresentImage(finalImg, *window);
+		primDrawCmd->RecordPresentImage(finalImg, *window);
 	}
 
 	if(perfTimers) {
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Present);
-		m_gpuTimers[idx]->End(*primWindowCmd);
+		m_gpuTimers[idx]->End(*primDrawCmd);
 	}
 
 	StopGPUProfilingStage(); // Frame
 	if(perfTimers) {
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Frame);
-		m_gpuTimers[idx]->End(*primWindowCmd);
+		m_gpuTimers[idx]->End(*primDrawCmd);
 	}
 }
 
 static auto cvHideGui = pragma::console::get_client_con_var("debug_hide_gui");
-void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
+void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> *rt)
 {
 	auto perfTimers = math::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers);
 	auto drawGui = !cvHideGui->GetBool();
 	if(drawGui) {
-		auto &rp = rt->GetRenderPass();
-		auto &fb = rt->GetFramebuffer();
 		StartProfilingStage("RecordGUI");
 		StartProfilingStage("GUI");
 
@@ -1955,24 +1956,23 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		StopProfilingStage(); // RecordGUI
 	}
 
+	auto &primDrawCmd = GetRenderContext().GetCurrentPrimaryDrawCommandBuffer();
 	auto *cl = static_cast<ClientState *>(GetClientState());
 	auto tStart = util::Clock::now();
-	if(cl != nullptr) {
+	if(cl != nullptr && rt) {
 		StartProfilingStage("RecordScene");
 		StartGPUProfilingStage("DrawScene");
 
-		auto &window = GetWindow();
-		auto &drawCmd = window.GetDrawCommandBuffer();
 		if(perfTimers) {
 			auto idx = GetPerformanceTimerIndex(GPUTimer::Scene);
-			m_gpuTimers[idx]->Begin(*drawCmd);
+			m_gpuTimers[idx]->Begin(*primDrawCmd);
 		}
 		rendering::DrawSceneInfo drawSceneInfo {};
-		drawSceneInfo.commandBuffer = drawCmd;
-		cl->Render(drawSceneInfo, rt);
+		drawSceneInfo.commandBuffer = primDrawCmd;
+		cl->Render(drawSceneInfo, *rt);
 		if(perfTimers) {
 			auto idx = GetPerformanceTimerIndex(GPUTimer::Scene);
-			m_gpuTimers[idx]->End(*drawCmd);
+			m_gpuTimers[idx]->End(*primDrawCmd);
 		}
 
 		StopGPUProfilingStage(); // DrawScene
@@ -1985,10 +1985,9 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		if(get_cgame() != nullptr)
 			get_cgame()->PreGUIDraw();
 
-		auto &primWindowCmd = GetWindow().GetDrawCommandBuffer();
 		if(perfTimers) {
 			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
-			m_gpuTimers[idx]->Begin(*primWindowCmd);
+			m_gpuTimers[idx]->Begin(*primDrawCmd);
 		}
 		for(auto &window : GetRenderContext().GetWindows()) {
 			if(!window || !window->IsValid() || window->GetState() != prosper::Window::State::Active)
@@ -2004,7 +2003,7 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		}
 		if(perfTimers) {
 			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
-			m_gpuTimers[idx]->End(*primWindowCmd);
+			m_gpuTimers[idx]->End(*primDrawCmd);
 		}
 		CallCallbacks<void>("PostDrawGUI");
 		if(get_cgame() != nullptr)
@@ -2015,7 +2014,12 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 }
 
 uint32_t pragma::CEngine::GetPerformanceTimerIndex(uint32_t swapchainIdx, GPUTimer timer) const { return swapchainIdx * math::to_integral(GPUTimer::Count) + math::to_integral(timer); }
-uint32_t pragma::CEngine::GetPerformanceTimerIndex(GPUTimer timer) const { return GetPerformanceTimerIndex(GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex(), timer); }
+uint32_t pragma::CEngine::GetPerformanceTimerIndex(GPUTimer timer) const {
+	auto idx = GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
+	if (!idx)
+		throw std::runtime_error {"No current acquired swapchain image!"};
+	return GetPerformanceTimerIndex(*idx, timer);
+}
 
 void pragma::CEngine::SetGpuPerformanceTimersEnabled(bool enabled)
 {

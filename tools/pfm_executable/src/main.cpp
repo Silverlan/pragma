@@ -15,6 +15,8 @@ int main(int argc, char *argv[])
 	  "materials/pfm/logo/icon_window.png",
 	  "-title_bar_color",
 	  "#262626",
+	  "-splashscreen",
+	  "pfm/logo/splashscreen",
 	  "+map empty",
 	  "+pfm",
 

@@ -227,6 +227,10 @@ export namespace pragma {
 		std::chrono::nanoseconds GetGpuExecutionTime(uint32_t swapchainIdx, GPUTimer timer) const;
 
 		virtual std::unique_ptr<ConVarInfoList> &GetConVarConfig(NwStateType type) override;
+
+		bool ShowSplashScreen();
+		void HideSplashScreen();
+		const std::shared_ptr<prosper::Window> &GetSplashScreenWindow() const { return m_splashScreenWindow; }
 	  protected:
 		friend CoreInputBindingLayer;
 		void DrawScene(std::shared_ptr<prosper::RenderTarget> *rt);
@@ -290,6 +294,7 @@ export namespace pragma {
 		std::shared_ptr<prosper::IQueryPool> m_gpuTimerPool = nullptr;
 		std::vector<std::shared_ptr<prosper::TimerQuery>> m_gpuTimers;
 		std::vector<std::chrono::nanoseconds> m_gpuExecTimes {};
+		std::shared_ptr<prosper::Window> m_splashScreenWindow;
 
 		std::vector<DroppedFile> m_droppedFiles = {}; // Only contains files during OnFilesDropped-call
 

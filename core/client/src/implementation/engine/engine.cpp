@@ -671,6 +671,76 @@ void pragma::CEngine::HandleOpenGLFallback()
 	pragma::util::start_process(cmdInfo);
 }
 
+bool pragma::CEngine::ShowSplashScreen()
+{
+	if(m_splashScreenWindow)
+		return true;
+	auto splashscreen = m_launchSettings.Get<udm::String>("splashscreen");
+	if(!splashscreen)
+		return false;
+	auto *cl = GetClientState();
+	if(!cl) {
+		spdlog::error("Unable to create splash screen: Invalid client state!");
+		return false;
+	}
+	auto *mat = static_cast<material::CMaterial *>(cl->LoadMaterial(*splashscreen));
+	if(!mat) {
+		spdlog::error("Failed to load splash screen material '{}'!", *splashscreen);
+		mat = static_cast<material::CMaterial*>(cl->GetMaterialManager().GetErrorMaterial());
+	}
+	if(!mat) {
+		spdlog::error("Failed to load splash screen material!");
+		return false;
+	}
+	auto *albedoMap = mat->GetAlbedoMap();
+	if(!albedoMap) {
+		spdlog::error("Splash screen material '{}' has no albedo map!", *splashscreen);
+		return false;
+	}
+
+	if(albedoMap->width == 0 || albedoMap->height == 0) {
+		spdlog::error("Splash screen material '{}' has empty bounds!", *splashscreen);
+		return false;
+	}
+
+	prosper::WindowSettings settings {};
+	settings.width = albedoMap->width;
+	settings.height = albedoMap->height;
+	settings.decorated = false;
+	settings.resizable = false;
+	settings.focused = true;
+
+	auto result = CreateWindow(settings);
+	if(!result)
+		return false;
+	auto &window = *result;
+	auto &gui = gui::WGUI::GetInstance();
+	auto *el = gui.GetBaseElement(window.get());
+	if(!el)
+		return false;
+	auto elTransformable = gui.Create<gui::types::WITransformable>(el);
+	elTransformable->SetSize(el->GetSize());
+	elTransformable->SetDraggable(true);
+
+	auto *elRect = gui.Create<gui::types::WITexturedRect>(el);
+	if(!elRect)
+		return false;
+	elRect->SetMaterial(*splashscreen);
+	elRect->SetSize(el->GetSize());
+	window->SetNoBorder(true);
+	m_splashScreenWindow = window;
+	return true;
+}
+void pragma::CEngine::HideSplashScreen()
+{
+	auto &window = GetWindow();
+	window->Show();
+	if(!m_splashScreenWindow)
+		return;
+	m_splashScreenWindow->Close();
+	m_splashScreenWindow = nullptr;
+}
+
 bool pragma::CEngine::Initialize(int argc, char *argv[])
 {
 	Engine::Initialize(argc, argv);
@@ -1275,6 +1345,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 			}
 		}
 	}
+	ShowSplashScreen();
 	return true;
 }
 

@@ -172,6 +172,10 @@ namespace pragma::debug {
 	void enable_gfx_api_dump(const std::vector<std::string> &argv);
 }
 
+static void hide_window() {
+	get_launch_settings().Set("hide_window", true);
+}
+
 void pragma::register_client_launch_parameters(LaunchParaMap &map)
 {
 	map.RegisterParameterHelp("-windowed", &launch_options::windowed, "-window -startwindowed -sw", "start in windowed mode");
@@ -206,4 +210,11 @@ void pragma::register_client_launch_parameters(LaunchParaMap &map)
 	map.RegisterParameterHelp("-window_backend", &launch_options::window_backend, "<Win32/Cocoa/Wayland/X11/Windowless>", "Uses the specified window backend system for window creation.");
 	map.RegisterParameterHelp("-cli", &launch_options::cli, "<1/0>", "If enabled, will automatically enable the options needed to run Pragma in a command-line-interface-only environment.");
 	map.RegisterParameterHelp("-wayland_libdecor_plugin", &launch_options::wayland_libdecor_plugin, "", "If specified, this libdecor plugin will be used for window decoration drawing on Linux with wayland.");
+	map.RegisterParameterHelp("-hide_window", +[](const std::vector<std::string> &argv) { hide_window(); }, "<1/0>", "If enabled, the primary window will be hidden on startup.");
+	map.RegisterParameterHelp("-splashscreen", +[](const std::vector<std::string> &argv) {
+		if(argv.empty())
+			return;
+		hide_window();
+		get_launch_settings().Set("splashscreen", argv.front());
+	}, "<material>", "If enabled, the Engine will start with a splashscreen and the primary window will be hidden until the game has been fully loaded.");
 }

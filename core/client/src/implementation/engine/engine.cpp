@@ -1004,8 +1004,8 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		const DWORD ATTR_CAPTION_COLOR = 35; // See DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR, can't use the enum because it may not be available and there's no way to check for it
 		DwmSetWindowAttribute(h, ATTR_CAPTION_COLOR, &hexCol, sizeof(hexCol));
 	}
-	if(borderColor.has_value()) {
-		auto tmp = *borderColor;
+	if(borderBarColor.has_value()) {
+		auto tmp = *borderBarColor;
 		pragma::math::swap(tmp.r, tmp.b);
 		auto hex = tmp.ToHexColorRGB();
 		COLORREF hexCol = pragma::math::to_hex_number("0x" + hex);

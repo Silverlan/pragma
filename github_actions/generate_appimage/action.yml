@@ -1,0 +1,59 @@
+name: Generate AppImage
+description: 'Generates AppImage for Pragma.'
+inputs:
+  build-directory:
+    description: 'Pragma build directory'
+    required: true
+  install-directory:
+    description: 'Pragma installation directory'
+    required: true
+  deps-directory:
+    description: 'Pragma deps directory'
+    required: true
+  pragma-directory:
+    description: 'Pragma directory'
+    required: true
+    default: 'pragma'
+outputs:
+  appimage-filepath:
+    description: 'The filepath to the AppImage file.'
+    value: ${{ steps.generate-appimage.outputs.appimage-filepath }}
+runs:
+  using: "composite"
+  steps:
+    - name: Install Cuda
+      uses: Jimver/cuda-toolkit@v0.2.23
+      with:
+        cuda: '12.8.1'
+        use-github-cache: false
+        use-local-cache: true
+        linux-local-args: '["--toolkit"]'
+        method: 'network'
+        sub-packages: '["nvcc"]'
+
+    - name: Generate AppImage
+      working-directory: pragma/build_scripts
+      shell: bash
+      id: generate-appimage
+      run: |
+        sudo apt-get install -y libopengl0
+        
+        # Use CUDA stub
+        sudo ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/lib/x86_64-linux-gnu/libcuda.so.1
+        
+        # Resolve libamdhip64.so.6 by pointing ldd to your dependencies directory
+        HIP_LIB_PATH=$(find ${{ steps.build-pragma.outputs.root-dir }} -name "libamdhip64.so.6" | head -n 1)
+        
+        # Create dummy shared object
+        echo "void dummy(){}" | gcc -shared -x c - -o /tmp/libamdhip64.so.6
+        sudo mv /tmp/libamdhip64.so.6 /usr/lib/x86_64-linux-gnu/
+        
+        sudo ldconfig
+        
+        python generate_appimage.py \
+          --build-directory ${{ inputs.build-directory }} \
+          --install-directory ${{ inputs.install-directory }} \
+          --build-tools-directory ${{ inputs.pragma-directory }}/build_tools \
+          --deps-directory ${{ inputs.deps-directory }}
+
+        echo "appimage-filepath=${{ inputs.build-directory }}/appimage/PFM-x86_64.AppImage" >> $GITHUB_OUTPUT

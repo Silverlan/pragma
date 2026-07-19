@@ -6,14 +6,14 @@ from pathlib import Path
 import argparse
 
 def str2bool(v):
-	if isinstance(v, bool):
-		return v
-	if v.lower() in ('yes', 'true', 't', 'y', '1'):
-		return True
-	elif v.lower() in ('no', 'false', 'f', 'n', '0'):
-		return False
-	else:
-		raise argparse.ArgumentTypeError('Boolean value expected.')
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 parser = argparse.ArgumentParser(description='Pragma AppImage Generator', allow_abbrev=False, formatter_class=argparse.ArgumentDefaultsHelpFormatter, epilog="")
 
@@ -45,7 +45,7 @@ def main():
     shutil.copytree(install_directory, appimage_install_path)
 
     repo_path = Path.cwd().parent
-    
+
     appimage_asset_path = Path.cwd() / "appimage"
     shutil.copy(repo_path / "tools/pfm_executable/logo/logo_dark.png", appimage_base_path / "icon.png")
     shutil.copy(repo_path / "tools/pfm_executable/pfm.desktop", appimage_base_path / "pfm.desktop")
@@ -71,15 +71,32 @@ def main():
 
     appdir_lib_path = str(appimage_data_path / "usr/bin/lib")
 
-    # Add deps library paths
-    deps_path = Path(deps_directory).resolve()
-    deps_lib_paths = []
-    if deps_path.exists():
-        for lib_dir in deps_path.glob("*/lib"):
-            if lib_dir.is_dir():
-                deps_lib_paths.append(str(lib_dir))
+    appdir_usr_lib = appimage_data_path / "usr/lib"
+    os.makedirs(appdir_usr_lib, exist_ok=True)
 
-    ld_paths_to_add = [appdir_lib_path] + deps_lib_paths
+    deps_path = Path(deps_directory).resolve()
+    deps_lib_paths = set()
+
+    if deps_path.exists():
+        print(f"Staging dependencies from {deps_path} directly into AppDir...")
+        for so_file in deps_path.rglob("*.so*"):
+            if so_file.is_file() or so_file.is_symlink():
+
+                # Skip OpenSSL libraries
+                if any(so_file.name.startswith(lib) for lib in ["libcrypto.so", "libssl.so"]):
+                    print(f"Skipping library: {so_file.name}")
+                    continue
+
+                # Add to LD_LIBRARY_PATH as a fallback
+                deps_lib_paths.add(str(so_file.parent))
+
+                # Copy the library
+                dest = appdir_usr_lib / so_file.name
+                if not dest.exists():
+                    shutil.copy(so_file, dest, follow_symlinks=False)
+
+    # Make sure usr/lib folder is in the LD path string
+    ld_paths_to_add = [appdir_lib_path, str(appdir_usr_lib)] + list(deps_lib_paths)
     ld_path_string = ":".join(ld_paths_to_add)
 
     existing_ld_path = os.environ.get("LD_LIBRARY_PATH", "")
@@ -91,6 +108,12 @@ def main():
 
     if no_strip:
         os.environ["NO_STRIP"] = "1"
+
+    # Exclude host libraries
+    exclude_libs = ["libcrypto.so.3", "libssl.so.3", "libcrypto.so.1.1", "libssl.so.1.1"]
+    existing_exclude = os.environ.get("EXCLUDE_LIBRARIES", "")
+    new_exclude = ":".join(exclude_libs)
+    os.environ["EXCLUDE_LIBRARIES"] = f"{existing_exclude}:{new_exclude}" if existing_exclude else new_exclude
 
     os.chdir(appimage_base_path)
     cmd = [

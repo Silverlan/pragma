@@ -41,7 +41,7 @@ runs:
 
     - name: Checkout Import Tests
       uses: actions/checkout@v4
-      if: ${{ inputs.import-tests-token }} != ""
+      if: ${{ inputs.import-tests-token != '' }}
       with:
         repository: Silverlan/pragma_tests_import
         token: ${{ inputs.import-tests-token }}
@@ -50,14 +50,14 @@ runs:
 
     - name: Copy Import Tests files
       shell: bash
-      if: ${{ inputs.import-tests-token }} != ""
+      if: ${{ inputs.import-tests-token != '' }}
       run: |
         cp -rf pragma_tests_import/* ${{ inputs.working-directory }}/
         rm -rf pragma_tests_import
 
     - name: Import Tests
       uses: Silverlan/pragma/github_actions/run_tests@main
-      if: ${{ inputs.import-tests-token }} != ""
+      if: ${{ inputs.import-tests-token != '' }}
       with:
         test-scripts: |
           "tests/import_assets.udm"

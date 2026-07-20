@@ -376,22 +376,29 @@ std::pair<std::vector<double>, std::vector<double>> pragma::util::generate_two_p
 }
 //
 
-extern std::string g_lpUserDataDir;
 extern std::vector<std::string> g_lpResourceDirs;
 pragma::util::Path pragma::util::get_user_data_dir()
 {
-	if(!g_lpUserDataDir.empty())
-		return g_lpUserDataDir;
+	auto userDataDir = get_engine()->GetLaunchSettings().Get<udm::String>("user_data_dir");
+	if(userDataDir)
+		return *userDataDir;
 	return get_program_path();
 }
 
 std::vector<pragma::util::Path> pragma::util::get_resource_dirs()
 {
-	std::vector<Path> paths;
-	paths.reserve(g_lpResourceDirs.size());
-	for(auto &path : g_lpResourceDirs)
-		paths.push_back(path);
-	return paths;
+	auto propResourceDirs = get_engine()->GetLaunchSettings().GetProperty("resource_dirs");
+	if(propResourceDirs) {
+		auto resourcesDirs = propResourceDirs->ToValue<std::vector<std::string>>();
+		if(resourcesDirs) {
+			std::vector<Path> paths;
+			paths.reserve(resourcesDirs->size());
+			for(auto &dir : *resourcesDirs)
+				paths.push_back(DirPath(dir));
+			return paths;
+		}
+	}
+	return {};
 }
 
 bool pragma::util::show_notification(const std::string &summary, const std::string &body)

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=PFM
+Exec=pfm
+Icon=icon
+Terminal=false
+Categories=Graphics;3DGraphics;

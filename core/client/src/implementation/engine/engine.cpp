@@ -640,21 +640,16 @@ void pragma::CEngine::SetAssetMultiThreadedLoadingEnabled(bool enabled)
 	}
 }
 
-extern std::optional<bool> g_launchParamWindowedMode;
-extern std::optional<int> g_launchParamRefreshRate;
-extern std::optional<bool> g_launchParamNoBorder;
-extern std::optional<uint32_t> g_launchParamWidth;
-extern std::optional<uint32_t> g_launchParamHeight;
-extern std::optional<Color> g_titleBarColor;
-extern std::optional<Color> g_borderColor;
-extern bool g_windowless;
-extern bool g_forceSingleThreadedMode;
-extern bool g_waitIdleBetweenFrames;
-extern bool g_cpuRendering;
 void register_game_shaders();
 
-bool pragma::CEngine::IsWindowless() const { return g_windowless; }
-bool pragma::CEngine::IsCPURenderingOnly() const { return g_cpuRendering; }
+bool pragma::CEngine::IsWindowless() const
+{
+	auto windowless = m_launchSettings.Get<udm::Boolean>("windowless");
+	if(windowless)
+		return *windowless;
+	return false;
+}
+bool pragma::CEngine::IsCPURenderingOnly() const { return m_launchSettings.Get<udm::Boolean>("cpu_rendering", false); }
 bool pragma::CEngine::IsClosed() const { return math::is_flag_set(m_stateFlags, StateFlags::CEClosed); }
 
 void pragma::CEngine::HandleOpenGLFallback()
@@ -676,12 +671,80 @@ void pragma::CEngine::HandleOpenGLFallback()
 	pragma::util::start_process(cmdInfo);
 }
 
-std::optional<std::string> g_waylandLibdecorPlugin;
-extern bool g_cli;
+bool pragma::CEngine::ShowSplashScreen()
+{
+	if(m_splashScreenWindow)
+		return true;
+	auto splashscreen = m_launchSettings.Get<udm::String>("splashscreen");
+	if(!splashscreen)
+		return false;
+	auto *cl = GetClientState();
+	if(!cl) {
+		spdlog::error("Unable to create splash screen: Invalid client state!");
+		return false;
+	}
+	auto *mat = static_cast<material::CMaterial *>(cl->LoadMaterial(*splashscreen));
+	if(!mat) {
+		spdlog::error("Failed to load splash screen material '{}'!", *splashscreen);
+		mat = static_cast<material::CMaterial*>(cl->GetMaterialManager().GetErrorMaterial());
+	}
+	if(!mat) {
+		spdlog::error("Failed to load splash screen material!");
+		return false;
+	}
+	auto *albedoMap = mat->GetAlbedoMap();
+	if(!albedoMap) {
+		spdlog::error("Splash screen material '{}' has no albedo map!", *splashscreen);
+		return false;
+	}
+
+	if(albedoMap->width == 0 || albedoMap->height == 0) {
+		spdlog::error("Splash screen material '{}' has empty bounds!", *splashscreen);
+		return false;
+	}
+
+	prosper::WindowSettings settings {};
+	settings.width = albedoMap->width;
+	settings.height = albedoMap->height;
+	settings.decorated = false;
+	settings.resizable = false;
+	settings.focused = true;
+
+	auto result = CreateWindow(settings);
+	if(!result)
+		return false;
+	auto &window = *result;
+	auto &gui = gui::WGUI::GetInstance();
+	auto *el = gui.GetBaseElement(window.get());
+	if(!el)
+		return false;
+	auto elTransformable = gui.Create<gui::types::WITransformable>(el);
+	elTransformable->SetSize(el->GetSize());
+	elTransformable->SetDraggable(true);
+
+	auto *elRect = gui.Create<gui::types::WITexturedRect>(el);
+	if(!elRect)
+		return false;
+	elRect->SetMaterial(*splashscreen);
+	elRect->SetSize(el->GetSize());
+	window->SetNoBorder(true);
+	m_splashScreenWindow = window;
+	return true;
+}
+void pragma::CEngine::HideSplashScreen()
+{
+	auto &window = GetWindow();
+	window->Show();
+	if(!m_splashScreenWindow)
+		return;
+	m_splashScreenWindow->Close();
+	m_splashScreenWindow = nullptr;
+}
+
 bool pragma::CEngine::Initialize(int argc, char *argv[])
 {
 	Engine::Initialize(argc, argv);
-	SetCLIOnly(g_cli);
+	SetCLIOnly(m_launchSettings.Get<udm::Boolean>("cli", false));
 
 	if(IsDeveloperModeEnabled()) {
 		spdlog::info("Developer mode is enabled. Disabling global shader file cache to allow hot-reloading of shader code.");
@@ -691,15 +754,16 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 #ifdef __linux__
 	auto xdgSessionType = util::get_env_variable("XDG_SESSION_TYPE");
 	if(!xdgSessionType || *xdgSessionType != "x11") {
-		if(!g_waylandLibdecorPlugin)
-			g_waylandLibdecorPlugin = "gtk";
-		if(g_waylandLibdecorPlugin) {
+		auto waylandLibdecorPlugin = m_launchSettings.Get<udm::String>("wayland_libdecor_plugin");
+		if(!waylandLibdecorPlugin)
+			waylandLibdecorPlugin = "gtk";
+		if(waylandLibdecorPlugin) {
 			// Note: Using cairo plugin with wayland will likely crash on startup
-			if(*g_waylandLibdecorPlugin == "cairo")
+			if(*waylandLibdecorPlugin == "cairo")
 				Con::CWAR << "Using libdecor cairo plugin may crash on startup!" << Con::endl;
 			util::set_env_variable("GDK_BACKEND", "wayland");
 
-			auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor/plugins", *g_waylandLibdecorPlugin);
+			auto path = util::FilePath(util::get_program_path(), "modules/graphics/vulkan/libdecor/plugins", *waylandLibdecorPlugin);
 			util::set_env_variable("LIBDECOR_PLUGIN_DIR", path.GetString());
 		}
 	}
@@ -734,13 +798,15 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		return false;
 	}
 
+	auto forceSingleThreadedMode = m_launchSettings.Get<udm::Boolean>("force_single_threaded_mode", false);
+	auto waitIdleBetweenFrames = m_launchSettings.Get<udm::Boolean>("wait_idle_between_frames", false);
 	auto windowRes = findCmdArg("cl_window_resolution");
 	prosper::IPrContext::CreateInfo contextCreateInfo {};
 	contextCreateInfo.width = 1280;
 	contextCreateInfo.height = 1024;
-	contextCreateInfo.windowless = g_windowless;
-	contextCreateInfo.forceSingleThreadedMode = g_forceSingleThreadedMode;
-	contextCreateInfo.waitIdleBetweenFrames = g_waitIdleBetweenFrames;
+	contextCreateInfo.windowless = IsWindowless();
+	contextCreateInfo.forceSingleThreadedMode = forceSingleThreadedMode;
+	contextCreateInfo.waitIdleBetweenFrames = waitIdleBetweenFrames;
 	contextCreateInfo.enableDiagnostics = IsGfxDiagnosticsModeEnabled();
 
 	std::shared_ptr<udm::Data> renderApiData {};
@@ -900,16 +966,28 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	initialWindowSettings.windowedMode = (mode != 0);
 	initialWindowSettings.decorated = ((mode == 2) ? false : true);
 
-	if(g_launchParamWindowedMode.has_value())
-		initialWindowSettings.windowedMode = *g_launchParamWindowedMode;
-	if(g_launchParamRefreshRate.has_value())
-		initialWindowSettings.refreshRate = *g_launchParamRefreshRate;
-	if(g_launchParamNoBorder.has_value())
-		initialWindowSettings.decorated = !*g_launchParamNoBorder;
-	if(g_launchParamWidth.has_value())
-		initialWindowSettings.width = *g_launchParamWidth;
-	if(g_launchParamHeight.has_value())
-		initialWindowSettings.height = *g_launchParamHeight;
+	if(m_launchSettings.Get<udm::Boolean>("hide_window", false))
+		initialWindowSettings.visible = false;
+
+	auto windowed = m_launchSettings.Get<udm::Boolean>("windowed");
+	if(windowed)
+		initialWindowSettings.windowedMode = *windowed;
+
+	auto freq = m_launchSettings.Get<udm::Int32>("windowed");
+	if(freq)
+		initialWindowSettings.refreshRate = *freq;
+
+	auto noborder = m_launchSettings.Get<udm::Boolean>("noborder");
+	if(noborder)
+		initialWindowSettings.decorated = !*noborder;
+
+	auto width = m_launchSettings.Get<udm::Int32>("w");
+	if(width)
+		initialWindowSettings.width = *width;
+
+	auto height = m_launchSettings.Get<udm::Int32>("h");
+	if(height)
+		initialWindowSettings.height = *height;
 
 	auto renderMonitor = findCmdArg("cl_render_monitor");
 	if(renderMonitor) {
@@ -948,10 +1026,21 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	}
 
 	auto &window = GetRenderContext().GetWindow();
-	if(g_titleBarColor.has_value())
-		window->SetTitleBarColor(*g_titleBarColor);
-	if(g_borderColor.has_value())
-		window->SetBorderColor(*g_borderColor);
+
+	std::optional<Color> titleBarColor {};
+	auto titleBarColorStr = m_launchSettings.Get<udm::String>("title_bar_color");
+	if(titleBarColorStr)
+		titleBarColor = Color::CreateFromHexColor(*titleBarColorStr);
+	if(titleBarColor)
+		window->SetTitleBarColor(*titleBarColor);
+
+	std::optional<Color> borderBarColor {};
+	auto borderBarColorStr = m_launchSettings.Get<udm::String>("border_bar_color");
+	if(borderBarColorStr)
+		borderBarColor = Color::CreateFromHexColor(*borderBarColorStr);
+	if(borderBarColor)
+		window->SetBorderColor(*borderBarColor);
+
 	window.SetStagingTargetReloadCallback([this, &window]() {
 		auto size = window.GetGlfwWindow().GetSize();
 		math::set_flag(m_stateFlags, StateFlags::FirstFrame, true);
@@ -973,16 +1062,16 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 #ifdef _WIN32
 #if defined(WINVER) && (WINVER >= 0x0501)
 	auto h = GetConsoleWindow();
-	if(g_titleBarColor.has_value()) {
-		auto tmp = *g_titleBarColor;
+	if(titleBarColor.has_value()) {
+		auto tmp = *titleBarColor;
 		pragma::math::swap(tmp.r, tmp.b);
 		auto hex = tmp.ToHexColorRGB();
 		COLORREF hexCol = pragma::math::to_hex_number("0x" + hex);
 		const DWORD ATTR_CAPTION_COLOR = 35; // See DWMWINDOWATTRIBUTE::DWMWA_CAPTION_COLOR, can't use the enum because it may not be available and there's no way to check for it
 		DwmSetWindowAttribute(h, ATTR_CAPTION_COLOR, &hexCol, sizeof(hexCol));
 	}
-	if(g_borderColor.has_value()) {
-		auto tmp = *g_borderColor;
+	if(borderBarColor.has_value()) {
+		auto tmp = *borderBarColor;
 		pragma::math::swap(tmp.r, tmp.b);
 		auto hex = tmp.ToHexColorRGB();
 		COLORREF hexCol = pragma::math::to_hex_number("0x" + hex);
@@ -1256,6 +1345,7 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 			}
 		}
 	}
+	ShowSplashScreen();
 	return true;
 }
 
@@ -1476,10 +1566,13 @@ std::expected<std::shared_ptr<prosper::Window>, std::string> pragma::CEngine::Cr
 		return std::unexpected {res.error()};
 	auto &window = res.value();
 
-	if(g_titleBarColor.has_value())
-		(*window)->SetTitleBarColor(*g_titleBarColor);
-	if(g_borderColor.has_value())
-		(*window)->SetBorderColor(*g_borderColor);
+	auto titleBarColor = m_launchSettings.Get<udm::String>("title_bar_color");
+	if(titleBarColor)
+		(*window)->SetTitleBarColor(*titleBarColor);
+
+	auto borderBarColor = m_launchSettings.Get<udm::String>("border_bar_color");
+	if(borderBarColor)
+		(*window)->SetBorderColor(*borderBarColor);
 
 	auto *pWindow = window.get();
 	pWindow->GetStagingRenderTarget(); // This will initialize the staging target immediately
@@ -1826,7 +1919,8 @@ void pragma::CEngine::UpdateFPS(float t)
 static auto cvProfiling = pragma::console::get_engine_con_var("debug_profiling_enabled");
 void pragma::CEngine::DrawFrame()
 {
-	auto primWindowCmd = GetWindow().GetDrawCommandBuffer();
+	auto &primDrawCmd = GetRenderContext().GetCurrentPrimaryDrawCommandBuffer();
+
 	auto perfTimers = math::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers);
 	if(perfTimers) {
 		auto n = math::to_integral(GPUTimer::Count);
@@ -1836,12 +1930,12 @@ void pragma::CEngine::DrawFrame()
 		}
 
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Frame);
-		m_gpuTimers[idx]->Begin(*primWindowCmd);
+		m_gpuTimers[idx]->Begin(*primDrawCmd);
 	}
 	m_gpuProfiler->Reset();
 	StartGPUProfilingStage("Frame");
 
-	auto ptrDrawCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(primWindowCmd);
+	auto ptrDrawCmd = std::dynamic_pointer_cast<prosper::IPrimaryCommandBuffer>(primDrawCmd);
 	CallCallbacks<void, std::reference_wrapper<std::shared_ptr<prosper::IPrimaryCommandBuffer>>>("DrawFrame", std::ref(ptrDrawCmd));
 
 #ifdef PRAGMA_ENABLE_VTUNE_PROFILING
@@ -1854,51 +1948,55 @@ void pragma::CEngine::DrawFrame()
 
 	StartProfilingStage("GUILogic");
 	auto &gui = gui::WGUI::GetInstance();
-	gui.Think(primWindowCmd);
+	gui.Think(primDrawCmd);
 	StopProfilingStage(); // GUILogic
 
-	auto &stagingRt = GetRenderContext().GetWindow().GetStagingRenderTarget();
-	if(math::is_flag_set(m_stateFlags, StateFlags::FirstFrame))
-		math::set_flag(m_stateFlags, StateFlags::FirstFrame, false);
-	else {
-		primWindowCmd->RecordImageBarrier(stagingRt->GetTexture().GetImage(), prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
+	auto &mainWindow = GetWindow();
+	std::shared_ptr<prosper::RenderTarget> *stagingRt = nullptr;
+	if(mainWindow.IsAvailableForRendering()) {
+		auto &mainWindowDrawCmd = mainWindow.GetDrawCommandBuffer();
+		stagingRt = &mainWindow.GetStagingRenderTarget();
+		if(mainWindowDrawCmd) {
+			if(math::is_flag_set(m_stateFlags, StateFlags::FirstFrame))
+				math::set_flag(m_stateFlags, StateFlags::FirstFrame, false);
+			else
+				mainWindowDrawCmd->RecordImageBarrier((*stagingRt)->GetTexture().GetImage(), prosper::ImageLayout::TransferSrcOptimal, prosper::ImageLayout::ColorAttachmentOptimal);
+		}
 	}
 
 	DrawScene(stagingRt);
 
 	if(perfTimers) {
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Present);
-		m_gpuTimers[idx]->Begin(*primWindowCmd);
+		m_gpuTimers[idx]->Begin(*primDrawCmd);
 	}
 	for(auto &window : GetRenderContext().GetWindows()) {
 		if(window->IsValid() == false || window->GetState() != prosper::Window::State::Active)
 			continue;
 		auto &finalImg = window->GetStagingRenderTarget()->GetTexture().GetImage();
-		primWindowCmd->RecordImageBarrier(finalImg, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
+		primDrawCmd->RecordImageBarrier(finalImg, prosper::ImageLayout::ColorAttachmentOptimal, prosper::ImageLayout::TransferSrcOptimal);
 
-		primWindowCmd->RecordPresentImage(finalImg, *window);
+		primDrawCmd->RecordPresentImage(finalImg, *window);
 	}
 
 	if(perfTimers) {
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Present);
-		m_gpuTimers[idx]->End(*primWindowCmd);
+		m_gpuTimers[idx]->End(*primDrawCmd);
 	}
 
 	StopGPUProfilingStage(); // Frame
 	if(perfTimers) {
 		auto idx = GetPerformanceTimerIndex(GPUTimer::Frame);
-		m_gpuTimers[idx]->End(*primWindowCmd);
+		m_gpuTimers[idx]->End(*primDrawCmd);
 	}
 }
 
 static auto cvHideGui = pragma::console::get_client_con_var("debug_hide_gui");
-void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
+void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> *rt)
 {
 	auto perfTimers = math::is_flag_set(m_stateFlags, StateFlags::EnableGpuPerformanceTimers);
 	auto drawGui = !cvHideGui->GetBool();
 	if(drawGui) {
-		auto &rp = rt->GetRenderPass();
-		auto &fb = rt->GetFramebuffer();
 		StartProfilingStage("RecordGUI");
 		StartProfilingStage("GUI");
 
@@ -1929,24 +2027,23 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		StopProfilingStage(); // RecordGUI
 	}
 
+	auto &primDrawCmd = GetRenderContext().GetCurrentPrimaryDrawCommandBuffer();
 	auto *cl = static_cast<ClientState *>(GetClientState());
 	auto tStart = util::Clock::now();
-	if(cl != nullptr) {
+	if(cl != nullptr && rt) {
 		StartProfilingStage("RecordScene");
 		StartGPUProfilingStage("DrawScene");
 
-		auto &window = GetWindow();
-		auto &drawCmd = window.GetDrawCommandBuffer();
 		if(perfTimers) {
 			auto idx = GetPerformanceTimerIndex(GPUTimer::Scene);
-			m_gpuTimers[idx]->Begin(*drawCmd);
+			m_gpuTimers[idx]->Begin(*primDrawCmd);
 		}
 		rendering::DrawSceneInfo drawSceneInfo {};
-		drawSceneInfo.commandBuffer = drawCmd;
-		cl->Render(drawSceneInfo, rt);
+		drawSceneInfo.commandBuffer = primDrawCmd;
+		cl->Render(drawSceneInfo, *rt);
 		if(perfTimers) {
 			auto idx = GetPerformanceTimerIndex(GPUTimer::Scene);
-			m_gpuTimers[idx]->End(*drawCmd);
+			m_gpuTimers[idx]->End(*primDrawCmd);
 		}
 
 		StopGPUProfilingStage(); // DrawScene
@@ -1959,10 +2056,9 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		if(get_cgame() != nullptr)
 			get_cgame()->PreGUIDraw();
 
-		auto &primWindowCmd = GetWindow().GetDrawCommandBuffer();
 		if(perfTimers) {
 			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
-			m_gpuTimers[idx]->Begin(*primWindowCmd);
+			m_gpuTimers[idx]->Begin(*primDrawCmd);
 		}
 		for(auto &window : GetRenderContext().GetWindows()) {
 			if(!window || !window->IsValid() || window->GetState() != prosper::Window::State::Active)
@@ -1978,7 +2074,7 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 		}
 		if(perfTimers) {
 			auto idx = GetPerformanceTimerIndex(GPUTimer::GUI);
-			m_gpuTimers[idx]->End(*primWindowCmd);
+			m_gpuTimers[idx]->End(*primDrawCmd);
 		}
 		CallCallbacks<void>("PostDrawGUI");
 		if(get_cgame() != nullptr)
@@ -1989,7 +2085,12 @@ void pragma::CEngine::DrawScene(std::shared_ptr<prosper::RenderTarget> &rt)
 }
 
 uint32_t pragma::CEngine::GetPerformanceTimerIndex(uint32_t swapchainIdx, GPUTimer timer) const { return swapchainIdx * math::to_integral(GPUTimer::Count) + math::to_integral(timer); }
-uint32_t pragma::CEngine::GetPerformanceTimerIndex(GPUTimer timer) const { return GetPerformanceTimerIndex(GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex(), timer); }
+uint32_t pragma::CEngine::GetPerformanceTimerIndex(GPUTimer timer) const {
+	auto idx = GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
+	if (!idx)
+		throw std::runtime_error {"No current acquired swapchain image!"};
+	return GetPerformanceTimerIndex(*idx, timer);
+}
 
 void pragma::CEngine::SetGpuPerformanceTimersEnabled(bool enabled)
 {

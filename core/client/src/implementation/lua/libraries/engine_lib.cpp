@@ -55,6 +55,8 @@ void Lua::engine::register_library(lua::State *l)
 		  zipFile = nullptr;
 		  return zipFileName;
 	  })];
+	modEngine[luabind::def("show_splash_screen", &pragma::CEngine::ShowSplashScreen)];
+	modEngine[luabind::def("hide_splash_screen", &pragma::CEngine::HideSplashScreen)];
 
 	register_shared_functions(l, modEngine);
 

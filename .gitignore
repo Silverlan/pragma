@@ -1,8 +1,13 @@
 build/
+build_tools/cmake/
 deps/
 .cache/
+.SynologyWorkingDirectory/
+.idea/
+.vscode/
 /build_tools/clang/
 /build_tools/gcc/
+/build_tools/linuxdeploy-x86_64.AppImage
 /build_scripts/user_modules.py
 CMakeLists.txt.user
 *.pyc

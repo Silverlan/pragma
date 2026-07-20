@@ -65,28 +65,28 @@ prosper::TimerQuery *GPUSwapchainTimer::GetTimerQuery()
 {
 	InitializeQueries();
 	auto index = get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
-	if(index >= m_swapchainTimers.size())
+	if(!index || *index >= m_swapchainTimers.size())
 		return nullptr;
-	return m_swapchainTimers.at(index).timerQuery.get();
+	return m_swapchainTimers.at(*index).timerQuery.get();
 }
 
 prosper::PipelineStatisticsQuery *GPUSwapchainTimer::GetStatisticsQuery()
 {
 	InitializeQueries();
 	auto index = get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
-	if(index >= m_swapchainTimers.size())
+	if(!index || *index >= m_swapchainTimers.size())
 		return nullptr;
-	return m_swapchainTimers.at(index).statsQuery.get();
+	return m_swapchainTimers.at(*index).statsQuery.get();
 }
 
 void GPUSwapchainTimer::InitializeQueries()
 {
 	auto index = get_cengine()->GetRenderContext().GetLastAcquiredPrimaryWindowSwapchainImageIndex();
-	if(index < m_swapchainTimers.size())
+	if(!index || *index < m_swapchainTimers.size())
 		return;
 	auto timerPool = m_wpTimerQueryPool.lock();
 	auto statsPool = m_wpStatsQueryPool.lock();
-	m_swapchainTimers.reserve(index + 1);
+	m_swapchainTimers.reserve(*index + 1);
 	for(auto i = decltype(m_swapchainTimers.size()) {0u}; i <= index; ++i) {
 		// TODO: Using the same stage for both time queries makes no sense
 		auto timerQuery = timerPool->CreateTimerQuery(static_cast<prosper::PipelineStageFlags>(m_stage), static_cast<prosper::PipelineStageFlags>(m_stage));

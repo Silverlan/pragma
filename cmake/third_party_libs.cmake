@@ -133,7 +133,7 @@ set(VERBOSE
 set(EFSW_INSTALL
     OFF
     CACHE BOOL OFF FORCE)
-pr_fetch_third_party_lib("efsw" INC "efsw" "https://github.com/SpartanJ/efsw" "1bb814c")
+pr_fetch_third_party_lib("efsw" INC "efsw" "https://github.com/SpartanJ/efsw" "3535c3a382c505d8b9dae4b59061ac3ff94470fb")
 pr_set_target_folder(efsw third_party_libs)
 #
 
@@ -239,7 +239,7 @@ else()
         "glfw"
         CACHE INTERNAL "" FORCE)
 endif()
-pr_fetch_third_party_lib("glfw" "https://github.com/Silverlan/glfw" "8d6f5d9bc8477057dccc1190d46b0945219e2f33") # Branch: "feat/drag-callback"
+pr_fetch_third_party_lib("glfw" "https://github.com/Silverlan/glfw" "9a646acc5f01461bb34fbc918d7e27dbf2422cd2") # Branch: "feat/drag-callback"
 pr_set_target_folder(glfw third_party_libs/glfw)
 #
 

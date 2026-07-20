@@ -219,7 +219,6 @@ lua::State *pragma::ClientState::GetGUILuaState() { return (m_luaGUI != nullptr)
 Lua::Interface &pragma::ClientState::GetGUILuaInterface() { return *m_luaGUI; }
 
 //__declspec(dllimport) void test_lua_policies(lua::State *l);
-std::optional<std::vector<std::string>> g_autoExecScripts {};
 void pragma::ClientState::InitializeGUILua()
 {
 	m_luaGUI = pragma::util::make_shared<Lua::Interface>();
@@ -282,9 +281,13 @@ void pragma::ClientState::InitializeGUILua()
 	gui::WGUILuaInterface::Initialize();
 
 	scripting::lua_core::execute_files_in_directory(GetGUILuaState(), "autorun/gui/");
-	if(g_autoExecScripts.has_value()) {
-		for(auto &f : *g_autoExecScripts)
-			scripting::lua_core::execute_file(GetGUILuaState(), f);
+	auto propAutoExec = get_engine()->GetLaunchSettings().GetProperty("auto_exec_scripts");
+	if(propAutoExec) {
+		auto autoExecScripts = propAutoExec->ToValue<std::vector<std::string>>();
+		if(autoExecScripts) {
+			for(auto &f : *autoExecScripts)
+				scripting::lua_core::execute_file(GetGUILuaState(), f);
+		}
 	}
 }
 
@@ -470,7 +473,6 @@ void pragma::ClientState::Draw(rendering::DrawSceneInfo &drawSceneInfo) //const 
 
 void pragma::ClientState::Render(rendering::DrawSceneInfo &drawSceneInfo, std::shared_ptr<prosper::RenderTarget> &rt)
 {
-	auto &drawCmd = drawSceneInfo.commandBuffer;
 	drawSceneInfo.outputImage = rt->GetTexture().GetImage().shared_from_this();
 	CallCallbacks<void, std::reference_wrapper<const rendering::DrawSceneInfo>, std::reference_wrapper<std::shared_ptr<prosper::RenderTarget>>>("PreRender", std::ref(drawSceneInfo), std::ref(rt));
 	if(m_game != nullptr) {

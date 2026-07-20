@@ -132,7 +132,7 @@ function(pr_fetch_repository IDENTIFIER GIT_URL GIT_SHA CHECKOUT_PATH)
     FetchContent_MakeAvailable(${IDENTIFIER})
 endfunction()
 
-project(pragma)
+project(pragma VERSION 1.3.0)
 
 if(NOT PRAGMA_IGNORE_WARNINGS)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")

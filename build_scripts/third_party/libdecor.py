@@ -8,7 +8,7 @@ def main():
 	if platform == "linux":
 		os.chdir(deps_dir)
 		libdecor_root = os.getcwd() +"/libdecor"
-		commit_sha = "73fc377e13834010178919b182e738ea53f15c10"
+		commit_sha = "59c498aff477a3c23dcb5bfaa101c5d3287da629"
 		if not check_repository_commit(libdecor_root, commit_sha, "libdecor"): 
 			if not Path(libdecor_root).is_dir():
 				print_msg("libdecor not found. Downloading...")

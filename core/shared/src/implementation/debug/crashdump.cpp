@@ -269,6 +269,43 @@ bool CrashHandler::GenerateCrashDump() const
 {
 	std::cout << "Generating crashdump..." << std::endl;
 	LOGGER.info("Generating crashdump...");
+
+	auto stackBacktrace = get_formatted_stack_backtrace_string();
+	// Output the backtrace immediately in case the crashdump handler itself is going to cause errors
+	std::cout << "Stack Backtrace: " << stackBacktrace << std::endl;
+
+#ifdef __linux__
+	// TODO: Is this obsolete? We're already writing get_formatted_stack_backtrace_string in Engine::GenerateEngineDump,
+	// which appears to be more reliable anyway.
+	LOGGER.debug("Generating stack backtrace...");
+	void *array[10];
+	size_t size;
+	char **symbols;
+	char buffer[1024];
+	buffer[0] = '\0';
+
+	size = backtrace(array, 10);
+	symbols = backtrace_symbols(array, size);
+
+	std::optional<std::string> backtraceStr {};
+	if(symbols != nullptr) {
+		snprintf(buffer, sizeof(buffer), "Error: signal %d:\n", m_sig);
+
+		for(size_t i = 0; i < size; i++) {
+			strncat(buffer, symbols[i], sizeof(buffer) - strlen(buffer) - 1);
+			strncat(buffer, "\n", sizeof(buffer) - strlen(buffer) - 1);
+		}
+
+		backtraceStr = buffer;
+		free(symbols);
+	}
+
+	if(backtraceStr) {
+		std::cout << "Raw Backtrace:" << std::endl;
+		std::cout << *backtraceStr << std::endl;
+	}
+#endif
+
 	flush_loggers();
 
 	LOGGER.debug("Loading localization files...");
@@ -295,36 +332,6 @@ bool CrashHandler::GenerateCrashDump() const
 		// default answer.
 		saveDump = (res == std::nullopt || *res == MessageBoxButton::Yes);
 	}
-
-#ifdef __linux__
-	LOGGER.debug("Generating stack backtrace...");
-	void *array[10];
-	size_t size;
-	char **symbols;
-	char buffer[1024];
-	buffer[0] = '\0';
-
-	size = backtrace(array, 10);
-	symbols = backtrace_symbols(array, size);
-
-	std::optional<std::string> backtraceStr {};
-	if(symbols != nullptr) {
-		snprintf(buffer, sizeof(buffer), "Error: signal %d:\n", m_sig);
-
-		for(size_t i = 0; i < size; i++) {
-			strncat(buffer, symbols[i], sizeof(buffer) - strlen(buffer) - 1);
-			strncat(buffer, "\n", sizeof(buffer) - strlen(buffer) - 1);
-		}
-
-		backtraceStr = buffer;
-		free(symbols);
-	}
-	
-	if(backtraceStr) {
-		std::cout << "Backtrace:" << std::endl;
-		std::cout << *backtraceStr << std::endl;
-	}
-#endif
 
 	auto success = false;
 	if(saveDump) {
@@ -393,7 +400,7 @@ bool CrashHandler::GenerateCrashDump() const
 #endif
 	if(crashInProsperModule) {
 		// Probably a rendering related crash.
-		Engine::Get()->HandleOpenGLFallback();
+		// Engine::Get()->HandleOpenGLFallback();
 	}
 
 	// We've done all we can, just force quit at this point

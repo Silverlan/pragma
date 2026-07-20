@@ -458,8 +458,13 @@ if platform == "linux":
 				"cmake",
 				"ninja",
 				"base-devel",
-				"freetype-devel",
-				"libnotify-devel"
+				"freetype-devel"
+			]
+
+			# oskit
+			packages += [
+				"libnotify-devel",
+				"dbus-devel"
 			]
 
 			# glfw
@@ -512,8 +517,13 @@ if platform == "linux":
 				"ninja",
 				"gcc",
 				"g++",
-				"freetype-devel",
-				"libnotify-devel"
+				"freetype-devel"
+			]
+
+			# oskit
+			packages += [
+				"libnotify-devel",
+				"dbus-devel"
 			]
 
 			# glfw
@@ -565,8 +575,13 @@ if platform == "linux":
 		elif(prefer_pacman()): # Arch / pacman
 			packages = [
 				"cmake",
-				"ninja",
-				"libnotify"
+				"ninja"
+			]
+
+			# oskit
+			packages += [
+				"libnotify",
+				"dbus"
 			]
 
 			if build_all:
@@ -589,8 +604,13 @@ if platform == "linux":
 				"ninja-build",
 				"gcc",
 				"g++",
-				"libfreetype6-dev",
-				"libnotify-dev"
+				"libfreetype6-dev"
+			]
+
+			# oskit
+			packages += [
+				"libnotify-dev",
+				"libdbus-1-dev"
 			]
 
 			# glfw

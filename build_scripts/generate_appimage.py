@@ -109,11 +109,8 @@ def main():
     if no_strip:
         os.environ["NO_STRIP"] = "1"
 
-    # Exclude host libraries
+    # Exclude libraries
     exclude_libs = ["libcrypto.so.3", "libssl.so.3", "libcrypto.so.1.1", "libssl.so.1.1"]
-    existing_exclude = os.environ.get("EXCLUDE_LIBRARIES", "")
-    new_exclude = ":".join(exclude_libs)
-    os.environ["EXCLUDE_LIBRARIES"] = f"{existing_exclude}:{new_exclude}" if existing_exclude else new_exclude
 
     os.chdir(appimage_base_path)
     cmd = [
@@ -126,6 +123,9 @@ def main():
 
     cmd.extend(extra_execs)
 
+    for lib in exclude_libs:
+        cmd.extend(["--exclude-library", lib])
+        
     cmd.extend(
         [
             "--desktop-file",

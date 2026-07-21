@@ -42,7 +42,13 @@ def main():
     shutil.rmtree(appimage_install_path, ignore_errors=True)
     shutil.rmtree(appimage_data_path / "usr/lib", ignore_errors=True)
     print(f"Copying install files to {str(appimage_install_path)}...")
-    shutil.copytree(install_directory, appimage_install_path)
+    shutil.copytree(
+        install_directory, 
+        appimage_install_path, 
+        symlinks=True,
+        ignore_dangling_symlinks=True,
+        ignore=shutil.ignore_patterns("cache", "Singleton*")
+    )
 
     repo_path = Path.cwd().parent
 

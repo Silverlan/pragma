@@ -668,6 +668,13 @@ void pragma::Engine::Release() { Close(); }
 
 bool pragma::Engine::Initialize(int argc, char *argv[])
 {
+#ifdef __linux__
+	if (util::is_running_as_appimage()) {
+		auto appImagePath = util::get_internal_appimage_path();
+		util::set_program_path(util::FilePath(*appImagePath).GetParent());
+	}
+#endif
+
 	InitLaunchOptions(argc, argv);
 
 	auto packageManager = m_launchSettings.Get<udm::Boolean>("managed_by_package_manager", false);
@@ -716,6 +723,16 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 		}
 	}
 	//
+
+#ifdef __linux__
+	if (util::is_running_as_appimage()) {
+		spdlog::debug("Pragma is running via AppImage.");
+		auto internalAppImagePath = util::get_internal_appimage_path();
+		auto appImagePath = util::get_path_to_appimage();
+		spdlog::debug("Internal AppImage path: {}", internalAppImagePath ? *internalAppImagePath : "nullopt");
+		spdlog::debug("Path to AppImage: {}", appImagePath ? *appImagePath : "nullopt");
+	}
+#endif
 
 	auto f = fs::open_file("git_info.txt", fs::FileMode::Read, nullptr, fs::SearchFlags::Local | fs::SearchFlags::NoMounts);
 	if(f) {

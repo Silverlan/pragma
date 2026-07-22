@@ -104,15 +104,19 @@ bool pragma::AddonSystem::MountAddon(const std::string &paddonPath, std::vector<
 	string::replace(addonPath, "\\", "/");
 	auto path = util::Path::CreatePath(addonPath);
 	auto n = path.GetComponentCount();
-	if((n % 2) == 0)
+	if((n % 2) == 0) {
+		spdlog::trace("AddonSystem::MountAddon: Invalid addon path \"{}\".", addonPath);
 		return false;
+	}
 	if(n > 1) {
 		size_t curOffset = 0;
 		path.GetComponent(curOffset, &curOffset);
 		for(auto i = decltype(n) {1u}; i < n; i += 2) {
 			auto component = path.GetComponent(curOffset, &curOffset);
-			if(component != "addons")
+			if(component != "addons") {
+				spdlog::trace("AddonSystem::MountAddon: Invalid top-level directory \"{}\".", component);
 				return false; // This is not a top-level directory (i.e. it's not an addon, but the sub-directory of an addon)
+			}
 			path.GetComponent(curOffset, &curOffset);
 		}
 	}

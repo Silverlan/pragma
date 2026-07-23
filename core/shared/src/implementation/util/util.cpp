@@ -377,11 +377,21 @@ std::pair<std::vector<double>, std::vector<double>> pragma::util::generate_two_p
 //
 
 extern std::vector<std::string> g_lpResourceDirs;
-pragma::util::Path pragma::util::get_user_data_dir()
+static std::optional<pragma::util::Path> g_userDataDir {};
+void pragma::util::set_user_data_dir(const Path &userDataDir)
 {
-	auto userDataDir = get_engine()->GetLaunchSettings().Get<udm::String>("user_data_dir");
-	if(userDataDir)
-		return *userDataDir;
+	if(userDataDir == get_program_path()) {
+		g_userDataDir = {};
+		return;
+	}
+	g_userDataDir = userDataDir;
+}
+pragma::util::Path pragma::util::get_user_data_dir(bool *optOutIsCustom)
+{
+	if(optOutIsCustom)
+		*optOutIsCustom = g_userDataDir.has_value();
+	if(g_userDataDir)
+		return *g_userDataDir;
 	return get_program_path();
 }
 
@@ -421,7 +431,4 @@ bool pragma::util::show_notification(const std::string &summary, const std::stri
 	return oskit::show_notification(info);
 }
 
-bool pragma::util::add_file_to_zip_archive(uzip::ZIPFile &zipArchive, const std::string &fileName, const void *data, uint64_t size, bool bOverwrite)
-{
-	return zipArchive.AddFile(fileName, data, size, bOverwrite);
-}
+bool pragma::util::add_file_to_zip_archive(uzip::ZIPFile &zipArchive, const std::string &fileName, const void *data, uint64_t size, bool bOverwrite) { return zipArchive.AddFile(fileName, data, size, bOverwrite); }

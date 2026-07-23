@@ -9,40 +9,80 @@ inputs:
     description: 'The version of Pragma to download.'
     required: true
     default: 'nightly'
+  format:
+    description: 'The format to download. Options: "archive" (default) or "appimage" (Linux only).'
+    required: false
+    default: 'archive'
+outputs:
+  path:
+    description: 'Path to the downloaded AppImage, or the extracted working directory if it is an archive.'
+    value: ${{ steps.download.outputs.path }}
 runs:
   using: "composite"
   steps:
     - name: Download Pragma
+      id: download
       shell: bash
       run: |
-        if [ -d "${{ inputs.working-directory }}" ]; then
-          echo "Pragma already exists. Skipping download."
-        else
-          repo="Silverlan/pragma"
-
-          version="${{ inputs.version }}"
-
-          dlUrl="https://github.com/Silverlan/pragma/releases/download/${version}/"
-          if [ "$RUNNER_OS" == "Linux" ]; then
+        version="${{ inputs.version }}"
+        format="${{ inputs.format }}"
+        
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          if [ "$format" == "appimage" ]; then
+            if [ "$version" == "nightly" ]; then
+              fileName="PFM-x86_64.AppImage"
+            else
+              fileName="PFM-${version}-x86_64.AppImage"
+            fi
+          else
             if [ "$version" == "nightly" ]; then
               fileName="pragma-linux-x64-clang.tar.gz"
             else
               fileName="pragma-${version}-linux-x64-clang.tar.gz"
             fi
-          else
-            if [ "$version" == "nightly" ]; then
-              fileName="pragma-windows-x64-clang.zip"
-            else
-              fileName="pragma-${version}-windows-x64-clang.zip"
-            fi
           fi
-          dlUrl="${dlUrl}${fileName}"
-
-          curl -L "${dlUrl}" -o "${fileName}"
-          mkdir -p "${{ inputs.working-directory }}"
-          if [[ $fileName == *.tar.gz ]]; then
-            tar -xzf ${fileName} -C "${{ inputs.working-directory }}"
+        else
+          # Windows
+          if [ "$version" == "nightly" ]; then
+            fileName="pragma-windows-x64-clang.zip"
           else
-            unzip -q ${fileName} -d "${{ inputs.working-directory }}"
+            fileName="pragma-${version}-windows-x64-clang.zip"
           fi
         fi
+        
+        if [[ "$fileName" == *.AppImage ]]; then
+          out_path="${{ inputs.working-directory }}/${fileName}"
+        else
+          out_path="${{ inputs.working-directory }}"
+        fi
+        
+        if [ -d "${{ inputs.working-directory }}" ] && [ "$(ls -A ${{ inputs.working-directory }})" ]; then
+          echo "Pragma already exists in ${{ inputs.working-directory }}. Skipping download."
+          echo "path=$out_path" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        dlUrl="https://github.com/Silverlan/pragma/releases/download/${version}/${fileName}"
+        echo "Downloading ${dlUrl}..."
+        # Using -f to fail curl on 404 errors so the action halts on invalid links
+        curl -L -f "${dlUrl}" -o "${fileName}"
+        
+        mkdir -p "${{ inputs.working-directory }}"
+        
+        if [[ "$fileName" == *.tar.gz ]]; then
+          echo "Extracting tar.gz..."
+          tar -xzf "${fileName}" -C "${{ inputs.working-directory }}"
+          rm "${fileName}"
+        elif [[ "$fileName" == *.zip ]]; then
+          echo "Extracting zip..."
+          unzip -q "${fileName}" -d "${{ inputs.working-directory }}"
+          rm "${fileName}"
+        elif [[ "$fileName" == *.AppImage ]]; then
+          echo "Moving and making AppImage executable..."
+          mv "${fileName}" "${out_path}"
+          chmod +x "${out_path}"
+        else
+          mv "${fileName}" "${{ inputs.working-directory }}/"
+        fi
+        
+        echo "path=$out_path" >> $GITHUB_OUTPUT

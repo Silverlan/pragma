@@ -5,6 +5,10 @@ inputs:
     description: 'The location where Pragma resides. If no Pragma installation is found, it will be installed in this location.'
     required: true
     default: 'pragma'
+  user-directory:
+    description: 'Where user-files and Pragma-generated files should reside. Defaults to $HOME/.local/share/pfm for appimages, otherwise working-directory.'
+    required: false
+    default: ''
   lua-code:
     description: 'Lua code to execute'
     required: true
@@ -21,6 +25,10 @@ inputs:
     description: 'The version of Pragma to download (if it not already exists).'
     required: true
     default: 'nightly'
+  format:
+    description: 'The format to use. Options: "archive" (default) or "appimage" (Linux only).'
+    required: false
+    default: 'archive'
   artifacts-name:
     description: 'If specified, debug files (e.g. logs) will be uploaded as artifacts under this name.'
     required: true
@@ -38,20 +46,36 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Resolve directory paths
+      shell: bash
+      run: |
+        RAW_WORK="${{ inputs.working-directory }}"
+        echo "WORKING_DIR=${RAW_WORK//\\//}" >> $GITHUB_ENV
+        
+        if [ -n "${{ inputs.user-directory }}" ]; then
+          RAW_USER="${{ inputs.user-directory }}"
+        elif [ "${{ inputs.format }}" == "appimage" ]; then
+          RAW_USER="$HOME/.local/share/pfm"
+        else
+          RAW_USER="${{ inputs.working-directory }}"
+        fi
+        echo "USER_DIR=${RAW_USER//\\//}" >> $GITHUB_ENV
+
     - name: Download Pragma
       id: download-pragma
       uses: Silverlan/pragma/github_actions/download_pragma@main
       with:
         version: "${{ inputs.version }}"
         working-directory: "${{ inputs.working-directory }}"
+        format: "${{ inputs.format }}"
 
     - name: Generate CI Lua-script
       shell: bash
       run: |
-        mkdir -p "${{ inputs.working-directory }}/lua"
-        scriptFileName="${{ inputs.working-directory }}/lua/ci_script.lua"
+        mkdir -p "$USER_DIR/lua"
+        scriptFileName="$USER_DIR/lua/ci_script.lua"
 
-        cat <<EOF > ${scriptFileName}
+        cat <<EOF > "$scriptFileName"
         local cbOnError = game.add_event_listener("OnLuaError",function(err)
           console.print_messageln("A Lua error has occurred! Shutting down...")
           file.write("ci.txt", "lua")
@@ -60,16 +84,16 @@ runs:
         end)
         EOF
 
-        echo "file.write(\"ci.txt\", \"unknown\")" >> ${scriptFileName}
+        echo "file.write(\"ci.txt\", \"unknown\")" >> "$scriptFileName"
         if [ "${{ inputs.lua-script }}" != "" ]; then
-          cat <<EOF >> ${scriptFileName}
+          cat <<EOF >> "$scriptFileName"
         include("${{ inputs.lua-script }}")
         EOF
 
         fi
-        echo "${{ inputs.lua-code }}" >> ${scriptFileName}
-        echo "file.write(\"ci.txt\", \"success\")" >> ${scriptFileName}
-        cat ${scriptFileName}
+        echo "${{ inputs.lua-code }}" >> "$scriptFileName"
+        echo "file.write(\"ci.txt\", \"success\")" >> "$scriptFileName"
+        cat "$scriptFileName"
 
     - name: Runner Setup
       shell: bash
@@ -88,25 +112,50 @@ runs:
       shell: bash
       id: run-script
       run: |
-        cd "${{ inputs.working-directory }}"
-        if [ "$RUNNER_OS" == "Linux" ]; then
-          chmod +x ./pragma
-        fi
-        executableName="pragma"
+        cd "$WORKING_DIR"
+        
         luaCmdName="lua_exec"
         if [ "${{ inputs.state }}" == "client" ]; then
           luaCmdName="lua_exec_cl"
         fi
-        if [ "$RUNNER_OS" == "Windows" ]; then
+        
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          if [ "${{ inputs.format }}" == "appimage" ]; then
+            if [ "${{ inputs.version }}" == "nightly" ]; then
+              appImageName="PFM-x86_64.AppImage"
+            else
+              appImageName="PFM-${{ inputs.version }}-x86_64.AppImage"
+            fi
+            chmod +x "./${appImageName}"
+            if [ "${{ inputs.state }}" == "server" ]; then
+              executableName="${appImageName} pragma_server"
+            else
+              executableName="${appImageName} pragma"
+            fi
+          else
+            chmod +x ./pragma
+            if [ "${{ inputs.state }}" == "server" ]; then
+              executableName="pragma_server"
+            else
+              executableName="pragma"
+            fi
+          fi
+        elif [ "$RUNNER_OS" == "Windows" ]; then
           if [ "${{ inputs.state }}" == "server" ]; then
             executableName="pragma_server"
           else
             executableName="pragma.com"
           fi
-        elif [ "${{ inputs.state }}" == "server" ]; then
-          executableName="pragma_server"
+        else
+          # Fallback (macOS / others)
+          if [ "${{ inputs.state }}" == "server" ]; then
+            executableName="pragma_server"
+          else
+            executableName="pragma"
+          fi
         fi
-        ./${executableName} -cli -non_interactive -luaext -log 1 1 -log_file "log.txt" +map "empty" +"${luaCmdName} ci_script.lua"
+        
+        ./${executableName} -cli -non_interactive -luaext -log 0 0 -log_file "log.txt" +map "empty" +"${luaCmdName} ci_script.lua"
 
         EXIT_CODE=$?
         echo "exit-code=$(echo $EXIT_CODE)" >> $GITHUB_OUTPUT
@@ -125,16 +174,21 @@ runs:
           exit $exit_code
         fi
     
-        if [ -f "${{ inputs.working-directory }}/ci_lua_error.txt" ]; then
-          CI_LUA_ERROR=$(cat "${{ inputs.working-directory }}/ci_lua_error.txt")
+        # Check for Lua errors in the user directory
+        if [ -f "$USER_DIR/ci_lua_error.txt" ]; then
+          CI_LUA_ERROR=$(cat "$USER_DIR/ci_lua_error.txt")
           if [ -n "$CI_LUA_ERROR" ]; then
-            # Sanitize Lua error content
             SANITIZED_LUA_ERROR=$(echo "$CI_LUA_ERROR" | tr -d '\n\r' | sed 's/["]/ /g')
             echo "lua-error=$SANITIZED_LUA_ERROR" >> $GITHUB_OUTPUT
           fi
         fi
     
-        CI_CONTENTS=$(cat "${{ inputs.working-directory }}/ci.txt")
+        if [ ! -f "$USER_DIR/ci.txt" ]; then
+          echo "error=ci_file_missing" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+        
+        CI_CONTENTS=$(cat "$USER_DIR/ci.txt")
         exit_code=$?
     
         if [ $exit_code -ne 0 ]; then
@@ -142,7 +196,6 @@ runs:
           exit 1
         fi
         if [ "$CI_CONTENTS" != "success" ]; then
-          # Sanitize content: remove newlines/carriage returns and problematic quotes
           SANITIZED_CONTENTS=$(echo "$CI_CONTENTS" | tr -d '\n\r' | sed 's/["]/ /g')
           echo "error=$SANITIZED_CONTENTS" >> $GITHUB_OUTPUT
           exit 2
@@ -153,14 +206,14 @@ runs:
       if: ${{ always() && inputs.artifacts-name != '' }}
       run: |
         mkdir -p artifacts
-        if [ -f "${{ inputs.working-directory }}/log.txt" ]; then
-          cp ${{ inputs.working-directory }}/log.txt artifacts/log.txt
+        if [ -f "$WORKING_DIR/log.txt" ]; then
+          cp "$WORKING_DIR/log.txt" artifacts/log.txt
         fi
-        if [ -d "${{ inputs.working-directory }}/crashdumps" ]; then
-          cp -r ${{ inputs.working-directory }}/crashdumps artifacts/crashdumps
+        if [ -d "$WORKING_DIR/crashdumps" ]; then
+          cp -r "$WORKING_DIR/crashdumps" artifacts/crashdumps
         fi
-        if [ -d "${{ inputs.working-directory }}/artifacts" ] && [ "$(ls -A ${{ inputs.working-directory }}/artifacts)" ]; then
-          cp -rf ${{ inputs.working-directory }}/artifacts/* artifacts/
+        if [ -d "$WORKING_DIR/artifacts" ] && [ "$(ls -A "$WORKING_DIR/artifacts")" ]; then
+          cp -rf "$WORKING_DIR/artifacts/"* artifacts/
         fi
 
     - name: Upload artifact files
@@ -177,18 +230,19 @@ runs:
           rm -rf "artifacts"
         fi
 
-        cd "${{ inputs.working-directory }}"
-        if [ -e "lua/ci_script.lua" ]; then
-          rm "lua/ci_script.lua"
+        if [ -e "$USER_DIR/lua/ci_script.lua" ]; then
+          rm "$USER_DIR/lua/ci_script.lua"
         fi
+        if [ -e "$USER_DIR/ci.txt" ]; then
+          rm "$USER_DIR/ci.txt"
+        fi
+        if [ -e "$USER_DIR/ci_lua_error.txt" ]; then
+          rm "$USER_DIR/ci_lua_error.txt"
+        fi
+
+        cd "$WORKING_DIR"
         if [ -e "log.txt" ]; then
           rm "log.txt"
-        fi
-        if [ -e "ci.txt" ]; then
-          rm "ci.txt"
-        fi
-        if [ -e "ci_lua_error.txt" ]; then
-          rm "ci_lua_error.txt"
         fi
         if [ -d "crashdumps" ]; then
           rm -rf "crashdumps"

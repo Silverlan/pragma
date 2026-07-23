@@ -4,7 +4,7 @@ inputs:
   working-directory:
     description: 'The location where Pragma resides. If no Pragma installation is found, it will be installed in this location.'
     required: true
-    default: 'pragma'
+    default: ''
   test-scripts:
     description: 'The test script(s) to execute.'
     required: true
@@ -17,6 +17,10 @@ inputs:
     description: 'The version of Pragma to download (if it not already exists).'
     required: true
     default: 'nightly'
+  format:
+    description: 'The format to use. Options: "archive" (default) or "appimage" (Linux only).'
+    required: false
+    default: 'archive'
   artifacts-name:
     description: 'If specified, debug files (e.g. logs) will be uploaded as artifacts under this name.'
     required: true
@@ -39,6 +43,7 @@ runs:
       with:
         state: "${{ inputs.state }}"
         version: "${{ inputs.version }}"
+        format: "${{ inputs.format }}"
         artifacts-name: "${{ inputs.artifacts-name }}"
         working-directory: "${{ inputs.working-directory }}"
         lua-code: |

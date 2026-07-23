@@ -103,6 +103,13 @@ jobs:
           workflow: run-tests.yml
           inputs: '{ "os": "ubuntu" }'
 
+      - name: Run Tests (AppImage)
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: run-tests.yml
+          inputs: '{ "os": "ubuntu" }'
+          format: 'appimage'
+
       - name: Generate File Lists
         shell: bash
         if: always()

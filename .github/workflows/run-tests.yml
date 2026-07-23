@@ -9,11 +9,22 @@ on:
           - windows
           - ubuntu
         required: true
+      format:
+        description: 'The format to download. Options: "archive" (default) or "appimage" (Linux only).'
+        type: choice
+        options:
+          - archive
+          - appimage
+        required: false
+        default: 'archive'
 
 jobs:
   test:
     name: Tests - ${{ matrix.config.os }}
     runs-on: ${{ matrix.config.os }}
+    permissions:
+      checks: write
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -26,11 +37,20 @@ jobs:
       run: |
         echo "WORKFLOW_STATUS=success" >> $GITHUB_ENV
 
+    - name: Create User Data Directories
+      if: ${{ inputs.format == 'appimage' }}
+      shell: bash
+      run: |
+        # We have to create these before running the tests, otherwise the directory watchers will not catch changes properly
+        mkdir -p $HOME/.local/share/pfm/lua
+        mkdir -p $HOME/.local/share/pfm/scripts/localization/en
+
     - name: Run Tests
       uses: Silverlan/pragma/github_actions/run_common_tests@main
       timeout-minutes: 60
       with:
         import-tests-token: ${{ secrets.PRAGMA_TESTS_IMPORT_TOKEN }}
+        format: ${{ inputs.format }}
 
     - name: Set Failure Workflow Status
       if: failure()

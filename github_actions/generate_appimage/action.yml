@@ -41,7 +41,7 @@ runs:
         # Use CUDA stub
         sudo ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/lib/x86_64-linux-gnu/libcuda.so.1
         
-        # Resolve libamdhip64.so.6 by pointing ldd to your dependencies directory
+        # Resolve libamdhip
         HIP_LIB_PATH=$(find ${{ steps.build-pragma.outputs.root-dir }} -name "libamdhip64.so.6" | head -n 1)
         
         # Create dummy shared object

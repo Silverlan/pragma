@@ -738,6 +738,15 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	}
 #endif
 
+	if(spdlog::should_log(spdlog::level::trace)) {
+		spdlog::trace("Program path: {}", util::get_program_path());
+		spdlog::trace("Program write path: {}", fs::get_program_write_path());
+		spdlog::trace("Root Paths:");
+		for(auto &path : fs::get_absolute_root_paths())
+			spdlog::trace(path.GetString());
+		spdlog::trace("");
+	}
+
 	auto f = fs::open_file("git_info.txt", fs::FileMode::Read, nullptr, fs::SearchFlags::Local | fs::SearchFlags::NoMounts);
 	if(f) {
 		spdlog::info("Git Info:");

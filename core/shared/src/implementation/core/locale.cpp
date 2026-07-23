@@ -122,6 +122,8 @@ void pragma::locale::set_language(std::string lan)
 
 	try {
 		g_locFileWatcher = std::make_unique<fs::DirectoryWatcherCallback>(LOCALIZATION_ROOT_PATH + lan + '/', [](const util::Path &basePath, const util::Path &path, fs::FileWatcherEvent event) {
+			if(spdlog::should_log(spdlog::level::trace))
+				spdlog::trace("locale DirectoryWatcherCallback(basePath=\"{}\", path=\"{}\", event=\"{}\")", basePath.GetString(), path.GetString(), magic_enum::enum_name(event));
 			if(event != fs::FileWatcherEvent::Modified)
 				return;
 			auto it = std::find(g_loadedFiles.begin(), g_loadedFiles.end(), path.GetString());

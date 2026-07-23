@@ -148,6 +148,7 @@ def main():
     print(f"Launching linuxdeploy with command {cmd}")
     try:
         subprocess.run(cmd, check=True)
+        subprocess.run(["chmod", "+x", str(appimage_base_path / "PFM-x86_64.AppImage")], check=True)
     except subprocess.CalledProcessError as e:
         print(f"linuxdeploy failed with exit code {e.returncode}")
         exit(e.returncode)

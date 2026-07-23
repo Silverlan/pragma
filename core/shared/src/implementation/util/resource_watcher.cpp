@@ -124,11 +124,6 @@ void pragma::util::ResourceWatcherManager::CallChangeCallbacks(EResourceWatcherC
 		m_callbacks.erase(it);
 }
 
-static bool is_image_format(const std::string &ext)
-{
-	auto &supportedFormats = MaterialManager::get_supported_image_formats();
-	return std::find_if(supportedFormats.begin(), supportedFormats.end(), [&ext](const MaterialManager::ImageFormat &format) { return pragma::string::compare(format.extension, ext, false); }) != supportedFormats.end();
-}
 void pragma::util::ResourceWatcherManager::OnResourceChanged(const Path &rootPath, const Path &path, const std::string &ext)
 {
 	auto &strPath = path.GetString();
@@ -272,6 +267,7 @@ void pragma::util::ResourceWatcherManager::OnResourceChanged(const Path &rootPat
 
 void pragma::util::ResourceWatcherManager::OnResourceChanged(const Path &rootPath, const Path &path)
 {
+	spdlog::trace("ResourceWatcherManager::OnResourceChanged(rootPath=\"{}\", path=\"{}\")", rootPath.GetString(), path.GetString());
 	fs::update_file_index_cache((rootPath + path).GetString());
 	/*std::string absPath;
 	if(fs::find_absolute_path(rootPath +'/' +path,absPath))

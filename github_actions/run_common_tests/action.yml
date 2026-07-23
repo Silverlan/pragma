@@ -4,20 +4,34 @@ inputs:
   working-directory:
     description: 'The location where Pragma resides. If no Pragma installation is found, it will be installed in this location.'
     required: true
-    default: 'pragma'
+    default: ''
   import-tests-token:
     required: false
     default: ""
+  format:
+    description: 'The format to use. Options: "archive" (default) or "appimage" (Linux only).'
+    required: false
+    default: 'archive'
 runs:
   using: "composite"
   steps:
+    - name: Resolve working-directory
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.working-directory }}" ]; then
+          echo "WORKING_DIR=${{ inputs.working-directory }}" >> $GITHUB_ENV
+        else
+          echo "WORKING_DIR=${{ github.workspace }}/pragma" >> $GITHUB_ENV
+        fi
+  
     - name: Serverside Tests
       uses: Silverlan/pragma/github_actions/run_tests@main
       with:
         test-scripts: |
           "tests/assets.udm"
           "tests/game.udm"
-        working-directory: "${{ inputs.working-directory }}"
+        working-directory: "${{ env.WORKING_DIR }}"
+        format: "${{ inputs.format }}"
         artifacts-name: "server-tests"
         state: "server"
 
@@ -28,7 +42,8 @@ runs:
           "tests/assets.udm"
           "tests/game.udm"
           "tests/file_change_watchers.udm"
-        working-directory: "${{ inputs.working-directory }}"
+        working-directory: "${{ env.WORKING_DIR }}"
+        format: "${{ inputs.format }}"
         artifacts-name: "base-tests"
 
     - name: PFM Tests
@@ -36,7 +51,8 @@ runs:
       with:
         test-scripts: |
           "tests/pfm.udm"
-        working-directory: "${{ inputs.working-directory }}"
+        working-directory: "${{ env.WORKING_DIR }}"
+        format: "${{ inputs.format }}"
         artifacts-name: "pfm-tests"
 
     - name: Checkout Import Tests
@@ -52,7 +68,7 @@ runs:
       shell: bash
       if: ${{ inputs.import-tests-token != '' }}
       run: |
-        cp -rf pragma_tests_import/* ${{ inputs.working-directory }}/
+        cp -rf pragma_tests_import/* ${{ env.WORKING_DIR }}/
         rm -rf pragma_tests_import
 
     - name: Import Tests
@@ -61,5 +77,6 @@ runs:
       with:
         test-scripts: |
           "tests/import_assets.udm"
-        working-directory: "${{ inputs.working-directory }}"
+        working-directory: "${{ env.WORKING_DIR }}"
+        format: "${{ inputs.format }}"
         artifacts-name: "import-tests"

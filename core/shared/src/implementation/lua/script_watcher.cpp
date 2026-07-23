@@ -24,6 +24,7 @@ bool LuaDirectoryWatcherManager::IsLuaFile(const std::string &path, bool bAllowC
 
 void LuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &fName)
 {
+	spdlog::trace("LuaDirectoryWatcherManager::OnLuaFileChanged(fName=\"{}\")", fName);
 	if(IsLuaFile(fName, true) == false)
 		return;
 	// Ignore include cache (= all include files are reloaded)

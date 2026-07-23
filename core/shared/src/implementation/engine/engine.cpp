@@ -669,7 +669,7 @@ void pragma::Engine::Release() { Close(); }
 bool pragma::Engine::Initialize(int argc, char *argv[])
 {
 #ifdef __linux__
-	if (util::is_running_as_appimage()) {
+	if(util::is_running_as_appimage()) {
 		auto appImagePath = util::get_internal_appimage_path();
 		util::set_program_path(util::FilePath(*appImagePath).GetParent());
 	}
@@ -687,9 +687,13 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 
 	// Initialize file system
 	{
-		auto userDataDir = m_launchSettings.Get<udm::String>("user_data_dir");
-		auto hasUserDataDir = userDataDir && !userDataDir->empty();
-		fs::set_absolute_root_path(util::get_user_data_dir().GetString(), hasUserDataDir ? 0 : -1);
+		auto lpUserDataDir = m_launchSettings.Get<udm::String>("user_data_dir");
+		if(lpUserDataDir && !lpUserDataDir->empty())
+			util::set_user_data_dir(*lpUserDataDir);
+
+		auto hasCustomUserDataDir = false;
+		auto userDataDir = util::get_user_data_dir(&hasCustomUserDataDir);
+		fs::set_absolute_root_path(userDataDir.GetString(), hasCustomUserDataDir ? 0 : -1);
 
 		// Logger has to be initialized *after* user-data directory has been specified, otherwise it
 		// may try (and fail) to write into read-only directory.
@@ -702,14 +706,14 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 		}
 		spdlog::info("Engine Version: {}", get_pretty_engine_version());
 
-		if(hasUserDataDir)
-			spdlog::debug("Using user-data directory '{}'...", *userDataDir);
+		if(hasCustomUserDataDir)
+			spdlog::debug("Using user-data directory '{}'...", userDataDir.GetString());
 
 		// TODO: File cache doesn't work with absolute paths at the moment
 		// (e.g. addons/imported/models/some_model.pmdl would return false even if the file exists)
 		fs::set_use_file_index_cache(true);
 
-		if(hasUserDataDir) {
+		if(hasCustomUserDataDir) {
 			// If we're using a custom user-data directory, we have to add the program path as an additional mount directory
 			fs::add_secondary_absolute_read_only_root_path("core", util::get_program_path());
 		}
@@ -725,7 +729,7 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 	//
 
 #ifdef __linux__
-	if (util::is_running_as_appimage()) {
+	if(util::is_running_as_appimage()) {
 		spdlog::debug("Pragma is running via AppImage.");
 		auto internalAppImagePath = util::get_internal_appimage_path();
 		auto appImagePath = util::get_path_to_appimage();

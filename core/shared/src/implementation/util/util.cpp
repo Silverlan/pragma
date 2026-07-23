@@ -378,8 +378,9 @@ std::pair<std::vector<double>, std::vector<double>> pragma::util::generate_two_p
 
 extern std::vector<std::string> g_lpResourceDirs;
 static std::optional<pragma::util::Path> g_userDataDir {};
-void pragma::util::set_user_data_dir(const Path &userDataDir)
+void pragma::util::set_user_data_dir(Path userDataDir)
 {
+	userDataDir = fs::resolve_home_directory(userDataDir.GetString(), false);
 	if(userDataDir == get_program_path()) {
 		g_userDataDir = {};
 		return;

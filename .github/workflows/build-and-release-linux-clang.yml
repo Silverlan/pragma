@@ -97,18 +97,17 @@ jobs:
             pragma-linux-x64-clang.tar.gz
             ${{ steps.generate-appimage.outputs.appimage-filepath }}
 
-      - name: Run Tests
+      - name: Dispatch Run Tests
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: run-tests.yml
           inputs: '{ "os": "ubuntu" }'
 
-      - name: Run Tests (AppImage)
+      - name: Dispatch Run Tests (AppImage)
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: run-tests.yml
-          inputs: '{ "os": "ubuntu" }'
-          format: 'appimage'
+          inputs: '{ "os": "ubuntu", "format": "appimage" }'
 
       - name: Generate File Lists
         shell: bash

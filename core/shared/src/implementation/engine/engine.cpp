@@ -671,7 +671,8 @@ bool pragma::Engine::Initialize(int argc, char *argv[])
 #ifdef __linux__
 	if(util::is_running_as_appimage()) {
 		auto appImagePath = util::get_internal_appimage_path();
-		util::set_program_path(util::FilePath(*appImagePath).GetParent());
+		if(appImagePath)
+			util::set_program_path(util::FilePath(*appImagePath));
 	}
 #endif
 

@@ -18,6 +18,7 @@ function gui.WIFileDialog:OnInitialize()
 	local pMain = gui.create("WIRect", self)
 	pMain:SetColor(Color.DimGray)
 	pMain:SetAutoAlignToParent(true)
+	pMain:AddStyleClass("background")
 	pMain:Update()
 	self.m_pMain = pMain
 
@@ -238,8 +239,8 @@ function gui.WIFileDialog:OnSizeChanged(w, h)
 		return
 	end
 	local xOffset = self.m_pLbFileName:GetX() + self.m_pLbFileName:GetWidth()
-	self.m_pFileName:ApplyPos(xOffset + margin, self.m_pLbFileName:GetY() - 1)
-	self.m_pFileName:ApplySize(self.m_pButtonOpen:GetX() - xOffset - margin * 2, 24)
+	self.m_pFileName:ApplyPos(xOffset + margin, self.m_pLbFileName:GetY() - 2)
+	self.m_pFileName:ApplySize(self.m_pButtonOpen:GetX() - xOffset - margin * 2, 26)
 end
 gui.register("file_dialog", gui.WIFileDialog)
 

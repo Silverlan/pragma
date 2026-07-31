@@ -651,7 +651,7 @@ bool pragma::gui::types::WITableRow::IsSelected() { return m_bSelected; }
 void pragma::gui::types::WITableRow::UpdateCell(const WITableCell &cell)
 {
 	const auto max = std::numeric_limits<decltype(m_cells.size())>::max();
-	;
+
 	auto startIdx = max;
 	for(auto it = m_cells.begin(); it != m_cells.end();) {
 		auto &hCell = *it;

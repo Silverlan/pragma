@@ -6,13 +6,45 @@ module pragma.shared;
 
 import :engine.info;
 
-#define PRAGMA_ENGINE_NAME "Pragma"
-#define PRAGMA_AUTHOR_EMAIL "opensource@pragma-engine.com"
-#define PRAGMA_WEBSITE_URL "https://pragma-engine.com"
-#define PRAGMA_WIKI_URL "https://wiki.pragma-engine.com/"
-#define PRAGMA_GITHUB_URL "https://github.com/Silverlan/pragma"
-#define PRAGMA_DISCORD_URL "https://discord.gg/Ck5BcCz"
-#define PRAGMA_STEAM_APP_ID 947'100
+struct EngineInfo {
+	EngineInfo();
+	void Load();
+	std::optional<std::string> contact;
+	std::optional<std::string> website;
+	std::optional<std::string> wiki;
+	std::optional<std::string> github;
+	std::optional<std::string> discord;
+	std::optional<std::string> forum;
+
+	std::optional<uint32_t> steamAppId;
+};
+
+EngineInfo::EngineInfo() {}
+
+void EngineInfo::Load()
+{
+	auto engineInfo = udm::Data::Load("scripts/engine_info.udm");
+	if(!engineInfo)
+		return;
+	auto data = engineInfo->GetAssetData().GetData()["engine_info"];
+	contact = data["contact"].ToValue<udm::String>();
+	website = data["website"].ToValue<udm::String>();
+	wiki = data["wiki"].ToValue<udm::String>();
+	github = data["github"].ToValue<udm::String>();
+	discord = data["discord"].ToValue<udm::String>();
+	forum = data["forum"].ToValue<udm::String>();
+	steamAppId = data["steam_app_id"].ToValue<udm::UInt32>();
+}
+
+static EngineInfo g_engineInfo {};
+static EngineInfo &get_engine_info()
+{
+	static std::once_flag flag;
+	std::call_once(flag, []() { g_engineInfo.Load(); });
+	return g_engineInfo;
+}
+
+constexpr std::string_view PRAGMA_ENGINE_NAME = "Pragma";
 
 std::string pragma::engine_info::get_program_title()
 {
@@ -29,7 +61,7 @@ std::string pragma::engine_info::get_identifier()
 	return name;
 }
 
-std::string pragma::engine_info::get_name() { return PRAGMA_ENGINE_NAME; }
+std::string pragma::engine_info::get_name() { return std::string {PRAGMA_ENGINE_NAME}; }
 
 pragma::util::Path pragma::engine_info::get_icon_path()
 {
@@ -49,12 +81,13 @@ std::string pragma::engine_info::get_server_executable_name()
 	exeName += "_server.exe";
 	return exeName;
 }
-std::string pragma::engine_info::get_author_mail_address() { return PRAGMA_AUTHOR_EMAIL; }
-std::string pragma::engine_info::get_website_url() { return PRAGMA_WEBSITE_URL; }
-std::string pragma::engine_info::get_wiki_url() { return PRAGMA_WIKI_URL; }
-std::string pragma::engine_info::get_discord_url() { return PRAGMA_DISCORD_URL; }
-std::string pragma::engine_info::get_github_url() { return PRAGMA_GITHUB_URL; }
-uint32_t pragma::engine_info::get_steam_app_id() { return PRAGMA_STEAM_APP_ID; }
+std::optional<std::string> pragma::engine_info::get_author_mail_address() { return get_engine_info().contact; }
+std::optional<std::string> pragma::engine_info::get_website_url() { return get_engine_info().website; }
+std::optional<std::string> pragma::engine_info::get_wiki_url() { return get_engine_info().wiki; }
+std::optional<std::string> pragma::engine_info::get_discord_url() { return get_engine_info().discord; }
+std::optional<std::string> pragma::engine_info::get_github_url() { return get_engine_info().github; }
+std::optional<std::string> pragma::engine_info::get_forum_url() { return get_engine_info().forum; }
+std::optional<uint32_t> pragma::engine_info::get_steam_app_id() { return get_engine_info().steamAppId; }
 
 const std::vector<std::string> pragma::engine_info::get_supported_audio_formats()
 {

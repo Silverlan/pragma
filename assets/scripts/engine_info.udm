@@ -1,0 +1,11 @@
+"engine_info"
+{
+	$string contact "opensource@pragma-engine.com"
+	$string website "https://pragma-engine.com"
+	$string wiki "https://wiki.pragma-engine.com"
+	$string github "https://github.com/Silverlan/pragma"
+	$string discord "https://discord.gg/Ck5BcCz"
+	$string forum "https://forum.pragma-engine.com"
+	
+	$uint32 steam_app_id 947100
+}

@@ -1108,7 +1108,6 @@ std::unique_ptr<uzip::ZIPFile> pragma::Engine::GenerateEngineDump(const std::str
 
 		auto logFileName = detail::get_log_file_name();
 		if(logFileName.has_value()) {
-			detail::close_logger();
 			flush_loggers();
 
 			/* For some reason this will fail sometimes

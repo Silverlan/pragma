@@ -413,7 +413,6 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 	updateIcon()
 	pItem:AddCallback("OnSizeChanged", updateIcon)
 	pIcon:SetDirection(gui.Arrow.DIRECTION_RIGHT)
-	pIcon:AddStyleClass("context_menu_arrow")
 
 	return pItem, pSubMenu
 end

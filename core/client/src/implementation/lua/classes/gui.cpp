@@ -1017,6 +1017,7 @@ void Lua::WINumericEntry::register_class(luabind::class_<pragma::gui::types::WIN
 	classDef.def("SetRange", &pragma::gui::types::WINumericEntry::SetRange);
 	classDef.def("GetMinValue", &pragma::gui::types::WINumericEntry::GetMinValue);
 	classDef.def("GetMaxValue", &pragma::gui::types::WINumericEntry::GetMaxValue);
+	classDef.def("SetStepArrowsEnabled", &pragma::gui::types::WINumericEntry::SetStepArrowsEnabled);
 }
 
 ////////////////////////////////////

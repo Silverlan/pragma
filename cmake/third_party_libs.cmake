@@ -410,7 +410,7 @@ pr_set_target_folder(OpenFBX third_party_libs)
 set(BUILD_SHARED_LIBS
     OFF
     CACHE BOOL OFF FORCE)
-pr_fetch_third_party_lib("tinygltf" "https://github.com/syoyo/tinygltf" "37250b3") # v2.9.6 Branch: "release"
+pr_fetch_third_party_lib("tinygltf" "https://github.com/syoyo/tinygltf" "cfcadfa8d14eb489d97b6324838ae100410edcc7") # v3.0.0
 set(BUILD_SHARED_LIBS
     ON
     CACHE BOOL ON FORCE)

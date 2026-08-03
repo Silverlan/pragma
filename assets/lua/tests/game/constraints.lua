@@ -1,8 +1,6 @@
 -- SPDX-FileCopyrightText: (c) 2026 Silverlan <opensource@pragma-engine.com>
 -- SPDX-License-Identifier: MIT
 
-include("/tests/pfm/base.lua")
-
 local function set_animated(ent, animationInfo)
 	local channel = panima.Channel()
 	channel:SetValueType(animationInfo.valueType)

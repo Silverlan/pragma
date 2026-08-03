@@ -45,7 +45,7 @@ void pragma::gui::print_debug_tracking_log(const types::WIBase &el)
 	size_t idx = 1;
 	for(auto &entry : log->entries) {
 		std::stringstream ss;
-		ss << "#" << idx << ":" << "\n";
+		ss << "#" << idx++ << ":" << "\n";
 		ss << entry.name << "(";
 		auto firstArg = true;
 		for(auto &arg : entry.args) {

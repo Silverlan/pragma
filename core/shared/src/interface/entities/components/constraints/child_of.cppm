@@ -12,7 +12,7 @@ export import :entities.universal_reference;
 export namespace pragma {
 	class ConstraintComponent;
 	class DLLNETWORK ConstraintChildOfComponent final : public BaseEntityComponent {
-	  public:
+	public:
 		static void RegisterMembers(EntityComponentManager &componentManager, TRegisterComponentMember registerMember);
 
 		ConstraintChildOfComponent(ecs::BaseEntity &ent);
@@ -34,7 +34,7 @@ export namespace pragma {
 
 		virtual void InitializeLuaObject(lua::State *lua) override;
 		std::optional<math::ScaledTransform> CalcInversePose(math::ScaledTransform &pose) const;
-	  protected:
+	protected:
 		enum class Type : uint8_t { Pose = 0, Position, Rotation };
 		struct PropertyInfo {
 			EntityUComponentMemberRef propertyRef;

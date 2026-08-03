@@ -149,10 +149,8 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  return *name;
 	  });
 	entsMod[classDefCompRef];
-	pragma::LuaCore::define_custom_constructor<EntityUComponentRef, +[](const Lua::util::Uuid &uuid, ComponentId componentId) -> EntityUComponentRef { return EntityUComponentRef {uuid.value, componentId}; }, const Lua::util::Uuid &, ComponentId>(
-	  GetLuaState());
-	pragma::LuaCore::define_custom_constructor<EntityUComponentRef, +[](const Lua::util::Uuid &uuid, const std::string &componentType) -> EntityUComponentRef { return EntityUComponentRef {uuid.value, componentType}; }, const Lua::util::Uuid &, const std::string &>(
-	  GetLuaState());
+	pragma::LuaCore::define_custom_constructor<EntityUComponentRef, +[](const Lua::util::Uuid &uuid, ComponentId componentId) -> EntityUComponentRef { return EntityUComponentRef {uuid.value, componentId}; }, const Lua::util::Uuid &, ComponentId>(GetLuaState());
+	pragma::LuaCore::define_custom_constructor<EntityUComponentRef, +[](const Lua::util::Uuid &uuid, const std::string &componentType) -> EntityUComponentRef { return EntityUComponentRef {uuid.value, componentType}; }, const Lua::util::Uuid &, const std::string &>(GetLuaState());
 
 	auto classDefMemRef = luabind::class_<EntityUComponentMemberRef, luabind::bases<EntityUComponentRef, EntityURef>>("UniversalMemberReference");
 	classDefMemRef.def(luabind::constructor<const std::string &, ComponentId, const std::string &>());
@@ -199,12 +197,10 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  return LuaCore::get_member_value(l, const_cast<BaseEntityComponent &>(*c), *memberInfo);
 	  });
 	entsMod[classDefMemRef];
-	pragma::LuaCore::define_custom_constructor<EntityUComponentMemberRef,
-	  +[](const Lua::util::Uuid &uuid, ComponentId componentId, const std::string &memberName) -> EntityUComponentMemberRef { return EntityUComponentMemberRef {uuid.value, componentId, memberName}; }, const Lua::util::Uuid &, ComponentId,
-	  const std::string &>(GetLuaState());
-	pragma::LuaCore::define_custom_constructor<EntityUComponentMemberRef,
-	  +[](const Lua::util::Uuid &uuid, const std::string &componentType, const std::string &memberName) -> EntityUComponentMemberRef { return EntityUComponentMemberRef {uuid.value, componentType, memberName}; }, const Lua::util::Uuid &, const std::string &,
-	  const std::string &>(GetLuaState());
+	pragma::LuaCore::define_custom_constructor<EntityUComponentMemberRef, +[](const Lua::util::Uuid &uuid, ComponentId componentId, const std::string &memberName) -> EntityUComponentMemberRef { return EntityUComponentMemberRef {uuid.value, componentId, memberName}; },
+	  const Lua::util::Uuid &, ComponentId, const std::string &>(GetLuaState());
+	pragma::LuaCore::define_custom_constructor<EntityUComponentMemberRef, +[](const Lua::util::Uuid &uuid, const std::string &componentType, const std::string &memberName) -> EntityUComponentMemberRef { return EntityUComponentMemberRef {uuid.value, componentType, memberName}; },
+	  const Lua::util::Uuid &, const std::string &, const std::string &>(GetLuaState());
 
 	auto classDefMultiEntRef = luabind::class_<MultiEntityURef>("MultiUniversalEntityReference");
 	classDefMultiEntRef.def(luabind::constructor<const ecs::BaseEntity &>());
@@ -292,8 +288,7 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 		  auto dt = std::chrono::steady_clock::now().time_since_epoch().count() - tStart;
 		  std::cout << "Lua Overhead: " << (dt / 1'000'000.0) << "ms" << std::endl;
 	  });
-	defIntersectionHandler.def(
-	  "IntersectionTest", +[](IntersectionHandlerComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) -> std::optional<HitInfo> { return c.IntersectionTest(origin, dir, math::CoordinateSpace::Object, minDist, maxDist); });
+	defIntersectionHandler.def("IntersectionTest", +[](IntersectionHandlerComponent &c, const Vector3 &origin, const Vector3 &dir, float minDist, float maxDist) -> std::optional<HitInfo> { return c.IntersectionTest(origin, dir, math::CoordinateSpace::Object, minDist, maxDist); });
 	// defBvh.def("IntersectionTest", static_cast<std::optional<pragma::bvh::HitInfo> (pragma::IntersectionHandlerComponent::*)(const Vector3 &, const Vector3 &, float, float) const>(&pragma::IntersectionHandlerComponent::IntersectionTest));
 	defIntersectionHandler.def("IntersectionTestAabb", static_cast<bool (IntersectionHandlerComponent::*)(const Vector3 &, const Vector3 &) const>(&IntersectionHandlerComponent::IntersectionTestAabb));
 	defIntersectionHandler.def(
@@ -501,6 +496,8 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defAnimated2.def("SetCurrentTime", &PanimaComponent::SetCurrentTime);
 	defAnimated2.def("GetCurrentTimeFraction", &PanimaComponent::GetCurrentTimeFraction);
 	defAnimated2.def("SetCurrentTimeFraction", &PanimaComponent::SetCurrentTimeFraction);
+	defAnimated2.def("SetPropertyAlwaysDirty", &PanimaComponent::SetPropertyAlwaysDirty);
+	defAnimated2.def("IsPropertyAlwaysDirty", &PanimaComponent::IsPropertyAlwaysDirty);
 	defAnimated2.def("SetPropertyEnabled", &PanimaComponent::SetPropertyEnabled);
 	defAnimated2.def("IsPropertyEnabled", &PanimaComponent::IsPropertyEnabled);
 	defAnimated2.def("IsPropertyAnimated", &PanimaComponent::IsPropertyAnimated);
@@ -577,8 +574,8 @@ void pragma::Game::RegisterLuaEntityComponents(luabind::module_ &entsMod)
 	defDriverC.scope[defDriver];
 	entsMod[defDriverC];
 	pragma::LuaCore::define_custom_constructor<game::ValueDriver,
-	  +[](ComponentId componentId, const std::string &memberRef, game::ValueDriverDescriptor descriptor, const std::string &self) -> game::ValueDriver { return game::ValueDriver {componentId, memberRef, descriptor, util::uuid_string_to_bytes(self)}; }, ComponentId,
-	  const std::string &, game::ValueDriverDescriptor, const std::string &>(GetLuaState());
+	  +[](ComponentId componentId, const std::string &memberRef, game::ValueDriverDescriptor descriptor, const std::string &self) -> game::ValueDriver { return game::ValueDriver {componentId, memberRef, descriptor, util::uuid_string_to_bytes(self)}; }, ComponentId, const std::string &,
+	  game::ValueDriverDescriptor, const std::string &>(GetLuaState());
 
 	auto defIK = pragma::LuaCore::create_entity_component_class<IKComponent, BaseEntityComponent>("IKComponent");
 	defIK.def("SetIKControllerEnabled", &IKComponent::SetIKControllerEnabled);

@@ -404,6 +404,15 @@ CallbackHandle pragma::ecs::BaseEntity::CallOnRemove(const CallbackHandle &hCall
 	return hCallback;
 }
 
+std::string pragma::ecs::build_component_member_path(std::string_view componentName, std::string_view propertyName, std::optional<util::Uuid> entityUuid)
+{
+	auto path = util::DirPath("ec") / componentName / propertyName;
+	auto strPath = path.GetString();
+	if(entityUuid)
+		strPath += "?entity_uuid=" + util::uuid_to_string(*entityUuid);
+	return strPath;
+}
+
 ////////////////////////////////////
 
 Con::c_cout &operator<<(Con::c_cout &os, const EntityHandle &ent)

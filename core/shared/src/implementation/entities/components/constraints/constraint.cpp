@@ -23,6 +23,7 @@ void ConstraintComponent::RegisterMembers(EntityComponentManager &componentManag
 	using T = ConstraintComponent;
 
 	{
+		// Influence value of >0 and <1 only makes sense when used on an animated property, since the property is reset every frame in that case.
 		using TInfluence = float;
 		auto memberInfo = create_component_member_info<T, TInfluence, static_cast<void (T::*)(TInfluence)>(&T::SetInfluence), static_cast<TInfluence (T::*)() const>(&T::GetInfluence)>("influence", 1.f);
 		memberInfo.SetMin(0.f);
@@ -109,8 +110,26 @@ const std::optional<ConstraintComponent::ConstraintParticipants> &ConstraintComp
 		if(panimaC.valid()) {
 			auto *memberInfo = drivenObj.GetMemberInfo(GetGame());
 			if(memberInfo) {
+				std::vector<std::string_view> members;
+				members.push_back(*memberInfo->GetName());
+
+				if(auto *poseTypeMetaData = memberInfo->FindTypeMetaData<ents::PoseTypeMetaData>()) {
+					if(poseTypeMetaData->posProperty)
+						members.push_back(*poseTypeMetaData->posProperty);
+					if(poseTypeMetaData->rotProperty)
+						members.push_back(*poseTypeMetaData->rotProperty);
+					if(poseTypeMetaData->scaleProperty)
+						members.push_back(*poseTypeMetaData->scaleProperty);
+				}
+
 				// TODO: Should we undo the dirty flag after the constraint has been removed?
-				panimaC->SetPropertyAlwaysDirty(memberInfo->GetName(), true);
+				auto *componentName = drivenObj.GetComponentName();
+				if (componentName) {
+					for(auto &name : members) {
+						auto memberPath = ecs::build_component_member_path(*componentName, name);
+						panimaC->SetPropertyAlwaysDirty(memberPath, true);
+					}
+				}
 			}
 		}
 	}

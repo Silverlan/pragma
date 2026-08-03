@@ -284,6 +284,7 @@ export {
 		using namespace pragma::math::scoped_enum::bitwise;
 
 		inline DLLNETWORK Con::c_cout &operator<<(Con::c_cout &os, const BaseEntity &ent) { return ent.print(os); }
+		DLLNETWORK std::string build_component_member_path(std::string_view componentName, std::string_view propertyName, std::optional<util::Uuid> entityUuid = {});
 
 		inline std::ostream &operator<<(std::ostream &os, const BaseEntity &ent)
 		{

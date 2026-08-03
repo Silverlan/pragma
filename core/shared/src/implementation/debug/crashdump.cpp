@@ -337,9 +337,11 @@ bool CrashHandler::GenerateCrashDump() const
 	if(saveDump) {
 		std::string err;
 		std::string zipFileName;
-		auto zipFile = Engine::GenerateEngineDump("crashdumps/crashdump", zipFileName, err);
-		// Logger should already be closed at this point, but to make sure...
+		// This is dangerous, if other threads are still running in the background, and they're invoking log messages
+		// after the logger has been closed, it may cause a cascading crash.
+		// We'll take the risk, since a crash is already undefined behavior as it is.
 		detail::close_logger();
+		auto zipFile = Engine::GenerateEngineDump("crashdumps/crashdump", zipFileName, err);
 		if(zipFile) {
 #ifdef _WIN32
 			std::string dumpErr;

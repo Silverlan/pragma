@@ -3,10 +3,16 @@
 	$string scriptFile "tests/game/create_entity.lua"
 }
 
+"constraints"
+{
+	$string scriptFile "tests/game/constraints.lua"
+}
+
 
 "game"
 {
 	$array children [string][
-		"create_entity"
+		"create_entity",
+		"constraints"
 	]
 }

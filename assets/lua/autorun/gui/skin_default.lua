@@ -372,6 +372,7 @@ skin["table_row"] = {
 		local bg = gui.create("WIRect", pElement)
 		bg:SetZPos(0)
 		bg:SetName("background")
+		bg:AddStyleClass("selection")
 		bg:SetAutoAlignToParent(true)
 		bg:SetVisible(false)
 		add_skin_element(pElement, bg)

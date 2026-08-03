@@ -817,13 +817,31 @@ void pragma::Engine::RegisterConsoleCommands()
 	conVarMapEn.RegisterConCommand("clear", [](NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float) { Get()->ClearConsole(); }, console::ConVarFlags::None, "Clears everything in the console.");
 
 	conVarMapEn.RegisterConCommand(
-	  "credits",
+	  "engine_info",
 	  [](NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float) {
-		  Con::COUT << "Silverlan" << Con::endl;
-		  Con::COUT << "Contact: " << engine_info::get_author_mail_address() << Con::endl;
-		  Con::COUT << "Website: " << engine_info::get_website_url() << Con::endl;
+		  auto contact = engine_info::get_author_mail_address();
+		  auto website = engine_info::get_website_url();
+		  auto wiki = engine_info::get_wiki_url();
+		  auto discord = engine_info::get_discord_url();
+		  auto github = engine_info::get_github_url();
+		  auto forum = engine_info::get_forum_url();
+		  auto steamAppId = engine_info::get_steam_app_id();
+		  if(contact)
+			  Con::COUT << "Contact: " << *contact << Con::endl;
+		  if(website)
+			  Con::COUT << "Website: " << *website << Con::endl;
+		  if(wiki)
+			  Con::COUT << "Wiki: " << *wiki << Con::endl;
+		  if(discord)
+			  Con::COUT << "Discord: " << *discord << Con::endl;
+		  if(github)
+			  Con::COUT << "Github: " << *github << Con::endl;
+		  if(forum)
+			  Con::COUT << "Forum: " << *forum << Con::endl;
+		  if(steamAppId)
+			  Con::COUT << "SteamAppId: " << *steamAppId << Con::endl;
 	  },
-	  console::ConVarFlags::None, "Prints a list of developers.");
+	  console::ConVarFlags::None, "Prints various information about the Engine.");
 
 	conVarMapEn.RegisterConCommand("version", [](NetworkState *, BasePlayerComponent *, std::vector<std::string> &, float) { Con::COUT << get_pretty_engine_version() << Con::endl; }, console::ConVarFlags::None, "Prints the current engine version to the console.");
 	conVarMapEn.RegisterConCommand("debug_profiling_print", debug_profiling_print, console::ConVarFlags::None, "Prints the last profiled times.");

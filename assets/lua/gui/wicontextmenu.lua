@@ -88,7 +88,12 @@ function gui.WIContextMenu:OnInitialize()
 end
 function gui.WIContextMenu:UpdateCompactHeight(h, dontApply)
 	h = h or self.m_contents:GetHeight()
-	if self.m_contents:GetHeight() <= MAX_HEIGHT and self.m_contents:GetHeight() ~= self:GetHeight() then
+	if self.m_contents:GetHeight() >= MAX_HEIGHT then
+		if(dontApply ~= false) then
+			self:SetHeight(MAX_HEIGHT)
+			self:UpdateFlipState()
+		end
+	elseif self.m_contents:GetHeight() <= MAX_HEIGHT and self.m_contents:GetHeight() ~= self:GetHeight() then
 		h = self.m_contents:GetHeight()
 		if(dontApply ~= false) then self:SetHeight(h) end
 	end
@@ -177,9 +182,17 @@ function gui.WIContextMenu:OnUpdate()
 
 	self:UpdateFlipState()
 end
+function gui.WIContextMenu:SetOriginPos(origPos, y)
+	if(y ~= nil) then
+		self:SetOriginPos(Vector2(origPos, y))
+		return
+	end
+	self.m_origCoords = origPos
+	self:SetPos(origPos)
+end
 function gui.WIContextMenu:UpdateFlipState()
-	local xBase = self:GetLeft()
-	local yBase = self:GetTop()
+	local xBase = (self.m_origCoords ~= nil and self.m_origCoords.x) or self:GetLeft()
+	local yBase = (self.m_origCoords ~= nil and self.m_origCoords.y) or self:GetTop()
 
 	self.m_xFlipped = false
 	self.m_yFlipped = false
@@ -376,8 +389,7 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 			pSubMenu:SetVisible(true)
 			self.m_activeSubMenu = pSubMenu
 			local pos = pItem:GetAbsolutePos()
-			pSubMenu:SetX(pos.x + self:GetWidth())
-			pSubMenu:SetY(pos.y)
+			pSubMenu:SetOriginPos(pos.x + self:GetWidth(), pos.y)
 			pSubMenu:UpdateFlipState()
 			--pSubMenu:RequestFocus()
 		end
@@ -413,7 +425,6 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 	updateIcon()
 	pItem:AddCallback("OnSizeChanged", updateIcon)
 	pIcon:SetDirection(gui.Arrow.DIRECTION_RIGHT)
-	pIcon:AddStyleClass("context_menu_arrow")
 
 	return pItem, pSubMenu
 end
@@ -448,7 +459,7 @@ gui.open_context_menu = function(window)
 	if menu ~= nil then
 		menu:SetName("context_menu")
 		menu:RequestFocus()
-		menu:SetPos(elBase:GetCursorPos())
+		menu:SetOriginPos(elBase:GetCursorPos())
 		menu:SetZPos(20000)
 		gui.impl.contextMenu.menues[elBase] = menu
 	end

@@ -1171,7 +1171,6 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 		  auto gname = util::register_global_string(name);
 		  imgCreateInfo.debugName = gname;
 	  });
-	defBufferCreateInfo.def(luabind::constructor<>());
 	defBufferCreateInfo.def_readwrite("size", &prosper::util::BufferCreateInfo::size);
 	defBufferCreateInfo.def_readwrite("queueFamilyMask", reinterpret_cast<uint32_t prosper::util::BufferCreateInfo::*>(&prosper::util::BufferCreateInfo::queueFamilyMask));
 	defBufferCreateInfo.def_readwrite("flags", reinterpret_cast<uint32_t prosper::util::BufferCreateInfo::*>(&prosper::util::BufferCreateInfo::flags));

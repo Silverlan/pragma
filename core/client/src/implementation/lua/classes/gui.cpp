@@ -10,6 +10,7 @@ import :scripting.lua.libraries.vulkan;
 
 import :game;
 import :gui;
+import :gui.debug_tracker;
 import :engine;
 import pragma.gui;
 import pragma.string.unicode;
@@ -549,6 +550,12 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetAutoCenterToParentX", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoCenterToParentX));
 	classDef.def("SetAutoCenterToParentY", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoCenterToParentY));
 	classDef.def("SetAutoCenterToParent", &pragma::gui::types::WIBase::SetAutoCenterToParent);
+	classDef.def("SetDebugChangeTrackingEnabled", +[](const pragma::gui::types::WIBase &el, bool enabled) {
+		pragma::gui::set_debug_tracking_enabled(el, enabled);
+	});
+	classDef.def("PrintDebugChangeTrackingLog", +[](const pragma::gui::types::WIBase &el) {
+		pragma::gui::print_debug_tracking_log(el);
+	});
 
 	auto defDrawInfo = luabind::class_<pragma::gui::DrawInfo>("DrawInfo");
 	defDrawInfo.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::gui::DrawInfo::Flags::None));
@@ -1010,6 +1017,7 @@ void Lua::WINumericEntry::register_class(luabind::class_<pragma::gui::types::WIN
 	classDef.def("SetRange", &pragma::gui::types::WINumericEntry::SetRange);
 	classDef.def("GetMinValue", &pragma::gui::types::WINumericEntry::GetMinValue);
 	classDef.def("GetMaxValue", &pragma::gui::types::WINumericEntry::GetMaxValue);
+	classDef.def("SetStepArrowsEnabled", &pragma::gui::types::WINumericEntry::SetStepArrowsEnabled);
 }
 
 ////////////////////////////////////

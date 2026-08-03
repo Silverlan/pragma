@@ -22,11 +22,27 @@ Lua::tb<void> Lua::engine::get_info(lua::State *l)
 	t["version"] = pragma::get_engine_version();
 	t["prettyVersion"] = pragma::get_pretty_engine_version();
 	t["identifier"] = pragma::engine_info::get_identifier();
-	t["discordURL"] = pragma::engine_info::get_discord_url();
-	t["steamAppId"] = pragma::engine_info::get_steam_app_id();
-	t["websiteURL"] = pragma::engine_info::get_website_url();
-	t["wikiURL"] = pragma::engine_info::get_wiki_url();
-	t["gitHubURL"] = pragma::engine_info::get_github_url();
+
+	auto discordUrl = pragma::engine_info::get_discord_url();
+	auto steamAppId = pragma::engine_info::get_steam_app_id();
+	auto websiteUrl = pragma::engine_info::get_website_url();
+	auto wikiUrl = pragma::engine_info::get_wiki_url();
+	auto githubUrl =  pragma::engine_info::get_github_url();
+	auto forumUrl =  pragma::engine_info::get_forum_url();
+
+	if(discordUrl)
+		t["discordURL"] = *discordUrl;
+	if(steamAppId)
+		t["steamAppId"] = *steamAppId;
+	if(websiteUrl)
+		t["websiteURL"] = *websiteUrl;
+	if(wikiUrl)
+		t["wikiURL"] = *wikiUrl;
+	if(githubUrl)
+		t["gitHubURL"] = *githubUrl;
+	if(forumUrl)
+		t["forumURL"] = *forumUrl;
+
 	t["name"] = pragma::engine_info::get_name();
 	return t;
 }

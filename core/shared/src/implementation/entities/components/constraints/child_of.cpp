@@ -13,57 +13,48 @@ void ConstraintChildOfComponent::RegisterMembers(EntityComponentManager &compone
 	using T = ConstraintChildOfComponent;
 	using TAxisEnabled = bool;
 	{
-		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetLocationAxisEnabled(Axis::X, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsLocationAxisEnabled(Axis::X); }>(
-		    "locationX", true);
+		auto memberInfo = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetLocationAxisEnabled(Axis::X, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsLocationAxisEnabled(Axis::X); }>(
+		  "locationX", true);
+		registerMember(std::move(memberInfo));
+	}
+	{
+		auto memberInfo = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetLocationAxisEnabled(Axis::Y, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsLocationAxisEnabled(Axis::Y); }>(
+		  "locationY", true);
+		registerMember(std::move(memberInfo));
+	}
+	{
+		auto memberInfo = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetLocationAxisEnabled(Axis::Z, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsLocationAxisEnabled(Axis::Z); }>(
+		  "locationZ", true);
+		registerMember(std::move(memberInfo));
+	}
+	{
+		auto memberInfo = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetRotationAxisEnabled(Axis::X, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsRotationAxisEnabled(Axis::X); }>(
+		  "rotationX", true);
+		registerMember(std::move(memberInfo));
+	}
+	{
+		auto memberInfo = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetRotationAxisEnabled(Axis::Y, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsRotationAxisEnabled(Axis::Y); }>(
+		  "rotationY", true);
+		registerMember(std::move(memberInfo));
+	}
+	{
+		auto memberInfo = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetRotationAxisEnabled(Axis::Z, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsRotationAxisEnabled(Axis::Z); }>(
+		  "rotationZ", true);
 		registerMember(std::move(memberInfo));
 	}
 	{
 		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetLocationAxisEnabled(Axis::Y, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsLocationAxisEnabled(Axis::Y); }>(
-		    "locationY", true);
+		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetScaleAxisEnabled(Axis::X, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsScaleAxisEnabled(Axis::X); }>("scaleX", true);
 		registerMember(std::move(memberInfo));
 	}
 	{
 		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetLocationAxisEnabled(Axis::Z, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsLocationAxisEnabled(Axis::Z); }>(
-		    "locationZ", true);
+		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetScaleAxisEnabled(Axis::Y, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsScaleAxisEnabled(Axis::Y); }>("scaleY", true);
 		registerMember(std::move(memberInfo));
 	}
 	{
 		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetRotationAxisEnabled(Axis::X, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsRotationAxisEnabled(Axis::X); }>(
-		    "rotationX", true);
-		registerMember(std::move(memberInfo));
-	}
-	{
-		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetRotationAxisEnabled(Axis::Y, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsRotationAxisEnabled(Axis::Y); }>(
-		    "rotationY", true);
-		registerMember(std::move(memberInfo));
-	}
-	{
-		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetRotationAxisEnabled(Axis::Z, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsRotationAxisEnabled(Axis::Z); }>(
-		    "rotationZ", true);
-		registerMember(std::move(memberInfo));
-	}
-	{
-		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetScaleAxisEnabled(Axis::X, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsScaleAxisEnabled(Axis::X); }>(
-		    "scaleX", true);
-		registerMember(std::move(memberInfo));
-	}
-	{
-		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetScaleAxisEnabled(Axis::Y, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsScaleAxisEnabled(Axis::Y); }>(
-		    "scaleY", true);
-		registerMember(std::move(memberInfo));
-	}
-	{
-		auto memberInfo
-		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetScaleAxisEnabled(Axis::Z, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsScaleAxisEnabled(Axis::Z); }>(
-		    "scaleZ", true);
+		  = create_component_member_info<T, TAxisEnabled, [](const ComponentMemberInfo &, T &c, TAxisEnabled enabled) { c.SetScaleAxisEnabled(Axis::Z, enabled); }, [](const ComponentMemberInfo &, T &c, TAxisEnabled &value) { value = c.IsScaleAxisEnabled(Axis::Z); }>("scaleZ", true);
 		registerMember(std::move(memberInfo));
 	}
 }
@@ -127,7 +118,7 @@ std::pair<std::optional<Vector3>, std::optional<Quat>> ConstraintChildOfComponen
 	auto &game = *GetEntity().GetNetworkState()->GetGameState();
 	m_drivenObjectPropertyInfo->propertyRef.UpdateMemberIndex(game);
 
-	return GetPropertyPose(*m_drivenObjectPropertyInfo, *constraintInfo->driverC, space);
+	return GetPropertyPose(*m_drivenObjectPropertyInfo, *constraintInfo->drivenObjectC, space);
 }
 
 const ComponentHandle<ConstraintComponent> &ConstraintChildOfComponent::GetConstraint() const { return m_constraintC; }

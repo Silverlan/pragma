@@ -58,6 +58,8 @@ pragma::gui::types::WIConsole *pragma::gui::types::WIConsole::Open()
 	s_hConsole = pConsole->GetHandle();
 
 	auto wikiUrl = engine_info::get_wiki_url();
+	if (!wikiUrl)
+		wikiUrl = "";
 	pConsole->SetText("{[c:c2003b]}"
 	                  "    _____ ____  _   _  _____  ____  _      ______ \n"
 	                  "   / ____/ __ \\| \\ | |/ ____|/ __ \\| |    |  ____|\n"
@@ -77,7 +79,7 @@ pragma::gui::types::WIConsole *pragma::gui::types::WIConsole::Open()
 	                  "- {[c:e68bbe]}exit{[/c]}: Exits the engine\n\n"
 	                  "Useful links:\n"
 	                  "- {[l:url \""
-	  + wikiUrl
+	  + *wikiUrl
 	  + "\"]}{[c:fde4f2]}Wiki{[/c]}{[/l]}\n"
 	    "- {[l:url \"https://wiki.pragma-engine.com/books/lua-api/page/introduction\"]}{[c:fde4f2]}Lua Documentation{[/c]}{[/l]}\n"
 	    "\n");

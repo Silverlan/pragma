@@ -1166,10 +1166,10 @@ void pragma::ClientState::RegisterVulkanLuaInterface(Lua::Interface &lua)
 
 	auto defBufferCreateInfo = luabind::class_<prosper::util::BufferCreateInfo>("BufferCreateInfo");
 	defBufferCreateInfo.property(
-	  "debugName", +[](const prosper::util::ImageCreateInfo &imgCreateInfo) -> std::string { return std::string {imgCreateInfo.debugName}; },
-	  +[](lua::State *l, prosper::util::ImageCreateInfo &imgCreateInfo, const std::string &name) {
+	  "debugName", +[](const prosper::util::BufferCreateInfo &bufCreateInfo) -> std::string { return std::string {bufCreateInfo.debugName}; },
+	  +[](lua::State *l, prosper::util::BufferCreateInfo &bufCreateInfo, const std::string &name) {
 		  auto gname = util::register_global_string(name);
-		  imgCreateInfo.debugName = gname;
+		  bufCreateInfo.debugName = gname;
 	  });
 	defBufferCreateInfo.def_readwrite("size", &prosper::util::BufferCreateInfo::size);
 	defBufferCreateInfo.def_readwrite("queueFamilyMask", reinterpret_cast<uint32_t prosper::util::BufferCreateInfo::*>(&prosper::util::BufferCreateInfo::queueFamilyMask));

@@ -38,4 +38,4 @@ end
 function Element:GetSocketType()
 	return self.m_socketType
 end
-gui.register("WIGraphNodeSocket", Element)
+gui.register("graph_node_socket", Element)

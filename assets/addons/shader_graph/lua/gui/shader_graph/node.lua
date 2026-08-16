@@ -7,22 +7,23 @@ function Element:OnInitialize()
 
 	self:SetSize(160, 128)
 
-	local box = gui.create("WIVBox", self, 0, 0, self:GetWidth(), self:GetHeight())
+	local box = gui.create("vbox", self, 0, 0, self:GetWidth(), self:GetHeight())
 	box:SetName("global_container")
 	box:SetFixedWidth(true)
 	box:AddCallback("OnSizeChanged", function()
 		self:SetHeight(box:GetBottom())
 	end)
 
-	local outputControls = gui.create("WIPFMControlsMenu", box, 0, 0, box:GetWidth(), box:GetHeight())
+	local outputControls = gui.create("pfm_controls_menu", box, 0, 0, box:GetWidth(), box:GetHeight())
 	outputControls:SetAutoFillContentsToHeight(false)
+	outputControls:SetAutoSizeToContents(false, true)
 	outputControls:SetFixedHeight(false)
 	outputControls:Wrap("WIContentWrapper"):SetPaddingLeftRight(10)
 	self.m_outputControls = outputControls
 
 	local offsetControls = 0
 	local inputControls = gui.create(
-		"WIPFMControlsMenu",
+		"pfm_controls_menu",
 		box,
 		offsetControls,
 		outputControls:GetBottom(),
@@ -31,6 +32,7 @@ function Element:OnInitialize()
 	)
 	inputControls:Wrap("WIContentWrapper"):SetPaddingLeftRight(10)
 	inputControls:SetAutoFillContentsToHeight(false)
+	inputControls:SetAutoSizeToContents(false, true)
 	inputControls:SetFixedHeight(false)
 	self.m_inputControls = inputControls
 
@@ -131,7 +133,7 @@ function Element:AddControl(socketType, linkable, title, id, type, defaultVal, m
 	end
 	local el
 	if linkable then
-		el = gui.create("WIGraphNodeSocket", shaderGraph)
+		el = gui.create("graph_node_socket", shaderGraph)
 		el:SetSocket(self, id, socketType)
 		el:SetMouseInputEnabled(true)
 		el:SetZPos(2)
@@ -222,4 +224,4 @@ function Element:AddOutput(name)
 	local elSocket, elCtrl = self:AddControl(gui.GraphNodeSocket.SOCKET_TYPE_OUTPUT, true, name, name)
 	return elSocket, elCtrl
 end
-gui.register("WIGraphNode", Element)
+gui.register("graph_node", Element)

@@ -27,12 +27,12 @@ end
 function Element:MouseCallback(button, state, mods)
 	if button == input.MOUSE_BUTTON_LEFT then
 		if state == input.STATE_PRESS then
-			self.m_selectionRect = gui.create("WISelectionRect", self)
+			self.m_selectionRect = gui.create("selection_rect", self)
 			self.m_selectionRect:SetPos(self:GetCursorPos())
 			self.m_selectionRect:SetZPos(10000)
 		else
 			local gnFrames = self.m_selectionRect:FindElements(function(el)
-				return el:GetClass() == "wiframe"
+				return el:IsType(gui.TYPE_FRAME)
 			end)
 			self:DeselectAll()
 			for _, frame in ipairs(gnFrames) do
@@ -244,7 +244,7 @@ function Element:ClearLinks()
 	self:CallCallbacks("OnLinksChanged")
 end
 function Element:AddLink(elOutputSocket, elInputSocket)
-	local l = gui.create("WIElementConnectorLine", self)
+	local l = gui.create("element_connector_line", self)
 	l:SetPointToVisibleBounds(false)
 	l:SetArrowScale(0.5)
 	l:SetSize(self:GetSize())
@@ -335,7 +335,7 @@ function Element:AddNode(graphNode)
 	pDrag:SetHeight(31)
 	pDrag:SetAutoAlignToParent(true, false)
 
-	local elNode = gui.create("WIGraphNode", frame)
+	local elNode = gui.create("graph_node", frame)
 	elNode:SetShaderGraph(self)
 	elNode:SetFrame(frame, elBg)
 	elNode:SetNode(graphNode:GetName())
@@ -444,7 +444,7 @@ function Element:StartInteractiveLinkMode(el)
 		end
 	end)
 
-	local l = gui.create("WIElementConnectorLine", self)
+	local l = gui.create("element_connector_line", self)
 	l:SetPointToVisibleBounds(false)
 	l:SetArrowScale(0.5)
 	l:SetSize(self:GetSize())
@@ -470,7 +470,7 @@ function Element:OnThink()
 		and util.is_valid(self.m_interactiveLinkSourceSocket)
 	then
 		local elSocket = gui.get_element_under_cursor(function(el)
-			return el:GetClass() == "wigraphnodesocket"
+			return el:IsType(gui.TYPE_GRAPH_NODE_SOCKET)
 				and el:GetSocketType() ~= self.m_interactiveLinkSourceSocket:GetSocketType()
 		end)
 		self.m_interactiveLinkTargetSocket = elSocket
@@ -487,4 +487,4 @@ function Element:OnThink()
 		self.m_interactiveLinkLine:Update()
 	end
 end
-gui.register("WIShaderGraph", Element)
+gui.register("shader_graph", Element)

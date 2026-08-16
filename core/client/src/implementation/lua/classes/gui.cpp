@@ -29,7 +29,7 @@ static TStream &print_ui_element(TStream &os, const pragma::gui::types::WIBase &
 	os << "[" << p->GetName() << "]";
 	os << "[" << p->GetIndex() << "]";
 	os << "[" << &handle << "]";
-	os << "[Pos:" << pos.x << ", " << pos.y << "]";
+	os << "[AbsPos:" << pos.x << ", " << pos.y << "]";
 	os << "[Sz:" << size.x << ", " << size.y << "]";
 	os << "[Vis:" << (p->IsVisible() ? "1" : "0") << "(" << (p->IsSelfVisible() ? "1" : "0") << ")]";
 

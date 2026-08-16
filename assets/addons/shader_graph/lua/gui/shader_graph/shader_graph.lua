@@ -32,7 +32,7 @@ function Element:MouseCallback(button, state, mods)
 			self.m_selectionRect:SetZPos(10000)
 		else
 			local gnFrames = self.m_selectionRect:FindElements(function(el)
-				return el:IsType(gui.TYPE_FRAME)
+				return el:IsType(gui.TYPE_WIFRAME)
 			end)
 			self:DeselectAll()
 			for _, frame in ipairs(gnFrames) do

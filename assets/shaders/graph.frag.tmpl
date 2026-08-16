@@ -1,0 +1,17 @@
+#version 440
+
+#extension GL_ARB_separate_shader_objects : enable
+#extension GL_ARB_shading_language_420pack : enable
+
+#define DEBUG_MODE DEBUG_MODE_NONE
+
+#include "/common/inputs/entity.glsl"
+#include "/common/inputs/textures/albedo_map.glsl"
+#include "/common/pixel_outputs/fs_bloom_color.glsl"
+#include "/common/vertex_outputs/vertex_data.glsl"
+{{header}}
+
+void main()
+{
+	{{body}}
+}

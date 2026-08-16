@@ -130,12 +130,16 @@ std::shared_ptr<pragma::shadergraph::Graph> ShaderGraphManager::LoadShader(const
 void ShaderGraphManager::ReloadShader(const std::string &identifier)
 {
 	auto itType = m_shaderNameToType.find(identifier);
-	if(itType == m_shaderNameToType.end())
+	if(itType == m_shaderNameToType.end()) {
+		spdlog::warn("Unable to reload shader graph {}: Shader type not registered?", identifier);
 		return;
+	}
 	auto &type = itType->second;
 	auto it = m_shaderGraphTypeManagers.find(type);
-	if(it == m_shaderGraphTypeManagers.end())
+	if(it == m_shaderGraphTypeManagers.end()) {
+		spdlog::warn("Unable to reload shader graph {}: Unknown type {}", identifier, type);
 		return;
+	}
 	it->second->ReloadShader(identifier);
 }
 std::shared_ptr<ShaderGraphData> ShaderGraphManager::GetGraph(const std::string &identifier) const
@@ -154,16 +158,22 @@ void ShaderGraphManager::SyncGraph(const std::string &type, const std::string &i
 	auto graphData = GetGraph(identifier);
 	if(!graphData) {
 		auto itType = m_shaderNameToType.find(identifier);
-		if(itType == m_shaderNameToType.end())
+		if(itType == m_shaderNameToType.end()) {
+			spdlog::warn("Failed to sync graph {} of type {}: Shader type not registered?", identifier, type);
 			return;
+		}
 		auto it = m_shaderGraphTypeManagers.find(type);
-		if(it == m_shaderGraphTypeManagers.end())
+		if(it == m_shaderGraphTypeManagers.end()) {
+			spdlog::warn("Failed to sync graph {} of type {}: Unknown type?", identifier, type);
 			return;
+		}
 		auto newGraph = pragma::util::make_shared<shadergraph::Graph>(graph.GetNodeRegistry());
 		it->second->RegisterGraph(identifier, newGraph);
 		graphData = GetGraph(identifier);
-		if(!graphData)
+		if(!graphData) {
+			spdlog::warn("Failed to sync graph {} of type {}: Graph data not found!", identifier, type);
 			return;
+		}
 	}
 	auto &curGraph = graphData->GetGraph();
 	curGraph->Clear();
@@ -180,9 +190,12 @@ std::shared_ptr<pragma::shadergraph::NodeRegistry> ShaderGraphManager::GetNodeRe
 
 void ShaderGraphData::GenerateGlsl()
 {
-	auto placeholder = fs::read_file("shaders/graph_placeholder.frag");
-	if(!placeholder)
+	constexpr auto graphTemplateFile = "shaders/graph.frag.tmpl";
+	auto placeholder = fs::read_file(graphTemplateFile);
+	if(!placeholder) {
+		spdlog::error("Failed to read graph template file {}", graphTemplateFile);
 		return;
+	}
 
 	std::string shaderName = m_identifier;
 	std::ostringstream header;

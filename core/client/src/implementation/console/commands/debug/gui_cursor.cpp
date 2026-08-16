@@ -390,9 +390,12 @@ static void debug_gui_cursor(pragma::NetworkState *state, pragma::BasePlayerComp
 	}
 	if(!argv.empty()) {
 		auto &elName = argv.front();
-		auto *el = pragma::gui::WGUI::GetInstance().FindByFilter([&elName](pragma::gui::types::WIBase &el) -> bool { return pragma::string::compare(el.GetName(), elName, false); });
+		pragma::gui::types::WIBase *el = nullptr;
+		el = pragma::gui::WGUI::GetInstance().FindByFilter([&elName](pragma::gui::types::WIBase &el) -> bool { return pragma::string::compare(el.GetName(), elName, false); });
+		if (!el && pragma::util::is_integer(elName))
+			el = pragma::gui::WGUI::GetInstance().FindByIndex(pragma::util::to_int(elName));
 		if(!el) {
-			Con::CWAR << "Unable to find element by name '" << elName << "'!" << Con::endl;
+			Con::CWAR << "Unable to find element by name or index '" << elName << "'!" << Con::endl;
 			return;
 		}
 		s_dbgManager->SetTargetGUIElementOverride(el);

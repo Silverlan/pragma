@@ -52,7 +52,7 @@ void COcclusionCullerComponent::AddEntity(ecs::CBaseEntity &ent)
 		if(pTrComponent != nullptr) {
 			auto &trC = static_cast<CTransformComponent &>(*pTrComponent);
 			it->second.push_back(trC.AddEventCallback(cTransformComponent::EVENT_ON_POSE_CHANGED, [this, ent](std::reference_wrapper<ComponentEvent> evData) -> util::EventReply {
-				if(math::is_flag_set(static_cast<CEOnPoseChanged &>(evData.get()).changeFlags, TransformChangeFlags::PositionChanged) == false)
+				if(math::is_flag_set(static_cast<CEOnPoseChanged &>(evData.get()).changeFlags, TransformChangeFlags::PositionChanged | TransformChangeFlags::RotationChanged | TransformChangeFlags::ScaleChanged) == false)
 					return util::EventReply::Unhandled;
 				// SceneRenderDesc::AssertRenderQueueThreadInactive();
 				// Note: Entity positions should generally not be updated during rendering,

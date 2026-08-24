@@ -35,7 +35,7 @@ pr_fetch_external_lib("datasystem"              "https://github.com/Silverlan/da
 pr_fetch_external_lib("iglfw"                   "https://github.com/Silverlan/iglfw"                  "202f6d22583fd71cc625776a469cf590a786ede2")
 pr_fetch_external_lib("luasystem"               "https://github.com/Silverlan/luasystem"              "a2a64cc780a73bad377750c6873dab6dbfe4584f")
 pr_fetch_external_lib("materialsystem"          "https://github.com/Silverlan/materialsystem"         "a494305b543ebf9d26d653f2e17668d9c1659983")
-pr_fetch_external_lib("mathutil"                "https://github.com/Silverlan/mathutil"               "041146b15bcbf5456d524bc9e4a7f405d5524721")
+pr_fetch_external_lib("mathutil"                "https://github.com/Silverlan/mathutil"               "abe8a3244d689ad1372aec75f0d9f5e5e9d41d20")
 pr_fetch_external_lib("networkmanager"          "https://github.com/Silverlan/networkmanager"         "307e83426280669624ee25f8e3058af96e4e0db3")
 pr_fetch_external_lib("oskit"                   "https://github.com/Silverlan/oskit"                  "897e250eff19d640db31535758f8737a306056ac")
 pr_fetch_external_lib("panima"                  "https://github.com/Silverlan/panima"                 "78d454726fdd3aca3512fb52844af11fe33f11cf")

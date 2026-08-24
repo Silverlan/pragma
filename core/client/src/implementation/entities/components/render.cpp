@@ -158,34 +158,12 @@ void CRenderComponent::Initialize()
 
 	BindEventUnhandled(cColorComponent::EVENT_ON_COLOR_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) { SetRenderBufferDirty(); });
 	BindEventUnhandled(cModelComponent::EVENT_ON_MODEL_CHANGED, [this](std::reference_wrapper<ComponentEvent> evData) {
-		m_localRenderBounds = {};
-		m_absoluteRenderBounds = {};
-		m_localRenderSphere = {};
-		m_absoluteRenderSphere = {};
-
-		auto &ent = GetEntity();
-		auto *mdlComponent = GetModelComponent();
-		auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
-		if(mdl == nullptr) {
-			UpdateRenderMeshes();
-			BroadcastEvent(cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);
-			return;
-		}
-
-		Vector3 rMin, rMax;
-		mdl->GetRenderBounds(rMin, rMax);
-		auto pPhysComponent = ent.GetPhysicsComponent();
-		auto lorigin = pPhysComponent != nullptr ? pPhysComponent->GetLocalOrigin() : Vector3 {};
-		rMin += lorigin;
-		rMax += lorigin;
-		SetLocalRenderBounds(rMin, rMax);
-
-		UpdateRenderMeshes();
-		BroadcastEvent(cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);
+		UpdateModelRenderBounds();
 	});
 	UpdateInstantiability();
 	UpdateAncestorHiddenState();
 	PropagateHiddenState();
+	UpdateModelRenderBounds();
 }
 CRenderComponent::~CRenderComponent()
 {
@@ -197,6 +175,33 @@ CRenderComponent::~CRenderComponent()
 		get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderBuffer);
 	if(m_renderDescSetGroup != nullptr)
 		get_cengine()->GetRenderContext().KeepResourceAliveUntilPresentationComplete(m_renderDescSetGroup);
+}
+void CRenderComponent::UpdateModelRenderBounds()
+{
+	m_localRenderBounds = {};
+	m_absoluteRenderBounds = {};
+	m_localRenderSphere = {};
+	m_absoluteRenderSphere = {};
+
+	auto &ent = GetEntity();
+	auto *mdlComponent = GetModelComponent();
+	auto mdl = mdlComponent ? mdlComponent->GetModel() : nullptr;
+	if(mdl == nullptr) {
+		UpdateRenderMeshes();
+		BroadcastEvent(cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);
+		return;
+	}
+
+	Vector3 rMin, rMax;
+	mdl->GetRenderBounds(rMin, rMax);
+	auto pPhysComponent = ent.GetPhysicsComponent();
+	auto lorigin = pPhysComponent != nullptr ? pPhysComponent->GetLocalOrigin() : Vector3 {};
+	rMin += lorigin;
+	rMax += lorigin;
+	SetLocalRenderBounds(rMin, rMax);
+
+	UpdateRenderMeshes();
+	BroadcastEvent(cRenderComponent::EVENT_ON_RENDER_MODE_CHANGED);
 }
 void CRenderComponent::OnRemove()
 {
@@ -221,6 +226,7 @@ void CRenderComponent::OnEntitySpawn()
 }
 void CRenderComponent::UpdateAbsoluteRenderBounds()
 {
+	math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty, true);
 	if(math::is_flag_set(m_stateFlags, StateFlags::RenderBoundsDirty) == false)
 		return;
 	math::set_flag(m_stateFlags, StateFlags::RenderBoundsDirty, false);
@@ -249,8 +255,6 @@ const math::Sphere &CRenderComponent::GetAbsoluteRenderSphere() const { return m
 bounding_volume::AABB CRenderComponent::CalcAbsoluteRenderBounds() const
 {
 	auto absBounds = m_localRenderBounds;
-	auto &min = absBounds.min;
-	auto &max = absBounds.max;
 
 	auto &ent = GetEntity();
 	auto pose = ent.GetPose();

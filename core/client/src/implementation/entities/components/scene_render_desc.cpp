@@ -171,16 +171,15 @@ bool SceneRenderDesc::ShouldCull(pragma::CRenderComponent &renderC, pragma::rend
 	auto &renderMeshes = renderC.GetRenderMeshes();
 	if(meshIdx >= renderMeshes.size())
 		return false;
+	// TODO: This is pretty expensive to do every frame for every mesh.
+	// We should put the camera frustum into entity space instead and then use the local render bounds.
 	auto &renderMesh = renderMeshes[meshIdx];
 	Vector3 min, max;
 	renderMesh->GetBounds(min, max);
-	auto &scale = renderC.GetEntity().GetScale();
-	min *= scale;
-	max *= scale;
-	auto &pos = renderC.GetEntity().GetPosition();
-	min += pos;
-	max += pos;
-	return fShouldCull(min, max);
+	bounding_volume::AABB localBounds{min, max};
+	auto pose = renderC.GetEntity().GetPose();
+	bounding_volume::AABB worldBounds = localBounds.Transform(pose);
+	return fShouldCull(worldBounds.min, worldBounds.max);
 }
 bool SceneRenderDesc::ShouldCull(const Vector3 &min, const Vector3 &max, const std::vector<pragma::math::Plane> &frustumPlanes) { return pragma::math::intersection::aabb_in_plane_mesh(min, max, frustumPlanes.begin(), frustumPlanes.end()) == pragma::math::intersection::Intersect::Outside; }
 

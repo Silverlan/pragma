@@ -202,6 +202,7 @@ export namespace pragma {
 		void UpdateAncestorHiddenState();
 		void PropagateHiddenState();
 		void UpdateVisibility();
+	    void UpdateModelRenderBounds();
 
 		void UpdateShouldDrawShadowState();
 		void UpdateRenderBuffer() const;

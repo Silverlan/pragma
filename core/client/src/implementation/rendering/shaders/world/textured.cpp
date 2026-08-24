@@ -258,10 +258,8 @@ void ShaderGameWorldLightingPass::InitializeShaderResources()
 	InitializeGfxPipelinePushConstantRanges();
 	InitializeGfxPipelineDescriptorSets();
 }
-void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+void ShaderGameWorldLightingPass::ApplyDefaultPipelineSettings(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
 {
-	ShaderEntity::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
-
 	auto isReflection = (static_cast<rendering::PassType>(GetBasePassType(pipelineIdx)) == rendering::PassType::Reflection);
 	if(isReflection) {
 		prosper::util::set_graphics_pipeline_cull_mode_flags(pipelineInfo, prosper::CullModeFlags::FrontBit);
@@ -272,6 +270,12 @@ void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelin
 	auto isTranslucentPipeline = IsSpecializationConstantSet(pipelineIdx, GameShaderSpecializationConstantFlag::EnableTranslucencyBit);
 	if(isTranslucentPipeline)
 		SetGenericAlphaColorBlendAttachmentProperties(pipelineInfo);
+}
+void ShaderGameWorldLightingPass::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx)
+{
+	ShaderEntity::InitializeGfxPipeline(pipelineInfo, pipelineIdx);
+
+	ApplyDefaultPipelineSettings(pipelineInfo, pipelineIdx);
 	pipelineInfo.ToggleDepthWrites(false); // Already written in depth pre-pass
 	pipelineInfo.ToggleDepthTest(true, prosper::CompareOp::LessOrEqual);
 
@@ -461,8 +465,8 @@ std::shared_ptr<prosper::IDescriptorSetGroup> ShaderGameWorldLightingPass::Initi
 
 GameShaderSpecializationConstantFlag ShaderGameWorldLightingPass::GetBaseSpecializationFlags() const { return GameShaderSpecializationConstantFlag::None; }
 
-void ShaderGameWorldLightingPass::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer,
-  prosper::IDescriptorSet &dsRenderSettings, prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const
+void ShaderGameWorldLightingPass::RecordBindScene(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const CRasterizationRendererComponent &renderer, prosper::IDescriptorSet &dsScene, prosper::IDescriptorSet &dsRenderer, prosper::IDescriptorSet &dsRenderSettings,
+  prosper::IDescriptorSet &dsShadows, const Vector4 &drawOrigin, SceneFlags &inOutSceneFlags) const
 {
 	std::array<prosper::IDescriptorSet *, 4> descSets {&dsScene, &dsRenderer, &dsRenderSettings, &dsShadows};
 

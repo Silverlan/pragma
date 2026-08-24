@@ -392,6 +392,7 @@ void pragma::LuaShaderWrapperTextured3D::InitializeGfxPipelineVertexAttributes()
 void pragma::LuaShaderWrapperTextured3D::InitializeGfxPipelinePushConstantRanges() { CallLuaMember<void>("InitializeGfxPipelinePushConstantRanges"); }
 void pragma::LuaShaderWrapperTextured3D::InitializeGfxPipelineDescriptorSets() { CallLuaMember<void>("InitializeGfxPipelineDescriptorSets"); }
 void pragma::LuaShaderWrapperTextured3D::InitializeDefaultRenderPass(std::shared_ptr<prosper::IRenderPass> &outRenderPass, uint32_t pipelineIdx) { static_cast<LShaderGameWorldLightingPass *>(m_shader)->InitializeDefaultRenderPass(outRenderPass, pipelineIdx); }
+void pragma::LuaShaderWrapperTextured3D::ApplyDefaultPipelineSettings(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx) { static_cast<LShaderGameWorldLightingPass *>(m_shader)->ApplyDefaultPipelineSettings(pipelineInfo, pipelineIdx); }
 
 /////////////////
 

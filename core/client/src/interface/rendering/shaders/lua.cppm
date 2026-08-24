@@ -511,6 +511,7 @@ export namespace pragma {
 		void SetPushConstants(util::DataStream dsPushConstants);
 		prosper::util::PreparedCommandBuffer &GetBindPcb();
 		void InitializeMaterialBuffer(prosper::IDescriptorSetGroup &descSet, material::CMaterial &mat, const rendering::ShaderInputData &matData);
+		void ApplyDefaultPipelineSettings(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
 
 		virtual LShaderBase *CreateShader() const override { return new TShader {}; }
 	  protected:

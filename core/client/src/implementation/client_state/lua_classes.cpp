@@ -1133,6 +1133,7 @@ void pragma::ClientState::RegisterSharedLuaClasses(Lua::Interface &lua, bool bGU
 	defShaderTextured3DBase.def("SetPushConstants", &LuaShaderWrapperTextured3D::SetPushConstants);
 	defShaderTextured3DBase.def("GetBindPcb", &LuaShaderWrapperTextured3D::GetBindPcb);
 	defShaderTextured3DBase.def("InitializeMaterialBuffer", &LuaShaderWrapperTextured3D::InitializeMaterialBuffer);
+	defShaderTextured3DBase.def("ApplyDefaultPipelineSettings", &LuaShaderWrapperTextured3D::ApplyDefaultPipelineSettings);
 
 	defShaderTextured3DBase.def("OnBindMaterial", &LuaShaderWrapperTextured3D::Lua_OnBindMaterial, &LuaShaderWrapperTextured3D::Lua_default_OnBindMaterial);
 	defShaderTextured3DBase.def("OnDraw", &LuaShaderWrapperTextured3D::Lua_OnDraw, &LuaShaderWrapperTextured3D::Lua_default_OnDraw);

@@ -132,6 +132,7 @@ export namespace pragma {
 		virtual bool GetRenderBufferTargets(geometry::CModelSubMesh &mesh, uint32_t pipelineIdx, std::vector<prosper::IBuffer *> &outBuffers, std::vector<prosper::DeviceSize> &outOffsets, std::optional<prosper::IndexBufferInfo> &outIndexBufferInfo) const override;
 		virtual uint32_t GetSceneDescriptorSetIndex() const override;
 		bool RecordPushSceneConstants(rendering::ShaderProcessor &shaderProcessor, const CSceneComponent &scene, const Vector4 &drawOrigin) const;
+		void ApplyDefaultPipelineSettings(prosper::GraphicsPipelineCreateInfo &pipelineInfo, uint32_t pipelineIdx);
 
 		virtual uint32_t GetCameraDescriptorSetIndex() const override;
 		virtual uint32_t GetRendererDescriptorSetIndex() const override;

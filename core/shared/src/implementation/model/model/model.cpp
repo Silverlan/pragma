@@ -49,8 +49,7 @@ bool pragma::asset::Eyeball::operator==(const Eyeball &other) const
 {
 	static_assert(layout_version == 1, "Update this function when making changes to this class!");
 	return name == other.name && boneIndex == other.boneIndex && uvec::cmp(origin, other.origin) && math::abs(zOffset - other.zOffset) < 0.001f && math::abs(radius - other.radius) < 0.001f && uvec::cmp(up, other.up) && uvec::cmp(forward, other.forward)
-	  && irisMaterialIndex == other.irisMaterialIndex && math::abs(maxDilationFactor - other.maxDilationFactor) < 0.001f && math::abs(irisUvRadius - other.irisUvRadius) < 0.001f && math::abs(irisScale - other.irisScale) < 0.001f && upperLid == other.upperLid
-	  && lowerLid == other.lowerLid;
+	  && irisMaterialIndex == other.irisMaterialIndex && math::abs(maxDilationFactor - other.maxDilationFactor) < 0.001f && math::abs(irisUvRadius - other.irisUvRadius) < 0.001f && math::abs(irisScale - other.irisScale) < 0.001f && upperLid == other.upperLid && lowerLid == other.lowerLid;
 }
 
 /////////////////////////////////////
@@ -78,8 +77,8 @@ pragma::asset::Model::Model(NetworkState *nw, uint32_t numBones, const std::stri
 pragma::asset::Model::Model(const Model &other)
     : m_networkState(other.m_networkState), m_metaInfo(other.m_metaInfo), m_stateFlags(other.m_stateFlags), m_mass(other.m_mass), m_blendControllers(other.m_blendControllers), m_bodyGroups(other.m_bodyGroups), m_hitboxes(other.m_hitboxes), m_name(other.m_name),
       m_animationIDs(other.m_animationIDs), m_bindPose(other.m_bindPose), m_collisionMin(other.m_collisionMin), m_collisionMax(other.m_collisionMax), m_renderMin(other.m_renderMin), m_renderMax(other.m_renderMax), m_joints(other.m_joints), m_baseMeshes(other.m_baseMeshes),
-      m_lods(other.m_lods), m_attachments(other.m_attachments), m_materials(other.m_materials), m_textureGroups(other.m_textureGroups), m_skeleton(std::make_unique<animation::Skeleton>(*other.m_skeleton)), m_reference(Frame::Create(*other.m_reference)),
-      m_vertexCount(other.m_vertexCount), m_triangleCount(other.m_triangleCount), m_flexControllers(other.m_flexControllers), m_flexes(other.m_flexes), m_phonemeMap(other.m_phonemeMap)
+      m_lods(other.m_lods), m_attachments(other.m_attachments), m_materials(other.m_materials), m_textureGroups(other.m_textureGroups), m_skeleton(std::make_unique<animation::Skeleton>(*other.m_skeleton)), m_reference(Frame::Create(*other.m_reference)), m_vertexCount(other.m_vertexCount),
+      m_triangleCount(other.m_triangleCount), m_flexControllers(other.m_flexControllers), m_flexes(other.m_flexes), m_phonemeMap(other.m_phonemeMap)
 {
 	m_stateFlags |= StateFlags::AllMaterialsLoaded;
 	m_meshGroups.reserve(other.m_meshGroups.size());
@@ -1305,24 +1304,34 @@ void pragma::asset::Model::CalculateRenderBounds()
 	Vector3 min(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
 	Vector3 max(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 	auto numMeshGroups = m_meshGroups.size();
-	if(numMeshGroups == 0) {
-		min = Vector3 {0.f, 0.f, 0.f};
-		max = Vector3 {0.f, 0.f, 0.f};
-	}
-	else {
-		for(auto &group : m_meshGroups) {
-			auto &meshes = group->GetMeshes();
-			for(auto &mesh : meshes) {
-				Vector3 meshMin;
-				Vector3 meshMax;
-				mesh->GetBounds(meshMin, meshMax);
-				uvec::min(&min, meshMin);
-				uvec::max(&max, meshMax);
-			}
+	auto numMeshes = 0;
+	for(auto &group : m_meshGroups) {
+		auto &meshes = group->GetMeshes();
+		for(auto &mesh : meshes) {
+			Vector3 meshMin;
+			Vector3 meshMax;
+			mesh->GetBounds(meshMin, meshMax);
+			uvec::min(&min, meshMin);
+			uvec::max(&max, meshMax);
+			++numMeshes;
 		}
+	}
+	if(numMeshes == 0) {
+		m_renderMin = {0.f, 0.f, 0.f};
+		m_renderMax = {0.f, 0.f, 0.f};
+		return;
 	}
 	m_renderMin = min;
 	m_renderMax = max;
+
+	// Ensure bounds do not become 0
+	for(size_t i = 0; i < 3; ++i) {
+		if(math::abs(max[i] - min[i]) < 0.0001f) {
+			auto v = (max[i] + min[i]) / 2.f;
+			m_renderMax[i] = v + 0.5f;
+			m_renderMin[i] = v - 0.5f;
+		}
+	}
 }
 
 Vector3 pragma::asset::Model::GetOrigin() const

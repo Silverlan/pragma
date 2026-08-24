@@ -16,6 +16,8 @@ SceneOutputNode::SceneOutputNode(const std::string_view &type) : Node {type, sha
 	AddInput(IN_EMISSIVE_COLOR, shadergraph::DataType::Color, Vector3 {0.f, 0.f, 0.f});
 
 	AddSocketEnum<AlphaMode>(CONST_ALPHA_MODE, AlphaMode::Opaque, true);
+	AddSocketEnum<prosper::PolygonMode>(CONST_POLYGON_MODE, prosper::PolygonMode::Fill, true);
+	AddSocket(CONST_LINE_WIDTH, shadergraph::DataType::Float, 1.f, 0.f, 10.f);
 
 	AddModuleDependency("scene_output");
 }

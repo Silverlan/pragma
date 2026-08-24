@@ -14,6 +14,8 @@ export namespace pragma::rendering::shader_graph {
 		static constexpr const char *IN_BLOOM_FACTOR = "bloomFactor";
 		static constexpr const char *IN_EMISSIVE_COLOR = "emissiveColor";
 		static constexpr const char *CONST_ALPHA_MODE = "alphaMode";
+		static constexpr const char *CONST_POLYGON_MODE = "polygonMode";
+		static constexpr const char *CONST_LINE_WIDTH = "lineWidth";
 		// TODO: Only allow one of these!
 		SceneOutputNode(const std::string_view &type);
 

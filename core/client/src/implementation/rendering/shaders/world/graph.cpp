@@ -92,12 +92,16 @@ void ShaderGraph::InitializeShaderResources()
 		mod->InitializeShaderResources();
 
 	m_alphaMode = AlphaMode::Opaque;
+	m_polygonMode = prosper::PolygonMode::Fill;
+	m_lineWidth = 1.f;
 	if(graph) {
 		for(auto &node : graph->GetNodes()) {
 			auto *outputNode = dynamic_cast<const rendering::shader_graph::SceneOutputNode *>(&node->node);
 			if(!outputNode)
 				continue;
 			node->GetInputValue(rendering::shader_graph::SceneOutputNode::CONST_ALPHA_MODE, m_alphaMode);
+			node->GetInputValue(rendering::shader_graph::SceneOutputNode::CONST_POLYGON_MODE, m_polygonMode);
+			node->GetInputValue(rendering::shader_graph::SceneOutputNode::CONST_LINE_WIDTH, m_lineWidth);
 		}
 	}
 
@@ -135,6 +139,9 @@ void ShaderGraph::InitializeGfxPipeline(prosper::GraphicsPipelineCreateInfo &pip
 		pipelineInfo.ToggleDepthWrites(true);
 		break;
 	}
+
+	prosper::util::set_graphics_pipeline_polygon_mode(pipelineInfo, m_polygonMode);
+	prosper::util::set_graphics_pipeline_line_width(pipelineInfo, m_lineWidth);
 }
 
 void ShaderGraph::InitializeShaderMaterial()

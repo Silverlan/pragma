@@ -38,5 +38,7 @@ export namespace pragma {
 		std::shared_ptr<prosper::IDescriptorSetGroup> m_defaultPbrDsg = nullptr;
 		std::vector<std::unique_ptr<rendering::ShaderGraphModule>> m_modules;
 		AlphaMode m_alphaMode = AlphaMode::Opaque;
+		prosper::PolygonMode m_polygonMode = prosper::PolygonMode::Fill;
+		float m_lineWidth = 1.f;
 	};
 };

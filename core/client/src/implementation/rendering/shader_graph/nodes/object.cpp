@@ -11,6 +11,7 @@ ObjectNode::ObjectNode(const std::string_view &type) : Node {type, shadergraph::
 {
 	AddOutput(OUT_MODEL_MATRIX, shadergraph::DataType::Transform);
 	AddOutput(OUT_COLOR, shadergraph::DataType::Color);
+	AddOutput(OUT_ALPHA, shadergraph::DataType::Float);
 
 	AddModuleDependency("object");
 }
@@ -18,7 +19,8 @@ ObjectNode::ObjectNode(const std::string_view &type) : Node {type, shadergraph::
 std::string ObjectNode::DoEvaluate(const shadergraph::Graph &graph, const shadergraph::GraphNode &instance) const
 {
 	std::ostringstream code;
-	code << instance.GetGlslOutputDeclaration(OUT_MODEL_MATRIX) << " = u_instance.M;\n";
-	code << instance.GetGlslOutputDeclaration(OUT_COLOR) << " = u_instance.color;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_MODEL_MATRIX) << " = u_instance.data.M;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_COLOR) << " = u_instance.data.color.rgb;\n";
+	code << instance.GetGlslOutputDeclaration(OUT_ALPHA) << " = u_instance.data.color.a;\n";
 	return code.str();
 }

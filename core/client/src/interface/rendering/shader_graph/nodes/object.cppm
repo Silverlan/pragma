@@ -10,6 +10,7 @@ export namespace pragma::rendering::shader_graph {
 	  public:
 		static constexpr const char *OUT_MODEL_MATRIX = "modelMatrix";
 		static constexpr const char *OUT_COLOR = "color";
+		static constexpr const char *OUT_ALPHA = "alpha";
 
 		ObjectNode(const std::string_view &type);
 

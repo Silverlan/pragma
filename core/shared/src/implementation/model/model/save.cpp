@@ -312,6 +312,13 @@ bool pragma::asset::Model::LoadFromAssetData(Game &game, const udm::AssetData &d
 	readFlag(udm, Flags::GeneratedMetaBlendShapes, "generatedMetaBlendShapes", flags);
 	static_assert(math::to_integral(Flags::Count) == 13, "Update this list when new flags have been added!");
 
+	{
+		auto isStatic = false;
+		udm["static"] >> isStatic;
+		if(isStatic)
+			flags |= Flags::Static;
+	}
+
 	auto isStatic = math::is_flag_set(flags, Flags::Static);
 	if(!isStatic) {
 		auto udmSkeleton = udm["skeleton"];

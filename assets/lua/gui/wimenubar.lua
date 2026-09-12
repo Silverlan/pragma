@@ -1,22 +1,23 @@
 -- SPDX-FileCopyrightText: (c) 2021 Silverlan <opensource@pragma-engine.com>
 -- SPDX-License-Identifier: MIT
 
-include("/gui/layout/hbox.lua")
 include("wicontextmenu.lua")
 
-util.register_class("gui.WIMenuBar", gui.HBox)
+util.register_class("gui.WIMenuBar", gui.Base)
 
 local get_event
 function gui.WIMenuBar:OnRemove() end
 function gui.WIMenuBar:OnInitialize()
-	gui.HBox.OnInitialize(self)
+	gui.Base.OnInitialize(self)
 
 	self:SetSize(128, 24)
 
+	self.m_contents = gui.create("hbox", self)
+
 	self:SetName("menu_bar")
 	local pMain = gui.create("WIRect")
-	self:SetBackgroundElement(pMain)
-	pMain:SetParent(self)
+	pMain:SetBackgroundElement(true)
+	pMain:SetParent(self.m_contents)
 	pMain:SetColor(Color.Beige)
 	pMain:AddStyleClass("menu_bar_background")
 	pMain:SetMouseInputEnabled(true)
@@ -155,7 +156,7 @@ function gui.WIMenuBar:FindItemByIdentifier(identifier)
 	return self.m_idToItem[identifier]
 end
 function gui.WIMenuBar:AddItem(name, fcContextCallback, identifier)
-	local pItem = gui.create("menu_item", self)
+	local pItem = gui.create("menu_item", self.m_contents)
 	if util.is_valid(pItem) == false then
 		return
 	end

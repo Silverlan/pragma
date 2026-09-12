@@ -2,7 +2,6 @@
 -- SPDX-License-Identifier: MIT
 
 include("wimenuitem.lua")
-include("/gui/layout/vbox.lua")
 
 util.register_class("gui.WIContextMenu", gui.Base)
 

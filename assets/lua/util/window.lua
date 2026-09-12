@@ -1,7 +1,6 @@
 -- SPDX-FileCopyrightText: (c) 2024 Silverlan <opensource@pragma-engine.com>
 -- SPDX-License-Identifier: MIT
 
-include("/gui/layout/vbox.lua")
 include("/gui/pfm/controls_menu/controls_menu.lua")
 
 util.open_generic_window = function(title, onOpen)

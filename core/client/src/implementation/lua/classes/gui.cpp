@@ -496,8 +496,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 		  return std::tuple<float, float, float, float> {left, top, right, bottom};
 	  });
 	classDef.def("HasAnchor", &pragma::gui::types::WIBase::HasAnchor);
-	classDef.def("HasHorizontalAnchor", +[](const pragma::gui::types::WIBase &el) { return el.IsAnchorEdgeEnabled(pragma::gui::Anchor::Edge::Left) || el.IsAnchorEdgeEnabled(pragma::gui::Anchor::Edge::Right) || el.IsAnchorEdgeEnabled(pragma::gui::Anchor::Edge::HorizontalCenter); });
-	classDef.def("HasVerticalAnchor", +[](const pragma::gui::types::WIBase &el) { return el.IsAnchorEdgeEnabled(pragma::gui::Anchor::Edge::Top) || el.IsAnchorEdgeEnabled(pragma::gui::Anchor::Edge::Bottom) || el.IsAnchorEdgeEnabled(pragma::gui::Anchor::Edge::VerticalCenter); });
+	classDef.def("HasHorizontalAnchor", &pragma::gui::types::WIBase::HasHorizontalAnchor);
+	classDef.def("HasVerticalAnchor", &pragma::gui::types::WIBase::HasVerticalAnchor);
 	classDef.def("SetRemoveOnParentRemoval", &pragma::gui::types::WIBase::SetRemoveOnParentRemoval);
 	classDef.def("GetCenter", &pragma::gui::types::WIBase::GetCenter);
 	classDef.def("GetCenterX", &pragma::gui::types::WIBase::GetCenterX);

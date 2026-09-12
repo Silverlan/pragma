@@ -285,12 +285,6 @@ void pragma::gui::WGUILuaInterface::InitializeGUIElement(types::WIBase &p)
 	}));
 }
 
-template<typename T>
-luabind::object cast_to_type(lua::State *l, pragma::gui::types::WIBase &el)
-{
-	return pragma::LuaCore::raw_object_to_luabind_object(l, pragma::util::weak_shared_handle_cast<pragma::gui::types::WIBase, T>(el.GetHandle()));
-}
-
 luabind::object pragma::gui::WGUILuaInterface::CreateLuaObject(lua::State *l, types::WIBase &p)
 {
 	for(auto &f : get_client_state()->GetGUILuaWrapperFactories()) {
@@ -298,94 +292,7 @@ luabind::object pragma::gui::WGUILuaInterface::CreateLuaObject(lua::State *l, ty
 		if(r)
 			return r;
 	}
-	if(dynamic_cast<types::WITextEntry *>(&p) != nullptr) {
-		if(dynamic_cast<types::WINumericEntry *>(&p) != nullptr)
-			return cast_to_type<types::WINumericEntry>(l, p);
-		else if(dynamic_cast<types::WIDropDownMenu *>(&p) != nullptr)
-			return cast_to_type<types::WIDropDownMenu>(l, p);
-		else if(dynamic_cast<types::WICommandLineEntry *>(&p) != nullptr)
-			return cast_to_type<types::WICommandLineEntry>(l, p);
-		return cast_to_type<types::WITextEntry>(l, p);
-	}
-	else if(dynamic_cast<types::WIText *>(&p) != nullptr)
-		return cast_to_type<types::WIText>(l, p);
-	else if(dynamic_cast<types::WIOutlinedRect *>(&p) != nullptr)
-		return cast_to_type<types::WIOutlinedRect>(l, p);
-	else if(dynamic_cast<types::WIShape *>(&p) != nullptr) {
-		if(dynamic_cast<types::WITexturedShape *>(&p) != nullptr) {
-			if(dynamic_cast<types::WIRoundedTexturedRect *>(&p) != nullptr)
-				return cast_to_type<types::WIRoundedTexturedRect>(l, p);
-			else if(dynamic_cast<types::WIIcon *>(&p) != nullptr) {
-				if(dynamic_cast<types::WISilkIcon *>(&p) != nullptr)
-					return cast_to_type<types::WISilkIcon>(l, p);
-				return cast_to_type<types::WIIcon>(l, p);
-			}
-			else if(dynamic_cast<types::WIDebugSSAO *>(&p) != nullptr)
-				return cast_to_type<types::WIDebugSSAO>(l, p);
-			else if(dynamic_cast<types::WISegmentedRectSegment *>(&p) != nullptr)
-				return cast_to_type<types::WISegmentedRectSegment>(l, p);
-			else if(dynamic_cast<types::WI9SliceRect *>(&p) != nullptr)
-				return cast_to_type<types::WI9SliceRect>(l, p);
-			return cast_to_type<types::WITexturedShape>(l, p);
-		}
-		else if(dynamic_cast<types::WIRoundedRect *>(&p) != nullptr)
-			return cast_to_type<types::WIRoundedRect>(l, p);
-		else if(dynamic_cast<types::WICheckbox *>(&p) != nullptr)
-			return cast_to_type<types::WICheckbox>(l, p);
-		else if(dynamic_cast<types::WIArrow *>(&p) != nullptr)
-			return cast_to_type<types::WIArrow>(l, p);
-		return cast_to_type<types::WIShape>(l, p);
-	}
-	else if(dynamic_cast<types::WIContainer *>(&p) != nullptr) {
-		if(dynamic_cast<types::WITable *>(&p) != nullptr) {
-			if(dynamic_cast<types::WIGridPanel *>(&p) != nullptr)
-				return cast_to_type<types::WIGridPanel>(l, p);
-			else if(dynamic_cast<types::WITreeList *>(&p) != nullptr)
-				return cast_to_type<types::WITreeList>(l, p);
-			return cast_to_type<types::WITable>(l, p);
-		}
-		else if(dynamic_cast<types::WITableRow *>(&p) != nullptr) {
-			if(dynamic_cast<types::WITreeListElement *>(&p) != nullptr)
-				return cast_to_type<types::WITreeListElement>(l, p);
-			return cast_to_type<types::WITableRow>(l, p);
-		}
-		else if(dynamic_cast<types::WITableCell *>(&p) != nullptr)
-			return cast_to_type<types::WITableCell>(l, p);
-		return cast_to_type<types::WIContainer>(l, p);
-	}
-	else if(dynamic_cast<types::WIScrollBar *>(&p) != nullptr)
-		return cast_to_type<types::WIScrollBar>(l, p);
-	else if(dynamic_cast<types::WISnapArea *>(&p) != nullptr)
-		return cast_to_type<types::WISnapArea>(l, p);
-	else if(dynamic_cast<types::WIButton *>(&p) != nullptr)
-		return cast_to_type<types::WIButton>(l, p);
-	else if(dynamic_cast<types::WILine *>(&p) != nullptr)
-		return cast_to_type<types::WILine>(l, p);
-	else if(dynamic_cast<types::WIScrollContainer *>(&p) != nullptr)
-		return cast_to_type<types::WIScrollContainer>(l, p);
-	else if(dynamic_cast<types::WIConsole *>(&p) != nullptr)
-		return cast_to_type<types::WIConsole>(l, p);
-	else if(dynamic_cast<types::WITransformable *>(&p) != nullptr) {
-		if(dynamic_cast<types::WIFrame *>(&p) != nullptr)
-			return cast_to_type<types::WIFrame>(l, p);
-		return cast_to_type<types::WITransformable>(l, p);
-	}
-	else if(dynamic_cast<types::WIDebugDepthTexture *>(&p) != nullptr)
-		return cast_to_type<types::WIDebugDepthTexture>(l, p);
-	else if(dynamic_cast<types::WIDebugShadowMap *>(&p) != nullptr)
-		return cast_to_type<types::WIDebugShadowMap>(l, p);
-	else if(dynamic_cast<types::WIProgressBar *>(&p) != nullptr) {
-		if(dynamic_cast<types::WISlider *>(&p) != nullptr)
-			return cast_to_type<types::WISlider>(l, p);
-		return cast_to_type<types::WIProgressBar>(l, p);
-	}
-	else if(dynamic_cast<types::WITooltip *>(&p) != nullptr)
-		return cast_to_type<types::WITooltip>(l, p);
-	else if(dynamic_cast<types::WIRoot *>(&p) != nullptr)
-		return cast_to_type<types::WIRoot>(l, p);
-	else if(dynamic_cast<types::WISegmentedRect *>(&p) != nullptr)
-		return cast_to_type<types::WISegmentedRect>(l, p);
-	return LuaCore::raw_object_to_luabind_object(l, p.GetHandle());
+	return get_cengine()->CreateGuiElementLuaObject(l, p);
 }
 
 luabind::object pragma::gui::WGUILuaInterface::GetLuaObject(lua::State *l, types::WIBase &p)

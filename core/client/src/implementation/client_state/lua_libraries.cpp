@@ -613,6 +613,45 @@ static void register_gui(Lua::Interface &lua)
 	Lua::WIRoundedRect::register_class(wiRoundedRectClassDef);
 	guiMod[wiRoundedRectClassDef];
 
+	auto flexBoxDef = luabind::class_<pragma::gui::types::FlexBox, pragma::gui::types::WIBase>("FlexBox");
+	flexBoxDef.def("SetSpacing", &pragma::gui::types::FlexBox::SetSpacing);
+	flexBoxDef.def("GetSpacing", &pragma::gui::types::FlexBox::GetSpacing);
+	flexBoxDef.def("SetPadding", &pragma::gui::types::FlexBox::SetPadding);
+	flexBoxDef.def("GetPadding", +[](pragma::gui::types::FlexBox &flexBox) {
+		auto padding = flexBox.GetPadding();
+		return std::tuple<int32_t, int32_t, int32_t, int32_t> {padding.left, padding.top, padding.right, padding.bottom};
+	});
+
+	flexBoxDef.def("SetChildMargin", &pragma::gui::types::FlexBox::SetChildMargin);
+	flexBoxDef.def("GetChildMargin", +[](pragma::gui::types::FlexBox &flexBox, pragma::gui::types::WIBase &el) {
+		auto margin = flexBox.GetChildMargin(el);
+		return std::tuple<int32_t, int32_t, int32_t, int32_t> {margin.left, margin.top, margin.right, margin.bottom};
+	});
+
+	flexBoxDef.def("SetFixedWidth", &pragma::gui::types::FlexBox::SetFixedWidth);
+	flexBoxDef.def("SetFixedHeight", &pragma::gui::types::FlexBox::SetFixedHeight);
+	flexBoxDef.def("SetFixedSize", &pragma::gui::types::FlexBox::SetFixedSize);
+	flexBoxDef.def("SetAutoSizeActivated", &pragma::gui::types::FlexBox::SetAutoSizeActivated);
+	flexBoxDef.def("SetAutoSizeActivated", +[](pragma::gui::types::FlexBox &flexBox, bool activated) {
+		flexBox.SetAutoSizeActivated(activated);
+	});
+
+	flexBoxDef.def("SetAutoFillContentsToWidth", &pragma::gui::types::FlexBox::SetAutoFillContentsToWidth);
+	flexBoxDef.def("SetAutoFillContentsToHeight", &pragma::gui::types::FlexBox::SetAutoFillContentsToHeight);
+	flexBoxDef.def("SetAutoFillContents", &pragma::gui::types::FlexBox::SetAutoFillContents);
+	flexBoxDef.def("SetAutoFillTarget", &pragma::gui::types::FlexBox::SetAutoFillTarget);
+
+	flexBoxDef.def("IsHorizontalBox", &pragma::gui::types::FlexBox::IsHorizontalBox);
+	flexBoxDef.def("IsVerticalBox", &pragma::gui::types::FlexBox::IsVerticalBox);
+	flexBoxDef.def("HasBoxAlignedAnchor", &pragma::gui::types::FlexBox::HasBoxAlignedAnchor);
+	guiMod[flexBoxDef];
+
+	auto vboxDef = luabind::class_<pragma::gui::types::VBox, luabind::bases<pragma::gui::types::FlexBox, pragma::gui::types::WIBase>>("VBox");
+	guiMod[vboxDef];
+
+	auto hboxDef = luabind::class_<pragma::gui::types::HBox, luabind::bases<pragma::gui::types::FlexBox, pragma::gui::types::WIBase>>("HBox");
+	guiMod[hboxDef];
+
 	guiMod[wiOutlinedRectClassDef];
 	guiMod[wiLineClassDef];
 	guiMod[wiScrollBarClassDef];

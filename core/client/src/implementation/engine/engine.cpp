@@ -1349,44 +1349,84 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	return true;
 }
 
+luabind::object pragma::CEngine::CreateGuiElementLuaObject(lua::State *l, gui::types::WIBase &el) const {
+	auto it = m_guiLuaObjectFactories.find(std::type_index(typeid(el)));
+	if (it == m_guiLuaObjectFactories.end()) {
+		//throw std::runtime_error{std::format("Attempted to create lua object for unknown GUI type {}. Was it registered with the Engine?", typeid(el).name())};
+		return LuaCore::raw_object_to_luabind_object(l, util::weak_shared_handle_cast<gui::types::WIBase, gui::types::WIBase>(el.GetHandle()));
+	}
+	auto *factory = it->second;
+	return factory(l,el);
+}
+
 void pragma::CEngine::RegisterUiElementTypes()
 {
-	auto &gui = gui::WGUI::GetInstance();
-	gui.RegisterType<gui::types::WICheckbox>("WICheckbox");
-	gui.RegisterType<gui::types::WIChoiceList>("WIChoiceList");
-	gui.RegisterType<gui::types::WICommandLineEntry>("WICommandLineEntry");
-	gui.RegisterType<gui::types::WIConsole>("WIConsole");
-	gui.RegisterType<gui::types::WIContainer>("WIContainer");
-	gui.RegisterType<gui::types::WIDetachable>("WIDetachable");
-	gui.RegisterType<gui::types::WIFPS>("WIFPS");
-	gui.RegisterType<gui::types::WIFrame>("WIFrame");
-	gui.RegisterType<gui::types::WIGridPanel>("WIGridPanel");
-	gui.RegisterType<gui::types::WIIcon>("WIIcon");
-	gui.RegisterType<gui::types::WIImageSlideShow>("WIImageSlideShow");
-	gui.RegisterType<gui::types::WILineGraph>("WILineGraph");
-	gui.RegisterType<gui::types::WIMessageBox>("WIMessageBox");
-	gui.RegisterType<gui::types::WINetGraph>("WINetGraph");
-	gui.RegisterType<gui::types::WIOptionsList>("WIOptionsList");
-	gui.RegisterType<gui::types::WIProgressBar>("WIProgressBar");
-	gui.RegisterType<gui::types::WIScrollContainer>("WIScrollContainer");
-	gui.RegisterType<gui::types::WIServerBrowser>("WIServerBrowser");
-	gui.RegisterType<gui::types::WISilkIcon>("WISilkIcon");
-	gui.RegisterType<gui::types::WISlider>("WISlider");
-	gui.RegisterType<gui::types::WISnapArea>("WISnapArea");
-	gui.RegisterType<gui::types::WITable>("WITable");
-	gui.RegisterType<gui::types::WITableRow>("WITableRow");
-	gui.RegisterType<gui::types::WITableCell>("WITableCell");
-	gui.RegisterType<gui::types::WITexturedCubemap>("WITexturedCubemap");
-	gui.RegisterType<gui::types::WITransformable>("WITransformable");
-	gui.RegisterType<gui::types::WITreeList>("WITreeList");
-	gui.RegisterType<gui::types::WITreeListElement>("WITreeListElement");
-	gui.RegisterType<gui::types::WIDebugDepthTexture>("WIDebugDepthTexture");
-	gui.RegisterType<gui::types::WIDebugHDRBloom>("WIDebugHDRBloom");
-	gui.RegisterType<gui::types::WIDebugMipMaps>("WIDebugMipMaps");
-	gui.RegisterType<gui::types::WIDebugMSAATexture>("WIDebugMSAATexture");
-	gui.RegisterType<gui::types::WIDebugShadowMap>("WIDebugShadowMap");
-	gui.RegisterType<gui::types::WIDebugSSAO>("WIDebugSSAO");
-	gui.RegisterType<gui::types::WIMainMenuElement>("WIMainMenuElement");
+	// Core GUI system types
+	RegisterGuiLuaObjectFactory<gui::types::WIRoot, gui::types::WIBase>();
+	RegisterGuiLuaObjectFactory<gui::types::WIArrow>();
+	RegisterGuiLuaObjectFactory<gui::types::WIBase>();
+	RegisterGuiLuaObjectFactory<gui::types::WIButton>();
+	RegisterGuiLuaObjectFactory<gui::types::WIContentWrapper, gui::types::WIBase>();
+	RegisterGuiLuaObjectFactory<gui::types::WIContextMenu, gui::types::WIShape>();
+	RegisterGuiLuaObjectFactory<gui::types::WIDropDownMenu>();
+	RegisterGuiLuaObjectFactory<gui::types::WILine>();
+	RegisterGuiLuaObjectFactory<gui::types::WIMenuItem, gui::types::WIBase>();
+	RegisterGuiLuaObjectFactory<gui::types::WISegmentedRectSegment>();
+	RegisterGuiLuaObjectFactory<gui::types::WISegmentedRect>();
+	RegisterGuiLuaObjectFactory<gui::types::WI9SliceRect>();
+	RegisterGuiLuaObjectFactory<gui::types::WIRect, gui::types::WIShape>();
+	RegisterGuiLuaObjectFactory<gui::types::WIOutlinedRect>();
+	RegisterGuiLuaObjectFactory<gui::types::WITexturedRect, gui::types::WITexturedShape>();
+	RegisterGuiLuaObjectFactory<gui::types::WIRoundedRect>();
+	RegisterGuiLuaObjectFactory<gui::types::WIRoundedTexturedRect>();
+	RegisterGuiLuaObjectFactory<gui::types::WIScrollBar>();
+	RegisterGuiLuaObjectFactory<gui::types::WIShape>();
+	RegisterGuiLuaObjectFactory<gui::types::WITexturedShape>();
+	RegisterGuiLuaObjectFactory<gui::types::WITextEntryBase, gui::types::WIBase>();
+	RegisterGuiLuaObjectFactory<gui::types::WITextEntry>();
+	RegisterGuiLuaObjectFactory<gui::types::WINumericEntry>();
+	RegisterGuiLuaObjectFactory<gui::types::WIText>();
+	RegisterGuiLuaObjectFactory<gui::types::WITooltip>();
+	RegisterGuiLuaObjectFactory<gui::types::HBox>();
+	RegisterGuiLuaObjectFactory<gui::types::VBox>();
+	static_assert(gui::NUMBER_OF_CORE_UI_ELEMENT_TYPES == 26, "If core UI element types have been added, they have to be registered above.");
+
+	// Engine GUI types
+	RegisterGuiType<gui::types::WICheckbox>("WICheckbox");
+	RegisterGuiType<gui::types::WIChoiceList, gui::types::WIBase>("WIChoiceList");
+	RegisterGuiType<gui::types::WICommandLineEntry>("WICommandLineEntry");
+	RegisterGuiType<gui::types::WIConsole>("WIConsole");
+	RegisterGuiType<gui::types::WIContainer>("WIContainer");
+	RegisterGuiType<gui::types::WIDetachable, gui::types::WIBase>("WIDetachable");
+	RegisterGuiType<gui::types::WIFPS, gui::types::WIBase>("WIFPS");
+	RegisterGuiType<gui::types::WIFrame>("WIFrame");
+	RegisterGuiType<gui::types::WIGridPanel>("WIGridPanel");
+	RegisterGuiType<gui::types::WIIcon>("WIIcon");
+	RegisterGuiType<gui::types::WIImageSlideShow, gui::types::WIBase>("WIImageSlideShow");
+	RegisterGuiType<gui::types::WILineGraph, gui::types::WIBase>("WILineGraph");
+	RegisterGuiType<gui::types::WIMessageBox, gui::types::WIBase>("WIMessageBox");
+	RegisterGuiType<gui::types::WINetGraph, gui::types::WIBase>("WINetGraph");
+	RegisterGuiType<gui::types::WIOptionsList, gui::types::WIBase>("WIOptionsList");
+	RegisterGuiType<gui::types::WIProgressBar>("WIProgressBar");
+	RegisterGuiType<gui::types::WIScrollContainer>("WIScrollContainer");
+	RegisterGuiType<gui::types::WIServerBrowser, gui::types::WIFrame>("WIServerBrowser");
+	RegisterGuiType<gui::types::WISilkIcon>("WISilkIcon");
+	RegisterGuiType<gui::types::WISlider>("WISlider");
+	RegisterGuiType<gui::types::WISnapArea>("WISnapArea");
+	RegisterGuiType<gui::types::WITable>("WITable");
+	RegisterGuiType<gui::types::WITableRow>("WITableRow");
+	RegisterGuiType<gui::types::WITableCell>("WITableCell");
+	RegisterGuiType<gui::types::WITexturedCubemap, gui::types::WIBase>("WITexturedCubemap");
+	RegisterGuiType<gui::types::WITransformable>("WITransformable");
+	RegisterGuiType<gui::types::WITreeList>("WITreeList");
+	RegisterGuiType<gui::types::WITreeListElement>("WITreeListElement");
+	RegisterGuiType<gui::types::WIDebugDepthTexture>("WIDebugDepthTexture");
+	RegisterGuiType<gui::types::WIDebugHDRBloom, gui::types::WITexturedShape>("WIDebugHDRBloom");
+	RegisterGuiType<gui::types::WIDebugMipMaps, gui::types::WIBase>("WIDebugMipMaps");
+	RegisterGuiType<gui::types::WIDebugMSAATexture, gui::types::WIBase>("WIDebugMSAATexture");
+	RegisterGuiType<gui::types::WIDebugShadowMap>("WIDebugShadowMap");
+	RegisterGuiType<gui::types::WIDebugSSAO>("WIDebugSSAO");
+	RegisterGuiType<gui::types::WIMainMenuElement, gui::types::WIBase>("WIMainMenuElement");
 }
 
 const std::string &pragma::CEngine::GetDefaultFontSetName() const { return m_defaultFontSet; }

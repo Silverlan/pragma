@@ -104,6 +104,22 @@ export namespace pragma {
 
 		virtual void HandleOpenGLFallback() override;
 
+		template<typename T, typename TBinding = T>
+		void RegisterGuiLuaObjectFactory()
+		{
+			auto *factory = +[](lua::State *l, gui::types::WIBase &el) { return LuaCore::raw_object_to_luabind_object(l, util::weak_shared_handle_cast<gui::types::WIBase, TBinding>(el.GetHandle())); };
+			m_guiLuaObjectFactories.insert(std::make_pair(std::type_index(typeid(T)), factory));
+		}
+		template<typename T, typename TBinding = T>
+		void RegisterGuiType(const std::string &typeName)
+		{
+			auto &gui = gui::WGUI::GetInstance();
+			gui.RegisterType<T>(typeName);
+
+			RegisterGuiLuaObjectFactory<T, TBinding>();
+		}
+		luabind::object CreateGuiElementLuaObject(lua::State *l, gui::types::WIBase &el) const;
+
 		void SetRenderResolution(std::optional<Vector2i> resolution);
 		Vector2i GetRenderResolution() const;
 
@@ -295,6 +311,8 @@ export namespace pragma {
 		std::vector<std::shared_ptr<prosper::TimerQuery>> m_gpuTimers;
 		std::vector<std::chrono::nanoseconds> m_gpuExecTimes {};
 		std::shared_ptr<prosper::Window> m_splashScreenWindow;
+
+		std::unordered_map<std::type_index, luabind::object (*)(lua::State *, pragma::gui::types::WIBase &)> m_guiLuaObjectFactories;
 
 		std::vector<DroppedFile> m_droppedFiles = {}; // Only contains files during OnFilesDropped-call
 

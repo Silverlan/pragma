@@ -517,7 +517,7 @@ void pragma::gui::types::WITransformable::InitializeSnapTargetGhost(WISnapArea &
 	pSnapGhost->SetColor(Color {255, 255, 255, 100});
 
 	auto *pOutline = wgui.Create<WIOutlinedRect>(pSnapGhost);
-	pOutline->SetAutoAlignToParent(true);
+	pOutline->SetAlignment(Alignment::Fill);
 	pOutline->SetOutlineWidth(2);
 	pOutline->SetColor(colors::Black);
 

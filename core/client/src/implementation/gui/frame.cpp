@@ -30,7 +30,7 @@ void pragma::gui::types::WIFrame::Initialize()
 
 	m_hBg = CreateChild<WIRect>();
 	m_hBg->SetName("background");
-	m_hBg->SetAutoAlignToParent(true);
+	m_hBg->SetAlignment(Alignment::Fill);
 	m_hBg->GetColorProperty()->Link(*GetColorProperty());
 
 	m_hContents = CreateChild<WIDetachable>();
@@ -44,7 +44,7 @@ void pragma::gui::types::WIFrame::Initialize()
 		m_hTitleBar = gui.Create<WIBase>(m_hMoveRect.get())->GetHandle();
 		WIBase *pTitleBar = m_hTitleBar.get();
 		pTitleBar->AddStyleClass("frame_titlebar");
-		pTitleBar->SetAutoAlignToParent(true);
+		pTitleBar->SetAlignment(Alignment::Fill);
 		auto hFrame = GetHandle();
 		pTitleBar->AddCallback("OnSizeChanged", FunctionCallback<>::Create([hFrame]() mutable {
 			if(!hFrame.IsValid())

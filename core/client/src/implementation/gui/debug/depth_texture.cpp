@@ -83,7 +83,7 @@ void pragma::gui::types::WIDebugDepthTexture::SetShouldResolveImage(bool b) {}
 void pragma::gui::types::WIDebugDepthTexture::Initialize()
 {
 	m_hTextureRect = CreateChild<WITexturedRect>();
-	m_hTextureRect->SetAutoAlignToParent(true);
+	m_hTextureRect->SetAlignment(Alignment::Fill);
 }
 
 void pragma::gui::types::WIDebugDepthTexture::Setup(float nearZ, float farZ)

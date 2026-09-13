@@ -12,14 +12,14 @@ function gui.WIMenuItem:OnInitialize()
 	self:SetMouseInputEnabled(true)
 	local pBg = gui.create("WIRect")
 	pBg:SetParent(self)
-	pBg:SetAutoAlignToParent(true)
+	pBg:SetAlignment(gui.ALIGNMENT_FILL)
 	pBg:SetColor(Color.SkyBlue)
 	pBg:AddStyleClass("menu_item_selected_background")
 	self.m_pBg = pBg
 
 	local pBgOutline = gui.create("WIOutlinedRect")
 	pBgOutline:SetParent(self)
-	pBgOutline:SetAutoAlignToParent(true)
+	pBgOutline:SetAlignment(gui.ALIGNMENT_FILL)
 	pBgOutline:SetColor(Color.RoyalBlue)
 	pBgOutline:AddStyleClass("menu_item_selected_outline")
 	self.m_pBgOutline = pBgOutline
@@ -152,11 +152,11 @@ function gui.WIMenuItem:SizeToContents()
 	if util.is_valid(self) == false or util.is_valid(self.m_pText) == false then
 		return
 	end
-	local sz = self.m_pText:GetSize()
+	--[[local sz = self.m_pText:GetSize()
 	sz.x = sz.x + border * 2
 	sz.y = sz.y + 2
 	self:SetSize(sz)
 	self.m_pText:SetX(border)
-	self.m_pText:SetY(self:GetHeight() * 0.5 - self.m_pText:GetHeight() * 0.5)
+	self.m_pText:SetY(self:GetHeight() * 0.5 - self.m_pText:GetHeight() * 0.5)]]
 end
 gui.register("menu_item", gui.WIMenuItem)

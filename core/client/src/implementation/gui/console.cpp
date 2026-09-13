@@ -157,7 +157,7 @@ void pragma::gui::types::WIConsole::Initialize()
 
 	auto *pLogScrollContainer = wgui.Create<WIScrollContainer>(pLogBg);
 	pLogScrollContainer->SetAutoStickToBottom(true);
-	pLogScrollContainer->SetAutoAlignToParent(true);
+	pLogScrollContainer->SetAlignment(Alignment::Fill);
 
 	auto *pLog = wgui.Create<WITextEntry>(pLogScrollContainer);
 	pLog->SetMultiLine(true);

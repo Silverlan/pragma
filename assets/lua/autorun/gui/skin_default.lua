@@ -162,7 +162,7 @@ skin["wibutton"] = {
 			local bg = gui.create("WITexturedRect", pElement)
 			bg:SetTexture(gradient)
 			bg:SetName("background")
-			bg:SetAutoAlignToParent(true)
+			bg:SetAlignment(gui.ALIGNMENT_FILL)
 			bg:SetZPos(-2)
 			pElement.m_pBackground = bg
 			add_skin_element(pElement, bg)
@@ -337,7 +337,7 @@ skin["table_row_header"] = {
 			bg:SetZPos(0)
 			bg:SetTexture(gradient)
 			bg:SetName("background")
-			bg:SetAutoAlignToParent(true)
+			bg:SetAlignment(gui.ALIGNMENT_FILL)
 			add_skin_element(pElement, bg)
 		end
 	end,
@@ -373,7 +373,7 @@ skin["table_row"] = {
 		bg:SetZPos(0)
 		bg:SetName("background")
 		bg:AddStyleClass("selection")
-		bg:SetAutoAlignToParent(true)
+		bg:SetAlignment(gui.ALIGNMENT_FILL)
 		bg:SetVisible(false)
 		add_skin_element(pElement, bg)
 
@@ -477,7 +477,7 @@ skin["main_menu"] = {
 					Initialize = function(GUI, pElement)
 						local outline = gui.create("WIOutlinedRect", pElement)
 						outline:SetColor(Color(188, 188, 188, 128))
-						outline:SetAutoAlignToParent(true)
+						outline:SetAlignment(gui.ALIGNMENT_FILL)
 					end,
 				},
 			},
@@ -530,7 +530,7 @@ skin["wiprogressbar"] = {
 	},
 	Initialize = function(GUI, pElement)
 		local pOutline = gui.create("WIOutlinedRect", pElement)
-		pOutline:SetAutoAlignToParent(true)
+		pOutline:SetAlignment(gui.ALIGNMENT_FILL)
 		pOutline:SetColorRGB(Color.Black)
 	end,
 }
@@ -548,12 +548,12 @@ skin["witooltip"] = {
 		if gradient ~= nil then
 			local pRect = gui.create("WITexturedRect", pElement)
 			pRect:SetTexture(gradient)
-			pRect:SetAutoAlignToParent(true)
+			pRect:SetAlignment(gui.ALIGNMENT_FILL)
 			pRect:SetZPos(0)
 
 			local pRectOutline = gui.create("WIOutlinedRect", pElement)
 			pRectOutline:SetColor(Color(188, 188, 188, 128))
-			pRectOutline:SetAutoAlignToParent(true)
+			pRectOutline:SetAlignment(gui.ALIGNMENT_FILL)
 			pRectOutline:SetZPos(0)
 
 			pText:SetZPos(1)
@@ -593,7 +593,7 @@ skin["window_frame"] = {
 		bg:SetZPos(-2)
 		bg:SetColorRGB(GUI.BACKGROUND_COLOR_DEFAULT)
 		bg:SetName("background")
-		bg:SetAutoAlignToParent(true)
+		bg:SetAlignment(gui.ALIGNMENT_FILL)
 		add_skin_element(pElement, bg)
 	end,
 	Release = clear_element,

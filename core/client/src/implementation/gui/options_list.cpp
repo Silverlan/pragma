@@ -115,7 +115,7 @@ pragma::gui::types::WICheckbox *pragma::gui::types::WIOptionsList::AddToggleChoi
 			return;
 		hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = (translator == nullptr) ? util::to_string(bChecked) : translator(bChecked);
 	}));
-	pCheckbox->SetAutoCenterToParent(true);
+	pCheckbox->SetAlignment(Alignment::Center);
 	row->InsertElement(1, hCheckbox);
 	return pCheckbox;
 }
@@ -299,10 +299,10 @@ void pragma::gui::types::WIOptionsList::AddKeyBinding(const std::string &keyName
 	pKey1->SetKey(key1);
 	pKey2->SetKey(key2);
 	row->InsertElement(1, pKey1);
-	pKey1->SetAutoAlignToParent(true);
+	pKey1->SetAlignment(Alignment::Fill);
 	pKey1->AddCallback("OnKeyChanged", FunctionCallback<void, platform::Key, platform::Key>::Create(std::bind(callback, 0, pKey2->GetHandle(), std::placeholders::_1, std::placeholders::_2)));
 
 	row->InsertElement(2, pKey2);
-	pKey2->SetAutoAlignToParent(true);
+	pKey2->SetAlignment(Alignment::Fill);
 	pKey2->AddCallback("OnKeyChanged", FunctionCallback<void, platform::Key, platform::Key>::Create(std::bind(callback, 1, pKey1->GetHandle(), std::placeholders::_1, std::placeholders::_2)));
 }

@@ -105,7 +105,7 @@ void pragma::gui::types::WIMainMenuCredits::OnVisibilityChanged(bool bVisible)
 	if(m_creditsContainer.IsValid())
 		return;
 	m_creditsContainer = CreateChild<WIBase>();
-	m_creditsContainer->SetAutoAlignToParent(true);
+	m_creditsContainer->SetAlignment(Alignment::Fill);
 
 	AddGap(120);
 	AddHeader(locale::get_text("menu_credits"), "header");

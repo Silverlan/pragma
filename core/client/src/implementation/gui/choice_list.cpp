@@ -16,7 +16,7 @@ void pragma::gui::types::WIChoiceList::Initialize()
 {
 	WIBase::Initialize();
 	m_text = CreateChild<WIText>();
-	m_text->SetAutoCenterToParent(true);
+	m_text->SetAlignment(Alignment::Center);
 	m_buttonPrev = CreateChild<WIButton>();
 	WIHandle hChoiceList = GetHandle();
 	auto *buttonPrev = static_cast<WIButton *>(m_buttonPrev.get());

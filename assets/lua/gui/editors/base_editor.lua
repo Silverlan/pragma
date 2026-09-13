@@ -30,16 +30,16 @@ function gui.WIBaseEditor:OnInitialize()
 
 	self.m_windowFrames = {}
 
-	local pMain = gui.create("WIRect", self)
-	pMain:SetColor(Color.Beige) --Color(40,40,40,255))
-	pMain:Update()
-	self.m_pMain = pMain
+	self:SetSize(1024, 768)
+
+	local root = gui.create("vbox", self)
+	root:AddStyleClass("fill")
+	self.m_root = root
+
 	self.m_windowToFrame = {}
 	self.m_windowFactories = {}
 
-	self.m_menuBarContainer = gui.create("WIBase", self)
-
-	self.m_menuBar = gui.create("menu_bar", self.m_menuBarContainer)
+	self.m_menuBar = gui.create("menu_bar", root)
 	self.m_menuBar:SetName("menu_bar")
 	self.m_menuBar:AddCallback("OnClose", function(pMenuBar)
 		if util.is_valid(self) then
@@ -48,17 +48,8 @@ function gui.WIBaseEditor:OnInitialize()
 		self:Close()
 	end)
 
-	self:SetSize(1024, 768)
-	self.m_menuBarContainer:SetSize(self:GetWidth(), 20)
-	self.m_menuBarContainer:SetAnchor(0, 0, 1, 0)
-	self.m_menuBar:SetSize(self.m_menuBarContainer:GetSize())
-	self.m_menuBar:SetAnchor(0, 0, 1, 1)
-
-	local pInfoBar = gui.create("pfm_info_bar", self)
+	local pInfoBar = gui.create("pfm_info_bar", root)
 	pInfoBar:SetName("info_bar")
-	pInfoBar:SetWidth(self:GetWidth())
-	pInfoBar:SetY(self:GetHeight() - pInfoBar:GetHeight())
-	pInfoBar:SetAnchor(0, 1, 1, 1)
 	self.m_infoBar = pInfoBar
 end
 
@@ -82,14 +73,6 @@ function gui.WIBaseEditor:GetFirstFrame()
 end
 
 function gui.WIBaseEditor:OnRemove() end
-
-function gui.WIBaseEditor:OnSizeChanged(w, h)
-	if util.is_valid(self.m_infoBar) == false or util.is_valid(self.m_menuBar) == false then
-		return
-	end
-	self.m_pMain:ApplySize(w, h - self.m_menuBar:GetHeight() - self.m_infoBar:GetHeight())
-	self.m_pMain:ApplyY(self.m_menuBar:GetHeight())
-end
 
 function gui.WIBaseEditor:GetInfoBar()
 	return self.m_infoBar
@@ -133,20 +116,10 @@ function gui.WIBaseEditor:AddWindowsMenuBarItem(fcView)
 end
 
 function gui.WIBaseEditor:InitializeGenericLayout()
-	self.m_contents = gui.create(
-		"hbox",
-		self,
-		0,
-		self.m_menuBar:GetHeight(),
-		self:GetWidth(),
-		self:GetHeight() - self.m_menuBar:GetHeight() - self.m_infoBar:GetHeight(),
-		0,
-		0,
-		1,
-		1
-	)
+	self.m_contents = gui.create("hbox")
+	self.m_contents:SetParent(self.m_root, self.m_infoBar:FindChildIndex())
 	self.m_contents:SetName("contents")
-	self.m_contents:SetAutoFillContents(true)
+	self.m_contents:AddStyleClass("editor_contents")
 end
 
 function gui.WIBaseEditor:GetContentsElement()
@@ -357,13 +330,6 @@ function gui.WIBaseEditor:GetMenuBar()
 	return self.m_menuBar
 end
 
-function gui.WIBaseEditor:GetMenuBarContainer()
-	return self.m_menuBarContainer
-end
-
-function gui.WIBaseEditor:SetBackgroundColor(col)
-	self.m_pMain:SetColor(col)
-end
 function gui.WIBaseEditor:CreateWindow(class)
 	local pFrame = gui.create("frame")
 	if pFrame == nil then

@@ -12,7 +12,7 @@ pragma::gui::types::WIDebugMSAATexture::WIDebugMSAATexture() : WIBase() {}
 void pragma::gui::types::WIDebugMSAATexture::Initialize()
 {
 	m_hTextureRect = CreateChild<WITexturedRect>();
-	m_hTextureRect->SetAutoAlignToParent(true);
+	m_hTextureRect->SetAlignment(Alignment::Fill);
 }
 
 void pragma::gui::types::WIDebugMSAATexture::SetTexture(prosper::Texture &texture)

@@ -18,7 +18,7 @@ pragma::gui::types::WIMessageBox *pragma::gui::types::WIMessageBox::Create(const
 		return nullptr;
 	pMessageBox->SetTitle(title);
 	pMessageBox->EnableButtons(buttons);
-	pMessageBox->SetAutoAlignToParent(true);
+	pMessageBox->SetAlignment(Alignment::Fill);
 	pMessageBox->SetText(text);
 	pMessageBox->SetZPos(10000);
 	pMessageBox->SetButtonCallback(callback);
@@ -148,7 +148,7 @@ void pragma::gui::types::WIMessageBox::Initialize()
 	m_hBg = CreateChild<WIRect>();
 	auto *pRect = m_hBg.get<WIRect>();
 	pRect->SetColor(0.f, 0.f, 0.f, 0.8f);
-	pRect->SetAutoAlignToParent(true);
+	pRect->SetAlignment(Alignment::Fill);
 
 	m_hMessage = CreateChild<WIFrame>();
 	auto *pMessage = m_hMessage.get<WIFrame>();

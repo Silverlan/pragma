@@ -28,20 +28,9 @@ function gui.WIContextMenu:OnInitialize()
 	self.m_tItems = {}
 	self.m_subMenues = {}
 	self.m_itemToSubMenu = {}
-	local pBg = gui.create("WIRect", self)
-	pBg:SetBackgroundElement(true)
-	pBg:SetAutoAlignToParent(true)
-	pBg:AddStyleClass("context_menu_background")
-	self:SetKeyboardInputEnabled(true)
-	pBg:SetColor(Color.Beige)
-	self.m_pBg = pBg
 
-	local pBgOutline = gui.create("WIOutlinedRect", self)
-	pBgOutline:SetBackgroundElement(true)
-	pBgOutline:SetAutoAlignToParent(true)
-	pBgOutline:AddStyleClass("context_menu_outline")
-	pBgOutline:SetColor(Color.Gray)
-	self.m_pBgOutline = pBgOutline
+	self:SetKeyboardInputEnabled(true)
+
 	if util.is_valid(gui.impl.cbMouseInput) == false then
 		-- Make sure the context menu is closed if the user clicks outside of it
 		gui.impl.cbMouseInput = input.add_callback("OnMouseInput", function(button, action, mods)
@@ -417,7 +406,7 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 	self.m_itemToSubMenu[pItem] = pSubMenu
 
 	local pIcon = gui.create("wiarrow", pItem)
-	pIcon:SetAutoCenterToParentY(true)
+	pIcon:SetVerticalAlignment(gui.ALIGNMENT_CENTER)
 	local function updateIcon()
 		pIcon:SetX(pItem:GetWidth() - pIcon:GetWidth() - 5)
 	end

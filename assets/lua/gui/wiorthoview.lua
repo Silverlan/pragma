@@ -178,7 +178,7 @@ function gui.WIOrthoView:OnInitialize()
 	end
 
 	local pBg = gui.create("WITexturedRect", self)
-	pBg:SetAutoAlignToParent(true)
+	pBg:SetAlignment(gui.ALIGNMENT_FILL)
 	self.m_pBg = pBg
 
 	local err, rt = prosper.create_render_target(

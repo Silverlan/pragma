@@ -31,7 +31,7 @@ function gui.WIFileExplorer:OnInitialize()
 
 	self.m_tRowInfo = {}
 	local t = gui.create("WITable", self)
-	t:SetAutoAlignToParent(true)
+	t:SetAlignment(gui.ALIGNMENT_FILL)
 	t:SetScrollable(true)
 	t:SetSortable(true)
 	t:SetSelectableMode(gui.Table.SELECTABLE_MODE_MULTI)

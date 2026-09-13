@@ -15,10 +15,10 @@ void pragma::gui::types::WIImageSlideShow::Initialize()
 	WIBase::Initialize();
 	EnableThinking();
 	m_hImgNext = CreateChild<WITexturedRect>();
-	m_hImgNext->SetAutoAlignToParent(true);
+	m_hImgNext->SetAlignment(Alignment::Fill);
 
 	m_hImgPrev = CreateChild<WITexturedRect>();
-	m_hImgPrev->SetAutoAlignToParent(true);
+	m_hImgPrev->SetAlignment(Alignment::Fill);
 	Update();
 }
 

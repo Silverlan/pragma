@@ -15,7 +15,7 @@ function gui.WIMenuBar:OnInitialize()
 	self.m_contents = gui.create("hbox", self)
 
 	self:SetName("menu_bar")
-	local pMain = gui.create("WIRect")
+	--[[local pMain = gui.create("WIRect")
 	pMain:SetBackgroundElement(true)
 	pMain:SetParent(self.m_contents)
 	pMain:SetColor(Color.Beige)
@@ -37,7 +37,7 @@ function gui.WIMenuBar:OnInitialize()
 		return util.EVENT_REPLY_HANDLED
 	end)
 
-	self.m_pMain = pMain
+	self.m_pMain = pMain]]
 
 	self.m_tItems = {}
 	self.m_idToItem = {}
@@ -49,8 +49,8 @@ function gui.WIMenuBar:OnInitialize()
 	end)
 	self.m_pClose = pClose]]
 
-	pMain:SetSize(self:GetSize())
-	pMain:SetAnchor(0, 0, 1, 1)
+	--pMain:SetSize(self:GetSize())
+	--pMain:SetAnchor(0, 0, 1, 1)
 
 	--[[pClose:SetSize(self:GetHeight(),self:GetHeight())
 	pClose:SetRight(self:GetRight())
@@ -107,7 +107,7 @@ function gui.WIMenuBar:UpdateThinkState()
 	self:SetThinkingEnabled(false)
 end
 function gui.WIMenuBar:SetBackgroundColor(col)
-	self.m_pMain:SetColor(col)
+	--self.m_pMain:SetColor(col)
 end
 function gui.WIMenuBar:IsContextMenuOpen()
 	for _, item in ipairs(self.m_tItems) do
@@ -161,7 +161,7 @@ function gui.WIMenuBar:AddItem(name, fcContextCallback, identifier)
 		return
 	end
 	pItem:SetTitle(name)
-	pItem:GetTextElement():SetAutoCenterToParent(true)
+	--pItem:GetTextElement():SetAlignment(gui.ALIGNMENT_CENTER)
 	pItem:SetContextMenuHandler(fcContextCallback)
 	pItem:AddCallback("OnSelectionChanged", function(el, selected)
 		if self:IsValid() == false or self:IsContextMenuOpen() == false then

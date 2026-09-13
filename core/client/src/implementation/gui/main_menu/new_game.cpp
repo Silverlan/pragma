@@ -90,7 +90,7 @@ void pragma::gui::types::WIMainMenuNewGame::InitializeOptionsList(WIOptionsList 
 	auto *buttonStart = WGUI::GetInstance().Create<WIButton>();
 	buttonStart->SetText(locale::get_text("start_game"));
 	buttonStart->SizeToContents();
-	buttonStart->SetAutoCenterToParent(true);
+	buttonStart->SetAlignment(Alignment::Center);
 	buttonStart->AddCallback("OnMouseEvent",
 	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
 		  OnStartGame(button, state, mods);

@@ -12,7 +12,7 @@ function gui.WIToolBar:OnInitialize()
 	self.m_selectedTool = 0
 	local pMain = gui.create("WIRect", self)
 	pMain:SetColor(Color.Beige)
-	pMain:SetAutoAlignToParent(true)
+	pMain:SetAlignment(gui.ALIGNMENT_FILL)
 	pMain:Update()
 	self.m_pMain = pMain
 end
@@ -118,7 +118,7 @@ function gui.WIToolBarTool:OnInitialize()
 	self:SetMouseInputEnabled(true)
 
 	local pBg = gui.create("WIRect", self)
-	pBg:SetAutoAlignToParent(true)
+	pBg:SetAlignment(gui.ALIGNMENT_FILL)
 	self.m_pBg = pBg
 
 	local pMain = gui.create("WIIcon", self)

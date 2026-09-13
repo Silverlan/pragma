@@ -308,6 +308,7 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	  });
 	classDef.def("GetChildren", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, std::string)>(&GetChildren));
 	classDef.def("GetFirstChild", &pragma::gui::types::WIBase::GetFirstChild);
+	classDef.def("GetFirstChildByName", &pragma::gui::types::WIBase::GetFirstChildByName);
 	classDef.def("GetChild", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, unsigned int)>(&GetChild));
 	classDef.def("GetChild", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, std::string, unsigned int)>(&GetChild));
 	classDef.def("IsPosInBounds", &PosInBounds);
@@ -395,10 +396,6 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetName", &pragma::gui::types::WIBase::SetName);
 	classDef.def("FindChildByName", &FindChildByName);
 	classDef.def("FindChildrenByName", &FindChildrenByName);
-	classDef.def("SetAutoAlignToParent", static_cast<void (pragma::gui::types::WIBase::*)(bool, bool)>(&pragma::gui::types::WIBase::SetAutoAlignToParent));
-	classDef.def("SetAutoAlignToParent", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoAlignToParent));
-	classDef.def("GetAutoAlignToParentX", &pragma::gui::types::WIBase::GetAutoAlignToParentX);
-	classDef.def("GetAutoAlignToParentY", &pragma::gui::types::WIBase::GetAutoAlignToParentY);
 	classDef.def("Resize", &pragma::gui::types::WIBase::Resize);
 	classDef.def("ScheduleUpdate", &pragma::gui::types::WIBase::ScheduleUpdate);
 	classDef.def("SetSkin", &pragma::gui::types::WIBase::SetSkin);
@@ -515,6 +512,12 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("RemoveStyleClass", &pragma::gui::types::WIBase::RemoveStyleClass);
 	classDef.def("ClearStyleClasses", &pragma::gui::types::WIBase::ClearStyleClasses);
 	classDef.def("FindChildIndex", &pragma::gui::types::WIBase::FindChildIndex);
+	classDef.def("FindChildIndex", +[](pragma::gui::types::WIBase &el) -> std::optional<uint32_t> {
+		auto *parent = el.GetParent();
+		if(!parent)
+			return {};
+		return parent->FindChildIndex(el);
+	});
 	classDef.def("SetScale", static_cast<void (pragma::gui::types::WIBase::*)(const ::Vector2 &)>(&pragma::gui::types::WIBase::SetScale));
 	classDef.def("SetScale", static_cast<void (pragma::gui::types::WIBase::*)(float, float)>(&pragma::gui::types::WIBase::SetScale));
 	classDef.def("GetScale", &pragma::gui::types::WIBase::GetScale, luabind::copy_policy<0> {});
@@ -547,9 +550,11 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetFileDropInputEnabled", &pragma::gui::types::WIBase::SetFileDropInputEnabled);
 	classDef.def("SetAnchorEdgeEnabled", &pragma::gui::types::WIBase::SetAnchorEdgeEnabled);
 	classDef.def("IsAnchorEdgeEnabled", &pragma::gui::types::WIBase::IsAnchorEdgeEnabled);
-	classDef.def("SetAutoCenterToParentX", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoCenterToParentX));
-	classDef.def("SetAutoCenterToParentY", static_cast<void (pragma::gui::types::WIBase::*)(bool)>(&pragma::gui::types::WIBase::SetAutoCenterToParentY));
-	classDef.def("SetAutoCenterToParent", &pragma::gui::types::WIBase::SetAutoCenterToParent);
+	classDef.def("SetAlignment", &pragma::gui::types::WIBase::SetAlignment);
+	classDef.def("SetHorizontalAlignment", &pragma::gui::types::WIBase::SetHorizontalAlignment);
+	classDef.def("SetVerticalAlignment", &pragma::gui::types::WIBase::SetVerticalAlignment);
+	classDef.def("GetHorizontalAlignment", &pragma::gui::types::WIBase::GetHorizontalAlignment);
+	classDef.def("GetVerticalAlignment", &pragma::gui::types::WIBase::GetVerticalAlignment);
 	classDef.def("SetDebugChangeTrackingEnabled", +[](const pragma::gui::types::WIBase &el, bool enabled) {
 		pragma::gui::set_debug_tracking_enabled(el, enabled);
 	});

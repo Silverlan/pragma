@@ -277,6 +277,13 @@ static void register_gui(Lua::Interface &lua)
 	luabind::globals(l)["gui"]["CHANGE_SOURCE_CONTENT"] = pragma::gui::ChangeSource::Content;
 	static_assert(pragma::math::to_integral(pragma::gui::ChangeSource::Count) == 3, "Update enum registration when new enum values are added!");
 
+	luabind::globals(l)["gui"]["ALIGNMENT_NONE"] = pragma::gui::Alignment::None;
+	luabind::globals(l)["gui"]["ALIGNMENT_START"] = pragma::gui::Alignment::Start;
+	luabind::globals(l)["gui"]["ALIGNMENT_CENTER"] = pragma::gui::Alignment::Center;
+	luabind::globals(l)["gui"]["ALIGNMENT_END"] = pragma::gui::Alignment::End;
+	luabind::globals(l)["gui"]["ALIGNMENT_FILL"] = pragma::gui::Alignment::Fill;
+	static_assert(pragma::math::to_integral(pragma::gui::Alignment::Count) == 5, "Update enum registration when new enum values are added!");
+
 	//
 	auto videoModeDef = luabind::class_<pragma::platform::Monitor::VideoMode>("VideoMode");
 	videoModeDef.def(
@@ -614,6 +621,12 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[wiRoundedRectClassDef];
 
 	auto flexBoxDef = luabind::class_<pragma::gui::types::FlexBox, pragma::gui::types::WIBase>("FlexBox");
+	flexBoxDef.add_static_constant("FLEX_ALIGN_START", pragma::math::to_integral(pragma::gui::types::FlexAlign::Start));
+	flexBoxDef.add_static_constant("FLEX_ALIGN_CENTER", pragma::math::to_integral(pragma::gui::types::FlexAlign::Center));
+	flexBoxDef.add_static_constant("FLEX_ALIGN_END", pragma::math::to_integral(pragma::gui::types::FlexAlign::End));
+	flexBoxDef.add_static_constant("FLEX_ALIGN_STRETCH", pragma::math::to_integral(pragma::gui::types::FlexAlign::Stretch));
+	flexBoxDef.def("SetAlignItems", &pragma::gui::types::FlexBox::SetAlignItems);
+	flexBoxDef.def("GetAlignItems", &pragma::gui::types::FlexBox::GetAlignItems);
 	flexBoxDef.def("SetSpacing", &pragma::gui::types::FlexBox::SetSpacing);
 	flexBoxDef.def("GetSpacing", &pragma::gui::types::FlexBox::GetSpacing);
 	flexBoxDef.def("SetPadding", &pragma::gui::types::FlexBox::SetPadding);
@@ -628,6 +641,9 @@ static void register_gui(Lua::Interface &lua)
 		return std::tuple<int32_t, int32_t, int32_t, int32_t> {margin.left, margin.top, margin.right, margin.bottom};
 	});
 
+	flexBoxDef.def("SetChildFlex", &pragma::gui::types::FlexBox::SetChildFlex);
+	flexBoxDef.def("GetChildFlex", &pragma::gui::types::FlexBox::GetChildFlex);
+
 	flexBoxDef.def("SetFixedWidth", &pragma::gui::types::FlexBox::SetFixedWidth);
 	flexBoxDef.def("SetFixedHeight", &pragma::gui::types::FlexBox::SetFixedHeight);
 	flexBoxDef.def("SetFixedSize", &pragma::gui::types::FlexBox::SetFixedSize);
@@ -635,11 +651,6 @@ static void register_gui(Lua::Interface &lua)
 	flexBoxDef.def("SetAutoSizeActivated", +[](pragma::gui::types::FlexBox &flexBox, bool activated) {
 		flexBox.SetAutoSizeActivated(activated);
 	});
-
-	flexBoxDef.def("SetAutoFillContentsToWidth", &pragma::gui::types::FlexBox::SetAutoFillContentsToWidth);
-	flexBoxDef.def("SetAutoFillContentsToHeight", &pragma::gui::types::FlexBox::SetAutoFillContentsToHeight);
-	flexBoxDef.def("SetAutoFillContents", &pragma::gui::types::FlexBox::SetAutoFillContents);
-	flexBoxDef.def("SetAutoFillTarget", &pragma::gui::types::FlexBox::SetAutoFillTarget);
 
 	flexBoxDef.def("IsHorizontalBox", &pragma::gui::types::FlexBox::IsHorizontalBox);
 	flexBoxDef.def("IsVerticalBox", &pragma::gui::types::FlexBox::IsVerticalBox);

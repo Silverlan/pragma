@@ -203,7 +203,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeOptionsList(WIOptionsList 
 	auto *buttonReset = gui.Create<WIButton>();
 	buttonReset->SetText(locale::get_text("reset_defaults"));
 	buttonReset->SizeToContents();
-	buttonReset->SetAutoCenterToParent(true);
+	buttonReset->SetAlignment(Alignment::Center);
 	buttonReset->AddCallback("OnMouseEvent",
 	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
 	    [this](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
@@ -217,7 +217,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeOptionsList(WIOptionsList 
 	auto *buttonApply = gui.Create<WIButton>();
 	buttonApply->SetText(locale::get_text("apply"));
 	buttonApply->SizeToContents();
-	buttonApply->SetAutoCenterToParent(true);
+	buttonApply->SetAlignment(Alignment::Center);
 	buttonApply->AddCallback("OnMouseEvent",
 	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
 	    [this](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {

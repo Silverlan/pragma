@@ -28,6 +28,7 @@ pr_add_dependency(${PROJ_NAME} noise-static TARGET)
 pr_add_dependency(${PROJ_NAME} noiseutils-static TARGET)
 pr_add_dependency(${PROJ_NAME} muparserx TARGET)
 pr_add_dependency(${PROJ_NAME} OpenFBX TARGET)
+pr_add_dependency(${PROJ_NAME} glaze_glaze TARGET)
 
 pr_add_dependency(${PROJ_NAME} tinygltf TARGET)
 pr_add_third_party_dependency(${PROJ_NAME} rapidxml)

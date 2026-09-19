@@ -401,7 +401,14 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetSkin", &pragma::gui::types::WIBase::SetSkin);
 	classDef.def("GetSkinName", &pragma::gui::types::WIBase::GetSkinName);
 	classDef.def("ResetSkin", &pragma::gui::types::WIBase::ResetSkin);
-	classDef.def("GetStyleClasses", +[](pragma::gui::types::WIBase &el) -> std::vector<std::string> { return el.GetStyleClasses(); });
+	classDef.def("GetStyleClasses", +[](pragma::gui::types::WIBase &el) -> std::vector<std::string> {
+		std::vector<std::string> styleClasses;
+		auto &elStyleClasses = el.GetStyleClasses();
+		styleClasses.reserve(elStyleClasses.size());
+		for (auto &str : elStyleClasses)
+			styleClasses.push_back(std::string{str});
+		return styleClasses;
+	});
 	classDef.def("AddStyleClass", &pragma::gui::types::WIBase::AddStyleClass);
 	classDef.def("SetCursor", &pragma::gui::types::WIBase::SetCursor);
 	classDef.def("GetCursor", &pragma::gui::types::WIBase::GetCursor);
@@ -511,6 +518,7 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("CenterToParentY", &pragma::gui::types::WIBase::CenterToParentY);
 	classDef.def("RemoveStyleClass", &pragma::gui::types::WIBase::RemoveStyleClass);
 	classDef.def("ClearStyleClasses", &pragma::gui::types::WIBase::ClearStyleClasses);
+	classDef.def("HasStyleClass", &pragma::gui::types::WIBase::HasStyleClass);
 	classDef.def("FindChildIndex", &pragma::gui::types::WIBase::FindChildIndex);
 	classDef.def("FindChildIndex", +[](pragma::gui::types::WIBase &el) -> std::optional<uint32_t> {
 		auto *parent = el.GetParent();
@@ -555,6 +563,10 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetVerticalAlignment", &pragma::gui::types::WIBase::SetVerticalAlignment);
 	classDef.def("GetHorizontalAlignment", &pragma::gui::types::WIBase::GetHorizontalAlignment);
 	classDef.def("GetVerticalAlignment", &pragma::gui::types::WIBase::GetVerticalAlignment);
+	classDef.def("SetInputState", &pragma::gui::types::WIBase::SetInputState);
+	classDef.def("GetInputState", &pragma::gui::types::WIBase::GetInputState);
+	classDef.def("SetLogicalState", &pragma::gui::types::WIBase::SetLogicalState);
+	classDef.def("GetLogicalState", &pragma::gui::types::WIBase::GetLogicalState);
 	classDef.def("SetDebugChangeTrackingEnabled", +[](const pragma::gui::types::WIBase &el, bool enabled) {
 		pragma::gui::set_debug_tracking_enabled(el, enabled);
 	});

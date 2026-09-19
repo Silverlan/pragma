@@ -91,7 +91,7 @@ void pragma::gui::WILuaSkin::FindSkinClasses(types::WIBase *el, std::unordered_m
 	//WISkinClass *cl = FindSkinClass(el->GetClass(),classes);
 	//if(cl != nullptr)
 	//	outClasses.push_back(cl);
-	std::vector<std::string> &styleClasses = el->GetStyleClasses();
+	auto &styleClasses = el->GetStyleClasses();
 	for(unsigned int i = 0; i < styleClasses.size(); i++) {
 		auto *cl = FindSkinClass(styleClasses[i], classes);
 		if(cl != nullptr)

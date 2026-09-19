@@ -20,6 +20,7 @@ export import :gui.frame;
 export import :gui.grid_panel;
 export import :gui.icon;
 export import :gui.image_slide_show;
+export import :gui.json_skin;
 export import :gui.key_entry;
 export import :gui.line_graph;
 export import :gui.load_screen;

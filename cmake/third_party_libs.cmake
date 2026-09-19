@@ -420,3 +420,6 @@ set(BUILD_SHARED_LIBS
 if(PRAGMA_WITH_MIMALLOC)
     pr_fetch_third_party_lib("mimalloc" "https://github.com/microsoft/mimalloc.git" "75d69f4ab736ad9f56cdd76c7eb883f60ac48869")
 endif()
+
+# glaze
+pr_fetch_third_party_lib("glaze_glaze" "https://github.com/stephenberry/glaze.git" "2518e7570d95c88a8622ed48cd7f80ce7290ce5b")

@@ -301,7 +301,7 @@ function Element:AddNode(graphNode)
 	local elBg = gui.create("WIRoundedRect", frame)
 	elBg:SetZPos(-100)
 	elBg:SetBackgroundElement(true)
-	elBg:SetAutoAlignToParent(true)
+	elBg:SetAlignment(gui.ALIGNMENT_FILL)
 	elBg:AddStyleClass("background")
 
 	frame:AddCallback("OnDragStart", function(el, x, y)
@@ -333,7 +333,7 @@ function Element:AddNode(graphNode)
 
 	local pDrag = frame:GetDragArea()
 	pDrag:SetHeight(31)
-	pDrag:SetAutoAlignToParent(true, false)
+	pDrag:SetHorizontalAlignment(gui.ALIGNMENT_FILL)
 
 	local elNode = gui.create("graph_node", frame)
 	elNode:SetShaderGraph(self)

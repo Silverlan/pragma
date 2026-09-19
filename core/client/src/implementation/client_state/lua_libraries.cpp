@@ -154,6 +154,7 @@ static void register_gui(Lua::Interface &lua)
 	  luabind::def("get_focused_element", static_cast<pragma::gui::types::WIBase *(*)(lua::State *)>(&Lua::gui::get_focused_element)), luabind::def("get_focused_element", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, prosper::Window &)>(&Lua::gui::get_focused_element)),
 	  luabind::def("register_skin", static_cast<bool (*)(lua::State *, const std::string &, const luabind::tableT<void> &, const luabind::tableT<void> &)>(&Lua::gui::register_skin)),
 	  luabind::def("register_skin", static_cast<bool (*)(lua::State *, const std::string &, const luabind::tableT<void> &, const luabind::tableT<void> &, const std::string &)>(&Lua::gui::register_skin)), luabind::def("register_default_skin", &Lua::gui::register_default_skin),
+	  luabind::def("register_json_skin", &Lua::gui::register_json_skin),
 	  luabind::def(
 	    "set_focus_enabled", +[](const prosper::Window &window, bool focusEnabled) { pragma::gui::WGUI::GetInstance().SetFocusEnabled(window, focusEnabled); }),
 	  luabind::def(

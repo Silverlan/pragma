@@ -645,5 +645,9 @@ skin["bg_gradient"] = {
 	Release = clear_element,
 }
 -----------------------------------------
-gui.register_skin("default", t, skin)
+
+include("/gui/skins/style_class.lua")
+
+-- gui.register_skin("default", t, skin)
+gui.register_json_skin("default", "scripts/ui/skins/base.jsonc")
 gui.set_skin("default")

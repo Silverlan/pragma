@@ -55,13 +55,8 @@ function gui.WIContextMenu:OnInitialize()
 
 	local contents = gui.create("vbox", scrollContainer, 0, 0, self:GetWidth(), self:GetHeight())
 	contents:SetFixedWidth(true)
+	contents:SetAlignItems(gui.FlexBox.FLEX_ALIGN_STRETCH)
 	contents:AddCallback("OnSizeChanged", function(el)
-		for _, item in ipairs(self.m_tItems) do
-			if item:IsValid() then
-				item:SetWidth(el:GetWidth())
-			end
-		end
-		
 		if(self.m_updateHeightOnContainerChange) then
 			self:UpdateCompactHeight()
 		end

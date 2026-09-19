@@ -26,9 +26,8 @@ void pragma::gui::types::WIMainMenuBase::Initialize()
 {
 	WIBase::Initialize();
 	SetSize(1'024, 768);
-	m_menuElementsContainer = WGUI::GetInstance().Create<WIBase>(this)->GetHandle();
-	m_menuElementsContainer->SetAutoSizeToContents(true);
-	m_menuElementsContainer->SetX(168);
+	m_menuElementsContainer = WGUI::GetInstance().Create<VBox>(this)->GetHandle();
+	m_menuElementsContainer->AddStyleClass("main_menu_nav_container");
 	ScheduleUpdate();
 }
 void pragma::gui::types::WIMainMenuBase::DoUpdate()
@@ -124,7 +123,7 @@ void pragma::gui::types::WIMainMenuBase::UpdateElement(int i)
 	WIMainMenuElement *el = GetElement(i);
 	if(el == nullptr)
 		return;
-	if(i == 0)
+	/*if(i == 0)
 		el->SetPos(0, 0);
 	else {
 		WIMainMenuElement *prev = GetElement(i - 1);
@@ -132,22 +131,22 @@ void pragma::gui::types::WIMainMenuBase::UpdateElement(int i)
 			int yGap = 5;
 			el->SetPos(0, prev->GetPos().y + prev->GetHeight() + yGap);
 		}
-	}
+	}*/
 }
 void pragma::gui::types::WIMainMenuBase::UpdateElements()
 {
-	for(unsigned int i = 0; i < m_elements.size(); i++)
-		UpdateElement(i);
-	if(m_menuElementsContainer.IsValid())
-		m_menuElementsContainer->SetY(GetHeight() - m_menuElementsContainer->GetHeight() - 120);
+	//for(unsigned int i = 0; i < m_elements.size(); i++)
+	//	UpdateElement(i);
+	//if(m_menuElementsContainer.IsValid())
+	//	m_menuElementsContainer->SetY(GetHeight() - m_menuElementsContainer->GetHeight() - 120);
 
-	if(m_menuElementsContainer.IsValid()) {
+	/*if(m_menuElementsContainer.IsValid()) {
 		for(auto &hEl : m_optionLists) {
 			if(hEl.IsValid() == false)
 				continue;
 			static_cast<WIOptionsList *>(hEl.get())->SetMaxHeight(m_menuElementsContainer->GetY() - hEl->GetY() - 38);
 		}
-	}
+	}*/
 }
 void pragma::gui::types::WIMainMenuBase::AddMenuItem(int pos, std::string name, const CallbackHandle &onActivated)
 {
@@ -198,9 +197,7 @@ pragma::gui::types::WIOptionsList *pragma::gui::types::WIMainMenuBase::Initializ
 }
 void pragma::gui::types::WIMainMenuBase::InitializeOptionsList(WIOptionsList *pList)
 {
-	pList->SetPos(192, 200);
 	pList->SizeToContents();
-	pList->SetWidth(700);
 	pList->ScheduleUpdate();
 	m_optionLists.push_back(pList->GetHandle());
 }
@@ -220,9 +217,7 @@ void pragma::gui::types::WIMainMenuElement::Select()
 	if(m_bSelected == true)
 		return;
 	m_bSelected = true;
-
-	if(m_hBackground.IsValid())
-		m_hBackground->SetVisible(true);
+	SetInputState(InputState::Hover);
 	CallCallbacks<void>("Select");
 	if(onSelected == nullptr)
 		return;
@@ -234,8 +229,7 @@ void pragma::gui::types::WIMainMenuElement::Deselect()
 	if(m_bSelected == false)
 		return;
 	m_bSelected = false;
-	if(m_hBackground.IsValid())
-		m_hBackground->SetVisible(false);
+	SetInputState(InputState::None);
 	CallCallbacks<void>("Deselect");
 	if(onDeselected == nullptr)
 		return;
@@ -246,32 +240,11 @@ void pragma::gui::types::WIMainMenuElement::Initialize()
 {
 	WIBase::Initialize();
 
-	SetSize(350, 46);
-	auto *pBackground = WGUI::GetInstance().Create<WIRect>(this);
-	if(pBackground) {
-		m_hBackground = pBackground->GetHandle();
-		pBackground->SetColor(Color {76, 76, 76});
-		pBackground->SetVisible(false);
-		pBackground->SetSize(GetSize());
-		pBackground->SetAnchor(0.f, 0.f, 1.f, 1.f);
-
-		auto *pPrefix = WGUI::GetInstance().Create<WIRect>(m_hBackground.get());
-		pPrefix->SetColor(Color {255, 210, 0});
-		pPrefix->SetHeight(pBackground->GetHeight());
-		pPrefix->SetWidth(3);
-		pPrefix->SetAnchor(0.f, 0.f, 0.f, 1.f);
-	}
+	SetSize(100, 20);
+	AddStyleClass("main_menu_nav_item");
 	WIText *pText = WGUI::GetInstance().Create<WIText>(this);
-	if(pText != nullptr) {
+	if(pText != nullptr)
 		m_hText = pText->GetHandle();
-		m_hText->SetX(21);
-		/*pText->SetFont("MainMenu_Regular");
-		pText->SetColor(MENU_ITEM_COLOR);
-		
-		pText->EnableShadow(true);
-		pText->SetShadowColor(MENU_ITEM_SHADOW_COLOR);
-		pText->SetShadowOffset(MENU_ITEM_SHADOW_OFFSET);*/
-	}
 	SetMouseInputEnabled(true);
 }
 
@@ -297,22 +270,21 @@ void pragma::gui::types::WIMainMenuElement::OnCursorExited() { Deselect(); }
 void pragma::gui::types::WIMainMenuElement::SetText(std::string &text)
 {
 	if(m_hText.IsValid()) {
-		string::Utf8String upperText {text};
-		upperText.toUpper();
 		WIText *pText = static_cast<WIText *>(m_hText.get());
-		pText->SetText(upperText);
+		pText->SetText(text);
 		pText->SizeToContents();
 	}
 }
 Vector4 pragma::gui::types::WIMainMenuElement::GetBackgroundColor()
 {
-	if(!m_hBackground.IsValid())
+	/*if(!m_hBackground.IsValid())
 		return Vector4(1, 1, 1, 1);
-	return m_hBackground->GetColor().ToVector4();
+	return m_hBackground->GetColor().ToVector4();*/
+	return Vector4{};
 }
 void pragma::gui::types::WIMainMenuElement::SetBackgroundColor(float r, float g, float b, float a)
 {
-	if(!m_hBackground.IsValid())
+	/*if(!m_hBackground.IsValid())
 		return;
-	m_hBackground->SetColor(r, g, b, a);
+	m_hBackground->SetColor(r, g, b, a);*/
 }

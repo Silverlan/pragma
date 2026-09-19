@@ -10,22 +10,8 @@ function gui.WIMenuItem:OnInitialize()
 	self.m_enabled = true
 
 	self:SetMouseInputEnabled(true)
-	local pBg = gui.create("WIRect")
-	pBg:SetParent(self)
-	pBg:SetAlignment(gui.ALIGNMENT_FILL)
-	pBg:SetColor(Color.SkyBlue)
-	pBg:AddStyleClass("menu_item_selected_background")
-	self.m_pBg = pBg
-
-	local pBgOutline = gui.create("WIOutlinedRect")
-	pBgOutline:SetParent(self)
-	pBgOutline:SetAlignment(gui.ALIGNMENT_FILL)
-	pBgOutline:SetColor(Color.RoyalBlue)
-	pBgOutline:AddStyleClass("menu_item_selected_outline")
-	self.m_pBgOutline = pBgOutline
 
 	local pText = gui.create("WIText", self)
-	pText:SetColor(Color.Black)
 	self.m_pText = pText
 
 	self:SetSelected(false)
@@ -63,12 +49,6 @@ function gui.WIMenuItem:IsContextMenuOpen()
 end
 function gui.WIMenuItem:SetSelected(b)
 	self.m_bSelected = b
-	if util.is_valid(self.m_pBg) == true then
-		self.m_pBg:SetVisible(b)
-	end
-	if util.is_valid(self.m_pBgOutline) == true then
-		self.m_pBgOutline:SetVisible(b)
-	end
 	self:CallCallbacks("OnSelectionChanged", b)
 end
 function gui.WIMenuItem:IsSelected()

@@ -120,11 +120,7 @@ void pragma::gui::types::WIMainMenu::Initialize()
 
 	m_hPragmaLogo = CreateChild<WITexturedRect>();
 	auto *pTex = static_cast<WITexturedRect *>(m_hPragmaLogo.get());
-	pTex->SetMaterial("wgui/pragma_logo");
-	pTex->SizeToTexture();
-	pTex->SetPos(192, 80);
-	pTex->SetHeight(64, true);
-	pTex->SetZPos(1'000);
+	pTex->AddStyleClass("main_menu_logo");
 
 	SetSize(1024, 768);
 	m_hBg = CreateChild<WIRect>();

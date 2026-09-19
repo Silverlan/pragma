@@ -58,7 +58,7 @@ void pragma::gui::JsonSkinClass::MergeFrom(const JsonSkinClass &baseClass)
 	}
 }
 
-pragma::gui::JsonSkin::JsonSkin() : WISkin{} {}
+pragma::gui::JsonSkin::JsonSkin() : WISkin {} {}
 
 void pragma::gui::JsonSkin::Load(const Settings &settings)
 {
@@ -273,7 +273,9 @@ void pragma::gui::JsonSkin::Initialize(types::WIBase *el)
 	for(auto &c : classes)
 		find_skin_classes(el, c->children, elClasses);
 	auto *l = get_client_state()->GetGUILuaState();
-	auto apply_style_class = luabind::object {l, luabind::globals(l)["apply_style_class"]};
+	auto apply_style_class = luabind::object {l, luabind::globals(l)["gui"]};
+	if(apply_style_class)
+		apply_style_class = apply_style_class["apply_style_class"];
 	if(!apply_style_class)
 		throw std::runtime_error {"Unable to apply style classes: Could not find Lua function 'apply_style_class'."};
 

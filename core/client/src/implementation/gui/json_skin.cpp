@@ -64,10 +64,11 @@ void pragma::gui::JsonSkin::Load(const Settings &settings)
 {
 	const auto &j = settings.jsonData;
 
+	// Note: Make sure to skip these in "ParseClass" when adding new root blocks
 	ParseConstants(j);
 	ParseFonts(j);
 
-	ParseClass(j, m_rootClass);
+	ParseClass(j, m_rootClass, true);
 	ResolveVariables(m_rootClass);
 	ResolveMixins(m_rootClass, m_rootClass);
 
@@ -129,14 +130,24 @@ void pragma::gui::JsonSkin::ParseFonts(const glz::json_t &j)
 	}
 }
 
-void pragma::gui::JsonSkin::ParseClass(const glz::json_t &j, JsonSkinClass &outClass)
+void pragma::gui::JsonSkin::ParseClass(const glz::json_t &j, JsonSkinClass &outClass, bool rootLevel)
 {
 	if(!j.is_object())
 		return;
 
+	if(rootLevel) {
+		for(const auto &[key, value] : j.get_object()) {
+			if(key == "constants" || key == "fonts")
+				continue; // Already handled
+			if(value.is_object()) {
+				outClass.children[key] = std::make_unique<JsonSkinClass>();
+				ParseClass(value, *outClass.children[key]);
+			}
+		}
+		return;
+	}
+
 	for(const auto &[key, value] : j.get_object()) {
-		if(key == "constants")
-			continue; // Already handled
 		if(key == "inherits") {
 			if(value.is_string())
 				outClass.inherits.push_back(value.get<std::string>());
@@ -170,10 +181,6 @@ void pragma::gui::JsonSkin::ParseClass(const glz::json_t &j, JsonSkinClass &outC
 					ParseClass(child, *outClass.children[key]);
 				}
 			}
-		}
-		else if(value.is_object()) {
-			outClass.children[key] = std::make_unique<JsonSkinClass>();
-			ParseClass(value, *outClass.children[key]);
 		}
 		else
 			outClass.properties[key] = value;
@@ -284,7 +291,7 @@ void pragma::gui::JsonSkin::Initialize(types::WIBase *el)
 		auto t = luabind::newtable(l);
 
 		// Convert json properties to Lua table
-		auto applyPropsToTable = [&](const auto &propsMap, luabind::object &targetTable) {
+		auto applyPropsToTable = [&](this auto& self, const auto &propsMap, luabind::object &targetTable) -> void {
 			for(const auto &[name, prop] : propsMap) {
 				if(prop.is_string())
 					targetTable[name] = prop.template get<std::string>();
@@ -292,23 +299,30 @@ void pragma::gui::JsonSkin::Initialize(types::WIBase *el)
 					targetTable[name] = prop.template get<double>();
 				else if(prop.is_boolean())
 					targetTable[name] = prop.template get<bool>() ? true : false;
-				else if(prop.is_object())
-					; // TODO: nested object
+				else if(prop.is_object()) {
+					auto subTable = luabind::newtable(l);
+					self(prop.get_object(), subTable);
+					targetTable[name] = subTable;
+				}
 				else if(prop.is_array()) {
 					auto tProp = luabind::newtable(l);
+					size_t tableIdx = 1;
 					for(auto [idx, val] : std::views::enumerate(prop.get_array())) {
 						if(val.is_string())
-							tProp[idx + 1] = val.template get<std::string>();
+							tProp[tableIdx++] = val.template get<std::string>();
 						else if(val.is_number())
-							tProp[idx + 1] = val.template get<double>();
+							tProp[tableIdx++] = val.template get<double>();
 						else if(val.is_boolean())
-							tProp[idx + 1] = val.template get<bool>() ? true : false;
-						else if(val.is_object())
-							; // TODO?
+							tProp[tableIdx++] = val.template get<bool>() ? true : false;
+						else if(val.is_object()){
+							auto subTable = luabind::newtable(l);
+							self(val.get_object(), subTable);
+							tProp[tableIdx++] = subTable;
+						}
 						else if(val.is_array())
 							; // TODO?
 						else if(val.is_null())
-							tProp[idx + 1] = luabind::nil;
+							tProp[tableIdx++] = luabind::nil;
 					}
 					targetTable[name] = tProp;
 				}

@@ -580,6 +580,34 @@ static void register_gui(Lua::Interface &lua)
 	wiNineSliceRect.add_static_constant("SEGMENT_COUNT", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::Count));
 	guiMod[wiNineSliceRect];
 
+	auto styledRect = luabind::class_<pragma::gui::types::StyledRect, pragma::gui::types::WIBase>("StyledRect");
+	styledRect.add_static_constant("GRADIENT_TYPE_LINEAR", pragma::math::to_integral(pragma::gui::shaders::StyledRect::Style::GradientType::Linear));
+	styledRect.add_static_constant("GRADIENT_TYPE_RADIAL", pragma::math::to_integral(pragma::gui::shaders::StyledRect::Style::GradientType::Radial));
+	styledRect.def("ClearGradient", &pragma::gui::types::StyledRect::ClearGradient);
+	styledRect.def("SetLinearGradient", &pragma::gui::types::StyledRect::SetLinearGradient);
+	styledRect.def("SetGradientStops", +[](pragma::gui::types::StyledRect &rect, std::vector<float> positions, std::vector<Color> colors) {
+		std::vector<pragma::gui::types::StyledRect::ColorStop> stops;
+		auto n = pragma::math::min(positions.size(), colors.size());
+		stops.reserve(n);
+		for(size_t i = 0; i < n; ++i)
+			stops.push_back({colors[i], positions[i]});
+		rect.SetGradientStops(stops);
+	});
+	styledRect.def("SetGradientType", &pragma::gui::types::StyledRect::SetGradientType);
+	styledRect.def("SetBorderColor", &pragma::gui::types::StyledRect::SetBorderColor);
+	styledRect.def("SetCornerRadii", &pragma::gui::types::StyledRect::SetCornerRadii);
+	styledRect.def("SetGradientStart", &pragma::gui::types::StyledRect::SetGradientStart);
+	styledRect.def("SetGradientEnd", &pragma::gui::types::StyledRect::SetGradientEnd);
+	styledRect.def("SetBorderThickness", &pragma::gui::types::StyledRect::SetBorderThickness);
+	styledRect.def("GetGradientType", &pragma::gui::types::StyledRect::GetGradientType);
+	styledRect.def("GetGradientStops", &pragma::gui::types::StyledRect::GetGradientStops, luabind::copy_policy<0> {});
+	styledRect.def("GetBorderColor", &pragma::gui::types::StyledRect::GetBorderColor, luabind::copy_policy<0> {});
+	styledRect.def("GetCornerRadii", &pragma::gui::types::StyledRect::GetCornerRadii, luabind::copy_policy<0> {});
+	styledRect.def("GetGradientStart", &pragma::gui::types::StyledRect::GetGradientStart, luabind::copy_policy<0> {});
+	styledRect.def("GetGradientEnd", &pragma::gui::types::StyledRect::GetGradientEnd, luabind::copy_policy<0> {});
+	styledRect.def("GetBorderThickness", &pragma::gui::types::StyledRect::GetBorderThickness);
+	guiMod[styledRect];
+
 	auto wiRoundedTexturedRect = luabind::class_<pragma::gui::types::WIRoundedTexturedRect, luabind::bases<pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>>("RoundedTexturedRect");
 	Lua::WIRoundedTexturedRect::register_class(wiRoundedTexturedRect);
 	guiMod[wiRoundedTexturedRect];
@@ -631,16 +659,18 @@ static void register_gui(Lua::Interface &lua)
 	flexBoxDef.def("SetSpacing", &pragma::gui::types::FlexBox::SetSpacing);
 	flexBoxDef.def("GetSpacing", &pragma::gui::types::FlexBox::GetSpacing);
 	flexBoxDef.def("SetPadding", &pragma::gui::types::FlexBox::SetPadding);
-	flexBoxDef.def("GetPadding", +[](pragma::gui::types::FlexBox &flexBox) {
-		auto padding = flexBox.GetPadding();
-		return std::tuple<int32_t, int32_t, int32_t, int32_t> {padding.left, padding.top, padding.right, padding.bottom};
-	});
+	flexBoxDef.def(
+	  "GetPadding", +[](pragma::gui::types::FlexBox &flexBox) {
+		  auto padding = flexBox.GetPadding();
+		  return std::tuple<int32_t, int32_t, int32_t, int32_t> {padding.left, padding.top, padding.right, padding.bottom};
+	  });
 
 	flexBoxDef.def("SetChildMargin", &pragma::gui::types::FlexBox::SetChildMargin);
-	flexBoxDef.def("GetChildMargin", +[](pragma::gui::types::FlexBox &flexBox, pragma::gui::types::WIBase &el) {
-		auto margin = flexBox.GetChildMargin(el);
-		return std::tuple<int32_t, int32_t, int32_t, int32_t> {margin.left, margin.top, margin.right, margin.bottom};
-	});
+	flexBoxDef.def(
+	  "GetChildMargin", +[](pragma::gui::types::FlexBox &flexBox, pragma::gui::types::WIBase &el) {
+		  auto margin = flexBox.GetChildMargin(el);
+		  return std::tuple<int32_t, int32_t, int32_t, int32_t> {margin.left, margin.top, margin.right, margin.bottom};
+	  });
 
 	flexBoxDef.def("SetChildFlex", &pragma::gui::types::FlexBox::SetChildFlex);
 	flexBoxDef.def("GetChildFlex", &pragma::gui::types::FlexBox::GetChildFlex);
@@ -649,9 +679,7 @@ static void register_gui(Lua::Interface &lua)
 	flexBoxDef.def("SetFixedHeight", &pragma::gui::types::FlexBox::SetFixedHeight);
 	flexBoxDef.def("SetFixedSize", &pragma::gui::types::FlexBox::SetFixedSize);
 	flexBoxDef.def("SetAutoSizeActivated", &pragma::gui::types::FlexBox::SetAutoSizeActivated);
-	flexBoxDef.def("SetAutoSizeActivated", +[](pragma::gui::types::FlexBox &flexBox, bool activated) {
-		flexBox.SetAutoSizeActivated(activated);
-	});
+	flexBoxDef.def("SetAutoSizeActivated", +[](pragma::gui::types::FlexBox &flexBox, bool activated) { flexBox.SetAutoSizeActivated(activated); });
 
 	flexBoxDef.def("IsHorizontalBox", &pragma::gui::types::FlexBox::IsHorizontalBox);
 	flexBoxDef.def("IsVerticalBox", &pragma::gui::types::FlexBox::IsVerticalBox);

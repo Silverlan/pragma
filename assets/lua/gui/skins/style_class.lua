@@ -272,48 +272,76 @@ function gui.apply_style_class(element, style)
 		element:SetSpacing(style.spacing)
 	end
 
+	local background = style.background
+	if style.backgroundColor then
+		background = background or {}
+		background.color = style.backgroundColor
+	end
+
 	local bg = element:GetFirstChildByName("skin_background")
-	if style.backgroundColor or style.backgroundGradient then
+	if background then
+		local simpleBackground = false
+		if background.borderThickness == nil and background.cornerRadii == nil and background.gradient == nil and background.color ~= nil then
+			simpleBackground = true
+		end
+
+		local bgClass = simpleBackground and "wirect" or "styled_rect"
+
+		if bg and bg:GetClass():lower() ~= bgClass then
+			util.remove(bg)
+			bg = nil
+		end
+
 		if not bg then
-			local className = style.backgroundGradient and "WITexturedRect" or "WIRect"
-			bg = gui.create(className, element)
+			bg = gui.create(bgClass, element)
 			bg:SetName("skin_background")
 			bg:SetZPos(100)
 			bg:SetBackgroundElement(true)
 			bg:SetAlignment(gui.ALIGNMENT_FILL)
 		end
 		bg:SetVisible(true) 
-		
-		if style.backgroundGradient then
-            -- Test
-			style.backgroundGradient = {
-				dir = Vector2(0, -1),
-				width = 128,
-				height = 64,
-				nodes = {
-					{
-						offset = 0.0,
-						color = "#ff0000"
-					},
-					{
-						offset = 1.0,
-						color = "#00ff00"
-					}
-				}
-			}
 
-			local tex = get_cached_gradient(style.backgroundGradient)
-			if bg.SetTexture then
-				bg:SetTexture(tex)
+		if not simpleBackground then
+			if background.borderThickness then
+				bg:SetBorderThickness(background.borderThickness)
+				if background.borderColor then bg:SetBorderColor(Color.CreateFromHexColor(background.borderColor:sub(2))) end
 			end
-            -- Disable base color
-			bg:SetColor(Color.CreateFromHexColor("ffffff"))
-			
-		elseif style.backgroundColor then
-			if bg.SetTexture then 
-				bg:SetTexture(nil) 
+
+			if background.cornerRadii then
+				bg:SetCornerRadii(Vector4(background.cornerRadii, background.cornerRadii, background.cornerRadii, background.cornerRadii))
 			end
-			bg:SetColor(Color.CreateFromHexColor(style.backgroundColor:sub(2)))
+
+			if background.color then
+				bg:SetColor(Color.CreateFromHexColor(background.color:sub(2)))
+			end
+
+			bg:ClearGradient()
+			if background.gradient then
+				if background.gradient.type then
+					local type = gui.StyledRect.GRADIENT_TYPE_LINEAR
+					if background.gradient.type == "radial" then
+						type = gui.StyledRect.GRADIENT_TYPE_RADIAL
+					end
+					bg:SetGradientType(type)
+				end
+
+				if background.gradient.start then
+					bg:SetGradientStart(Vector2(background.gradient.start[1], background.gradient.start[2]))
+				end
+				if background.gradient["end"] then
+					bg:SetGradientEnd(Vector2(background.gradient["end"][1], background.gradient["end"][2]))
+				end
+
+				if background.gradient.stops then
+					local positions = {}
+					local colors = {}
+					for _, stop in ipairs(background.gradient.stops) do
+						table.insert(positions, stop.pos)
+						table.insert(colors, Color.CreateFromHexColor(stop.color:sub(2)))
+					end
+					bg:SetGradientStops(positions, colors)
+				end
+			end
 		end
 	elseif bg then
 		bg:SetVisible(false)

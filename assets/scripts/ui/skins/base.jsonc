@@ -1,0 +1,304 @@
+{
+	"constants": {
+		"FONT_MAIN_MENU_BODY": "MainMenu_Regular"
+	},
+	"fonts": {
+        "MainMenu_Regular": {
+            "fontSet": "default",
+            "size": 36,
+            "flags": ["sans", "mono"]
+        }
+    },
+
+	// Main Menu
+	".main_menu_logo": {
+		"material": "wgui/pragma_logo",
+		"x": 192,
+		"y": 80,
+		"width": "auto",
+		"height": 64,
+		"zIndex": 1000
+	},
+	".main_menu_nav_container": {
+		"x": 171,
+		"y": 250
+	},
+	".main_menu_nav_item": {
+		"width": 350,
+		"height": 46,
+		"children": {
+			"witext": {
+				"x": 21,
+				"textTransform": "uppercase",
+				"font": "$FONT_MAIN_MENU_BODY",
+				"color": "#4c4c4c",
+				"shadowColor": "#000000",
+				"shadowOffset": [2, 2]
+			}
+		},
+		"states": {
+			"hover": {
+				"backgroundColor": "#4c4c4c",
+				"sound": "ui/menu_select",
+				"children": {
+					"witext": {
+						"color": "#ffffff"
+					}
+				},
+				"decorators": {
+					"left_hover_bar": {
+						"visible": true
+					}
+				}
+			}
+		},
+		"decorators": {
+			"left_hover_bar": {
+				"type": "WIRect",
+				"x": 0,
+				"y": 0,
+				"width": 4,
+				"height": "100%",
+				"visible": false,
+				"color": "#ffff00"
+			}
+		}
+	},
+	"wioptionslist": {
+		"width": "600",
+		"x": "450",
+		"y": "250"
+	},
+	".options_list_control": {
+		"width": "100%",
+		"height": "100%"
+	},
+	"witable": {
+		"rowHeight": 32,
+		"background": {
+			"gradient": {
+                "start": [0, 0],
+                "end": [0, 1],
+                "stops": [
+                    { "pos": 0.0, "color": "#1e1e1edc" },
+                    { "pos": 1.0, "color": "#0a0a0adc" }
+                ]
+            }
+		}
+	},
+	".table_row_header": {
+		"background": {
+			"gradient": {
+                "start": [0, 0],
+                "end": [0, 1],
+                "stops": [
+                    { "pos": 0.0, "color": "#323232" },
+                    { "pos": 1.0, "color": "#262626" }
+                ]
+            }
+		},
+		"children": {
+			".label": {
+				"alignment": "center"
+			}
+		}
+	},
+	".table_row": {
+		"outlineWidth": 1,
+		"outlineColor": "#bcbcbc80",
+		"children": {
+			".label": {
+				"verticalAlignment": "center",
+				"x": 12
+			}
+		}
+	},
+	"witablecell": {
+		"children": {
+			"witext": {
+				//"debugPrint": "1",
+				"color": "#ffffff"
+			}
+		}
+	},
+	"wibutton": {
+		"background": {
+			"gradient": {
+                "start": [0, 0],
+                "end": [0, 1],
+                "stops": [
+                    { "pos": 0.0, "color": "#323232" },
+                    { "pos": 1.0, "color": "#262626" }
+                ]
+            }
+		},
+		"children": {
+			"witext": {
+				"alignment": "center",
+				"textTransform": "uppercase",
+				"color": "#ffffff"
+			}
+		},
+		"states": {
+			"hover": {
+				"background": {
+					"gradient": {
+						"start": [0, 0],
+						"end": [0, 1],
+						"stops": [
+							{ "pos": 0.0, "color": "#262626" },
+							{ "pos": 1.0, "color": "#1e1e1e" }
+						]
+					}
+				}
+			}
+		}
+	},
+	".progressbar_label_overlay": {
+		"color": "#000000",
+		"alignment": "center"
+	},
+	".progressbar_label_background": {
+		"color": "#ffffff",
+		"alignment": "center"
+	},
+	"wichoicelist": {
+		"children": {
+			"witext": {
+				"color": "#ffffff"
+			}
+		}
+	},
+	".progress_bar": {
+		"outlineWidth": 1,
+		"outlineColor": "#000000",
+		"children": {
+			".fill": {
+				"backgroundColor": "#ffffff"
+			}
+		}
+	},
+	".scrollbar_slider": {
+		"backgroundColor": "#bfbfbf"
+	},
+	".caret": {
+		"backgroundColor": "#000000"
+	},
+	".text_entry": {
+		"background": {
+			"color": "#ffffff",
+			"borderThickness": 1,
+			"borderColor": "#000000"
+		},
+		"children": {
+			"witext": {
+				//"debugPrint": "2",
+				"color": "#000000"
+			}
+		}
+	},
+	".text_entry_field": {
+		"width": "100%"
+	},
+	".text_entry_field_container_single": {
+		"verticalAlignment": "center"
+	},
+	".text_entry_field_container_multiline": {
+		"height": "100%",
+		"alignItems": "stretch"
+	},
+	".text_selection": {
+		"background": {
+			"color": "#bfbfbf"
+		}
+	},
+	".dropdown_menu_list": {
+		"backgroundColor": "#ffffff",
+		"outlineWidth": 1,
+		"outlineColor": "#000000",
+		"alignItems": "stretch",
+		"zIndex": 10000
+	},
+	".dropdown_menu_option": {
+		"height": 18,
+		"states": {
+			"hover": {
+				"backgroundColor": "#1e90ff"
+			}
+		}
+	},
+	"widropdownmenu": {
+		"children": {
+			".text_entry_field": {
+				"alignX": "stretch",
+				"marginRight": 20 // Leave some space for the arrow icon
+			}
+		},
+		"decorators": {
+			"arrow": {
+				"type": "WIArrow",
+				"width": 8,
+				"height": 8,
+
+				"alignX": "right",
+				"marginRight": 6,
+
+				"alignY": "center"
+			}
+		}
+	},
+
+	"widetachable": {
+		"children": {
+			".contents": {
+				"alignment": "fill"
+			}
+		}
+	},
+
+	".move_rect": {
+		//"debugPrint": "1",
+		"height": 28
+	},
+
+	".frame": {
+		"children": {
+			".main_contents": {
+				"flex": 1
+			}
+		}
+	},
+
+	".frame_titlebar": {
+		"children": {
+			"wibutton": {
+				"width": 20,
+				"height": 20
+			},
+			"witext": {
+				"color": "#ffffff"
+			}
+		},
+		"height": 24,
+		"justifyContent": "spaceBetween"
+	},
+
+	"wiserverbrowser": {
+		"width": 800,
+		"height": 400,
+		"minWidth": 400,
+		"minHeight": 300,
+		"backgroundColor": "#333333",
+		"children": {
+			"witable": {
+				"alignX": "stretch",
+
+				"flex": 1
+			},
+			".button_container": {
+				"alignmentX": "fill",
+				"justifyContent": "end"
+			}
+		}
+	}
+}

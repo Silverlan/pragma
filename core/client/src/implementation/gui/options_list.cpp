@@ -21,7 +21,6 @@ void pragma::gui::types::WIOptionsList::Initialize()
 	m_hTable = CreateChild<WITable>();
 	auto *pTable = m_hTable.get<WITable>();
 	pTable->SetAnchor(0.f, 0.f, 1.f, 1.f);
-	pTable->SetRowHeight(32);
 	pTable->SetScrollable(true);
 	//pTable->SetAnchor(0.f,0.f,1.f,1.f);
 	auto *pRow = pTable->AddHeaderRow();
@@ -130,9 +129,7 @@ pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceLi
 		return nullptr;
 	auto hChoiceList = CreateChild<WIChoiceList>();
 	auto *pChoiceList = hChoiceList.get<WIChoiceList>();
-	auto sz = GetSize();
-	pChoiceList->SetSize(sz.x, sz.y);
-	pChoiceList->SetAnchor(0.f, 0.f, 1.f, 1.f);
+	pChoiceList->AddStyleClass("options_list_control");
 	pChoiceList->SetChoices(list);
 	row->SetValue(0, name);
 	if(initializer != nullptr)
@@ -168,9 +165,7 @@ pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDo
 		return nullptr;
 	auto hDropDownMenu = CreateChild<WIDropDownMenu>();
 	auto *pDropDownMenu = hDropDownMenu.get<WIDropDownMenu>();
-	auto sz = GetSize();
-	pDropDownMenu->SetSize(sz.x, sz.y);
-	pDropDownMenu->SetAnchor(0.f, 0.f, 1.f, 1.f);
+	pDropDownMenu->AddStyleClass("options_list_control");
 	pDropDownMenu->SetOptions(list);
 	row->SetValue(0, name);
 	if(initializer != nullptr)
@@ -232,9 +227,7 @@ pragma::gui::types::WITextEntry *pragma::gui::types::WIOptionsList::AddTextEntry
 		return nullptr;
 	auto hTextEntry = CreateChild<WITextEntry>();
 	auto *pTextEntry = hTextEntry.get<WITextEntry>();
-	auto sz = GetSize();
-	pTextEntry->SetSize(sz.x, sz.y);
-	pTextEntry->SetAnchor(0.f, 0.f, 1.f, 1.f);
+	pTextEntry->AddStyleClass("options_list_control");
 	row->SetValue(0, name);
 	if(!cvarName.empty()) {
 		auto hOptions = GetHandle();
@@ -255,9 +248,7 @@ pragma::gui::types::WISlider *pragma::gui::types::WIOptionsList::AddSlider(const
 		return nullptr;
 	auto hSlider = CreateChild<WISlider>();
 	auto *pSlider = hSlider.get<WISlider>();
-	auto sz = GetSize();
-	pSlider->SetSize(sz.x, sz.y);
-	pSlider->SetAnchor(0.f, 0.f, 1.f, 1.f);
+	pSlider->AddStyleClass("options_list_control");
 	row->SetValue(0, name);
 	if(initializer != nullptr)
 		initializer(pSlider);

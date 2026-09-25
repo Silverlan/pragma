@@ -15,7 +15,7 @@ pragma::gui::types::WILuaBase::~WILuaBase() {}
 
 void pragma::gui::types::WILuaBase::SetupLua(const luabind::object &o, std::string &className)
 {
-	m_class = className;
+	m_class = util::register_global_string(string::get_lower(className));
 	SetLuaObject(o);
 	SetUserData2(m_baseLuaObj);
 }

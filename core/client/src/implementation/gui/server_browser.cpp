@@ -228,7 +228,7 @@ void pragma::gui::types::WIServerBrowser::Initialize()
 	AddStyleClass("serverbrowser");
 	SetTitle(locale::get_text("server_browser"));
 
-	auto *contents = GetContents();
+	auto *contents = GetInnerContents();
 	if(!contents)
 		return;
 	auto &wgui = WGUI::GetInstance();
@@ -248,13 +248,11 @@ void pragma::gui::types::WIServerBrowser::Initialize()
 			row->SetValue(5, locale::get_text("latency"));
 		}
 		t->SetColumnWidth(0, 30);
-		t->SizeToContents();
-
-		t->SetSize(contents->GetWidth() - 20, contents->GetHeight() - 100);
-		t->SetX(10);
-		t->SetAnchor(0.f, 0.f, 1.f, 1.f);
 	}
-	m_hRefresh = wgui.Create<WIButton>(contents)->GetHandle();
+
+	auto *buttonBox = wgui.Create<HBox>(contents);
+	buttonBox->AddStyleClass("button_container");
+	m_hRefresh = wgui.Create<WIButton>(buttonBox)->GetHandle();
 	WIButton *buttonRefresh = m_hRefresh.get<WIButton>();
 	if(buttonRefresh != nullptr) {
 		buttonRefresh->SetText(locale::get_text("refresh"));
@@ -267,12 +265,8 @@ void pragma::gui::types::WIServerBrowser::Initialize()
 			sb->Refresh();
 			return CallbackReturnType::HasReturnValue;
 		}));
-
-		buttonRefresh->SetWidth(100);
-		buttonRefresh->SetPos(contents->GetWidth() - buttonRefresh->GetWidth() - 10, contents->GetHeight() - buttonRefresh->GetHeight() - 20);
-		buttonRefresh->SetAnchor(1.f, 1.f, 1.f, 1.f);
 	}
-	m_hConnect = wgui.Create<WIButton>(contents)->GetHandle();
+	m_hConnect = wgui.Create<WIButton>(buttonBox)->GetHandle();
 	WIButton *buttonConnect = m_hConnect.get<WIButton>();
 	if(buttonConnect != nullptr) {
 		buttonConnect->SetText(locale::get_text("connect"));
@@ -294,13 +288,7 @@ void pragma::gui::types::WIServerBrowser::Initialize()
 			OnServerDoubleClick(*data);
 			return CallbackReturnType::HasReturnValue;
 		}));
-
-		buttonConnect->SetWidth(100);
-		buttonConnect->SetPos(contents->GetWidth() - buttonConnect->GetWidth() - 120, contents->GetHeight() - buttonConnect->GetHeight() - 20);
-		buttonConnect->SetAnchor(1.f, 1.f, 1.f, 1.f);
 	}
-	SetSize(800, 400);
-	SetMinSize(400, 300);
 }
 
 void pragma::gui::types::WIServerBrowser::DoRefresh()

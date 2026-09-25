@@ -239,7 +239,6 @@ void pragma::gui::types::WIMainMenuOptions::InitializeGeneralSettings()
 	pList->SetTitle(title);
 	// Player Name
 	auto *teName = pList->AddTextEntry(locale::get_text("player_name"), "playername");
-	teName->SizeToContents();
 	//
 	// Language
 	std::unordered_map<std::string, std::string> lanOptions {};

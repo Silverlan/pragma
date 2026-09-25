@@ -9,8 +9,10 @@ export namespace pragma::gui::types {
 	class DLLCLIENT WIDetachable : public WIBase {
 	  public:
 		WIDetachable();
-		virtual ~WIDetachable() override;
-		virtual void OnRemove() override;
+		~WIDetachable() override;
+		void Initialize() override;
+		void OnRemove() override;
+		VBox *GetContents();
 		void Detach();
 		void Reattach();
 		bool IsDetached() const;
@@ -25,6 +27,7 @@ export namespace pragma::gui::types {
 			Vector2i origSize;
 			std::optional<std::array<float, 4>> origAnchor;
 		};
+		WIHandle m_contents;
 		std::unique_ptr<DetachedWindow> m_detachedWindow = nullptr;
 	};
 }

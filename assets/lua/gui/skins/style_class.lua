@@ -3,13 +3,13 @@
 
 log = log or {}
 log.info = function(...)
-    print("[GUI] ", ...)
+	print("[GUI] ", ...)
 end
 log.warn = function(...)
-    console.print_warning("[GUI] ", ...)
+	console.print_warning("[GUI] ", ...)
 end
 log.err = function(...)
-    console.print_error("[GUI] ", ...)
+	console.print_error("[GUI] ", ...)
 end
 
 local function unpack_spacing(val)
@@ -123,12 +123,12 @@ local function apply_dimensions(element, style)
 	local origSize
 	if w_is_auto or h_is_auto then origSize = element:GetSize() end
 
-    -- x / width
+	-- x / width
 	if x_is_pct then
-		element:SetX(0)
+		element:ApplyX(0)
 		element:SetAnchor(gui.ANCHOR_EDGE_LEFT, x_val)
 	elseif x_val then
-		element:SetX(toint(x_val))
+		element:ApplyX(toint(x_val))
 	end
 
 	if w_is_pct then
@@ -141,7 +141,7 @@ local function apply_dimensions(element, style)
 		end
 		local parent = element:GetParent()
 		if parent then
-			element:SetWidth(toint(parent:GetWidth() *w_val))
+			element:ApplyWidth(toint(parent:GetWidth() *w_val))
 		end
 		
 		if not x_is_pct and not style.anchor then
@@ -150,15 +150,15 @@ local function apply_dimensions(element, style)
 		-- Set Right anchor dynamically
 		element:SetAnchor(gui.ANCHOR_EDGE_RIGHT, base_left + w_val)
 	elseif w_val then
-		element:SetWidth(toint(w_val))
+		element:ApplyWidth(toint(w_val))
 	end
 
 	-- y / height
 	if y_is_pct then
-		element:SetY(0)
+		element:ApplyY(0)
 		element:SetAnchor(gui.ANCHOR_EDGE_TOP, y_val)
 	elseif y_val then
-		element:SetY(toint(y_val))
+		element:ApplyY(toint(y_val))
 	end
 
 	if h_is_pct then
@@ -171,7 +171,7 @@ local function apply_dimensions(element, style)
 		end
 		local parent = element:GetParent()
 		if parent then
-			element:SetHeight(toint(element:GetParent():GetHeight() *h_val))
+			element:ApplyHeight(toint(element:GetParent():GetHeight() *h_val))
 		end
 		
 		if not y_is_pct and not style.anchor then
@@ -180,18 +180,74 @@ local function apply_dimensions(element, style)
 		-- Set Bottom anchor dynamically
 		element:SetAnchor(gui.ANCHOR_EDGE_BOTTOM, base_top + h_val)
 	elseif h_val then
-		element:SetHeight(toint(h_val))
+		element:ApplyHeight(toint(h_val))
 	end
 
 	if w_is_auto ~= h_is_auto then
 		local aspectRatio = (origSize.y > 0) and (origSize.x /origSize.y) or 0.0
 		if w_is_auto then
 			local w = element:GetHeight() *aspectRatio
-			element:SetWidth(w)
+			element:ApplyWidth(w)
 		else
 			local h = (aspectRatio > 0.0001) and (element:GetWidth() /aspectRatio) or 0.0
-			element:SetHeight(h)
+			element:ApplyHeight(h)
 		end
+	end
+end
+
+local function to_alignment_enum(align)
+	local alignment = gui.ALIGNMENT_NONE
+	if align == "start" then alignment = gui.ALIGNMENT_START
+	elseif align == "center" then alignment = gui.ALIGNMENT_CENTER
+	elseif align == "end" then alignment = gui.ALIGNMENT_END
+	elseif align == "fill" then alignment = gui.ALIGNMENT_FILL end
+	return alignment
+end
+
+local function to_flex_align_enum(align)
+	local flexAlign = gui.FlexBox.FLEX_ALIGN_START
+	if align == "start" then flexAlign = gui.FlexBox.FLEX_ALIGN_START
+	elseif align == "center" then flexAlign = gui.FlexBox.FLEX_ALIGN_CENTER
+	elseif align == "end" then flexAlign = gui.FlexBox.FLEX_ALIGN_END
+	elseif align == "stretch" then flexAlign = gui.FlexBox.FLEX_ALIGN_STRETCH end
+	return flexAlign
+end
+
+local function to_flex_justify_enum(align)
+	local flexJustify = gui.FlexBox.FLEX_JUSTIFY_START
+	if align == "start" then flexJustify = gui.FlexBox.FLEX_JUSTIFY_START
+	elseif align == "center" then flexJustify = gui.FlexBox.FLEX_JUSTIFY_CENTER
+	elseif align == "end" then flexJustify = gui.FlexBox.FLEX_JUSTIFY_END
+	elseif align == "spaceBetween" then flexJustify = gui.FlexBox.FLEX_JUSTIFY_SPACE_BETWEEN
+	elseif align == "spaceEvenly" then flexJustify = gui.FlexBox.FLEX_JUSTIFY_SPACE_EVENLY end
+	return flexJustify
+end
+
+local function apply_anchor_align(element, align, idStart, idEnd, anchor0, anchor1, margin0, margin1, offset, axis)
+	if align == idStart then
+		margin0 = margin0 or 0
+		element:SetAnchor(anchor0, 0.0)
+		element:SetAnchor(anchor1, 0.0)
+		element:SetAnchorEdgeEnabled(anchor0, true)
+		element:SetAnchorOffset(anchor0, margin0)
+	elseif align == idEnd then
+		margin1 = margin1 or 0
+		element:SetAnchor(anchor0, 1.0)
+		element:SetAnchor(anchor1, 1.0)
+		element:SetAnchorEdgeEnabled(anchor1, true)
+		element:SetAnchorOffset(anchor1, -margin1)
+	elseif align == "center" then
+		if axis == math.AXIS_X then element:SetAnchorHorizontalCenter(offset or 0)
+		else element:SetAnchorVerticalCenter(offset or 0) end
+	elseif align == "stretch" then
+		margin0 = margin0 or 0
+		margin1 = margin1 or 0
+		element:SetAnchor(anchor0, 0.0)
+		element:SetAnchor(anchor1, 1.0)
+		element:SetAnchorEdgeEnabled(anchor0, true)
+		element:SetAnchorEdgeEnabled(anchor1, true)
+		element:SetAnchorOffset(anchor0, margin0)
+		element:SetAnchorOffset(anchor1, -margin1)
 	end
 end
 
@@ -206,6 +262,12 @@ function gui.apply_style_class(element, style)
 	if style.autoAlign then element:SetAlignment(gui.ALIGNMENT_FILL) end
 	if style.visible ~= nil then element:SetVisible(style.visible) end
 	if style.zIndex then element:SetZPos(style.zIndex) end
+
+	if style.alignment then element:SetAlignment(to_alignment_enum(style.alignment)) end
+	if style.alignmentX then element:SetHorizontalAlignment(to_alignment_enum(style.alignmentX)) end
+	if style.alignmentY then element:SetVerticalAlignment(to_alignment_enum(style.alignmentY)) end
+	if style.horizontalAlignment then element:SetHorizontalAlignment(to_alignment_enum(style.horizontalAlignment)) end
+	if style.verticalAlignment then element:SetVerticalAlignment(to_alignment_enum(style.verticalAlignment)) end
 
 	-- Text properties
 	if style.font and element.SetFont then element:SetFont(style.font) end
@@ -244,9 +306,54 @@ function gui.apply_style_class(element, style)
 
 	if style.anchor then element:SetAnchor(style.anchor[1], style.anchor[2], style.anchor[3], style.anchor[4]) end
 
-    apply_dimensions(element, style)
+	if style.anchorEdges then
+		for edgeName, value in pairs(style.anchorEdges) do
+			local edgeEnum = gui["ANCHOR_EDGE_" .. edgeName:upper()]
+			if edgeEnum and element.SetAnchor then
+				element:SetAnchor(edgeEnum, value)
+				element:SetAnchorEdgeEnabled(edgeEnum, true)
+			end
+		end
+	end
 
-	if style.alignItems and element.SetAlignItems then element:SetAlignItems(style.alignItems) end
+	apply_dimensions(element, style)
+
+	if style.minWidth and element.SetMinWidth then
+		element:SetMinWidth(style.minWidth)
+	end
+	if style.maxWidth and element.SetMaxWidth then
+		element:SetMaxWidth(style.maxWidth)
+	end
+	if style.minHeight and element.SetMinHeight then
+		element:SetMinHeight(style.minHeight)
+	end
+	if style.maxHeight and element.SetMaxHeight then
+		element:SetMaxHeight(style.maxHeight)
+	end
+
+	if style.rowHeight and element.SetRowHeight then
+		element:SetRowHeight(style.rowHeight)
+	end
+
+	if style.alignX or style.alignY then
+		element:ClearAnchor()
+		apply_anchor_align(
+			element, style.alignX, "left", "right", gui.ANCHOR_EDGE_LEFT, gui.ANCHOR_EDGE_RIGHT,
+			-- style.marginLeft, style.marginRight,
+			0, 0,
+			style.offsetX, math.AXIS_X
+		)
+		apply_anchor_align(
+			element, style.alignY, "top", "bottom", gui.ANCHOR_EDGE_TOP, gui.ANCHOR_EDGE_BOTTOM,
+			-- style.marginTop, style.marginBottom,
+			0, 0,
+			style.offsetY, math.AXIS_Y
+		)
+		element:UpdateAnchorTransform()
+	end
+
+	if style.alignItems and element.SetAlignItems then element:SetAlignItems(to_flex_align_enum(style.alignItems)) end
+	if style.justifyContent and element.SetJustifyContent then element:SetJustifyContent(to_flex_justify_enum(style.justifyContent)) end
 
 	if style.flex then
 		local parent = element:GetParent()
@@ -260,10 +367,15 @@ function gui.apply_style_class(element, style)
 		element:SetPadding(l, t, r, b)
 	end
 
-	if style.margin then
-		local parent = element:GetParent()
-		if parent ~= nil and parent.SetChildMargin ~= nil then
-			local l, t, r, b = unpack_spacing(style.margin)
+	local parent = element:GetParent()
+	if parent ~= nil and parent.SetChildMargin ~= nil then
+		if style.margin or style.marginLeft or style.marginRight or style.marginTop or style.marginBottom then
+			local l, t, r, b = 0, 0, 0, 0
+			if style.margin then l, t, r, b = unpack_spacing(style.margin) end
+			if style.marginLeft then l = tonumber(style.marginLeft) end
+			if style.marginRight then r = tonumber(style.marginRight) end
+			if style.marginTop then t = tonumber(style.marginTop) end
+			if style.marginBottom then b = tonumber(style.marginBottom) end
 			parent:SetChildMargin(element, l, t, r, b)
 		end
 	end
@@ -295,11 +407,15 @@ function gui.apply_style_class(element, style)
 		if not bg then
 			bg = gui.create(bgClass, element)
 			bg:SetName("skin_background")
-			bg:SetZPos(100)
 			bg:SetBackgroundElement(true)
+			bg:SetZPos(-100)
 			bg:SetAlignment(gui.ALIGNMENT_FILL)
 		end
 		bg:SetVisible(true) 
+
+		if background.color then
+			bg:SetColor(Color.CreateFromHexColor(background.color:sub(2)))
+		end
 
 		if not simpleBackground then
 			if background.borderThickness then
@@ -309,10 +425,6 @@ function gui.apply_style_class(element, style)
 
 			if background.cornerRadii then
 				bg:SetCornerRadii(Vector4(background.cornerRadii, background.cornerRadii, background.cornerRadii, background.cornerRadii))
-			end
-
-			if background.color then
-				bg:SetColor(Color.CreateFromHexColor(background.color:sub(2)))
 			end
 
 			bg:ClearGradient()
@@ -353,8 +465,8 @@ function gui.apply_style_class(element, style)
 		if not ol then
 			ol = gui.create("WIOutlinedRect", element)
 			ol:SetName("skin_outline")
-			ol:SetZPos(-90) 
 			ol:SetBackgroundElement(true)
+			ol:SetZPos(10) 
 			ol:SetAlignment(gui.ALIGNMENT_FILL)
 		end
 		ol:SetOutlineWidth(outlineWidth)
@@ -384,7 +496,7 @@ function gui.apply_style_class(element, style)
 		for selector, childStyle in pairs(style.children) do
 			local matchingChildren = find_matching_children(element, selector)
 			for _, child in ipairs(matchingChildren) do
-                -- TODO: Do we need this here?
+				-- TODO: Do we need this here?
 				if childStyle.margin then
 					local immediateParent = child:GetParent()
 					if immediateParent and immediateParent.SetChildMargin then
@@ -409,8 +521,8 @@ function gui.apply_style_class(element, style)
 				
 				if decEl then
 					decEl:SetName(internalName)
-                    decEl:SetBackgroundElement(true)
-                    decEl:SetZPos(-80)
+					decEl:SetBackgroundElement(true, false)
+					decEl:SetZPos(-80)
 				else
 					log.err("Failed to create decorator type: " .. tostring(elementType))
 				end
@@ -418,6 +530,8 @@ function gui.apply_style_class(element, style)
 			
 			if decEl then
 				decEl:SetVisible(true)
+				--decEl:Update()
+				--decEl:RefreshSkin()
 				gui.apply_style_class(decEl, decStyle)
 			end
 		end

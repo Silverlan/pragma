@@ -20,6 +20,13 @@ pragma::gui::types::WIFrame::~WIFrame()
 
 pragma::gui::types::WIBase *pragma::gui::types::WIFrame::GetContents() { return m_hContents.get(); }
 
+pragma::gui::types::VBox *pragma::gui::types::WIFrame::GetInnerContents()
+{
+	if(!m_hContents.IsValid())
+		return nullptr;
+	return static_cast<WIDetachable *>(m_hContents.get())->GetContents();
+}
+
 void pragma::gui::types::WIFrame::OnDetachButtonPressed() { Detach(); }
 
 void pragma::gui::types::WIFrame::Initialize()
@@ -27,58 +34,28 @@ void pragma::gui::types::WIFrame::Initialize()
 	SetDraggable(true);
 	SetResizable(true);
 	SetSize(256, 256);
+	AddStyleClass("frame");
 
-	m_hBg = CreateChild<WIRect>();
-	m_hBg->SetName("background");
-	m_hBg->SetAlignment(Alignment::Fill);
-	m_hBg->GetColorProperty()->Link(*GetColorProperty());
-
-	m_hContents = CreateChild<WIDetachable>();
-	m_hContents->SetY(30);
-	m_hContents->SetSize(GetWidth(), GetHeight() - m_hContents->GetY());
-	m_hContents->SetAnchor(0.f, 0.f, 1.f, 1.f);
+	auto contents = CreateChild<VBox>();
+	contents->SetAlignment(Alignment::Fill);
 
 	WITransformable::Initialize();
 	if(m_hMoveRect.IsValid()) {
-		auto &gui = WGUI::GetInstance();
-		m_hTitleBar = gui.Create<WIBase>(m_hMoveRect.get())->GetHandle();
+		m_hTitleBar = contents->CreateChild<HBox>();
 		WIBase *pTitleBar = m_hTitleBar.get();
 		pTitleBar->AddStyleClass("frame_titlebar");
-		pTitleBar->SetAlignment(Alignment::Fill);
-		auto hFrame = GetHandle();
-		pTitleBar->AddCallback("OnSizeChanged", FunctionCallback<>::Create([hFrame]() mutable {
-			if(!hFrame.IsValid())
-				return;
-			auto *pFrame = static_cast<WIFrame *>(hFrame.get());
-			if(!pFrame->m_hTitleBar.IsValid())
-				return;
-			auto *pTitleBar = pFrame->m_hTitleBar.get();
-			if(pFrame->m_hClose.IsValid()) {
-				WIButton *pButton = static_cast<WIButton *>(pFrame->m_hClose.get());
-				pButton->SetX(pTitleBar->GetWidth() - pButton->GetWidth() - 10);
-				pButton->SetY(CInt32(pTitleBar->GetHeight() * 0.5f - pButton->GetHeight() * 0.5f));
-			}
-			if(pFrame->m_hClose.IsValid() && pFrame->m_hDetachButton.IsValid()) {
-				WIButton *pButton = static_cast<WIButton *>(pFrame->m_hDetachButton.get());
-				pButton->SetX(pFrame->m_hClose->GetX() - pButton->GetWidth() - 5);
-				pButton->SetY(pFrame->m_hClose->GetY());
-			}
-			if(pFrame->m_hTitle.IsValid()) {
-				WIText *pText = static_cast<WIText *>(pFrame->m_hTitle.get());
-				pText->SetX(10);
-				pText->SetY(CInt32(pTitleBar->GetHeight() * 0.5f - pText->GetHeight() * 0.5f));
-			}
-		}));
+		pTitleBar->SetHorizontalAlignment(Alignment::Fill);
 
-		m_hTitle = gui.Create<WIText>(pTitleBar)->GetHandle();
+		m_hTitle = pTitleBar->CreateChild<WIText>();
 		WIText *pTitle = static_cast<WIText *>(m_hTitle.get());
 		pTitle->AddStyleClass("frame_title");
 		pTitle->SetName("frame_title");
 		if(pTitle != nullptr)
 			pTitle->SetVisible(false);
 
+		auto buttonContainer = pTitleBar->CreateChild<HBox>();
 		{
-			m_hDetachButton = gui.Create<WIButton>(pTitleBar)->GetHandle();
+			m_hDetachButton = buttonContainer->CreateChild<WIButton>();
 			WIButton *pButton = static_cast<WIButton *>(m_hDetachButton.get());
 			pButton->SetText(".");
 			pButton->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this](util::EventReply *reply) -> CallbackReturnType {
@@ -86,11 +63,10 @@ void pragma::gui::types::WIFrame::Initialize()
 				OnDetachButtonPressed();
 				return CallbackReturnType::HasReturnValue;
 			}));
-			pButton->SetSize(20, 20);
 		}
 
 		{
-			m_hClose = gui.Create<WIButton>(pTitleBar)->GetHandle();
+			m_hClose = buttonContainer->CreateChild<WIButton>();
 			WIButton *pButton = static_cast<WIButton *>(m_hClose.get());
 			pButton->SetText("X");
 			pButton->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([this](util::EventReply *reply) -> CallbackReturnType {
@@ -98,9 +74,10 @@ void pragma::gui::types::WIFrame::Initialize()
 				OnCloseButtonPressed();
 				return CallbackReturnType::HasReturnValue;
 			}));
-			pButton->SetSize(20, 20);
 		}
 	}
+	m_hContents = contents->CreateChild<WIDetachable>();
+	m_hContents->AddStyleClass("main_contents");
 }
 pragma::util::EventReply pragma::gui::types::WIFrame::MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods)
 {

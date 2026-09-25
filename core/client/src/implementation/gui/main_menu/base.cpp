@@ -217,7 +217,6 @@ void pragma::gui::types::WIMainMenuElement::Select()
 	if(m_bSelected == true)
 		return;
 	m_bSelected = true;
-	SetInputState(InputState::Hover);
 	CallCallbacks<void>("Select");
 	if(onSelected == nullptr)
 		return;
@@ -229,7 +228,6 @@ void pragma::gui::types::WIMainMenuElement::Deselect()
 	if(m_bSelected == false)
 		return;
 	m_bSelected = false;
-	SetInputState(InputState::None);
 	CallCallbacks<void>("Deselect");
 	if(onDeselected == nullptr)
 		return;

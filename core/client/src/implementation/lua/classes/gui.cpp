@@ -401,14 +401,15 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetSkin", &pragma::gui::types::WIBase::SetSkin);
 	classDef.def("GetSkinName", &pragma::gui::types::WIBase::GetSkinName);
 	classDef.def("ResetSkin", &pragma::gui::types::WIBase::ResetSkin);
-	classDef.def("GetStyleClasses", +[](pragma::gui::types::WIBase &el) -> std::vector<std::string> {
-		std::vector<std::string> styleClasses;
-		auto &elStyleClasses = el.GetStyleClasses();
-		styleClasses.reserve(elStyleClasses.size());
-		for (auto &str : elStyleClasses)
-			styleClasses.push_back(std::string{str});
-		return styleClasses;
-	});
+	classDef.def(
+	  "GetStyleClasses", +[](pragma::gui::types::WIBase &el) -> std::vector<std::string> {
+		  std::vector<std::string> styleClasses;
+		  auto &elStyleClasses = el.GetStyleClasses();
+		  styleClasses.reserve(elStyleClasses.size());
+		  for(auto &str : elStyleClasses)
+			  styleClasses.push_back(std::string {str});
+		  return styleClasses;
+	  });
 	classDef.def("AddStyleClass", &pragma::gui::types::WIBase::AddStyleClass);
 	classDef.def("SetCursor", &pragma::gui::types::WIBase::SetCursor);
 	classDef.def("GetCursor", &pragma::gui::types::WIBase::GetCursor);
@@ -502,6 +503,9 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("HasAnchor", &pragma::gui::types::WIBase::HasAnchor);
 	classDef.def("HasHorizontalAnchor", &pragma::gui::types::WIBase::HasHorizontalAnchor);
 	classDef.def("HasVerticalAnchor", &pragma::gui::types::WIBase::HasVerticalAnchor);
+	classDef.def("SetAnchorOffset", &pragma::gui::types::WIBase::SetAnchorOffset);
+	classDef.def("UpdateAnchorTransform", &pragma::gui::types::WIBase::UpdateAnchorTransform);
+	classDef.def("UpdateAnchorTransform", +[](pragma::gui::types::WIBase &el) { el.UpdateAnchorTransform(); });
 	classDef.def("SetRemoveOnParentRemoval", &pragma::gui::types::WIBase::SetRemoveOnParentRemoval);
 	classDef.def("GetCenter", &pragma::gui::types::WIBase::GetCenter);
 	classDef.def("GetCenterX", &pragma::gui::types::WIBase::GetCenterX);
@@ -520,12 +524,13 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("ClearStyleClasses", &pragma::gui::types::WIBase::ClearStyleClasses);
 	classDef.def("HasStyleClass", &pragma::gui::types::WIBase::HasStyleClass);
 	classDef.def("FindChildIndex", &pragma::gui::types::WIBase::FindChildIndex);
-	classDef.def("FindChildIndex", +[](pragma::gui::types::WIBase &el) -> std::optional<uint32_t> {
-		auto *parent = el.GetParent();
-		if(!parent)
-			return {};
-		return parent->FindChildIndex(el);
-	});
+	classDef.def(
+	  "FindChildIndex", +[](pragma::gui::types::WIBase &el) -> std::optional<uint32_t> {
+		  auto *parent = el.GetParent();
+		  if(!parent)
+			  return {};
+		  return parent->FindChildIndex(el);
+	  });
 	classDef.def("SetScale", static_cast<void (pragma::gui::types::WIBase::*)(const ::Vector2 &)>(&pragma::gui::types::WIBase::SetScale));
 	classDef.def("SetScale", static_cast<void (pragma::gui::types::WIBase::*)(float, float)>(&pragma::gui::types::WIBase::SetScale));
 	classDef.def("GetScale", &pragma::gui::types::WIBase::GetScale, luabind::copy_policy<0> {});
@@ -567,12 +572,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetInputState", &pragma::gui::types::WIBase::GetInputState);
 	classDef.def("SetLogicalState", &pragma::gui::types::WIBase::SetLogicalState);
 	classDef.def("GetLogicalState", &pragma::gui::types::WIBase::GetLogicalState);
-	classDef.def("SetDebugChangeTrackingEnabled", +[](const pragma::gui::types::WIBase &el, bool enabled) {
-		pragma::gui::set_debug_tracking_enabled(el, enabled);
-	});
-	classDef.def("PrintDebugChangeTrackingLog", +[](const pragma::gui::types::WIBase &el) {
-		pragma::gui::print_debug_tracking_log(el);
-	});
+	classDef.def("SetDebugChangeTrackingEnabled", +[](const pragma::gui::types::WIBase &el, bool enabled) { pragma::gui::set_debug_tracking_enabled(el, enabled); });
+	classDef.def("PrintDebugChangeTrackingLog", +[](const pragma::gui::types::WIBase &el) { pragma::gui::print_debug_tracking_log(el); });
 
 	auto defDrawInfo = luabind::class_<pragma::gui::DrawInfo>("DrawInfo");
 	defDrawInfo.add_static_constant("FLAG_NONE", pragma::math::to_integral(pragma::gui::DrawInfo::Flags::None));

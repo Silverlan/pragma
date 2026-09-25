@@ -28,6 +28,16 @@ void pragma::gui::types::WIDetachable::DetachedWindow::Clear()
 pragma::gui::types::WIDetachable::WIDetachable() : WIBase {} {}
 pragma::gui::types::WIDetachable::~WIDetachable() {}
 
+void pragma::gui::types::WIDetachable::Initialize()
+{
+	WIBase::Initialize();
+	auto *vbox = WGUI::GetInstance().Create<VBox>(this);
+	vbox->AddStyleClass("contents");
+	m_contents = vbox->GetHandle();
+}
+
+pragma::gui::types::VBox *pragma::gui::types::WIDetachable::GetContents() { return static_cast<VBox*>(m_contents.get()); }
+
 void pragma::gui::types::WIDetachable::OnRemove()
 {
 	Reattach();
@@ -77,6 +87,7 @@ void pragma::gui::types::WIDetachable::Detach()
 		elBg->GetColorProperty()->Link(*frame->GetColorProperty());
 		elBg->SetSize(w, h);
 		elBg->SetAnchor(0, 0, 1, 1);
+		elBg->SetBackgroundElement(true);
 
 		ClearAnchor();
 		SetParentAndUpdateWindow(elBg);

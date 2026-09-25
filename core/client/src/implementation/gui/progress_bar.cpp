@@ -19,11 +19,12 @@ void pragma::gui::types::WIProgressBar::Initialize()
 {
 	WIBase::Initialize();
 	SetSize(128, 32);
+	AddStyleClass("progress_bar");
+
 	m_hLabel = CreateChild<WIText>();
-	m_hLabel->SetAlignment(Alignment::Center);
 	m_hLabel->AddStyleClass("progressbar_label_background");
-	m_hProgress = CreateChild<WIRect>();
-	m_hProgress->GetColorProperty()->Link(*GetColorProperty());
+	m_hProgress = CreateChild<WIBase>();
+	m_hProgress->AddStyleClass("fill");
 
 	m_hLabel2 = WGUI::GetInstance().Create<WIText>(m_hProgress.get())->GetHandle();
 	m_hLabel2->AddStyleClass("progressbar_label_overlay");
@@ -54,7 +55,7 @@ void pragma::gui::types::WIProgressBar::SetValueTranslator(const std::function<s
 void pragma::gui::types::WIProgressBar::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
 {
 	if(m_hProgress.IsValid()) {
-		auto *pProgress = m_hProgress.get<WIRect>();
+		auto *pProgress = m_hProgress.get<WIBase>();
 		pProgress->SetHeight(GetHeight());
 	}
 	OnProgressChanged(GetValue(), GetValue());
@@ -67,7 +68,7 @@ void pragma::gui::types::WIProgressBar::OnProgressChanged(float oldValue, float 
 {
 	auto w = GetWidth();
 	if(m_hProgress.IsValid()) {
-		auto *pProgress = m_hProgress.get<WIRect>();
+		auto *pProgress = m_hProgress.get<WIBase>();
 		pProgress->SetWidth(CInt32(CFloat(w) * GetProgress()));
 	}
 	UpdateText();

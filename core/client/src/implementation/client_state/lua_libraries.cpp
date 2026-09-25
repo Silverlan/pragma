@@ -654,8 +654,17 @@ static void register_gui(Lua::Interface &lua)
 	flexBoxDef.add_static_constant("FLEX_ALIGN_CENTER", pragma::math::to_integral(pragma::gui::types::FlexAlign::Center));
 	flexBoxDef.add_static_constant("FLEX_ALIGN_END", pragma::math::to_integral(pragma::gui::types::FlexAlign::End));
 	flexBoxDef.add_static_constant("FLEX_ALIGN_STRETCH", pragma::math::to_integral(pragma::gui::types::FlexAlign::Stretch));
+
+	flexBoxDef.add_static_constant("FLEX_JUSTIFY_START", pragma::math::to_integral(pragma::gui::types::FlexJustify::Start));
+	flexBoxDef.add_static_constant("FLEX_JUSTIFY_CENTER", pragma::math::to_integral(pragma::gui::types::FlexJustify::Center));
+	flexBoxDef.add_static_constant("FLEX_JUSTIFY_END", pragma::math::to_integral(pragma::gui::types::FlexJustify::End));
+	flexBoxDef.add_static_constant("FLEX_JUSTIFY_SPACE_BETWEEN", pragma::math::to_integral(pragma::gui::types::FlexJustify::SpaceBetween));
+	flexBoxDef.add_static_constant("FLEX_JUSTIFY_SPACE_EVENLY", pragma::math::to_integral(pragma::gui::types::FlexJustify::SpaceEvenly));
+
 	flexBoxDef.def("SetAlignItems", &pragma::gui::types::FlexBox::SetAlignItems);
 	flexBoxDef.def("GetAlignItems", &pragma::gui::types::FlexBox::GetAlignItems);
+	flexBoxDef.def("SetJustifyContent", &pragma::gui::types::FlexBox::SetJustifyContent);
+	flexBoxDef.def("GetJustifyContent", &pragma::gui::types::FlexBox::GetJustifyContent);
 	flexBoxDef.def("SetSpacing", &pragma::gui::types::FlexBox::SetSpacing);
 	flexBoxDef.def("GetSpacing", &pragma::gui::types::FlexBox::GetSpacing);
 	flexBoxDef.def("SetPadding", &pragma::gui::types::FlexBox::SetPadding);

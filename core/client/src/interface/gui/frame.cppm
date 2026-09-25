@@ -16,6 +16,7 @@ export namespace pragma::gui::types {
 		virtual ~WIFrame() override;
 		virtual void Initialize() override;
 		WIBase *GetContents();
+		VBox *GetInnerContents();
 		void SetTitle(std::string title);
 		const string::Utf8String &GetTitle() const;
 		void SetCloseButtonEnabled(bool b);
@@ -26,7 +27,6 @@ export namespace pragma::gui::types {
 		void Reattach();
 		bool IsDetached() const;
 	  protected:
-		WIHandle m_hBg;
 		WIHandle m_hTitle;
 		WIHandle m_hTitleBar;
 		WIHandle m_hClose;

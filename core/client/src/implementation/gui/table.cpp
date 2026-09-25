@@ -755,6 +755,7 @@ pragma::gui::WIHandle pragma::gui::types::WITableRow::SetValue(unsigned int col,
 	}
 	WIHandle hLabel = CreateChild<WIText>();
 	WIText *text = hLabel.get<WIText>();
+	text->AddStyleClass("label");
 	text->SetText(val);
 	text->SizeToContents();
 	InsertElement(col, hLabel);

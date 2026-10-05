@@ -16,7 +16,7 @@ void pragma::gui::types::WIGridPanel::FillRows(uint32_t count)
 		AddRow();
 }
 
-float pragma::gui::types::WIGridPanel::UpdateRowHeights(float yOffset, float defHeight)
+float pragma::gui::types::WIGridPanel::UpdateRows(float yOffset)
 {
 	if(m_resizeMode == ResizeMode::FitToChildren) {
 		auto w = GetWidth();
@@ -39,14 +39,14 @@ float pragma::gui::types::WIGridPanel::UpdateRowHeights(float yOffset, float def
 						hRow = math::max(hRow, static_cast<float>(hChild->GetHeight()));
 					}
 				}
-				row->SetSize(w, CInt32(hRow));
-				row->SetY(CInt32(yOffset));
+				row->ApplySize(w, CInt32(hRow));
+				row->ApplyY(CInt32(yOffset));
 				yOffset += hRow;
 			}
 		}
 		return yOffset;
 	}
-	return WITable::UpdateRowHeights(yOffset, defHeight);
+	return WITable::UpdateRows(yOffset);
 }
 
 void pragma::gui::types::WIGridPanel::DoUpdate()
@@ -62,7 +62,7 @@ void pragma::gui::types::WIGridPanel::DoUpdate()
 			for(auto i = decltype(numRows) {0}; i < numRows; ++i) {
 				auto *pRow = GetRow(i);
 				if(pRow != nullptr)
-					pRow->SetHeight(static_cast<int32_t>(rowHeight));
+					pRow->ApplyHeight(static_cast<int32_t>(rowHeight));
 			}
 		}
 	}

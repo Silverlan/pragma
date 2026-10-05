@@ -245,9 +245,10 @@ void pragma::gui::types::WITransformable::Initialize()
 	EnableThinking();
 	SetDraggable(true);
 	SetResizable(true);
-	m_hMoveRect = CreateChild<WIBase>();
+	if(!m_hMoveRect.IsValid())
+		m_hMoveRect = CreateChild<WIBase>();
 	auto *pMoveRect = m_hMoveRect.get();
-	pMoveRect->AddStyleClass("move_rect");
+	pMoveRect->AddStyleClass("transformable__transform-rect");
 	pMoveRect->SetMouseInputEnabled(math::is_flag_set(m_stateFlags, StateFlags::Draggable));
 	pMoveRect->AddCallback("OnMouseEvent",
 	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn([this](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
@@ -542,8 +543,8 @@ void pragma::gui::types::WITransformable::OnSizeChanged(const Vector2i &oldSize,
 		m_dragCursorOffset.y *= static_cast<int32_t>(sc.y);
 	}
 	Vector2i minSize = m_minSize;
-    auto w = GetWidth();
-    auto h = GetHeight();
+	auto w = GetWidth();
+	auto h = GetHeight();
 	if(w < minSize.x || h < minSize.y) {
 		if(w < minSize.x)
 			minSize.x = math::max(w, -1);
@@ -569,10 +570,7 @@ void pragma::gui::types::WITransformable::SetDragBounds(const Vector2i &min, con
 	m_maxDrag = max;
 }
 std::pair<Vector2i, Vector2i> pragma::gui::types::WITransformable::GetDragBounds() const { return {m_minDrag, m_maxDrag}; }
-void pragma::gui::types::WITransformable::OnPosChanged(const Vector2i &oldSize, ChangeSource changeSource)
-{
-	UpdateResizeRectPos();
-}
+void pragma::gui::types::WITransformable::OnPosChanged(const Vector2i &oldSize, ChangeSource changeSource) { UpdateResizeRectPos(); }
 
 void pragma::gui::types::WITransformable::SetDraggable(bool b)
 {

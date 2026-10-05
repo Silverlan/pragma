@@ -33,9 +33,15 @@ export namespace pragma::gui {
 			JsonSkin *base = nullptr;
 			glz::json_t jsonData;
 		};
+
+		struct Style {
+			string::OrderedStringMap<glz::json_t> properties;
+			string::OrderedStringMap<Style> children;
+			string::OrderedStringMap<Style> decorators;
+		};
 	  protected:
 		JsonSkinClass m_rootClass;
-		string::StringMap<std::string> m_constants;
+		std::unordered_map<std::string, glz::generic_json<>> m_constants;
 
 		void ParseConstants(const glz::json_t &j);
 		void ParseFonts(const glz::json_t &j);
@@ -49,6 +55,7 @@ export namespace pragma::gui {
 
 		void Load(const Settings &settings);
 
+		std::optional<Style> ComputeStyle(types::WIBase &el) const;
 		void Initialize(types::WIBase *el) override;
 		void Release(types::WIBase *el) override;
 	};

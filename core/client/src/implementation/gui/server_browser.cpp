@@ -251,7 +251,7 @@ void pragma::gui::types::WIServerBrowser::Initialize()
 	}
 
 	auto *buttonBox = wgui.Create<HBox>(contents);
-	buttonBox->AddStyleClass("button_container");
+	buttonBox->AddStyleClass("button-container");
 	m_hRefresh = wgui.Create<WIButton>(buttonBox)->GetHandle();
 	WIButton *buttonRefresh = m_hRefresh.get<WIButton>();
 	if(buttonRefresh != nullptr) {

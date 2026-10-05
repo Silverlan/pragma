@@ -47,8 +47,6 @@ export namespace pragma::gui::types {
 		void SetSortFunction(const std::function<bool(const WITableRow &, const WITableRow &, uint32_t, bool)> &sortFunc);
 		const std::function<bool(const WITableRow &, const WITableRow &, uint32_t, bool)> &GetSortFunction() const;
 		void Sort();
-		void SetRowHeight(int h);
-		int GetRowHeight() const;
 		void SetSelectable(SelectableMode mode);
 		SelectableMode GetSelectableMode() const;
 		void DeselectAllRows();
@@ -69,7 +67,6 @@ export namespace pragma::gui::types {
 			unsigned int column;
 		};
 		std::unordered_map<unsigned int, int> m_columnWidths;
-		int m_rowHeight;
 		SelectableMode m_selectableMode = SelectableMode::None;
 		bool m_bSortable;
 		std::function<bool(const WITableRow &, const WITableRow &, uint32_t, bool)> m_sortFunction;
@@ -93,8 +90,8 @@ export namespace pragma::gui::types {
 		void OnRowCellCreated(WITableCell *cell);
 		static void OnHeaderCellPressed(WITableCell *cell);
 		static void OnScrollOffsetChanged(unsigned int offset, void *userData);
-		virtual void UpdateHeaderRowHeight(WITableRow *pRow, float defHeight);
-		virtual float UpdateRowHeights(float yOffset, float defHeight);
+		virtual void UpdateHeaderRow(WITableRow *pRow);
+		virtual float UpdateRows(float yOffset);
 		virtual void OnChildAdded(WIBase *child) override;
 		void UpdateCell(const WITableCell &cell);
 		template<class TRow>
@@ -105,7 +102,7 @@ export namespace pragma::gui::types {
 				parent = m_hScrollContainer.get();
 			auto *pRow = WGUI::GetInstance().Create<TRow>(parent);
 			auto hRow = pRow->GetHandle();
-			pRow->AddStyleClass("table_row");
+			pRow->AddStyleClass("table__row");
 			m_rows.push_back(hRow);
 			InitializeRow(pRow, false);
 			return pRow;

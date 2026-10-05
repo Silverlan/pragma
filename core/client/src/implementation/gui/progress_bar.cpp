@@ -19,15 +19,15 @@ void pragma::gui::types::WIProgressBar::Initialize()
 {
 	WIBase::Initialize();
 	SetSize(128, 32);
-	AddStyleClass("progress_bar");
+	AddStyleClass("progress-bar");
 
 	m_hLabel = CreateChild<WIText>();
-	m_hLabel->AddStyleClass("progressbar_label_background");
+	m_hLabel->AddStyleClass("progress-bar__label--background");
 	m_hProgress = CreateChild<WIBase>();
-	m_hProgress->AddStyleClass("fill");
+	m_hProgress->AddStyleClass("progress-bar__fill");
 
 	m_hLabel2 = WGUI::GetInstance().Create<WIText>(m_hProgress.get())->GetHandle();
-	m_hLabel2->AddStyleClass("progressbar_label_overlay");
+	m_hLabel2->AddStyleClass("progress-bar__label--overlay");
 	UpdateTextPosition();
 }
 

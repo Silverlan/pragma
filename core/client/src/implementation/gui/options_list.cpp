@@ -129,7 +129,7 @@ pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceLi
 		return nullptr;
 	auto hChoiceList = CreateChild<WIChoiceList>();
 	auto *pChoiceList = hChoiceList.get<WIChoiceList>();
-	pChoiceList->AddStyleClass("options_list_control");
+	pChoiceList->AddStyleClass("options_list__control");
 	pChoiceList->SetChoices(list);
 	row->SetValue(0, name);
 	if(initializer != nullptr)
@@ -165,7 +165,7 @@ pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDo
 		return nullptr;
 	auto hDropDownMenu = CreateChild<WIDropDownMenu>();
 	auto *pDropDownMenu = hDropDownMenu.get<WIDropDownMenu>();
-	pDropDownMenu->AddStyleClass("options_list_control");
+	pDropDownMenu->AddStyleClass("options_list__control");
 	pDropDownMenu->SetOptions(list);
 	row->SetValue(0, name);
 	if(initializer != nullptr)
@@ -227,7 +227,7 @@ pragma::gui::types::WITextEntry *pragma::gui::types::WIOptionsList::AddTextEntry
 		return nullptr;
 	auto hTextEntry = CreateChild<WITextEntry>();
 	auto *pTextEntry = hTextEntry.get<WITextEntry>();
-	pTextEntry->AddStyleClass("options_list_control");
+	pTextEntry->AddStyleClass("options_list__control");
 	row->SetValue(0, name);
 	if(!cvarName.empty()) {
 		auto hOptions = GetHandle();
@@ -248,7 +248,7 @@ pragma::gui::types::WISlider *pragma::gui::types::WIOptionsList::AddSlider(const
 		return nullptr;
 	auto hSlider = CreateChild<WISlider>();
 	auto *pSlider = hSlider.get<WISlider>();
-	pSlider->AddStyleClass("options_list_control");
+	pSlider->AddStyleClass("options_list__control");
 	row->SetValue(0, name);
 	if(initializer != nullptr)
 		initializer(pSlider);

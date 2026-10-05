@@ -766,8 +766,6 @@ void Lua::WIContainer::register_class(luabind::class_<pragma::gui::types::WICont
 
 void Lua::WITable::register_class(luabind::class_<pragma::gui::types::WITable, luabind::bases<pragma::gui::types::WIContainer, pragma::gui::types::WIBase>> &classDef)
 {
-	classDef.def("GetRowHeight", &pragma::gui::types::WITable::GetRowHeight);
-	classDef.def("SetRowHeight", &pragma::gui::types::WITable::SetRowHeight);
 	classDef.def("SetSelectableMode", &pragma::gui::types::WITable::SetSelectable);
 	classDef.def("GetSelectableMode", &pragma::gui::types::WITable::GetSelectableMode);
 	classDef.def("SetColumnWidth", &pragma::gui::types::WITable::SetColumnWidth);

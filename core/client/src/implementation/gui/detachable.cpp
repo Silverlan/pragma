@@ -32,7 +32,7 @@ void pragma::gui::types::WIDetachable::Initialize()
 {
 	WIBase::Initialize();
 	auto *vbox = WGUI::GetInstance().Create<VBox>(this);
-	vbox->AddStyleClass("contents");
+	vbox->AddStyleClass("detachable__contents");
 	m_contents = vbox->GetHandle();
 }
 

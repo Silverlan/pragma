@@ -9,6 +9,38 @@ module pragma.client;
 
 import :console.commands;
 
+namespace pragma::debug {
+	std::string get_element_info(pragma::gui::types::WIBase &el)
+	{
+		std::stringstream ss;
+		auto pos = el.GetAbsolutePos();
+		auto size = el.GetSize();
+
+		ss << "Class: " << el.GetClass() << "\nName: " << el.GetName() << "\nIndex: " << el.GetIndex() << "\nSize: (" << size.x << "," << size.y << ")"
+		   << "\nPos: (" << pos.x << "," << pos.y << ")";
+		auto debugInfo = el.GetDebugInfo();
+		if(debugInfo.empty() == false)
+			ss << "\nDebug Info: " << debugInfo;
+		return ss.str();
+	}
+
+	gui::types::WIBase *find_gui_element(std::vector<std::string> &argv)
+	{
+		if(argv.empty())
+			return nullptr;
+		auto &elName = argv.front();
+		gui::types::WIBase *el = nullptr;
+		el = gui::WGUI::GetInstance().FindByFilter([&elName](gui::types::WIBase &el) -> bool { return string::compare(el.GetName(), elName, false); });
+		if(!el && util::is_integer(elName))
+			el = gui::WGUI::GetInstance().FindByIndex(util::to_int(elName));
+		if(!el) {
+			Con::CWAR << "Unable to find element by name or index '" << elName << "'!" << Con::endl;
+			return nullptr;
+		}
+		return el;
+	}
+}
+
 class GUIDebugCursorManager {
   public:
 	GUIDebugCursorManager();
@@ -201,19 +233,7 @@ void GUIDebugCursorManager::SetWindow(prosper::Window &window)
 	m_cursorElementList.clear();
 }
 
-std::string GUIDebugCursorManager::GetElementInfo(pragma::gui::types::WIBase &el)
-{
-	std::stringstream ss;
-	auto pos = el.GetAbsolutePos();
-	auto size = el.GetSize();
-
-	ss << "Class: " << el.GetClass() << "\nName: " << el.GetName() << "\nIndex: " << el.GetIndex() << "\nSize: (" << size.x << "," << size.y << ")"
-	   << "\nPos: (" << pos.x << "," << pos.y << ")";
-	auto debugInfo = el.GetDebugInfo();
-	if(debugInfo.empty() == false)
-		ss << "\nDebug Info: " << debugInfo;
-	return ss.str();
-}
+std::string GUIDebugCursorManager::GetElementInfo(pragma::gui::types::WIBase &el) { return pragma::debug::get_element_info(el); }
 
 void GUIDebugCursorManager::SelectNextParentInHierarchy()
 {
@@ -389,18 +409,9 @@ static void debug_gui_cursor(pragma::NetworkState *state, pragma::BasePlayerComp
 		if(s_dbgManager->Initialize() == false)
 			s_dbgManager = nullptr;
 	}
-	if(!argv.empty()) {
-		auto &elName = argv.front();
-		pragma::gui::types::WIBase *el = nullptr;
-		el = pragma::gui::WGUI::GetInstance().FindByFilter([&elName](pragma::gui::types::WIBase &el) -> bool { return pragma::string::compare(el.GetName(), elName, false); });
-		if(!el && pragma::util::is_integer(elName))
-			el = pragma::gui::WGUI::GetInstance().FindByIndex(pragma::util::to_int(elName));
-		if(!el) {
-			Con::CWAR << "Unable to find element by name or index '" << elName << "'!" << Con::endl;
-			return;
-		}
+	auto *el = pragma::debug::find_gui_element(argv);
+	if(el)
 		s_dbgManager->SetTargetGUIElementOverride(el);
-	}
 }
 namespace {
 	auto UVN = pragma::console::client::register_command("debug_gui_cursor", &debug_gui_cursor, pragma::console::ConVarFlags::None, "Prints information about the GUI element currently hovered over by the cursor.");

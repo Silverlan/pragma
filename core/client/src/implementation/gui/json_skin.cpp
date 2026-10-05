@@ -65,8 +65,11 @@ void pragma::gui::JsonSkin::Load(const Settings &settings)
 	const auto &j = settings.jsonData;
 
 	// Note: Make sure to skip these in "ParseClass" when adding new root blocks
-	ParseConstants(j);
-	ParseFonts(j);
+	if(j.contains("theme")) {
+		auto theme = j["theme"];
+		ParseConstants(theme);
+		ParseFonts(theme);
+	}
 
 	ParseClass(j, m_rootClass, true);
 	ResolveVariables(m_rootClass);
@@ -82,10 +85,8 @@ void pragma::gui::JsonSkin::Load(const Settings &settings)
 void pragma::gui::JsonSkin::ParseConstants(const glz::json_t &j)
 {
 	if(j.contains("constants") && j["constants"].is_object()) {
-		for(const auto &[key, val] : j["constants"].get_object()) {
-			if(val.is_string())
-				m_constants[key] = val.get<std::string>();
-		}
+		for(const auto &[key, val] : j["constants"].get_object())
+			m_constants[key] = val;
 	}
 }
 
@@ -100,7 +101,7 @@ void pragma::gui::JsonSkin::ParseFonts(const glz::json_t &j)
 		if(!fontSet.empty() && fontSet[0] == '$') {
 			auto it = m_constants.find(fontSet.substr(1));
 			if(it != m_constants.end())
-				fontSet = it->second;
+				fontSet = it->second.get<std::string>();
 		}
 
 		if(fontSet == "default")
@@ -189,7 +190,7 @@ void pragma::gui::JsonSkin::ParseClass(const glz::json_t &j, JsonSkinClass &outC
 
 void pragma::gui::JsonSkin::ResolveVariables(JsonSkinClass &cl)
 {
-	for(auto &[key, val] : cl.properties) {
+	auto resolveProperty = [this](this auto &self, glz::json_t &val) -> void {
 		if(val.is_string()) {
 			auto strVal = val.get<std::string>();
 			if(!strVal.empty() && strVal[0] == '$') {
@@ -199,7 +200,17 @@ void pragma::gui::JsonSkin::ResolveVariables(JsonSkinClass &cl)
 					val = it->second;
 			}
 		}
-	}
+		else if(val.is_object()) {
+			for(auto &[key, child] : val.get_object())
+				self(child);
+		}
+		else if(val.is_array()) {
+			for(auto &child : val.get_array())
+				self(child);
+		}
+	};
+	for(auto &[key, val] : cl.properties)
+		resolveProperty(val);
 
 	for(auto &[key, child] : cl.children)
 		ResolveVariables(*child);
@@ -229,13 +240,11 @@ void pragma::gui::JsonSkin::MergeBaseSkin(const JsonSkinClass &baseRoot, JsonSki
 
 namespace pragma::gui {
 	struct SkinContext {
-		JsonSkinClass* skinClass;
+		JsonSkinClass *skinClass;
 		int specificity;
 
 		// Sort by specificity
-		bool operator<(const SkinContext& other) const {
-			return specificity < other.specificity;
-		}
+		bool operator<(const SkinContext &other) const { return specificity < other.specificity; }
 	};
 	JsonSkinClass *find_skin_class(std::string_view className, const string::StringMap<std::unique_ptr<JsonSkinClass>> &classes)
 	{
@@ -255,7 +264,7 @@ namespace pragma::gui {
 		// Style Classes (specificity = 10)
 		auto &styleClasses = el->GetStyleClasses();
 		for(auto &styleClass : styleClasses) {
-			auto *cl = find_skin_class("." + std::string{styleClass}, classes);
+			auto *cl = find_skin_class("." + std::string {styleClass}, classes);
 			if(cl != nullptr)
 				outClasses.push_back({cl, baseSpecificity + 10});
 		}
@@ -285,19 +294,17 @@ static std::string_view get_state_name(pragma::gui::InputState state)
 	return "";
 }
 
-void pragma::gui::JsonSkin::Initialize(types::WIBase *el)
+std::optional<pragma::gui::JsonSkin::Style> pragma::gui::JsonSkin::ComputeStyle(types::WIBase &el) const
 {
-	WISkin::Initialize(el);
-
 	std::vector<types::WIBase *> els;
-	auto *parent = el;
+	auto *parent = &el;
 	while(parent != nullptr) {
 		els.push_back(parent);
 		parent = parent->GetParent();
 	}
 
 	// Initialize the root with 0 specificity
-	std::vector<SkinContext> classes = {{&m_rootClass, 0}};
+	std::vector<SkinContext> classes = {{const_cast<JsonSkinClass *>(&m_rootClass), 0}};
 	for(auto &el_iter : els | std::views::reverse) {
 		auto numClasses = classes.size();
 		for(size_t i = 0; i < numClasses; ++i) // Note: Loop modifies 'classes'
@@ -306,7 +313,7 @@ void pragma::gui::JsonSkin::Initialize(types::WIBase *el)
 
 	std::vector<SkinContext> elClassesContexts;
 	for(auto &c : classes)
-		find_skin_classes(el, c.skinClass->children, elClassesContexts, c.specificity);
+		find_skin_classes(&el, c.skinClass->children, elClassesContexts, c.specificity);
 
 	// Sort rules by specificity
 	std::stable_sort(elClassesContexts.begin(), elClassesContexts.end());
@@ -318,7 +325,7 @@ void pragma::gui::JsonSkin::Initialize(types::WIBase *el)
 		elClasses.push_back(c.skinClass);
 
 	if(elClasses.empty())
-		return;
+		return {};
 
 	uint32_t styledStatesMask = 0;
 	for(auto *cl : elClasses) {
@@ -330,7 +337,58 @@ void pragma::gui::JsonSkin::Initialize(types::WIBase *el)
 				styledStatesMask |= (1 << i);
 		}
 	}
-	el->SetStyledStatesMask(styledStatesMask);
+	el.SetStyledStatesMask(styledStatesMask);
+
+	auto currentStateStr = get_state_name(el.GetInputState());
+
+	Style style;
+	for(auto *cl : elClasses) {
+		// Base properties
+		for(const auto &[name, prop] : cl->properties)
+			style.properties[name] = prop;
+
+		// Property overrides from active state (e.g. hover)
+		JsonSkinClass *activeState = nullptr;
+		if(!currentStateStr.empty()) {
+			auto stateIt = cl->states.find(currentStateStr);
+			if(stateIt != cl->states.end()) {
+				activeState = stateIt->second.get();
+				for(const auto &[name, prop] : activeState->properties)
+					style.properties[name] = prop;
+			}
+		}
+
+		auto mergeSubItems = [](const auto &baseMap, const auto *stateMap, string::OrderedStringMap<Style> &targetMap) {
+			// Base properties
+			for(const auto &[name, baseItem] : baseMap) {
+				auto &targetItem = targetMap[name];
+				for(const auto &[pName, pVal] : baseItem->properties)
+					targetItem.properties[pName] = pVal;
+			}
+
+			// Apply states
+			if(stateMap) {
+				for(const auto &[name, stateItem] : *stateMap) {
+					auto &targetItem = targetMap[name];
+					for(const auto &[pName, pVal] : stateItem->properties)
+						targetItem.properties[pName] = pVal;
+				}
+			}
+		};
+
+		mergeSubItems(cl->children, activeState ? &activeState->children : nullptr, style.children);
+		mergeSubItems(cl->decorators, activeState ? &activeState->decorators : nullptr, style.decorators);
+	}
+	return style;
+}
+
+void pragma::gui::JsonSkin::Initialize(types::WIBase *el)
+{
+	WISkin::Initialize(el);
+
+	auto style = ComputeStyle(*el);
+	if(!style)
+		return;
 
 	auto *l = get_client_state()->GetGUILuaState();
 	auto apply_style_class = luabind::object {l, luabind::globals(l)["gui"]};
@@ -339,99 +397,158 @@ void pragma::gui::JsonSkin::Initialize(types::WIBase *el)
 	if(!apply_style_class)
 		throw std::runtime_error {"Unable to apply style classes: Could not find Lua function 'apply_style_class'."};
 
-	auto currentStateStr = get_state_name(el->GetInputState());
-	auto t = luabind::newtable(l);
-	for(auto *cl : elClasses) {
-		// Convert json properties to Lua table
-		auto applyPropsToTable = [&](this auto &self, const auto &propsMap, luabind::object &targetTable) -> void {
-			for(const auto &[name, prop] : propsMap) {
-				if(prop.is_string())
-					targetTable[name] = prop.template get<std::string>();
-				else if(prop.is_number())
-					targetTable[name] = prop.template get<double>();
-				else if(prop.is_boolean())
-					targetTable[name] = prop.template get<bool>() ? true : false;
-				else if(prop.is_object()) {
-					auto subTable = luabind::newtable(l);
-					self(prop.get_object(), subTable);
-					targetTable[name] = subTable;
-				}
-				else if(prop.is_array()) {
-					auto tProp = luabind::newtable(l);
-					size_t tableIdx = 1;
-					for(auto [idx, val] : std::views::enumerate(prop.get_array())) {
-						if(val.is_string())
-							tProp[tableIdx++] = val.template get<std::string>();
-						else if(val.is_number())
-							tProp[tableIdx++] = val.template get<double>();
-						else if(val.is_boolean())
-							tProp[tableIdx++] = val.template get<bool>() ? true : false;
-						else if(val.is_object()) {
-							auto subTable = luabind::newtable(l);
-							self(val.get_object(), subTable);
-							tProp[tableIdx++] = subTable;
-						}
-						else if(val.is_array())
-							; // TODO?
-						else if(val.is_null())
-							tProp[tableIdx++] = luabind::nil;
+	// To Lua table
+	auto applyPropsToTable = [&](this auto &self, const auto &propsMap, luabind::object &targetTable) -> void {
+		for(const auto &[name, prop] : propsMap) {
+			if(prop.is_string())
+				targetTable[name] = prop.template get<std::string>();
+			else if(prop.is_number())
+				targetTable[name] = prop.template get<double>();
+			else if(prop.is_boolean())
+				targetTable[name] = prop.template get<bool>() ? true : false;
+			else if(prop.is_object()) {
+				auto subTable = luabind::newtable(l);
+				self(prop.get_object(), subTable);
+				targetTable[name] = subTable;
+			}
+			else if(prop.is_array()) {
+				auto tProp = luabind::newtable(l);
+				size_t tableIdx = 1;
+				for(auto [idx, val] : std::views::enumerate(prop.get_array())) {
+					if(val.is_string())
+						tProp[tableIdx++] = val.template get<std::string>();
+					else if(val.is_number())
+						tProp[tableIdx++] = val.template get<double>();
+					else if(val.is_boolean())
+						tProp[tableIdx++] = val.template get<bool>() ? true : false;
+					else if(val.is_object()) {
+						auto subTable = luabind::newtable(l);
+						self(val.get_object(), subTable);
+						tProp[tableIdx++] = subTable;
 					}
-					targetTable[name] = tProp;
+					else if(val.is_array())
+						; // TODO?
+					else if(val.is_null())
+						tProp[tableIdx++] = luabind::nil;
 				}
-				else if(prop.is_null())
-					targetTable[name] = luabind::nil;
+				targetTable[name] = tProp;
 			}
-		};
+			else if(prop.is_null())
+				targetTable[name] = luabind::nil;
+		}
+	};
 
-		// Base properties
-		applyPropsToTable(cl->properties, t);
+	auto buildLuaTable = [&](this auto &self, const Style &style) -> luabind::object {
+		auto targetTable = luabind::newtable(l);
 
-		// Property overrides from active state (e.g. hover)
-		JsonSkinClass *activeState = nullptr;
-		if(!currentStateStr.empty()) {
-			auto stateIt = cl->states.find(currentStateStr);
-			if(stateIt != cl->states.end()) {
-				activeState = stateIt->second.get();
-				applyPropsToTable(activeState->properties, t);
+		applyPropsToTable(style.properties, targetTable);
+
+		if(!style.children.empty()) {
+			auto tChildren = luabind::newtable(l);
+			for(const auto &[name, child] : style.children) {
+				tChildren[name] = self(child);
 			}
+			targetTable["children"] = tChildren;
 		}
 
-		auto mergeProperties = [&](const auto &baseMap, const auto *stateMap, const char *tableName) {
-			if(baseMap.empty() && (!stateMap || stateMap->empty()))
-				return;
-
-			auto tGroup = luabind::newtable(l);
-
-			// Base properties
-			for(const auto &[name, baseItem] : baseMap) {
-				auto tItem = luabind::newtable(l);
-
-				applyPropsToTable(baseItem->properties, tItem);
-				if(stateMap) {
-					auto stateIt = stateMap->find(name);
-					if(stateIt != stateMap->end())
-						applyPropsToTable(stateIt->second->properties, tItem);
-				}
-				tGroup[name] = tItem;
+		if(!style.decorators.empty()) {
+			auto tDecorators = luabind::newtable(l);
+			for(const auto &[name, decorator] : style.decorators) {
+				tDecorators[name] = self(decorator);
 			}
+			targetTable["decorators"] = tDecorators;
+		}
 
-			// Apply states
-			if(stateMap) {
-				for(const auto &[name, stateItem] : *stateMap) {
-					if(baseMap.find(name) == baseMap.end()) {
-						auto tItem = luabind::newtable(l);
-						applyPropsToTable(stateItem->properties, tItem);
-						tGroup[name] = tItem;
-					}
-				}
-			}
-			t[tableName] = tGroup;
-		};
+		return targetTable;
+	};
 
-		mergeProperties(cl->children, activeState ? &activeState->children : nullptr, "children");
-		mergeProperties(cl->decorators, activeState ? &activeState->decorators : nullptr, "decorators");
-	}
+	auto t = buildLuaTable(*style);
 	apply_style_class(WGUILuaInterface::GetLuaObject(l, *el), t);
 }
 
 void pragma::gui::JsonSkin::Release(types::WIBase *el) { WISkin::Release(el); }
+
+namespace pragma::debug {
+	std::string get_element_info(pragma::gui::types::WIBase &el);
+	gui::types::WIBase *find_gui_element(std::vector<std::string> &argv);
+}
+
+static void debug_print_style(pragma::gui::types::WIBase &el)
+{
+	auto *skin = dynamic_cast<pragma::gui::JsonSkin *>(el.GetSkin());
+	if(!skin)
+	{
+		Con::CWAR<<"Element has no valid skin."<<Con::endl;
+		return;
+	}
+	auto style = skin->ComputeStyle(el);
+	if(!style)
+	{
+		Con::CWAR<<"Failed to compute style for element!"<<Con::endl;
+		return;
+	}
+
+	auto print_style = [](this auto &self, const auto &s, int indent, std::ostream &os) -> void {
+		std::string ind(indent * 4, ' ');
+		std::string child_ind((indent + 1) * 4, ' ');
+
+		for(const auto &[name, prop] : s.properties) {
+			std::string prop_str;
+			glz::write_json(prop, prop_str);
+			os << ind << name << ": " << prop_str << "\n";
+		}
+
+		if(!s.children.empty()) {
+			os << ind << "children: {\n";
+			for(const auto &[name, child] : s.children) {
+				os << child_ind << name << ": {\n";
+				self(child, indent + 2, os);
+				os << child_ind << "}\n";
+			}
+			os << ind << "}\n";
+		}
+
+		if(!s.decorators.empty()) {
+			os << ind << "decorators: {\n";
+			for(const auto &[name, decorator] : s.decorators) {
+				os << child_ind << name << ": {\n";
+				self(decorator, indent + 2, os);
+				os << child_ind << "}\n";
+			}
+			os << ind << "}\n";
+		}
+	};
+
+	std::stringstream ss;
+	ss << "Computed Style for element \n" << pragma::debug::get_element_info(el) << "\n";
+	ss << "Style classes:\n";
+	auto className = el.GetClass();
+	ss << className << "\n";
+	for(auto &styleClass : el.GetStyleClasses())
+		ss << "." << styleClass << "\n";
+
+	auto &name = el.GetName();
+	if(!name.empty())
+		ss << "#" << name << "\n";
+
+	ss<<"\nComputed:\n";
+	ss << "{\n";
+	print_style(*style, 1, ss);
+	ss << "}\n";
+
+	Con::COUT << ss.str() << Con::endl;
+}
+
+static void debug_gui_style(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_gui_style", &debug_gui_style, pragma::console::ConVarFlags::None, "Prints the effective style data for the specified GUI element.");
+}
+
+static void debug_gui_style(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+{
+	auto *el = pragma::debug::find_gui_element(argv);
+	if(!el)
+		return;
+	debug_print_style(*el);
+}

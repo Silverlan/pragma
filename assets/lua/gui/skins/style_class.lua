@@ -331,22 +331,35 @@ function gui.apply_style_class(element, style)
 		element:SetMaxHeight(style.maxHeight)
 	end
 
-	if style.rowHeight and element.SetRowHeight then
+	--[[if style.rowHeight and element.SetRowHeight then
 		element:SetRowHeight(style.rowHeight)
+	end]]
+
+	local parent = element:GetParent()
+	local marginHandled = false
+	if parent ~= nil and parent.SetChildMargin ~= nil then
+		if style.margin or style.marginLeft or style.marginRight or style.marginTop or style.marginBottom then
+			local l, t, r, b = 0, 0, 0, 0
+			if style.margin then l, t, r, b = unpack_spacing(style.margin) end
+			if style.marginLeft then l = tonumber(style.marginLeft) end
+			if style.marginRight then r = tonumber(style.marginRight) end
+			if style.marginTop then t = tonumber(style.marginTop) end
+			if style.marginBottom then b = tonumber(style.marginBottom) end
+			parent:SetChildMargin(element, l, t, r, b)
+			marginHandled = true
+		end
 	end
 
 	if style.alignX or style.alignY then
 		element:ClearAnchor()
 		apply_anchor_align(
 			element, style.alignX, "left", "right", gui.ANCHOR_EDGE_LEFT, gui.ANCHOR_EDGE_RIGHT,
-			-- style.marginLeft, style.marginRight,
-			0, 0,
+			marginHandled and 0 or style.marginLeft, marginHandled and 0 or style.marginRight,
 			style.offsetX, math.AXIS_X
 		)
 		apply_anchor_align(
 			element, style.alignY, "top", "bottom", gui.ANCHOR_EDGE_TOP, gui.ANCHOR_EDGE_BOTTOM,
-			-- style.marginTop, style.marginBottom,
-			0, 0,
+			marginHandled and 0 or style.marginTop, marginHandled and 0 or style.marginBottom,
 			style.offsetY, math.AXIS_Y
 		)
 		element:UpdateAnchorTransform()
@@ -365,19 +378,6 @@ function gui.apply_style_class(element, style)
 	if style.padding and element.SetPadding then
 		local l, t, r, b = unpack_spacing(style.padding)
 		element:SetPadding(l, t, r, b)
-	end
-
-	local parent = element:GetParent()
-	if parent ~= nil and parent.SetChildMargin ~= nil then
-		if style.margin or style.marginLeft or style.marginRight or style.marginTop or style.marginBottom then
-			local l, t, r, b = 0, 0, 0, 0
-			if style.margin then l, t, r, b = unpack_spacing(style.margin) end
-			if style.marginLeft then l = tonumber(style.marginLeft) end
-			if style.marginRight then r = tonumber(style.marginRight) end
-			if style.marginTop then t = tonumber(style.marginTop) end
-			if style.marginBottom then b = tonumber(style.marginBottom) end
-			parent:SetChildMargin(element, l, t, r, b)
-		end
 	end
 	
 	if style.spacing and element.SetSpacing then

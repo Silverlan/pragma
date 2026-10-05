@@ -86,7 +86,7 @@ bool pragma::ClientState::OnWindowShouldClose(prosper::Window &window)
 {
 	auto *game = GetGameState();
 	if(game == nullptr)
-		return false;
+		return true;
 	return game->OnWindowShouldClose(window);
 }
 void pragma::ClientState::OnPreedit(prosper::Window &window, const string::Utf8String &preeditString, const std::vector<int> &blockSizes, int focusedBlock, int caret)

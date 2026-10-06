@@ -252,6 +252,16 @@ local function apply_anchor_align(element, align, idStart, idEnd, anchor0, ancho
 end
 
 function gui.apply_style_class(element, style)
+	if style.style then
+		if type(style.style) == "string" then
+			style.color = style.color or style.style
+		else
+			for k, v in pairs(style.style) do
+				style[k] = style[k] or v
+			end
+		end
+	end
+
 	-- General properties
 	if style.color then element:SetColor(Color.CreateFromHexColor(style.color:sub(2))) end
 	if style.zPos then element:SetZPos(style.zPos) end
@@ -388,6 +398,11 @@ function gui.apply_style_class(element, style)
 	if style.backgroundColor then
 		background = background or {}
 		background.color = style.backgroundColor
+	end
+	if type(background) == "string" then
+		local color = background
+		background = {}
+		background.color = color
 	end
 
 	local bg = element:GetFirstChildByName("skin_background")

@@ -48,6 +48,7 @@ export namespace pragma::gui {
 		void ParseClass(const glz::json_t &j, JsonSkinClass &outClass, bool rootLevel = false);
 
 		void ResolveVariables(JsonSkinClass &cl);
+		void ResolveVariables(string::StringMap<glz::json_t> &properties);
 		void ResolveMixins(JsonSkinClass &target, const JsonSkinClass &root);
 		void MergeBaseSkin(const JsonSkinClass &baseRoot, JsonSkinClass &cl);
 	  public:

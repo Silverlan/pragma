@@ -82,11 +82,34 @@ void pragma::gui::JsonSkin::Load(const Settings &settings)
 	}
 }
 
+static void resolve_property(const std::unordered_map<std::string, glz::generic_json<>> &constants, glz::json_t &val) {
+	if(val.is_string()) {
+		auto strVal = val.get<std::string>();
+		if(!strVal.empty() && strVal[0] == '$') {
+			auto varName = strVal.substr(1);
+			auto it = constants.find(varName);
+			if(it != constants.end())
+				val = it->second;
+		}
+	}
+	else if(val.is_object()) {
+		for(auto &[key, child] : val.get_object())
+			resolve_property(constants, child);
+	}
+	else if(val.is_array()) {
+		for(auto &child : val.get_array())
+			resolve_property(constants, child);
+	}
+}
+
 void pragma::gui::JsonSkin::ParseConstants(const glz::json_t &j)
 {
 	if(j.contains("constants") && j["constants"].is_object()) {
 		for(const auto &[key, val] : j["constants"].get_object())
 			m_constants[key] = val;
+
+		for(auto &[key, val] : m_constants)
+			resolve_property(m_constants, val);
 	}
 }
 
@@ -188,29 +211,15 @@ void pragma::gui::JsonSkin::ParseClass(const glz::json_t &j, JsonSkinClass &outC
 	}
 }
 
+void pragma::gui::JsonSkin::ResolveVariables(string::StringMap<glz::json_t> &properties)
+{
+	for(auto &[key, val] : properties)
+		resolve_property(m_constants, val);
+}
+
 void pragma::gui::JsonSkin::ResolveVariables(JsonSkinClass &cl)
 {
-	auto resolveProperty = [this](this auto &self, glz::json_t &val) -> void {
-		if(val.is_string()) {
-			auto strVal = val.get<std::string>();
-			if(!strVal.empty() && strVal[0] == '$') {
-				auto varName = strVal.substr(1);
-				auto it = m_constants.find(varName);
-				if(it != m_constants.end())
-					val = it->second;
-			}
-		}
-		else if(val.is_object()) {
-			for(auto &[key, child] : val.get_object())
-				self(child);
-		}
-		else if(val.is_array()) {
-			for(auto &child : val.get_array())
-				self(child);
-		}
-	};
-	for(auto &[key, val] : cl.properties)
-		resolveProperty(val);
+	ResolveVariables(cl.properties);
 
 	for(auto &[key, child] : cl.children)
 		ResolveVariables(*child);

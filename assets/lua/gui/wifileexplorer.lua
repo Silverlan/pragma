@@ -71,7 +71,6 @@ function gui.WIFileExplorer:OnInitialize()
 		return not res
 	end)
 	t:SetSelectableMode(gui.Table.SELECTABLE_MODE_SINGLE)
-	t:SetRowHeight(20)
 	self.m_pFileList = t
 
 	self.m_columnStates = {}

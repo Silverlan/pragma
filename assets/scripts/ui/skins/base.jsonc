@@ -209,7 +209,7 @@
 	},
 	"widropdownmenu": {
 		"children": {
-			".text_entry__entry-field": {
+			".text-entry__field": {
 				"alignX": "stretch",
 				"marginRight": 20 // Leave some space for the arrow icon
 			}

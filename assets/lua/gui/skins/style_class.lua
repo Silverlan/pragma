@@ -127,6 +127,7 @@ local function apply_dimensions(element, style)
 	if x_is_pct then
 		element:ApplyX(0)
 		element:SetAnchor(gui.ANCHOR_EDGE_LEFT, x_val)
+		element:SetAnchorEdgeEnabled(gui.ANCHOR_EDGE_LEFT, true)
 	elseif x_val then
 		element:ApplyX(toint(x_val))
 	end
@@ -146,9 +147,11 @@ local function apply_dimensions(element, style)
 		
 		if not x_is_pct and not style.anchor then
 			element:SetAnchor(gui.ANCHOR_EDGE_LEFT, base_left)
+			element:SetAnchorEdgeEnabled(gui.ANCHOR_EDGE_LEFT, true)
 		end
 		-- Set Right anchor dynamically
 		element:SetAnchor(gui.ANCHOR_EDGE_RIGHT, base_left + w_val)
+		element:SetAnchorEdgeEnabled(gui.ANCHOR_EDGE_RIGHT, true)
 	elseif w_val then
 		element:ApplyWidth(toint(w_val))
 	end
@@ -157,6 +160,7 @@ local function apply_dimensions(element, style)
 	if y_is_pct then
 		element:ApplyY(0)
 		element:SetAnchor(gui.ANCHOR_EDGE_TOP, y_val)
+		element:SetAnchorEdgeEnabled(gui.ANCHOR_EDGE_TOP, true)
 	elseif y_val then
 		element:ApplyY(toint(y_val))
 	end
@@ -176,9 +180,11 @@ local function apply_dimensions(element, style)
 		
 		if not y_is_pct and not style.anchor then
 			element:SetAnchor(gui.ANCHOR_EDGE_TOP, base_top)
+			element:SetAnchorEdgeEnabled(gui.ANCHOR_EDGE_TOP, true)
 		end
 		-- Set Bottom anchor dynamically
 		element:SetAnchor(gui.ANCHOR_EDGE_BOTTOM, base_top + h_val)
+		element:SetAnchorEdgeEnabled(gui.ANCHOR_EDGE_BOTTOM, true)
 	elseif h_val then
 		element:ApplyHeight(toint(h_val))
 	end
@@ -382,6 +388,8 @@ function gui.apply_style_class(element, style)
 		local parent = element:GetParent()
 		if parent and parent.SetChildFlex then
 			parent:SetChildFlex(element, style.flex)
+			if parent:IsHorizontalBox() and element.SetFixedWidth then element:SetFixedWidth(true) end
+			if parent:IsVerticalBox() and element.SetFixedHeight then element:SetFixedHeight(true) end
 		end
 	end
 

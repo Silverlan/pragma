@@ -31,6 +31,7 @@ function gui.WIBaseEditor:OnInitialize()
 	self.m_windowFrames = {}
 
 	self:SetSize(1024, 768)
+	self:AddStyleClass("editor")
 
 	local root = gui.create("vbox", self)
 	root:AddStyleClass("fill")

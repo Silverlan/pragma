@@ -64,6 +64,17 @@ void pragma::gui::JsonSkin::Load(const Settings &settings)
 {
 	const auto &j = settings.jsonData;
 
+	auto *baseSkin = settings.base;
+	if (j.contains("inherits"))
+	{
+		auto inherits = j["inherits"];
+		if (inherits.is_string())
+		{
+			auto baseTheme = inherits.get_string();
+			baseSkin = dynamic_cast<JsonSkin*>(WGUI::GetInstance().GetSkin(baseTheme));
+		}
+	}
+
 	// Note: Make sure to skip these in "ParseClass" when adding new root blocks
 	if(j.contains("theme")) {
 		auto theme = j["theme"];
@@ -72,14 +83,15 @@ void pragma::gui::JsonSkin::Load(const Settings &settings)
 	}
 
 	ParseClass(j, m_rootClass, true);
+
+	if(baseSkin) {
+		for(const auto &[k, v] : baseSkin->m_constants)
+			m_constants.insert({k, v});
+		MergeBaseSkin(baseSkin->m_rootClass, m_rootClass);
+	}
+
 	ResolveVariables(m_rootClass);
 	ResolveMixins(m_rootClass, m_rootClass);
-
-	if(settings.base != nullptr) {
-		for(const auto &[k, v] : settings.base->m_constants)
-			m_constants.insert({k, v});
-		MergeBaseSkin(settings.base->m_rootClass, m_rootClass);
-	}
 }
 
 static void resolve_property(const std::unordered_map<std::string, glz::generic_json<>> &constants, glz::json_t &val) {

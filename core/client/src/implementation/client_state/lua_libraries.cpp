@@ -650,6 +650,9 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[wiRoundedRectClassDef];
 
 	auto flexBoxDef = luabind::class_<pragma::gui::types::FlexBox, pragma::gui::types::WIBase>("FlexBox");
+	flexBoxDef.add_static_constant("FLEX_DIRECTION_HORIZONTAL", pragma::math::to_integral(pragma::gui::types::FlexDirection::Horizontal));
+	flexBoxDef.add_static_constant("FLEX_DIRECTION_VERTICAL", pragma::math::to_integral(pragma::gui::types::FlexDirection::Vertical));
+
 	flexBoxDef.add_static_constant("FLEX_ALIGN_START", pragma::math::to_integral(pragma::gui::types::FlexAlign::Start));
 	flexBoxDef.add_static_constant("FLEX_ALIGN_CENTER", pragma::math::to_integral(pragma::gui::types::FlexAlign::Center));
 	flexBoxDef.add_static_constant("FLEX_ALIGN_END", pragma::math::to_integral(pragma::gui::types::FlexAlign::End));
@@ -692,7 +695,8 @@ static void register_gui(Lua::Interface &lua)
 
 	flexBoxDef.def("IsHorizontalBox", &pragma::gui::types::FlexBox::IsHorizontalBox);
 	flexBoxDef.def("IsVerticalBox", &pragma::gui::types::FlexBox::IsVerticalBox);
-	flexBoxDef.def("HasBoxAlignedAnchor", &pragma::gui::types::FlexBox::HasBoxAlignedAnchor);
+	flexBoxDef.def("HasAlignedAnchor", static_cast<bool(pragma::gui::types::FlexBox::*)(pragma::gui::types::WIBase *, pragma::gui::types::FlexDirection) const>(&pragma::gui::types::FlexBox::HasAlignedAnchor));
+	flexBoxDef.def("HasAlignedAnchor", static_cast<bool(pragma::gui::types::FlexBox::*)(pragma::gui::types::WIBase *) const>(&pragma::gui::types::FlexBox::HasAlignedAnchor));
 	guiMod[flexBoxDef];
 
 	auto vboxDef = luabind::class_<pragma::gui::types::VBox, luabind::bases<pragma::gui::types::FlexBox, pragma::gui::types::WIBase>>("VBox");

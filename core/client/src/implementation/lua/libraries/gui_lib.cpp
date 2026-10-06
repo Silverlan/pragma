@@ -294,17 +294,26 @@ static bool register_skin(lua::State *l, const std::string &skin, const luabind:
 }
 bool Lua::gui::register_json_skin(lua::State *l, const std::string &skin, const std::string &fileName)
 {
-	if(l != pragma::get_client_state()->GetGUILuaState()) {
+	/*if(l != pragma::get_client_state()->GetGUILuaState()) {
 		Lua::Error(l, "Attempted to register GUI skin with client lua state! This is not allowed, skins can only be registered with GUI lua state!");
 		return false;
-	}
+	}*/
+	l = pragma::get_client_state()->GetGUILuaState();
 
 	glz::generic json{};
 	std::string buffer{}; // scratch buffer, same as before
 
-	auto ec = glz::read_file_jsonc(json, fileName, buffer);
+	std::string fullPath;
+	if(pragma::fs::find_absolute_path(fileName, fullPath) == false) {
+		Con::CERR<<std::format("Failed to load json skin '{}': File not found!", fileName)<<Con::endl;
+		//Lua::Error(l, std::format("Failed to load json skin '{}': File not found!", fileName));
+		return false;
+	}
+
+	auto ec = glz::read_file_jsonc(json, fullPath, buffer);
 	if (ec) {
-		Lua::Error(l, std::format("Failed to load json skin '{}': {}", fileName, glz::format_error(ec, buffer)));
+		Con::CERR<<std::format("Failed to load json skin '{}': {}", fullPath, glz::format_error(ec, buffer))<<Con::endl;
+		//Lua::Error(l, std::format("Failed to load json skin '{}': {}", fullPath, glz::format_error(ec, buffer)));
 		return false;
 	}
 

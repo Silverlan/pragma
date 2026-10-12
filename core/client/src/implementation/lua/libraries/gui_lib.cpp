@@ -300,7 +300,7 @@ bool Lua::gui::register_json_skin(lua::State *l, const std::string &skin, const 
 	}*/
 	l = pragma::get_client_state()->GetGUILuaState();
 
-	glz::generic json{};
+	glz::generic_u64 json{};
 	std::string buffer{}; // scratch buffer, same as before
 
 	std::string fullPath;
@@ -318,10 +318,8 @@ bool Lua::gui::register_json_skin(lua::State *l, const std::string &skin, const 
 	}
 
 	auto s = std::make_unique<pragma::gui::JsonSkin>();
-	pragma::gui::JsonSkin::Settings settings;
-	settings.jsonData = std::move(json);
 	// TODO: Load base skin?
-	s->Load(settings);
+	s->Load(nullptr, &json);
 	pragma::gui::WGUI::GetInstance().RegisterSkin(skin, std::move(s));
 	return true;
 }

@@ -268,6 +268,24 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("GetFocusProperty", &pragma::gui::types::WIBase::GetFocusProperty);
 	classDef.def("GetVisibilityProperty", &pragma::gui::types::WIBase::GetVisibilityProperty);
 	classDef.def("GetMouseInBoundsProperty", &pragma::gui::types::WIBase::GetMouseInBoundsProperty);
+
+	classDef.def("GetMinWidth", &pragma::gui::types::WIBase::GetMinWidth);
+	classDef.def("GetMinHeight", &pragma::gui::types::WIBase::GetMinHeight);
+	classDef.def("SetMinWidth", &pragma::gui::types::WIBase::SetMinWidth);
+	classDef.def("SetMinHeight", &pragma::gui::types::WIBase::SetMinHeight);
+	classDef.def("SetMinSize", &pragma::gui::types::WIBase::SetMinSize);
+	classDef.def("GetMaxWidth", &pragma::gui::types::WIBase::GetMaxWidth);
+	classDef.def("GetMaxHeight", &pragma::gui::types::WIBase::GetMaxHeight);
+	classDef.def("SetMaxWidth", &pragma::gui::types::WIBase::SetMaxWidth);
+	classDef.def("SetMaxHeight", &pragma::gui::types::WIBase::SetMaxHeight);
+	classDef.def("SetMaxSize", &pragma::gui::types::WIBase::SetMaxSize);
+	classDef.def("SetMinSize", +[](pragma::gui::types::WIBase &el, int32_t x, int32_t y) {
+		el.SetMinSize(::Vector2i {x, y});
+	});
+	classDef.def("SetMaxSize", +[](pragma::gui::types::WIBase &el, int32_t x, int32_t y) {
+		el.SetMaxSize(::Vector2i {x, y});
+	});
+
 	classDef.def("SetColor", &SetColor);
 	classDef.def("SetColorRGB", static_cast<void (*)(lua::State *, pragma::gui::types::WIBase &, const ::Color &)>([](lua::State *l, pragma::gui::types::WIBase &hPanel, const ::Color &color) {
 		auto vCol = color.ToVector4();
@@ -2077,20 +2095,6 @@ void Lua::WITransformable::register_class(luabind::class_<pragma::gui::types::WI
 	classDef.def("SetResizable", &pragma::gui::types::WITransformable::SetResizable);
 	classDef.def("IsDraggable", &pragma::gui::types::WITransformable::IsDraggable);
 	classDef.def("IsResizable", &pragma::gui::types::WITransformable::IsResizable);
-	classDef.def("SetMinWidth", &pragma::gui::types::WITransformable::SetMinWidth);
-	classDef.def("SetMinHeight", &pragma::gui::types::WITransformable::SetMinHeight);
-	classDef.def("SetMinSize", static_cast<void (pragma::gui::types::WITransformable::*)(int, int)>(&pragma::gui::types::WITransformable::SetMinSize));
-	classDef.def("SetMinSize", static_cast<void (pragma::gui::types::WITransformable::*)(::Vector2i)>(&pragma::gui::types::WITransformable::SetMinSize));
-	classDef.def("GetMinWidth", &pragma::gui::types::WITransformable::GetMinWidth);
-	classDef.def("GetMinHeight", &pragma::gui::types::WITransformable::GetMinHeight);
-	classDef.def("GetMinSize", &pragma::gui::types::WITransformable::GetMinSize, luabind::copy_policy<0> {});
-	classDef.def("SetMaxWidth", &pragma::gui::types::WITransformable::SetMaxWidth);
-	classDef.def("SetMaxHeight", &pragma::gui::types::WITransformable::SetMaxHeight);
-	classDef.def("SetMaxSize", static_cast<void (pragma::gui::types::WITransformable::*)(int, int)>(&pragma::gui::types::WITransformable::SetMaxSize));
-	classDef.def("SetMaxSize", static_cast<void (pragma::gui::types::WITransformable::*)(::Vector2i)>(&pragma::gui::types::WITransformable::SetMaxSize));
-	classDef.def("GetMaxWidth", &pragma::gui::types::WITransformable::GetMaxWidth);
-	classDef.def("GetMaxHeight", &pragma::gui::types::WITransformable::GetMaxHeight);
-	classDef.def("GetMaxSize", &pragma::gui::types::WITransformable::GetMaxSize, luabind::copy_policy<0> {});
 	classDef.def("Close", &pragma::gui::types::WITransformable::Close);
 	classDef.def("GetDragArea", &pragma::gui::types::WITransformable::GetDragArea);
 	classDef.def("IsBeingDragged", &pragma::gui::types::WITransformable::IsBeingDragged);

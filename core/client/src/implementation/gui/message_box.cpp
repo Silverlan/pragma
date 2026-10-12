@@ -220,8 +220,8 @@ void pragma::gui::types::WIMessageBox::SetText(const std::string &text)
 	auto h = pText->GetHeight();
 	pMessage->SetHeight(h + 120);
 	pMessage->CenterToParent();
-	pMessage->SetMinSize(pMessage->GetWidth(), pMessage->GetHeight());
-	pMessage->SetMaxSize(800, 400);
+	pMessage->SetMinSize(Vector2i {pMessage->GetWidth(), pMessage->GetHeight()});
+	pMessage->SetMaxSize(Vector2i {800, 400});
 }
 
 void pragma::gui::types::WIMessageBox::SetButtonCallback(const std::function<void(WIMessageBox *, Button)> &callback) { m_buttonCallback = callback; }

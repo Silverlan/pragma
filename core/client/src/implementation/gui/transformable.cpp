@@ -39,50 +39,6 @@ void pragma::gui::types::WITransformable::SetResizeRatioLocked(bool bLocked)
 	m_resizeRatio = GetWidth() / static_cast<float>(GetHeight());
 }
 bool pragma::gui::types::WITransformable::IsResizeRatioLocked() const { return math::is_flag_set(m_stateFlags, StateFlags::ResizeRatioLocked); }
-void pragma::gui::types::WITransformable::SetMinWidth(int w) { SetMinSize(Vector2i(w, m_minSize.y)); }
-void pragma::gui::types::WITransformable::SetMinHeight(int h) { SetMinSize(Vector2i(m_minSize.x, h)); }
-void pragma::gui::types::WITransformable::SetMinSize(int w, int h) { SetMinSize(Vector2i(w, h)); }
-void pragma::gui::types::WITransformable::SetMinSize(Vector2i size)
-{
-	m_minSize = size;
-	if(size.x < 0)
-		size.x = 0;
-	if(size.y < 0)
-		size.y = 0;
-	Vector2i sz = GetSize();
-	if(sz.x < size.x || sz.y < size.y) {
-		if(sz.x < size.x)
-			sz.x = size.x;
-		if(sz.y < size.y)
-			sz.y = size.y;
-		SetSize(sz.x, sz.y);
-	}
-}
-int pragma::gui::types::WITransformable::GetMinWidth() { return m_minSize.x; }
-int pragma::gui::types::WITransformable::GetMinHeight() { return m_minSize.y; }
-const Vector2i &pragma::gui::types::WITransformable::GetMinSize() const { return m_minSize; }
-void pragma::gui::types::WITransformable::SetMaxWidth(int w) { SetMaxSize(Vector2i(w, m_maxSize.x)); }
-void pragma::gui::types::WITransformable::SetMaxHeight(int h) { SetMaxSize(Vector2i(m_maxSize.x, h)); }
-void pragma::gui::types::WITransformable::SetMaxSize(int w, int h) { SetMaxSize(Vector2i(w, h)); }
-void pragma::gui::types::WITransformable::SetMaxSize(Vector2i size)
-{
-	if(size.x < -1)
-		size.x = -1;
-	if(size.y < -1)
-		size.y = -1;
-	m_maxSize = size;
-	Vector2i sz = GetSize();
-	if(sz.x > size.x || sz.y > size.y) {
-		if(sz.x > size.x)
-			sz.x = size.x;
-		if(sz.y > size.y)
-			sz.y = size.y;
-		SetSize(sz.x, sz.y);
-	}
-}
-int pragma::gui::types::WITransformable::GetMaxWidth() { return m_maxSize.x; }
-int pragma::gui::types::WITransformable::GetMaxHeight() { return m_maxSize.y; }
-const Vector2i &pragma::gui::types::WITransformable::GetMaxSize() const { return m_maxSize; }
 void pragma::gui::types::WITransformable::OnTitleBarMouseEvent(platform::MouseButton button, platform::KeyState state, platform::Modifier mods)
 {
 	MouseCallback(button, state, mods);
@@ -381,8 +337,12 @@ void pragma::gui::types::WITransformable::Think(const std::shared_ptr<prosper::I
 		CallCallbacks<void, std::reference_wrapper<Vector2i>, bool>("TranslateTransformPosition", std::ref(size), false);
 		size -= pos;
 
-		auto &minSize = GetMinSize();
-		auto &maxSize = GetMaxSize();
+		Vector2i minSize { GetMinWidth(), GetMinHeight() };
+		Vector2i maxSize { std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max() };
+		if (GetMaxWidth())
+			maxSize.x = *GetMaxWidth();
+		if (GetMaxHeight())
+			maxSize.y = *GetMaxHeight();
 		for(size_t i = decltype(bKeepSize.size()) {0}; i < bKeepSize.size(); ++i) {
 			if(bKeepSize[i] == true)
 				size[i] = GetSize()[i];
@@ -542,7 +502,12 @@ void pragma::gui::types::WITransformable::OnSizeChanged(const Vector2i &oldSize,
 		m_dragCursorOffset.x *= static_cast<int32_t>(sc.x);
 		m_dragCursorOffset.y *= static_cast<int32_t>(sc.y);
 	}
-	Vector2i minSize = m_minSize;
+	Vector2i minSize { GetMinWidth(), GetMinHeight() };
+	Vector2i maxSize { std::numeric_limits<int32_t>::max(), std::numeric_limits<int32_t>::max() };
+	if (GetMaxWidth())
+		maxSize.x = *GetMaxWidth();
+	if (GetMaxHeight())
+		maxSize.y = *GetMaxHeight();
 	auto w = GetWidth();
 	auto h = GetHeight();
 	if(w < minSize.x || h < minSize.y) {
@@ -552,7 +517,6 @@ void pragma::gui::types::WITransformable::OnSizeChanged(const Vector2i &oldSize,
 			minSize.y = math::max(h, -1);
 		SetMinSize(minSize);
 	}
-	Vector2i maxSize = m_maxSize;
 	if((w > maxSize.x && maxSize.x != -1) || (h > maxSize.y && maxSize.y != -1)) {
 		if(w > maxSize.x && maxSize.x != -1)
 			maxSize.x = w;

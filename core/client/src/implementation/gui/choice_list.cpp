@@ -15,12 +15,18 @@ pragma::gui::types::WIChoiceList::~WIChoiceList() {}
 void pragma::gui::types::WIChoiceList::Initialize()
 {
 	WIBase::Initialize();
-	m_text = CreateChild<WIText>();
-	m_text->SetAlignment(Alignment::Center);
-	m_buttonPrev = CreateChild<WIButton>();
+	auto contents = CreateChild<HBox>();
+	contents->AddStyleClass("choice-list__content-area");
+	static_cast<HBox*>(contents.get())->SetJustifyContent(FlexJustify::SpaceBetween);
+
+	auto prevContainer = contents->CreateChild<HBox>();
+	prevContainer->AddStyleClass("choice-list__button-container");
+
+	m_buttonPrev = prevContainer->CreateChild<WIButton>();
+	m_text = contents->CreateChild<WIText>();
 	WIHandle hChoiceList = GetHandle();
 	auto *buttonPrev = static_cast<WIButton *>(m_buttonPrev.get());
-	buttonPrev->SetText("<");
+	buttonPrev->AddStyleClass("choice-list__button-prev");
 	buttonPrev->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hChoiceList](util::EventReply *reply) mutable -> CallbackReturnType {
 		*reply = util::EventReply::Handled;
 		if(!hChoiceList.IsValid())
@@ -29,9 +35,12 @@ void pragma::gui::types::WIChoiceList::Initialize()
 		return CallbackReturnType::HasReturnValue;
 	}));
 
-	m_buttonNext = CreateChild<WIButton>();
+	auto nextContainer = contents->CreateChild<HBox>();
+	nextContainer->AddStyleClass("choice-list__button-container");
+
+	m_buttonNext = nextContainer->CreateChild<WIButton>();
 	auto *buttonNext = static_cast<WIButton *>(m_buttonNext.get());
-	buttonNext->SetText(">");
+	buttonNext->AddStyleClass("choice-list__button-next");
 	buttonNext->AddCallback("OnPressed", FunctionCallback<util::EventReply>::CreateWithOptionalReturn([hChoiceList](util::EventReply *reply) mutable -> CallbackReturnType {
 		*reply = util::EventReply::Handled;
 		if(!hChoiceList.IsValid())
@@ -49,18 +58,7 @@ void pragma::gui::types::WIChoiceList::UpdateButtons()
 		m_buttonNext->SetVisible((m_selected < (m_choices.size() - 1)) ? true : false);
 }
 
-void pragma::gui::types::WIChoiceList::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)
-{
-	if(m_buttonPrev.IsValid()) {
-		auto *buttonPrev = static_cast<WIButton *>(m_buttonPrev.get());
-		buttonPrev->SetSize(GetHeight(), GetHeight());
-	}
-	if(m_buttonNext.IsValid()) {
-		auto *buttonNext = static_cast<WIButton *>(m_buttonNext.get());
-		buttonNext->SetSize(GetHeight(), GetHeight());
-		buttonNext->SetX(GetWidth() - buttonNext->GetWidth());
-	}
-}
+void pragma::gui::types::WIChoiceList::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) {}
 
 void pragma::gui::types::WIChoiceList::SetChoices(const std::vector<std::string> &choices)
 {
@@ -95,8 +93,6 @@ void pragma::gui::types::WIChoiceList::SelectChoice(UInt ichoice)
 	auto *pText = static_cast<WIText *>(m_text.get());
 	auto &choice = m_choices[ichoice];
 	pText->SetText(choice.choice);
-	pText->SizeToContents();
-	pText->SetX(CInt32(CFloat(GetWidth()) * 0.5f - CFloat(pText->GetWidth()) * 0.5f));
 	UpdateButtons();
 	CallCallbacks<void, uint32_t, std::reference_wrapper<std::string>>("OnSelect", ichoice, std::ref(choice.value));
 }

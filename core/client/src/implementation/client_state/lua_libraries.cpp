@@ -285,7 +285,34 @@ static void register_gui(Lua::Interface &lua)
 	luabind::globals(l)["gui"]["ALIGNMENT_FILL"] = pragma::gui::Alignment::Fill;
 	static_assert(pragma::math::to_integral(pragma::gui::Alignment::Count) == 5, "Update enum registration when new enum values are added!");
 
-	//
+	luabind::globals(l)["gui"]["INPUT_STATE_NONE"] = pragma::gui::InputState::None;
+	luabind::globals(l)["gui"]["INPUT_STATE_HOVER"] = pragma::gui::InputState::Hover;
+	luabind::globals(l)["gui"]["INPUT_STATE_PRESSED"] = pragma::gui::InputState::Pressed;
+	luabind::globals(l)["gui"]["INPUT_STATE_FOCUSED"] = pragma::gui::InputState::Focused;
+	luabind::globals(l)["gui"]["INPUT_STATE_COUNT"] = pragma::gui::InputState::Count;
+	static_assert(pragma::math::to_integral(pragma::gui::InputState::Count) == 4, "Update enum registration when new enum values are added!");
+
+	luabind::globals(l)["gui"]["LOGICAL_STATE_NONE"] = pragma::gui::LogicalState::None;
+	luabind::globals(l)["gui"]["LOGICAL_STATE_SELECTED"] = pragma::gui::LogicalState::Selected;
+	luabind::globals(l)["gui"]["LOGICAL_STATE_CHECKED"] = pragma::gui::LogicalState::Checked;
+	luabind::globals(l)["gui"]["LOGICAL_STATE_DISABLED"] = pragma::gui::LogicalState::Disabled;
+	luabind::globals(l)["gui"]["LOGICAL_STATE_ERROR"] = pragma::gui::LogicalState::Error;
+	luabind::globals(l)["gui"]["LOGICAL_STATE_COUNT"] = pragma::gui::LogicalState::Count;
+	static_assert(pragma::math::to_integral(pragma::gui::LogicalState::Count) == 5, "Update enum registration when new enum values are added!");
+
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_DEFAULT"] = pragma::platform::Cursor::Shape::Default;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_HIDDEN"] = pragma::platform::Cursor::Shape::Hidden;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_ARROW"] = pragma::platform::Cursor::Shape::Arrow;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_IBEAM"] = pragma::platform::Cursor::Shape::IBeam;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_CROSSHAIR"] = pragma::platform::Cursor::Shape::Crosshair;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_HAND"] = pragma::platform::Cursor::Shape::Hand;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_HRESIZE"] = pragma::platform::Cursor::Shape::HResize;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_VRESIZE"] = pragma::platform::Cursor::Shape::VResize;
+
+	luabind::globals(l)["gui"]["CURSOR_MODE_DISABLED"] = pragma::platform::CursorMode::Disabled;
+	luabind::globals(l)["gui"]["CURSOR_MODE_HIDDEN"] = pragma::platform::CursorMode::Hidden;
+	luabind::globals(l)["gui"]["CURSOR_MODE_NORMAL"] = pragma::platform::CursorMode::Normal;
+
 	auto videoModeDef = luabind::class_<pragma::platform::Monitor::VideoMode>("VideoMode");
 	videoModeDef.def(
 	  "__tostring", +[](const pragma::platform::Monitor::VideoMode &videoMode) -> std::string {

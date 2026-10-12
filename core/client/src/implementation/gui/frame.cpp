@@ -125,22 +125,18 @@ void pragma::gui::types::WIFrame::OnSizeChanged(const Vector2i &oldSize, ChangeS
 	auto h = GetHeight();
 	if(m_hMoveRect.IsValid())
 		m_hMoveRect->SetWidth(w);
-	Vector2i minSize = m_minSize;
-	if(w < minSize.x || h < minSize.y) {
-		if(w < minSize.x)
-			minSize.x = w;
-		if(h < minSize.y)
-			minSize.y = h;
-		SetMinSize(minSize);
-	}
-	Vector2i maxSize = m_maxSize;
-	if((w > maxSize.x && maxSize.x != -1) || (h > maxSize.y && maxSize.y != -1)) {
-		if(w > maxSize.x && maxSize.x != -1)
-			maxSize.x = w;
-		if(h > maxSize.y && maxSize.y != -1)
-			maxSize.y = h;
-		SetMaxSize(maxSize);
-	}
+	auto minWidth = GetMinWidth();
+	if (w < minWidth)
+		SetMinWidth(w);
+	auto minHeight = GetMinHeight();
+	if (h < minHeight)
+		SetMinHeight(h);
+	auto maxWidth = GetMaxWidth();
+	if (maxWidth && w > *maxWidth)
+		SetMaxWidth(w);
+	auto maxHeight = GetMaxHeight();
+	if (maxHeight && h > *maxHeight)
+		SetMaxHeight(h);
 }
 
 void pragma::gui::types::WIFrame::SetTitle(std::string title)

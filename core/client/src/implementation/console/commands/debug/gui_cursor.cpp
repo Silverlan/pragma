@@ -492,7 +492,9 @@ namespace {
 static void debug_dump_gui_tree(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
 {
 	auto &wgui = pragma::gui::WGUI::GetInstance();
-	auto *elRoot = wgui.GetBaseElement();
+	auto *elRoot = pragma::debug::find_gui_element(argv);
+	if (!elRoot)
+		elRoot = wgui.GetBaseElement();
 	if(!elRoot)
 		return;
 
@@ -515,6 +517,7 @@ static void debug_dump_gui_tree(pragma::NetworkState *state, pragma::BasePlayerC
 		bool isVisible = el->IsVisible();
 
 		ss << indent << "[" << el->GetClass() << "]";
+		ss<< " Index: " << el->GetIndex();
 		if(!el->GetName().empty())
 			ss << " Name: \"" << el->GetName() << "\"";
 
@@ -560,7 +563,10 @@ static void debug_dump_gui_tree(pragma::NetworkState *state, pragma::BasePlayerC
 	dumpGuiTree(elRoot, 0, true);
 
 	std::string filename = (argv.size() > 1) ? argv[1] : "temp/gui_tree_dump.txt";
-	pragma::fs::write_file(filename, ss.str());
+	if (pragma::fs::write_file(filename, ss.str()))
+		Con::COUT<<std::format("Dumped GUI tree to {}", filename)<<Con::endl;
+	else
+		Con::CWAR<<std::format("Failed to dump GUI tree to {}", filename)<<Con::endl;
 }
 namespace {
 	auto UVN = pragma::console::client::register_command("debug_dump_gui_tree", &debug_dump_gui_tree, pragma::console::ConVarFlags::None, "Dumps the entire GUI tree to \"temp/gui_tree_dump.txt\".");

@@ -66,4 +66,5 @@ namespace {
 	auto UVN = register_variable<udm::UInt32>("render_bloom_resolution", 512, pragma::console::ConVarFlags::Archive, "The width for the bloom texture. The height will be calculated using the aspect ratio of the renderer.");
 
 	auto UVN = register_variable<udm::Boolean>("debug_occlusion_culling_freeze_camera", false, pragma::console::ConVarFlags::None, "Freezes the current camera position in place for occlusion culling.");
+	auto UVN = register_variable<udm::UInt8>("debug_gui_style_lua", 0, pragma::console::ConVarFlags::Archive, "If enabled, the Lua function 'gui.apply_style_class' will be run to apply GUI styles. 1 = Call Lua function after C++ styling, 2 = Disable C++ styling.");
 }

@@ -15,7 +15,7 @@ static spdlog::logger &LOGGER = pragma::register_logger("gui");
 
 namespace pragma::gui
 {
-	struct DLLCLIENT JsonSkinClass {
+	struct JsonSkinClass {
 		JsonSkinClass() = default;
 		JsonSkinClass(const JsonSkinClass &) = delete;
 		JsonSkinClass &operator=(const JsonSkinClass &) = delete;
@@ -49,8 +49,48 @@ namespace pragma::gui
 		return udm::Type::Invalid;
 	}
 
-	class DLLCLIENT JsonSkinBase {
-	  public:
+	bool is_json_array(JsonData jptr)
+	{
+		auto &j = *static_cast<const glz::generic_u64 *>(jptr);
+		return j.is_array();
+	}
+	size_t get_json_array_size(JsonData jptr)
+	{
+		auto &j = *static_cast<const glz::generic_u64 *>(jptr);
+		if (!j.is_array())
+			return 0;
+		auto &a = j.get_array();
+		return a.size();
+	}
+	JsonData get_json_array_value(JsonData jptr, size_t index)
+	{
+		auto &j = *static_cast<const glz::generic_u64 *>(jptr);
+		if (!j.is_array())
+			return nullptr;
+		auto &a = j.get_array();
+		return &a.at(index);
+	}
+
+	template<typename T> requires(is_json_type<T>)
+	T get_generic_json_value(JsonData jptr)
+	{
+		auto &j = *static_cast<const glz::generic_u64 *>(jptr);
+		return j.get<T>();
+	}
+
+	template<>
+	udm::Boolean get_json_value<udm::Boolean>(JsonData jptr) { return get_generic_json_value<udm::Boolean>(jptr); }
+	template<>
+	udm::Double get_json_value<udm::Double>(JsonData jptr) { return get_generic_json_value<udm::Double>(jptr); }
+	template<>
+	udm::Int64 get_json_value<udm::Int64>(JsonData jptr) { return get_generic_json_value<udm::Int64>(jptr); }
+	template<>
+	udm::String get_json_value<udm::String>(JsonData jptr) { return get_generic_json_value<udm::String>(jptr); }
+	template<>
+	udm::UInt64 get_json_value<udm::UInt64>(JsonData jptr) { return get_generic_json_value<udm::UInt64>(jptr); }
+
+	class JsonSkinBase {
+	public:
 		struct Settings {
 			JsonSkin *base = nullptr;
 			glz::generic_u64 jsonData;
@@ -63,7 +103,7 @@ namespace pragma::gui
 
 			std::optional<StyleProperty> FindProperty(std::string_view name) const;
 			template<typename T> requires(is_valid_json_udm_type<T>)
-			std::optional<T> GetPropertyValue(std::string_view name) const
+			std::optional<T> GetPropertyValue(std::string_view name, bool logInvalid = true) const
 			{
 				auto prop = FindProperty(name);
 				if (!prop)
@@ -71,13 +111,14 @@ namespace pragma::gui
 				auto val = prop->GetValue<T>();
 				if (!val)
 				{
-					prop->LogInvalid();
+					if (logInvalid)
+						prop->LogInvalid();
 					return {};
 				}
 				return val;
 			}
 			template<typename T> requires(is_valid_json_udm_type<T>)
-			std::optional<std::vector<T>> GetArrayPropertyValues(std::string_view name) const
+			std::optional<std::vector<T>> GetArrayPropertyValues(std::string_view name, bool logInvalid = true) const
 			{
 				auto prop = FindProperty(name);
 				if (!prop)
@@ -85,7 +126,8 @@ namespace pragma::gui
 				auto values = prop->GetArrayValues<T>();
 				if (!values)
 				{
-					prop->LogInvalid();
+					if (logInvalid)
+						prop->LogInvalid();
 					return {};
 				}
 				return values;
@@ -98,10 +140,22 @@ namespace pragma::gui
 				prop->LogInvalid();
 			}
 		};
+
+		JsonSkinBase();
+
+		void Load(const Settings &settings);
+
+		std::optional<Style> ComputeStyle(types::WIBase &el) const;
+		void Initialize(types::WIBase *el);
+		void Release(types::WIBase *el);
+		void ApplyStyle(types::WIBase &el, Style &style) const;
 	  protected:
 		JsonSkinClass m_rootClass;
 		std::unordered_map<std::string, glz::generic_u64> m_constants;
+		mutable std::unordered_map<types::WIBase*, udm::PProperty> m_cacheData;
 
+		void InitializeLua(types::WIBase *el);
+		udm::Element *GetCacheData(types::WIBase &el, bool init = true) const;
 		void ParseConstants(const glz::generic_u64 &j);
 		void ParseFonts(const glz::generic_u64 &j);
 		void ParseClass(const glz::generic_u64 &j, JsonSkinClass &outClass, bool rootLevel = false);
@@ -110,14 +164,6 @@ namespace pragma::gui
 		void ResolveVariables(string::StringMap<glz::generic_u64> &properties);
 		void ResolveMixins(JsonSkinClass &target, const JsonSkinClass &root);
 		void MergeBaseSkin(const JsonSkinClass &baseRoot, JsonSkinClass &cl);
-	  public:
-		JsonSkinBase();
-
-		void Load(const Settings &settings);
-
-		std::optional<Style> ComputeStyle(types::WIBase &el) const;
-		void Initialize(types::WIBase *el);
-		void ApplyStyle(types::WIBase &el, const Style &style) const;
 	};
 
 	static const glz::generic_u64 &get_json_data(JsonData json)
@@ -183,6 +229,7 @@ void pragma::gui::JsonSkin::Initialize(types::WIBase *el)
 void pragma::gui::JsonSkin::Release(types::WIBase *el)
 {
 	WISkin::Release(el);
+	m_baseJsonSkin->Release(el);
 }
 void pragma::gui::JsonSkin::Load(JsonSkin *base, JsonData data)
 {
@@ -246,6 +293,18 @@ static void resolve_property(const std::unordered_map<std::string, glz::generic_
 		for(auto &child : val.get_array())
 			resolve_property(constants, child);
 	}
+}
+
+udm::Element *pragma::gui::JsonSkinBase::GetCacheData(types::WIBase &el, bool init) const
+{
+	auto it = m_cacheData.find(&el);
+	if (it != m_cacheData.end())
+		return &it->second->GetValue<udm::Element>();
+	if (!init)
+		return nullptr;
+	auto p = udm::Property::Create<udm::Element>();
+	m_cacheData.insert(std::make_pair(&el, p));
+	return &p->GetValue<udm::Element>();
 }
 
 void pragma::gui::JsonSkinBase::ParseConstants(const glz::generic_u64 &j)
@@ -564,8 +623,13 @@ std::optional<pragma::gui::StyleProperty> pragma::gui::JsonSkinBase::Style::Find
 
 static void log_invalid_property(const glz::generic_u64 &prop, std::string_view propertyName)
 {
-	auto propertyValue = prop.as<std::string>();
-	LOGGER.warn("Invalid value for property '{}': {}", propertyName, propertyValue);
+	auto expected = prop.dump();
+	std::string propertyValue;
+	if (expected)
+		propertyValue = expected.value();
+	else
+		propertyValue = expected.error().custom_error_message;
+	LOGGER.warn("Invalid value for style property '{}': {}", propertyName, propertyValue);
 }
 
 void pragma::gui::StyleProperty::LogInvalid() const
@@ -687,7 +751,7 @@ static bool is_match(pragma::gui::types::WIBase &child, std::string_view matchNa
 	if (childName == matchName)
 		return true;
 	auto childClass = child.GetClass();
-	return childName.length() == childClass.length() && pragma::string::compare(childName.c_str(), childClass.str, false, childName.length());
+	return pragma::string::compare<std::string_view>(childClass.str, matchName, false);
 }
 
 static void collect_children(pragma::gui::types::WIBase &currentParent, std::string_view matchName, bool isDirectOnly, std::vector<pragma::gui::types::WIBase*> &results)
@@ -791,9 +855,9 @@ static DimensionInfo parse_dimension(const pragma::gui::StyleProperty &prop)
 	{
 		if (*str == "auto")
 			return {{},DimensionInfo::Type::Auto};
-		if (!str->empty() && str->front() == '%')
+		if (!str->empty() && str->back() == '%')
 		{
-			auto pc = str->substr(1);
+			auto pc = str->substr(0, str->length() -1);
 			return {pragma::string::to_int(pc) /100.f, DimensionInfo::Type::Percentage};
 		}
 		return {pragma::string::to_int(*str), DimensionInfo::Type::Value};
@@ -830,26 +894,23 @@ static void apply_dimensions(pragma::gui::types::WIBase &el, const pragma::gui::
 		else if (pos.type == DimensionInfo::Type::Value)
 			el.ApplyDimensionPos(axis, pos.value);
 
-		std::optional<std::array<float, 4>> anchor {}; // TODO
 		if (size.type == DimensionInfo::Type::Percentage)
 		{
 			// To make % width work dynamically, we need a left anchor to base the right anchor on
-			float baseLeft = 0.f;
+			float baseStart = 0.f;
 			if (pos.type == DimensionInfo::Type::Percentage)
-				baseLeft = pos.value;
-			else if (anchor)
-				baseLeft = (*anchor)[0];
+				baseStart = pos.value;
 
 			auto *parent = el.GetParent();
 			if (parent)
-				el.ApplyDimensionSize(axis, pragma::math::round(parent->GetWidth() *size.value));
+				el.ApplyDimensionSize(axis, pragma::math::round(parent->GetDimensionSize(axis) *size.value));
 
-			if (pos.type != DimensionInfo::Type::Percentage && !anchor) {
-				el.SetAnchor(edge0, baseLeft);
+			if (pos.type != DimensionInfo::Type::Percentage) {
+				el.SetAnchor(edge0, baseStart);
 				el.SetAnchorEdgeEnabled(edge0, true);
 			}
 			// Set Right anchor dynamically
-			el.SetAnchor(edge1, baseLeft +size.value);
+			el.SetAnchor(edge1, baseStart +size.value);
 			el.SetAnchorEdgeEnabled(edge1, true);
 		}
 		else if (size.type == DimensionInfo::Type::Value)
@@ -876,6 +937,11 @@ static void apply_dimensions(pragma::gui::types::WIBase &el, const pragma::gui::
 	}
 }
 
+static void apply_style(pragma::gui::types::WIButton &el, const pragma::gui::JsonSkinBase::Style &style)
+{
+	if (auto text = style.GetPropertyValue<udm::String>("text"); text)
+		el.SetText(*text);
+}
 static void apply_style(pragma::gui::types::WIText &el, const pragma::gui::JsonSkinBase::Style &style)
 {
 	if (auto font = style.GetPropertyValue<udm::String>("font"); font)
@@ -950,6 +1016,10 @@ static void apply_style(pragma::gui::types::WITexturedRect &el, const pragma::gu
 
 static void apply_style(pragma::gui::types::FlexBox &el, const pragma::gui::JsonSkinBase::Style &style)
 {
+	if (style.FindProperty("width"))
+		el.SetFixedWidth(true);
+	if (style.FindProperty("height"))
+		el.SetFixedHeight(true);
 	if (auto alignItems = style.GetPropertyValue<udm::String>("alignItems"); alignItems)
 	{
 		if (auto flexAlignEnum = to_flex_align_enum(*alignItems); flexAlignEnum)
@@ -1059,7 +1129,7 @@ static void apply_background(pragma::gui::types::WIBase &el, const pragma::gui::
 	if (auto bgColorProp = style.FindProperty("backgroundColor"); bgColorProp)
 		bgInfo.color = get_property_color(*bgColorProp);
 
-	if (auto bg = style.GetPropertyValue<udm::String>("background"); bg)
+	if (auto bg = style.GetPropertyValue<udm::String>("background", false); bg)
 	{
 		auto color = string_to_color(*bg);
 		if (color)
@@ -1067,8 +1137,7 @@ static void apply_background(pragma::gui::types::WIBase &el, const pragma::gui::
 		else
 			style.LogInvalidProperty("background");
 	}
-
-	if (auto background = style.FindProperty("background"); background)
+	else if (auto background = style.FindProperty("background"); background)
 	{
 		bgInfo.borderThickness = background->GetValue<udm::Int32>("borderThickness");
 		if (bgInfo.borderThickness)
@@ -1208,17 +1277,51 @@ static void apply_outline(pragma::gui::types::WIBase &el, const pragma::gui::Jso
 		ol->SetVisible(false);
 }
 
-void pragma::gui::JsonSkinBase::ApplyStyle(types::WIBase &el, const Style &style) const
+void pragma::gui::JsonSkinBase::ApplyStyle(types::WIBase &el, Style &style) const
 {
+	if (auto styleProp = style.FindProperty("style"); styleProp)
+	{
+		if (auto styleStr = styleProp->GetValue<udm::String>(); styleStr)
+		{
+			auto it = style.properties.find("color");
+			if (it == style.properties.end())
+				style.properties["color"] = *styleStr;
+		}
+		else
+		{
+			auto &j = *static_cast<const glz::generic_u64 *>(styleProp->property);
+			if (j.is_object())
+			{
+				for(auto &[key, child] : j.get_object())
+				{
+					auto it = style.properties.find(key);
+					if (it != style.properties.end())
+						continue;
+					style.properties[key] = child;
+				}
+			}
+		}
+	}
+
+	if (auto debugPrint = style.GetPropertyValue<udm::String>("debugPrint"); debugPrint)
+	{
+		console::set_console_color(pragma::console::ConsoleColorFlags::BackgroundMagenta);
+
+		std::stringstream elStr;
+		elStr << el;
+
+		auto msg = *debugPrint;
+		string::replace(msg, "{self}", elStr.str());
+		Con::COUT << "GUI element debug print: " << msg << Con::endl;
+	}
+
 	if (auto colorProp = style.FindProperty("color"); colorProp)
 	{
 		auto color = get_property_color(*colorProp);
 		if (color)
 			el.SetColor(*color);
 	}
-	// Are these still needed?
-	// if (style.fixedWidth or style.width) and element.SetFixedWidth then element:SetFixedWidth(true) end
-	// if (style.fixedHeight or style.height) and element.SetFixedHeight then element:SetFixedHeight(true) end
+
 	if (auto visible = style.GetPropertyValue<udm::Boolean>("visible"); visible)
 		el.SetVisible(*visible);
 	if (auto zIndex = style.GetPropertyValue<udm::Int32>("zIndex"); zIndex)
@@ -1234,25 +1337,12 @@ void pragma::gui::JsonSkinBase::ApplyStyle(types::WIBase &el, const Style &style
 	// TODO: Make these virtual methods in the GUI library
 	if (auto *p = dynamic_cast<types::WIText*>(&el); p)
 		apply_style(*p, style);
+	if (auto *p = dynamic_cast<types::WIButton*>(&el); p)
+		apply_style(*p, style);
 	if (auto *p = dynamic_cast<types::WITexturedRect*>(&el); p)
 		apply_style(*p, style);
 	if (auto *p = dynamic_cast<types::FlexBox*>(&el); p)
 		apply_style(*p, style);
-
-	/*if (auto alignment = style.GetPropertyValue<udm::String>("alignment"); alignment) {
-		auto alignmentEnum = to_alignment_enum(*alignment);
-		if (alignmentEnum)
-			el.SetAlignment(*alignmentEnum);
-		else
-			log_invalid_property(*property, name);
-	}*/
-	/*
-	 *if style.alignment then element:SetAlignment(to_alignment_enum(style.alignment)) end
-if style.alignmentX then element:SetHorizontalAlignment(to_alignment_enum(style.alignmentX)) end
-if style.alignmentY then element:SetVerticalAlignment(to_alignment_enum(style.alignmentY)) end
-if style.horizontalAlignment then element:SetHorizontalAlignment(to_alignment_enum(style.horizontalAlignment)) end
-if style.verticalAlignment then element:SetVerticalAlignment(to_alignment_enum(style.verticalAlignment)) end
-*/
 
 	if (auto minWidth = style.GetPropertyValue<udm::Int32>("minWidth"); minWidth)
 		el.SetMinWidth(*minWidth);
@@ -1283,6 +1373,14 @@ if style.verticalAlignment then element:SetVerticalAlignment(to_alignment_enum(s
 			margin[3] = *marginBottom;
 		parent->SetChildMargin(el, margin[0], margin[1], margin[2], margin[3]);
 		marginHandled = true;
+	}
+
+	if (auto align = style.GetPropertyValue<udm::String>("align"); align)
+	{
+		if (auto it = style.properties.find("alignX"); it == style.properties.end())
+			style.properties["alignX"] = *align;
+		if (auto it = style.properties.find("alignY"); it == style.properties.end())
+			style.properties["alignY"] = *align;
 	}
 
 	auto alignX = style.GetPropertyValue<udm::String>("alignX");
@@ -1330,19 +1428,34 @@ if style.verticalAlignment then element:SetVerticalAlignment(to_alignment_enum(s
 	apply_background(el, style);
 	apply_outline(el, style);
 
+	constexpr std::string_view soundCacheKey = "lastSkinSound";
 	if (auto sound = style.GetPropertyValue<udm::String>("sound"); sound)
 	{
-		// TODO
-		// -- Ensure we only play the sound once
-		// if element.__lastSkinSound ~= style.sound then
-		if (auto *cl = get_client_state(); cl)
+		auto &cache = *GetCacheData(el, true);
+		std::string lastSkinSound;
+		cache[soundCacheKey] >> lastSkinSound;
+		if (lastSkinSound != *sound)
 		{
-			if (auto snd = cl->CreateSound(*sound, audio::ALSoundType::GUI, audio::ALCreateFlags::Mono); snd)
+			if (auto *cl = get_client_state(); cl)
 			{
-				snd->SetRelative(true);
-				snd->SetPitch(0.8f); // TODO: Let user define via skin
-				snd->Play();
+				if (auto snd = cl->CreateSound(*sound, audio::ALSoundType::GUI, audio::ALCreateFlags::Mono); snd)
+				{
+					snd->SetRelative(true);
+					snd->SetPitch(0.8f); // TODO: Let user define via style
+					snd->Play();
+				}
 			}
+			cache[soundCacheKey] << *sound;
+		}
+	}
+	else
+	{
+		auto *cache = GetCacheData(el, true);
+		if (cache)
+		{
+			auto it = cache->children.find(soundCacheKey);
+			if (it != cache->children.end())
+				cache->children.erase(it);
 		}
 	}
 
@@ -1394,7 +1507,7 @@ if style.verticalAlignment then element:SetVerticalAlignment(to_alignment_enum(s
 	}
 }
 
-void pragma::gui::JsonSkinBase::Initialize(types::WIBase *el)
+void pragma::gui::JsonSkinBase::InitializeLua(types::WIBase *el)
 {
 	auto style = ComputeStyle(*el);
 	if(!style)
@@ -1470,10 +1583,29 @@ void pragma::gui::JsonSkinBase::Initialize(types::WIBase *el)
 		return targetTable;
 	};
 
-	ApplyStyle(*el, *style);
-
 	auto t = buildLuaTable(*style);
 	apply_style_class(WGUILuaInterface::GetLuaObject(l, *el), t);
+}
+
+static auto cvDebugGuiStyleLua = pragma::console::get_client_con_var("debug_gui_style_lua");
+void pragma::gui::JsonSkinBase::Initialize(types::WIBase *el)
+{
+	auto style = ComputeStyle(*el);
+	if(!style)
+		return;
+	auto debugMode = cvDebugGuiStyleLua->GetInt();
+	if (debugMode != 2)
+		ApplyStyle(*el, *style);
+	if (debugMode > 0)
+		InitializeLua(el);
+}
+
+void pragma::gui::JsonSkinBase::Release(types::WIBase *el)
+{
+	auto it = m_cacheData.find(el);
+	if (it == m_cacheData.end())
+		return;
+	m_cacheData.erase(it);
 }
 
 namespace pragma::debug {

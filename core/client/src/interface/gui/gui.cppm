@@ -48,7 +48,3 @@ export import :gui.table;
 export import :gui.textured_cubemap;
 export import :gui.transformable;
 export import :gui.tree_list;
-
-export {
-	bool load_skin(const std::string &skinName);
-};

@@ -225,8 +225,10 @@ void pragma::CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 			return;
 		zip.AddFile("lua_traceback_" + identifier + ".txt", ss.str());
 	};
+#ifdef ENABLE_GUI_LUA_STATE
 	if(GetClientState())
 		fWriteLuaTraceback(static_cast<ClientState *>(GetClientState())->GetGUILuaState(), "gui");
+#endif
 
 	std::stringstream engineInfo;
 	engineInfo << "Render API: " << GetRenderAPI();
@@ -1868,8 +1870,10 @@ Lua::Interface *pragma::CEngine::GetLuaInterface(lua::State *l)
 {
 	auto *cl = static_cast<ClientState *>(GetClientState());
 	if(cl != nullptr) {
+#ifdef ENABLE_GUI_LUA_STATE
 		if(cl->GetGUILuaState() == l)
 			return &cl->GetGUILuaInterface();
+#endif
 		auto *cg = cl->GetGameState();
 		if(cg != nullptr && cg->GetLuaState() == l)
 			return &cg->GetLuaInterface();
@@ -1891,8 +1895,12 @@ pragma::NetworkState *pragma::CEngine::GetNetworkState(lua::State *l)
 	auto *cl = static_cast<ClientState *>(GetClientState());
 	if(cl == nullptr)
 		return nullptr;
-	if(cl->GetLuaState() == l || cl->GetGUILuaState() == l)
+	if(cl->GetLuaState() == l)
 		return cl;
+#ifdef ENABLE_GUI_LUA_STATE
+	if(cl->GetGUILuaState() == l)
+		return cl;
+#endif
 	return Engine::GetNetworkState(l);
 }
 
@@ -2410,6 +2418,7 @@ namespace {
 	  });
 }
 
+#ifdef ENABLE_GUI_LUA_STATE
 static void dump_traceback_gui()
 {
 	auto *en = pragma::get_cengine();
@@ -2433,3 +2442,4 @@ namespace pragma::LuaCore::debug {
 	DLLCLIENT void dump_traceback_gui() { ::dump_traceback_gui(); }
 	DLLCLIENT void dump_stack_gui() { ::dump_stack_gui(); }
 };
+#endif

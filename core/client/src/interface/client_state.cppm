@@ -78,8 +78,10 @@ export namespace pragma {
 		rendering::GameWorldShaderSettings m_worldShaderSettings {};
 		LastConnectionInfo m_lastConnection {};
 	  protected:
+#ifdef ENABLE_GUI_LUA_STATE
 		std::shared_ptr<Lua::Interface> m_luaGUI = nullptr;
 		void InitializeGUILua();
+#endif
 		std::vector<std::function<luabind::object(lua::State *, gui::types::WIBase &)>> m_guiLuaWrapperFactories;
 
 		virtual void InitializeResourceManager() override;
@@ -99,7 +101,6 @@ export namespace pragma {
 		material::Material *LoadMaterial(const std::string &path, const std::function<void(material::Material *)> &onLoaded, bool bReload, bool bLoadInstantly); // TODO
 		material::MaterialHandle CreateMaterial(const std::string &path, const std::string &shader);
 		material::MaterialHandle CreateMaterial(const std::string &shader);
-		bool LoadGUILuaFile(std::string f);
 		networking::IClient *GetClient();
 		virtual NwStateType GetType() const override;
 		virtual void Think() override;
@@ -124,8 +125,11 @@ export namespace pragma {
 
 		gui::types::WIMainMenu *GetMainMenu();
 
+#ifdef ENABLE_GUI_LUA_STATE
+		bool LoadGUILuaFile(std::string f);
 		lua::State *GetGUILuaState();
 		Lua::Interface &GetGUILuaInterface();
+#endif
 		bool IsMainMenuOpen();
 		void CloseMainMenu();
 		void OpenMainMenu();

@@ -37,7 +37,7 @@ static pragma::ClientState *g_client = nullptr;
 pragma::ClientState *pragma::get_client_state() { return g_client; }
 
 std::vector<std::string> &get_required_game_textures();
-pragma::ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr), m_resDownload(nullptr), m_volMaster(1.f), m_hMainMenu(), m_luaGUI(nullptr)
+pragma::ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo(nullptr), m_resDownload(nullptr), m_volMaster(1.f), m_hMainMenu()
 {
 	g_client = this;
 	m_soundScriptManager = std::make_unique<audio::CSoundScriptManager>();
@@ -53,9 +53,11 @@ pragma::ClientState::ClientState() : NetworkState(), m_client(nullptr), m_svInfo
 		auto *cl = get_client_state();
 		if(!cl)
 			return;
+#ifdef ENABLE_GUI_LUA_STATE
 		auto *luaGui = cl->GetGUILuaState();
 		if(luaGui)
 			Lua::gui::register_gui_type_lua_enum(luaGui, className, typeId);
+#endif
 
 		auto *game = get_client_game();
 		if(game) {
@@ -175,7 +177,9 @@ void pragma::ClientState::Initialize()
 
 	get_cengine()->LoadClientConfig();
 	auto &gui = gui::WGUI::GetInstance();
+#ifdef ENABLE_GUI_LUA_STATE
 	InitializeGUILua();
+#endif
 	m_hMainMenu = gui.Create<gui::types::WIMainMenu>()->GetHandle();
 
 	UpdateGameWorldShaderSettings();
@@ -215,8 +219,15 @@ namespace {
 	  });
 }
 
+#ifdef ENABLE_GUI_LUA_STATE
 lua::State *pragma::ClientState::GetGUILuaState() { return (m_luaGUI != nullptr) ? m_luaGUI->GetState() : nullptr; }
 Lua::Interface &pragma::ClientState::GetGUILuaInterface() { return *m_luaGUI; }
+
+bool pragma::ClientState::LoadGUILuaFile(std::string f)
+{
+	f = fs::get_normalized_path(f);
+	return (Lua::LoadFile(GetGUILuaState(), f) == Lua::StatusCode::Ok) ? true : false;
+}
 
 //__declspec(dllimport) void test_lua_policies(lua::State *l);
 void pragma::ClientState::InitializeGUILua()
@@ -290,6 +301,7 @@ void pragma::ClientState::InitializeGUILua()
 		}
 	}
 }
+#endif
 
 void pragma::ClientState::AddGUILuaWrapperFactory(const std::function<luabind::object(lua::State *, gui::types::WIBase &)> &f) { m_guiLuaWrapperFactories.push_back(f); }
 std::vector<std::function<luabind::object(lua::State *, pragma::gui::types::WIBase &)>> &pragma::ClientState::GetGUILuaWrapperFactories() { return m_guiLuaWrapperFactories; }
@@ -349,17 +361,21 @@ void pragma::ClientState::Close()
 	if(m_hMainMenu.IsValid())
 		m_hMainMenu->Remove();
 
+#ifdef ENABLE_GUI_LUA_STATE
 	auto *state = m_luaGUI->GetState();
 	Lua::gui::clear_lua_callbacks(state);
+#endif
 	auto *guiBaseEl = gui::WGUI::GetInstance().GetBaseElement();
 	if(guiBaseEl != nullptr)
 		gui::WGUILuaInterface::ClearGUILuaObjects(*guiBaseEl);
+#ifdef ENABLE_GUI_LUA_STATE
 	auto identifier = m_luaGUI->GetIdentifier();
 	TerminateLuaModules(state);
 	m_luaGUI = nullptr;
 	DeregisterLuaModules(state, identifier); // Has to be called AFTER Lua instance has been released!
+#endif
 	auto &conVarPtrs = GetConVarPtrs();
-	pragma::string::StringMap<std::shared_ptr<console::PtrConVar>>::iterator itHandles;
+	string::StringMap<std::shared_ptr<console::PtrConVar>>::iterator itHandles;
 	for(itHandles = conVarPtrs.begin(); itHandles != conVarPtrs.end(); itHandles++)
 		itHandles->second->set(nullptr);
 	StopSounds();
@@ -577,12 +593,6 @@ pragma::networking::CLNetMessage *pragma::ClientState::GetNetMessage(unsigned in
 pragma::networking::ClientMessageMap *pragma::ClientState::GetNetMessageMap() { return networking::get_client_message_map(); }
 
 bool pragma::ClientState::IsClient() const { return true; }
-
-bool pragma::ClientState::LoadGUILuaFile(std::string f)
-{
-	f = fs::get_normalized_path(f);
-	return (Lua::LoadFile(GetGUILuaState(), f) == Lua::StatusCode::Ok) ? true : false;
-}
 
 void pragma::ClientState::SendUserInfo()
 {

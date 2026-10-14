@@ -12,7 +12,6 @@ pragma::gui::JsonSkinWithLua::JsonSkinWithLua() : JsonSkin {} {}
 void pragma::gui::JsonSkinWithLua::ApplyStyle(types::WIBase &el, Style &style) const
 {
 	auto debugMode = cvDebugGuiStyleLua->GetInt();
-
 	if (debugMode != 2)
 	{
 		JsonSkin::ApplyStyle(el, style);
@@ -125,6 +124,7 @@ void pragma::gui::JsonSkinWithLua::Load(StyleProperty &styleProp)
 
 void pragma::gui::JsonSkinWithLua::ApplyStyleLua(types::WIBase &el, Style &style) const
 {
+#ifdef ENABLE_GUI_LUA_STATE
 	auto *l = get_client_state()->GetGUILuaState();
 	auto apply_style_class = luabind::object {l, luabind::globals(l)["gui"]};
 	if(apply_style_class)
@@ -138,6 +138,7 @@ void pragma::gui::JsonSkinWithLua::ApplyStyleLua(types::WIBase &el, Style &style
 
 	auto t = Lua::udm::udm_to_value(l, root);
 	apply_style_class(WGUILuaInterface::GetLuaObject(l, el), t);
+#endif
 }
 
 namespace pragma::debug {

@@ -8,7 +8,8 @@ import :gui;
 
 void CLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 {
-	auto filePath = pragma::util::FilePath(path);
+    // Obsolete
+	/*auto filePath = pragma::util::FilePath(path);
 	auto it = filePath.begin();
 	auto end = filePath.end();
 	if(it != end && pragma::string::compare<std::string_view>(*it, "gui", false) == true) {
@@ -21,6 +22,6 @@ void CLuaDirectoryWatcherManager::OnLuaFileChanged(const std::string &path)
 				load_skin(skinName);
 			}
 		}
-	}
+	}*/
 	LuaDirectoryWatcherManager::OnLuaFileChanged(path);
 }

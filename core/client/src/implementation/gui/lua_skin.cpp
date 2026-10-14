@@ -11,11 +11,11 @@ import :client_state;
 #pragma optimize("", off)
 pragma::gui::WILuaSkin::WILuaSkin() : WISkin {}, m_lua(nullptr), m_rootClass(nullptr) {}
 
-void pragma::gui::WILuaSkin::Release(types::WIBase *el)
+void pragma::gui::WILuaSkin::Release(types::WIBase &el)
 {
 	WISkin::Release(el);
 	std::vector<types::WIBase *> els;
-	types::WIBase *parent = el;
+	types::WIBase *parent = &el;
 	while(parent != nullptr) {
 		els.push_back(parent);
 		parent = parent->GetParent();
@@ -25,7 +25,7 @@ void pragma::gui::WILuaSkin::Release(types::WIBase *el)
 		types::WIBase *el = els[i];
 		auto numClasses = classes.size();
 		for(size_t k = 0; k < numClasses; k++)
-			FindSkinClasses(el, classes[k]->classes, classes);
+			FindSkinClasses(*el, classes[k]->classes, classes);
 	}
 	std::vector<WISkinClass *> elClasses;
 	for(unsigned int i = 0; i < classes.size(); i++)
@@ -35,12 +35,12 @@ void pragma::gui::WILuaSkin::Release(types::WIBase *el)
 			auto fRelease = elClasses[i]->releaseFunction;
 			Lua::CallFunction(
 			  m_lua,
-			  [this, fRelease, el](lua::State *) {
+			  [this, fRelease, &el](lua::State *) {
 				  fRelease->push(m_lua);
 
 				  m_vars->push(m_lua);
 				  //WISkinClass *cl = elClasses[i];
-				  auto o = WGUILuaInterface::GetLuaObject(m_lua, *el);
+				  auto o = WGUILuaInterface::GetLuaObject(m_lua, el);
 				  o.push(m_lua);
 				  return Lua::StatusCode::Ok;
 			  },
@@ -49,18 +49,18 @@ void pragma::gui::WILuaSkin::Release(types::WIBase *el)
 	}
 }
 
-void pragma::gui::WILuaSkin::Initialize(types::WIBase *el)
+void pragma::gui::WILuaSkin::Initialize(types::WIBase &el)
 {
 	WISkin::Initialize(el);
 	std::vector<types::WIBase *> els;
-	types::WIBase *parent = el;
+	types::WIBase *parent = &el;
 	while(parent != nullptr) {
 		els.push_back(parent);
 		parent = parent->GetParent();
 	}
 	std::vector<WISkinClass *> classes = {&m_rootClass};
 	for(auto i = els.size() - 1; i != size_t(-1); i--) {
-		types::WIBase *el = els[i];
+		types::WIBase &el = *els[i];
 		auto numClasses = classes.size();
 		for(size_t k = 0; k < numClasses; k++)
 			FindSkinClasses(el, classes[k]->classes, classes);
@@ -73,12 +73,12 @@ void pragma::gui::WILuaSkin::Initialize(types::WIBase *el)
 			auto fInit = elClasses[i]->initializeFunction;
 			Lua::CallFunction(
 			  m_lua,
-			  [this, fInit, el](lua::State *) {
+			  [this, fInit, &el](lua::State *) {
 				  fInit->push(m_lua);
 
 				  m_vars->push(m_lua);
 				  //WISkinClass *cl = elClasses[i];
-				  auto o = WGUILuaInterface::GetLuaObject(m_lua, *el);
+				  auto o = WGUILuaInterface::GetLuaObject(m_lua, el);
 				  o.push(m_lua);
 				  return Lua::StatusCode::Ok;
 			  },
@@ -86,12 +86,12 @@ void pragma::gui::WILuaSkin::Initialize(types::WIBase *el)
 		}
 	}
 }
-void pragma::gui::WILuaSkin::FindSkinClasses(types::WIBase *el, std::unordered_map<std::string, std::unique_ptr<WISkinClass>> &classes, std::vector<WISkinClass *> &outClasses)
+void pragma::gui::WILuaSkin::FindSkinClasses(types::WIBase &el, std::unordered_map<std::string, std::unique_ptr<WISkinClass>> &classes, std::vector<WISkinClass *> &outClasses)
 {
 	//WISkinClass *cl = FindSkinClass(el->GetClass(),classes);
 	//if(cl != nullptr)
 	//	outClasses.push_back(cl);
-	auto &styleClasses = el->GetStyleClasses();
+	auto &styleClasses = el.GetStyleClasses();
 	for(unsigned int i = 0; i < styleClasses.size(); i++) {
 		auto *cl = FindSkinClass(styleClasses[i], classes);
 		if(cl != nullptr)

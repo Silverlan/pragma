@@ -1125,6 +1125,10 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 
 	auto &fontSet = GetDefaultFontSet();
 	auto &gui = gui::WGUI::Open(GetRenderContext(), matManager);
+	static spdlog::logger &GUI_LOGGER = pragma::register_logger("gui");
+	gui.SetLogHandler([](std::string_view msg, util::LogSeverity severity) {
+		GUI_LOGGER.log(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(severity)), msg);
+	});
 	RegisterUiElementTypes();
 	gui.SetLocaleResolver([](const std::string &key, const std::vector<string::Utf8String> &args) -> string::Utf8String {
 		// get_text currently doesn't support Utf8String args, so we'll convert to std::string for now

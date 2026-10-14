@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: (c) 2019 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-module;
-
-#include <glaze/glaze.hpp>
-
 module pragma.client;
 
 import :scripting.lua.libraries.gui;
@@ -300,26 +296,19 @@ bool Lua::gui::register_json_skin(lua::State *l, const std::string &skin, const 
 	}*/
 	l = pragma::get_client_state()->GetGUILuaState();
 
-	glz::generic_u64 json{};
-	std::string buffer{}; // scratch buffer, same as before
-
-	std::string fullPath;
-	if(pragma::fs::find_absolute_path(fileName, fullPath) == false) {
+	auto s = std::make_unique<pragma::gui::JsonSkinWithLua>();
+	auto f = pragma::fs::open_file(fileName, pragma::fs::FileMode::Read);
+	if (!f)
+	{
 		Con::CERR<<std::format("Failed to load json skin '{}': File not found!", fileName)<<Con::endl;
-		//Lua::Error(l, std::format("Failed to load json skin '{}': File not found!", fileName));
 		return false;
 	}
-
-	auto ec = glz::read_file_jsonc(json, fullPath, buffer);
-	if (ec) {
-		Con::CERR<<std::format("Failed to load json skin '{}': {}", fullPath, glz::format_error(ec, buffer))<<Con::endl;
-		//Lua::Error(l, std::format("Failed to load json skin '{}': {}", fullPath, glz::format_error(ec, buffer)));
+	pragma::fs::File fptr {f};
+	if (auto result = s->Load(fptr); !result)
+	{
+		Con::CERR<<std::format("Failed to load json skin '{}': {}", fileName, result.error())<<Con::endl;
 		return false;
 	}
-
-	auto s = std::make_unique<pragma::gui::JsonSkin>();
-	// TODO: Load base skin?
-	s->Load(nullptr, &json);
 	pragma::gui::WGUI::GetInstance().RegisterSkin(skin, std::move(s));
 	return true;
 }

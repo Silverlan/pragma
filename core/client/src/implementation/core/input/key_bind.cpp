@@ -26,7 +26,6 @@ KeyBind::KeyBind(const KeyBind &other) { operator=(other); }
 KeyBind &KeyBind::operator=(const KeyBind &other)
 {
 	m_bind = other.m_bind ? std::make_unique<std::string>(*other.m_bind) : nullptr;
-	;
 	m_type = other.m_type;
 	m_function = other.m_function;
 	m_cmds = other.m_cmds;

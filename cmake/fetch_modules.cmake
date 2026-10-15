@@ -19,7 +19,7 @@ function(pr_fetch_module IDENTIFIER GIT_URL GIT_SHA)
     set_property(GLOBAL PROPERTY PR_FLATPAK_SOURCES "${_sources}")
 endfunction()
 
-pr_fetch_module("interfaces"                      "https://github.com/Silverlan/pragma_interfaces.git"      "adda2aba1fbf570cf5f251ec5c1a503bab89544b")
+pr_fetch_module("interfaces"                      "https://github.com/Silverlan/pragma_interfaces.git"      "32e6cdedd1dc17a61918f675e4178a53613e4ee4")
 
 if(PRAGMA_WITH_ESSENTIAL_CLIENT_MODULES)
     pr_fetch_module("pr_prosper_vulkan"           "https://github.com/Silverlan/pr_prosper_vulkan.git"      "d31cd9143cbc7a2f73516a7be278bfe9f1fc6c14")

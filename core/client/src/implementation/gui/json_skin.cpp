@@ -170,9 +170,9 @@ static void debug_print_style(pragma::gui::types::WIBase &el)
 			os << ind << name << ": " << propStr << "\n";
 		}
 
-		if(!s.children.empty()) {
-			os << ind << "children: {\n";
-			for(const auto &[name, child] : s.children) {
+		if(!s.descendants.empty()) {
+			os << ind << "descendants: {\n";
+			for(const auto &[name, child] : s.descendants) {
 				os << child_ind << name << ": {\n";
 				self(child, indent + 2, os);
 				os << child_ind << "}\n";

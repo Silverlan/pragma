@@ -177,8 +177,6 @@ void pragma::util::CResourceWatcherManager::OnResourceChanged(const Path &rootPa
 	}
 	else if(rootPath == "scripts/ui/skins/") {
 		std::string skinName {path.GetFileName()};
-		ufile::remove_extension_from_filename(skinName, std::array<std::string, 1>{"jsonc"});
-		// TODO: Use filename as skin name?
-		Lua::gui::register_json_skin(get_client_state()->GetLuaState(), skinName, rootPath / path);
+		Lua::gui::register_json_skin(get_client_state()->GetLuaState(), skinName);
 	}
 }

@@ -1131,6 +1131,10 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	gui.SetLogHandler([](std::string_view msg, util::LogSeverity severity) {
 		GUI_LOGGER.log(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(severity)), msg);
 	});
+	gui.SetDefaultSkinFactory([]() -> gui::JsonSkin* {
+		return new gui::JsonSkinWithLua{};
+	});
+
 	RegisterUiElementTypes();
 	gui.SetLocaleResolver([](const std::string &key, const std::vector<string::Utf8String> &args) -> string::Utf8String {
 		// get_text currently doesn't support Utf8String args, so we'll convert to std::string for now
@@ -1203,6 +1207,13 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		}
 		RunConsoleCommand(cmd, args);
 	});
+
+	if (auto *skin = gui.LoadSkin("pragma"); !skin)
+	{
+		criticalFailure(std::format("Failed to load GUI theme 'pragma'!"));
+		return false;
+	}
+	gui.SetSkin("pragma");
 
 	m_speedCam = 1600.0f;
 	m_speedCamMouse = 0.2f;

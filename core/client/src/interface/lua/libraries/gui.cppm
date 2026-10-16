@@ -55,7 +55,7 @@ export namespace Lua {
 		DLLCLIENT bool register_skin(lua::State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData, const std::string &baseName);
 	    DLLCLIENT void register_default_skin(const std::string &vars, const std::string &skinData);
 #endif
-		DLLCLIENT bool register_json_skin(lua::State *l, const std::string &skin, const std::string &fileName);
+		DLLCLIENT bool register_json_skin(lua::State *l, const std::string &skin);
 		DLLCLIENT void set_skin(const std::string &skin);
 		DLLCLIENT bool skin_exists(const std::string &name);
 		DLLCLIENT pragma::platform::Cursor::Shape get_cursor();

@@ -290,23 +290,10 @@ static bool register_skin(lua::State *l, const std::string &skin, const luabind:
 	return true;
 }
 #endif
-bool Lua::gui::register_json_skin(lua::State *l, const std::string &skin, const std::string &fileName)
+bool Lua::gui::register_json_skin(lua::State *l, const std::string &skin)
 {
-	auto s = std::make_unique<pragma::gui::JsonSkinWithLua>();
-	auto f = pragma::fs::open_file(fileName, pragma::fs::FileMode::Read);
-	if (!f)
-	{
-		Con::CERR<<std::format("Failed to load json skin '{}': File not found!", fileName)<<Con::endl;
-		return false;
-	}
-	pragma::fs::File fptr {f};
-	if (auto result = s->Load(fptr); !result)
-	{
-		Con::CERR<<std::format("Failed to load json skin '{}': {}", fileName, result.error())<<Con::endl;
-		return false;
-	}
-	pragma::gui::WGUI::GetInstance().RegisterSkin(skin, std::move(s));
-	return true;
+	auto *p = pragma::gui::WGUI::GetInstance().LoadSkin(skin);
+	return p != nullptr;
 }
 #ifdef ENABLE_GUI_LUA_STATE
 void Lua::gui::register_default_skin(const std::string &vars, const std::string &skinData)

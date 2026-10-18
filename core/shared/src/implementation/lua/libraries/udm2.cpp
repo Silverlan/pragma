@@ -1259,13 +1259,13 @@ void Lua::udm::register_types(Interface &lua, luabind::module_ &modUdm)
 	cdProp.def(
 	  "ToAscii", +[](lua::State *l, ::udm::Property &prop, const std::string &propName, const std::string &prefix) -> std::string {
 		  std::stringstream ss;
-		  prop.ToAscii(::udm::AsciiSaveFlags::Default, ss, propName, prefix);
+		  prop.ToAscii({::udm::AsciiSaveFlags::Default, prefix}, ss, propName);
 		  return ss.str();
 	  });
 	cdProp.def(
 	  "ToAscii", +[](lua::State *l, ::udm::Property &prop, const std::string &propName) -> std::string {
 		  std::stringstream ss;
-		  prop.ToAscii(::udm::AsciiSaveFlags::Default, ss, propName);
+		  prop.ToAscii({::udm::AsciiSaveFlags::Default}, ss, propName);
 		  return ss.str();
 	  });
 	cdProp.def("Get", +[](lua::State *l, ::udm::Property &prop) -> ::udm::LinkedPropertyWrapper { return ::udm::LinkedPropertyWrapper {prop}; });

@@ -52,7 +52,7 @@ pr_fetch_external_lib("util_source2"            "https://github.com/Silverlan/ut
 pr_fetch_external_lib("util_string"             "https://github.com/Silverlan/util_string"            "ef7bd3436cc9e62e159f858aa30c465bf2d8e882")
 pr_fetch_external_lib("util_source_script"      "https://github.com/Silverlan/util_source_script"     "82e7537a2b562d036492568bc61be3e93507c380")
 pr_fetch_external_lib("util_timeline_scene"     "https://github.com/Silverlan/util_timeline_scene"    "6092f5ebeef6be95dc9553fe32dd424cc9af92b6")
-pr_fetch_external_lib("util_udm"                "https://github.com/Silverlan/util_udm"               "ae3fc416d784e37de3a837910d19ce5563ff89a4")
+pr_fetch_external_lib("util_udm"                "https://github.com/Silverlan/util_udm"               "f1100c5fb04f2bc17a5ac0102c1ca8d21956d067")
 pr_fetch_external_lib("util_versioned_archive"  "https://github.com/Silverlan/util_versioned_archive" "0b0e419a112f654c2fdc27e0660309afc4c581b8")
 pr_fetch_external_lib("util_vmf"                "https://github.com/Silverlan/util_vmf"               "346aaeb9446349371010423e9a39a31c7cd35afc")
 pr_fetch_external_lib("util_zip"                "https://github.com/Silverlan/util_zip"               "308709b8fc505f01c81b782ab9aed2ff6b0dc210")

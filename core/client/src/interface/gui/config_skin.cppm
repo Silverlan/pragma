@@ -1,20 +1,20 @@
 // SPDX-FileCopyrightText: (c) 2026 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
-export module pragma.client:gui.json_skin;
+export module pragma.client:gui.config_skin;
 
 export import pragma.lua;
 export import pragma.gui;
 
 namespace pragma::gui {
-	export class DLLCLIENT JsonSkinWithLua : public JsonSkin
+	export class DLLCLIENT ConfigSkinWithLua : public ConfigSkin
 	{
 	public:
-		JsonSkinWithLua();
-		using JsonSkin::Load;
+		ConfigSkinWithLua();
+		using ConfigSkin::Load;
 	protected:
 		void ApplyStyle(types::WIBase &el, Style &style) const override;
-		void Load(StyleProperty &styleProp) override;
+		void Initialize(StyleProperty &rootStyle, const udm::PropertyWrapper &data) override;
 	private:
 		void ApplyStyleLua(types::WIBase &el, Style &style) const;
 	};

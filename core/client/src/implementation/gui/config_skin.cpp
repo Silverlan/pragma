@@ -3,18 +3,18 @@
 
 module pragma.client;
 
-import :gui.json_skin;
+import :gui.config_skin;
 
 import :client_state;
 
 static auto cvDebugGuiStyleLua = pragma::console::get_client_con_var("debug_gui_style_lua");
-pragma::gui::JsonSkinWithLua::JsonSkinWithLua() : JsonSkin {} {}
-void pragma::gui::JsonSkinWithLua::ApplyStyle(types::WIBase &el, Style &style) const
+pragma::gui::ConfigSkinWithLua::ConfigSkinWithLua() : ConfigSkin {} {}
+void pragma::gui::ConfigSkinWithLua::ApplyStyle(types::WIBase &el, Style &style) const
 {
 	auto debugMode = cvDebugGuiStyleLua->GetInt();
 	if (debugMode != 2)
 	{
-		JsonSkin::ApplyStyle(el, style);
+		ConfigSkin::ApplyStyle(el, style);
 		if (auto debugPrint = style.GetPropertyValue<udm::String>("debugPrint"); debugPrint)
 		{
 			console::set_console_color(pragma::console::ConsoleColorFlags::BackgroundMagenta);
@@ -63,66 +63,57 @@ void pragma::gui::JsonSkinWithLua::ApplyStyle(types::WIBase &el, Style &style) c
 		ApplyStyleLua(el, style);
 }
 
-void pragma::gui::JsonSkinWithLua::Load(StyleProperty &styleProp)
+void pragma::gui::ConfigSkinWithLua::Initialize(StyleProperty &rootStyle, const udm::PropertyWrapper &data)
 {
-	JsonSkin::Load(styleProp);
-
-	if (auto themeProp = styleProp.FindProperty("theme"); themeProp)
+	if (auto fonts = data["theme"]["fonts"]; fonts)
 	{
-		if (auto fonts = themeProp->FindProperty("fonts"); fonts)
+		for(auto &pair : fonts.ElIt())
 		{
-			auto prop = udm::Property::Create<udm::Element>();
-			udm::LinkedPropertyWrapper udmData {*prop};
-			fonts->ToUdmData(udmData);
+			auto &fontName = pair.key;
+			auto &udmFont = pair.property;
+			std::string fontSet = "default";
+			udmFont["fontSet"] >> fontSet;
+			ResolveConstant(fontSet);
 
-			for(auto &pair : udmData.ElIt())
+			if(fontSet == "default")
+				fontSet = get_cengine()->GetDefaultFontSetName();
+
+			int32_t size = 16;
+			udmFont["size"] >> size;
+
+			auto featureFlags = FontSetFlag::None;
+			for (auto &udmFlag : udmFont["flags"])
 			{
-				auto &fontName = pair.key;
-				auto &udmFont = pair.property;
-				std::string fontSet = "default";
-				udmFont["fontSet"] >> fontSet;
-				ResolveConstant(fontSet);
-
-				if(fontSet == "default")
-					fontSet = get_cengine()->GetDefaultFontSetName();
-
-				int32_t size = 16;
-				udmFont["size"] >> size;
-
-				auto featureFlags = FontSetFlag::None;
-				for (auto &udmFlag : udmFont["flags"])
+				std::string flagVal;
+				if (!(udmFlag >> flagVal))
+					continue;
+				using namespace pragma::string::string_switch;
+				switch(hash(flagVal))
 				{
-					std::string flagVal;
-					if (!(udmFlag >> flagVal))
-						continue;
-					using namespace pragma::string::string_switch;
-					switch(hash(flagVal))
-					{
-					case "sans"_:
-						featureFlags |= FontSetFlag::Sans;
-						break;
-					case "mono"_:
-						featureFlags |= FontSetFlag::Mono;
-						break;
-					case "bold"_:
-						featureFlags |= FontSetFlag::Bold;
-						break;
-					case "italic"_:
-						featureFlags |= FontSetFlag::Italic;
-						break;
-					case "serif"_:
-						featureFlags |= FontSetFlag::Serif;
-						break;
-					}
+				case "sans"_:
+					featureFlags |= FontSetFlag::Sans;
+					break;
+				case "mono"_:
+					featureFlags |= FontSetFlag::Mono;
+					break;
+				case "bold"_:
+					featureFlags |= FontSetFlag::Bold;
+					break;
+				case "italic"_:
+					featureFlags |= FontSetFlag::Italic;
+					break;
+				case "serif"_:
+					featureFlags |= FontSetFlag::Serif;
+					break;
 				}
-
-				Lua::engine::create_font(nullptr, std::string {fontName}, fontSet, featureFlags, size, false);
 			}
+
+			Lua::engine::create_font(nullptr, std::string {fontName}, fontSet, featureFlags, size, false);
 		}
 	}
 }
 
-void pragma::gui::JsonSkinWithLua::ApplyStyleLua(types::WIBase &el, Style &style) const
+void pragma::gui::ConfigSkinWithLua::ApplyStyleLua(types::WIBase &el, Style &style) const
 {
 #ifdef ENABLE_GUI_LUA_STATE
 	auto *l = get_client_state()->GetGUILuaState();
@@ -148,7 +139,7 @@ namespace pragma::debug {
 
 static void debug_print_style(pragma::gui::types::WIBase &el)
 {
-	auto *skin = dynamic_cast<pragma::gui::JsonSkin *>(el.GetSkin());
+	auto *skin = dynamic_cast<pragma::gui::ConfigSkin *>(el.GetSkin());
 	if(!skin)
 	{
 		Con::CWAR<<"Element has no valid skin."<<Con::endl;

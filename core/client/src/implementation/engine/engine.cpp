@@ -1131,8 +1131,8 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 	gui.SetLogHandler([](std::string_view msg, util::LogSeverity severity) {
 		GUI_LOGGER.log(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(severity)), msg);
 	});
-	gui.SetDefaultSkinFactory([]() -> gui::JsonSkin* {
-		return new gui::JsonSkinWithLua{};
+	gui.SetDefaultSkinFactory([]() -> gui::ConfigSkin* {
+		return new gui::ConfigSkinWithLua{};
 	});
 
 	RegisterUiElementTypes();

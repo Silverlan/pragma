@@ -14,6 +14,8 @@ function gui.WIMenuBar:OnInitialize()
 
 	self.m_contents = gui.create("hbox", self)
 
+	self.m_menuItemContainer = gui.create("hbox", self.m_contents)
+
 	self:SetName("menu_bar")
 	--[[local pMain = gui.create("WIRect")
 	pMain:SetBackgroundElement(true)
@@ -55,7 +57,8 @@ function gui.WIMenuBar:OnInitialize()
 	--[[pClose:SetSize(self:GetHeight(),self:GetHeight())
 	pClose:SetRight(self:GetRight())
 	pClose:SetAnchor(1,0,1,0)]]
-	self:AddStyleClass("menu_bar")
+	self:AddStyleClass("menu-bar")
+	self.m_contents:AddStyleClass("menu-bar__content-area")
 	self:ScheduleUpdate()
 
 	self.m_eventData = get_event()
@@ -70,6 +73,7 @@ local function get_interpolated_color(colors, factor)
 
 	return col0:Lerp(col1, factor * #colors - colIndex0)
 end
+function gui.WIMenuBar:GetContents() return self.m_contents end
 function gui.WIMenuBar:UpdateWindowColors()
 	if self.m_eventData == nil then
 		return
@@ -156,7 +160,7 @@ function gui.WIMenuBar:FindItemByIdentifier(identifier)
 	return self.m_idToItem[identifier]
 end
 function gui.WIMenuBar:AddItem(name, fcContextCallback, identifier)
-	local pItem = gui.create("menu_item", self.m_contents)
+	local pItem = gui.create("menu_item", self.m_menuItemContainer)
 	if util.is_valid(pItem) == false then
 		return
 	end

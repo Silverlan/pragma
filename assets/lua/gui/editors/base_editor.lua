@@ -8,10 +8,6 @@ include("/gui/pfm/layout/info_bar.lua")
 include("/gui/pfm/containers/frame.lua")
 
 util.register_class("gui.WIBaseEditor", gui.Base)
-function gui.WIBaseEditor:__init()
-	gui.Base.__init(self)
-end
-
 function gui.WIBaseEditor:OnVisibilityChanged(bVisible)
 	if bVisible == false then
 		gui.close_context_menu()
@@ -120,7 +116,7 @@ function gui.WIBaseEditor:InitializeGenericLayout()
 	self.m_contents = gui.create("hbox")
 	self.m_contents:SetParent(self.m_root, self.m_infoBar:FindChildIndex())
 	self.m_contents:SetName("contents")
-	self.m_contents:AddStyleClass("editor_contents")
+	self.m_contents:AddStyleClass("editor__content-area")
 end
 
 function gui.WIBaseEditor:GetContentsElement()

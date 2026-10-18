@@ -9,12 +9,7 @@ function InfoBox:OnInitialize()
 	gui.Base.OnInitialize(self)
 
 	self:SetSize(128, 128)
-
-	local bg = gui.create("WIRect", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
-	self.m_bg = bg
-
-	local bar = gui.create("WIRect", self, 0, 0, 3, self:GetHeight(), 0, 0, 0, 1)
-	self.m_bar = bar
+	self:SetAutoSizeToContents(true)
 
 	self.m_btClose = gui.PFMButton.create(self, "gui/pfm/icon_clear", "gui/pfm/icon_clear_activated", function()
 		self:CallCallbacks("OnClose")
@@ -24,12 +19,9 @@ function InfoBox:OnInitialize()
 		end
 		self:SetVisible(false)
 	end)
-	self.m_btClose:SetSize(11, 11)
-	self.m_btClose:SetPos(self:GetWidth() - self.m_btClose:GetWidth() - 3, 3)
-	self.m_btClose:SetAnchor(1, 0, 1, 0)
 
-	local contents = gui.create("WIBase", self)
-	contents:AnchorWithMargin(20)
+	local contents = gui.create("vbox", self)
+	contents:AddStyleClass("info-box")
 	self.m_contents = contents
 
 	local text = gui.create("WIText", contents)
@@ -51,28 +43,18 @@ end
 function InfoBox:SetType(type)
 	self.m_type = type
 
-	self.m_bg:RemoveStyleClass("bg_info")
-	self.m_bg:RemoveStyleClass("bg_warning")
-	self.m_bg:RemoveStyleClass("bg_error")
-	self.m_text:RemoveStyleClass("fg_info")
-	self.m_text:RemoveStyleClass("fg_warning")
-	self.m_text:RemoveStyleClass("fg_error")
-	self.m_bar:RemoveStyleClass("fg_info")
-	self.m_bar:RemoveStyleClass("fg_warning")
-	self.m_bar:RemoveStyleClass("fg_error")
+	self.m_contents:RemoveStyleClass("info-box--info")
+	self.m_contents:RemoveStyleClass("info-box--warning")
+	self.m_contents:RemoveStyleClass("info-box--error")
+
 	if type == InfoBox.TYPE_INFO then
-		self.m_bg:AddStyleClass("bg_info")
-		self.m_text:AddStyleClass("fg_info")
-		self.m_bar:AddStyleClass("fg_info")
+		self.m_contents:AddStyleClass("info-box--info")
 	elseif type == InfoBox.TYPE_WARNING then
-		self.m_bg:AddStyleClass("bg_warning")
-		self.m_text:AddStyleClass("fg_warning")
-		self.m_bar:AddStyleClass("fg_warning")
+		self.m_contents:AddStyleClass("info-box--warning")
 	elseif type == InfoBox.TYPE_ERROR then
-		self.m_bg:AddStyleClass("bg_error")
-		self.m_text:AddStyleClass("fg_error")
-		self.m_bar:AddStyleClass("fg_error")
+		self.m_contents:AddStyleClass("info-box--error")
 	end
+	self.m_contents:RefreshSkin()
 end
 function InfoBox:GetType()
 	return self.m_type
@@ -88,7 +70,6 @@ function InfoBox:GetTextElement()
 end
 function InfoBox:SizeToContents()
 	self.m_text:UpdateSubLines()
-	self:SetHeight(self.m_contents:GetTop() * 2 + self.m_text:GetTextHeight())
 end
 gui.register("InfoBox", InfoBox)
 

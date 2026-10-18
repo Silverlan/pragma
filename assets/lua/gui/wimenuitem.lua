@@ -15,7 +15,7 @@ function gui.WIMenuItem:OnInitialize()
 	self.m_pText = pText
 
 	self:SetSelected(false)
-	self:AddStyleClass("menu_item")
+	self:AddStyleClass("menu-item")
 end
 
 function gui.WIMenuItem:SetRightText(text)

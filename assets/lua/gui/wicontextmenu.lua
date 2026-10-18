@@ -66,7 +66,7 @@ function gui.WIContextMenu:OnInitialize()
 	end)
 	self.m_contents = contents
 
-	self:AddStyleClass("context_menu")
+	self:AddStyleClass("context-menu")
 	self:SetHeight(0) -- Hide the element initially to avoid flickering
 end
 function gui.WIContextMenu:UpdateCompactHeight(h, dontApply)

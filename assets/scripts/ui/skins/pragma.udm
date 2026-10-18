@@ -1,0 +1,271 @@
+{
+	"theme" {
+		inherits: "base"
+		fonts: {
+			"MainMenu_Regular" {
+				fontSet: "default"
+				size: 36
+				flags: ["sans", "mono"]
+			}
+		}
+		constants: {
+			FONT_MAIN_MENU_BODY: "MainMenu_Regular"
+
+			COLOR_BG_PANEL: "#232323"
+			COLOR_BG_SURFACE: "#323232"
+			COLOR_BG_SURFACE_HOVER: "#404040"
+			COLOR_BG_INPUT: "#ffffff"
+
+			STYLE_TEXT_PRIMARY: "#ffffff"
+			STYLE_TEXT_INVERSE: "#000000"
+
+			COLOR_ACCENT_PRIMARY: "#bfbfbf"
+
+			COLOR_BORDER_DEFAULT: "#111111"
+
+			STYLE_NAV_ITEM: {
+				textTransform: "uppercase"
+				font: "$FONT_MAIN_MENU_BODY"
+				color: "#4c4c4c"
+				shadowColor: "#000000"
+				shadowOffset: [2, 2]
+			}
+
+			STYLE_NAV_ITEM_HOVER: {
+				color: "$STYLE_TEXT_PRIMARY"
+			}
+		}
+	}
+
+	// Main Menu
+	".main_menu__logo" {
+		material: "wgui/pragma_logo"
+		x: 192
+		y: 80
+		width: "auto"
+		height: 64
+		zIndex: 1000
+	}
+	".main_menu__nav" {
+		x: 171
+		y: 250
+	}
+	".main_menu__nav-item" {
+		width: 350
+		height: 46
+		descendants: {
+			"witext" {
+				x: 21
+				style: "$STYLE_NAV_ITEM"
+			}
+		}
+		states: {
+			"hover" {
+				background: "#4c4c4c"
+				sound: "ui/menu_select"
+				"descendants" {
+					"witext" {
+						style: "$STYLE_NAV_ITEM_HOVER"
+					}
+				}
+				"decorators" {
+					"left_hover_bar" {
+						visible: true
+					}
+				}
+			}
+		}
+		decorators: {
+			"left_hover_bar" {
+				type: "WIRect"
+				x: 0
+				y: 0
+				width: 4
+				height: "100%"
+				visible: false
+				color: "#ffff00"
+			}
+		}
+	}
+	"wioptionslist" {
+		width: "600"
+		x: "450"
+		y: "250"
+	}
+	"witable" {
+		background: "$COLOR_BG_PANEL"
+	}
+	".table__row--header" {
+		background: "$COLOR_BG_SURFACE"
+		descendants: {
+			".table__label" {
+				align: "center"
+			}
+		}
+	}
+	".table__row" {
+		outlineWidth: 1
+		outlineColor: "$COLOR_BORDER_DEFAULT"
+		descendants: {
+			".table__label" {
+				alignY: "center"
+				x: 12
+			}
+		}
+	}
+	"witablecell" {
+		descendants: {
+			"witext" {
+				//"debugPrint": "1",
+				style: "$STYLE_TEXT_PRIMARY"
+			}
+		}
+	}
+	"wibutton" {
+		background: "$COLOR_BG_SURFACE"
+		descendants: {
+			"witext" {
+				align: "center"
+				textTransform: "uppercase"
+				style: "$STYLE_TEXT_PRIMARY"
+			}
+		}
+		states: {
+			"hover" {
+				background: "$COLOR_BG_SURFACE_HOVER"
+			}
+		}
+	}
+	".progress-bar__label--overlay" {
+		style: "$STYLE_TEXT_INVERSE"
+	}
+	".progress-bar__label--background" {
+		style: "$STYLE_TEXT_PRIMARY"
+	}
+	"wichoicelist" {
+		descendants: {
+			"witext" {
+				style: "$STYLE_TEXT_PRIMARY"
+			}
+		}
+	}
+	".progress-bar" {
+		outlineWidth: 1
+		outlineColor: "$COLOR_BORDER_DEFAULT"
+	}
+	".progress-bar__fill" {
+		background: "$COLOR_BG_SURFACE"
+	}
+	".scrollbar__slider" {
+		background: "$COLOR_ACCENT_PRIMARY"
+	}
+	".text-entry__caret" {
+		backgroundColor: "$COLOR_BORDER_DEFAULT"
+	}
+	".text-entry" {
+		background: {
+			color: "$COLOR_BG_INPUT"
+			borderThickness: 1
+			borderColor: "$COLOR_BORDER_DEFAULT"
+		}
+		descendants: {
+			"witext" {
+				//"debugPrint": "2",
+				style: "$STYLE_TEXT_INVERSE"
+			}
+		}
+	}
+	".text-entry__field" {
+		width: "100%"
+	}
+	".text-entry__field--single-line" {
+		//"alignY": "center"
+	}
+	".text-entry__field--multi-line" {
+		height: "100%"
+		alignItems: "stretch"
+	}
+	".text-selection" {
+		background: "$COLOR_ACCENT_PRIMARY"
+	}
+	".dropdown-menu__list" {
+		background: "$COLOR_BG_INPUT"
+		outlineWidth: 1
+		outlineColor: "$COLOR_BORDER_DEFAULT"
+		alignItems: "stretch"
+		zIndex: 10000
+	}
+	".dropdown-menu__option" {
+		height: 18
+		states: {
+			"hover" {
+				background: "$COLOR_ACCENT_PRIMARY"
+			}
+		}
+	}
+	"widropdownmenu" {
+		descendants: {
+			".text-entry__field" {
+				alignX: "stretch"
+				marginRight: 20 // Leave some space for the arrow icon
+			}
+		}
+		decorators: {
+			"arrow" {
+				type: "WIArrow"
+				width: 8
+				height: 8
+
+				alignX: "right"
+				marginRight: 6
+
+				alignY: "center"
+			}
+		}
+	}
+
+	".detachable__contents" {
+		align: "stretch"
+	}
+
+	".transformable__transform-rect" {
+		//"debugPrint": "1",
+		height: 28
+	}
+
+	".frame__contents" {
+		flex: 1
+	}
+	".frame__title-bar" {
+		descendants: {
+			"wibutton" {
+				width: 20
+				height: 20
+			}
+			"witext" {
+				style: "$STYLE_TEXT_PRIMARY"
+			}
+		}
+		height: 24
+		justifyContent: "spaceBetween"
+	}
+
+	"wiserverbrowser" {
+		width: 800
+		height: 400
+		minWidth: 400
+		minHeight: 300
+		background: "$COLOR_BG_PANEL"
+		descendants: {
+			"witable" {
+				alignX: "stretch"
+
+				flex: 1
+			}
+			".button-container" {
+				alignX: "stretch"
+				justifyContent: "end"
+			}
+		}
+	}
+}

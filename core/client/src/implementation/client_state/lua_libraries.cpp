@@ -161,7 +161,10 @@ static void register_gui(Lua::Interface &lua)
 	    "set_focus_enabled", +[](const prosper::Window &window, bool focusEnabled) { pragma::gui::WGUI::GetInstance().SetFocusEnabled(window, focusEnabled); }),
 	  luabind::def(
 	    "is_focus_enabled", +[](const prosper::Window &window) { return pragma::gui::WGUI::GetInstance().IsFocusEnabled(window); }),
-
+	    luabind::def("load_skin", +[](const std::string &name) -> bool {
+		    auto *skin = pragma::gui::WGUI::GetInstance().LoadSkin(name);
+	    	return (skin != nullptr);
+	    }),
 	  luabind::def("set_skin", Lua::gui::set_skin), luabind::def("skin_exists", Lua::gui::skin_exists), luabind::def("get_cursor", Lua::gui::get_cursor), luabind::def("set_cursor", Lua::gui::set_cursor),
 	  luabind::def("get_cursor_input_mode", Lua::gui::get_cursor_input_mode), luabind::def("set_cursor_input_mode", Lua::gui::set_cursor_input_mode), luabind::def("get_window_size", Lua::gui::get_window_size),
 	  luabind::def("inject_mouse_input", static_cast<bool (*)(pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier, const Vector2i &)>(&Lua::gui::inject_mouse_input)),

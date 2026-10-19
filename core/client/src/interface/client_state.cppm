@@ -151,8 +151,6 @@ export namespace pragma {
 		networking::ClientMessageMap *GetNetMessageMap();
 		void SendUserInfo();
 
-		void InitializeGUIModule();
-
 		// Sound
 		virtual void StopSounds() override;
 		virtual void StopSound(std::shared_ptr<audio::ALSound> pSnd) override;

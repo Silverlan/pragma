@@ -828,20 +828,6 @@ pragma::networking::IClient *pragma::ClientState::GetClient() { return m_client.
 
 void pragma::ClientState::InitializeResourceManager() { m_resourceWatcher = std::make_unique<util::CResourceWatcherManager>(this); }
 
-void pragma::ClientState::InitializeGUIModule()
-{
-#ifdef _WIN32
-	if(m_lastModuleHandle == nullptr)
-		return;
-	auto *l = GetGUILuaState();
-	if(l != nullptr)
-		InitializeDLLModule(l, m_lastModuleHandle);
-	l = GetLuaState();
-	if(l != nullptr)
-		InitializeDLLModule(l, m_lastModuleHandle);
-#endif
-}
-
 unsigned int pragma::ClientState::GetServerMessageID(std::string_view identifier)
 {
 	auto *map = networking::get_server_message_map();

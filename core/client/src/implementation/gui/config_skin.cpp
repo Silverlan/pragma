@@ -14,18 +14,18 @@ void pragma::gui::ConfigSkinWithLua::ApplyStyle(types::WIBase &el, Style &style)
 	auto debugMode = cvDebugGuiStyleLua->GetInt();
 	if (debugMode != 2)
 	{
-		ConfigSkin::ApplyStyle(el, style);
 		if (auto debugPrint = style.GetPropertyValue<udm::String>("debugPrint"); debugPrint)
 		{
 			console::set_console_color(pragma::console::ConsoleColorFlags::BackgroundMagenta);
 
 			std::stringstream elStr;
-			elStr << el;
+			elStr << el.GetIndex();
 
 			auto msg = *debugPrint;
 			string::replace(msg, "{self}", elStr.str());
 			Con::COUT << "GUI element debug print: " << msg << Con::endl;
 		}
+		ConfigSkin::ApplyStyle(el, style);
 
 		constexpr std::string_view soundCacheKey = "lastSkinSound";
 		if (auto sound = style.GetPropertyValue<udm::String>("sound"); sound)

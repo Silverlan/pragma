@@ -31,9 +31,14 @@ void pragma::gui::types::WIScrollContainer::SizeToContents(bool x, bool y, Chang
 {
 	if(m_hWrapper.IsValid() == false)
 		return;
-	m_hWrapper->SizeToContents(x, y, changeSource);
+	//m_hWrapper->SizeToContents(x, y, changeSource);
 	auto sz = m_hWrapper.get()->GetSize();
-	SetSize(sz.x, sz.y, changeSource);
+	if(x && y)
+		SetSize(sz.x, sz.y, changeSource);
+	else if(x)
+		SetWidth(sz.x, false, changeSource);
+	else if(y)
+		SetHeight(sz.y, false, changeSource);
 }
 
 int pragma::gui::types::WIScrollContainer::GetContentWidth()
@@ -127,22 +132,28 @@ void pragma::gui::types::WIScrollContainer::OnVScrollOffsetChanged(unsigned int 
 void pragma::gui::types::WIScrollContainer::Initialize()
 {
 	WIBase::Initialize();
-	m_hScrollBarH = CreateChild<WIScrollBar>();
-	WIScrollBar *pScrollBarH = m_hScrollBarH.get<WIScrollBar>();
-	pScrollBarH->SetVisible(false);
-	pScrollBarH->SetZPos(1000);
-	pScrollBarH->AddStyleClass("scrollbar_horizontal");
-	pScrollBarH->AddCallback("OnScrollOffsetChanged", FunctionCallback<void, unsigned int>::Create(std::bind(&WIScrollContainer::OnHScrollOffsetChanged, this, std::placeholders::_1)));
 
-	m_hScrollBarV = CreateChild<WIScrollBar>();
+	auto vcontents = CreateChild<VBox>();
+	vcontents->AddStyleClass("sc_test_vbox");
+	auto hcontents = vcontents->CreateChild<HBox>();
+	hcontents->AddStyleClass("sc_test_hbox");
+
+	m_hWrapper = hcontents->CreateChild<WIBase>();
+	WIBase *pWrapper = m_hWrapper.get();
+	pWrapper->SetAutoSizeToContents(false, true); // TODO: Horizontal/Vertical
+	pWrapper->AddStyleClass("test_sc_wrapper");
+
+	m_hScrollBarV = hcontents->CreateChild<WIScrollBar>();
 	WIScrollBar *pScrollBarV = m_hScrollBarV.get<WIScrollBar>();
-	pScrollBarV->SetVisible(false);
-	pScrollBarV->SetZPos(1000);
-	pScrollBarH->AddStyleClass("scrollbar_vertical");
+	pScrollBarV->SetVisible(true);//false);
+	pScrollBarV->AddStyleClass("scrollbar--vertical");
 	pScrollBarV->AddCallback("OnScrollOffsetChanged", FunctionCallback<void, unsigned int>::Create(std::bind(&WIScrollContainer::OnVScrollOffsetChanged, this, std::placeholders::_1)));
 
-	m_hWrapper = CreateChild<WIBase>();
-	WIBase *pWrapper = m_hWrapper.get();
+	m_hScrollBarH = vcontents->CreateChild<WIScrollBar>();
+	WIScrollBar *pScrollBarH = m_hScrollBarH.get<WIScrollBar>();
+	pScrollBarH->SetVisible(true);//false);
+	pScrollBarH->AddStyleClass("scrollbar--horizontal");
+	pScrollBarH->AddCallback("OnScrollOffsetChanged", FunctionCallback<void, unsigned int>::Create(std::bind(&WIScrollContainer::OnHScrollOffsetChanged, this, std::placeholders::_1)));
 
 	// pWrapper->SetAutoAlignToParent(true);
 	m_hChildAdded = pWrapper->AddCallback("OnChildAdded", FunctionCallback<void, WIBase *>::Create(std::bind(&WIScrollContainer::OnWrapperChildAdded, this, std::placeholders::_1)));
@@ -271,15 +282,13 @@ void pragma::gui::types::WIScrollContainer::DoUpdate()
 			w = size.x;
 		if(IsContentsHeightFixed())
 			h = size.y;
-		pWrapper->SetSize(w, h);
+		//pWrapper->SetSize(w, h);
 		if(m_hScrollBarH.IsValid()) {
 			WIScrollBar *pScrollBar = m_hScrollBarH.get<WIScrollBar>();
 			pScrollBar->SetHorizontal(true);
 			pScrollBar->SetUp(size.x, w);
 			pScrollBar->SetScrollAmount(m_scrollAmountX);
-			pScrollBar->SetSize(GetWidth(), 10);
-			pScrollBar->SetY(GetHeight() - pScrollBar->GetHeight());
-			pScrollBar->SetVisible(w > size.x); // set scroll offset to 0
+			pScrollBar->SetVisible(true);//w > size.x); // set scroll offset to 0
 		}
 		if(m_hScrollBarV.IsValid()) {
 			WIScrollBar *pScrollBar = m_hScrollBarV.get<WIScrollBar>();
@@ -287,12 +296,10 @@ void pragma::gui::types::WIScrollContainer::DoUpdate()
 
 			pScrollBar->SetUp(size.y, h);
 			pScrollBar->SetScrollAmount(m_scrollAmountY);
-			pScrollBar->SetSize(10, GetHeight());
-			pScrollBar->SetX(GetWidth() - pScrollBar->GetWidth());
 
 			if(bAtBottom == true && ShouldAutoStickToBottom())
 				ScrollToBottom();
-			pScrollBar->SetVisible(h > size.y);
+			pScrollBar->SetVisible(true);//h > size.y);
 		}
 	}
 	WIBase::DoUpdate();

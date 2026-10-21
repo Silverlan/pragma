@@ -18,6 +18,13 @@ namespace pragma::debug {
 
 		ss << "Class: " << el.GetClass() << "\nName: " << el.GetName() << "\nIndex: " << el.GetIndex() << "\nSize: (" << size.x << "," << size.y << ")"
 		   << "\nPos: (" << pos.x << "," << pos.y << ")";
+		if(auto &styleClasses = el.GetStyleClasses(); !styleClasses.empty()) {
+			std::vector<std::string> strings;
+			strings.reserve(styleClasses.size());
+			for(auto &styleClass : styleClasses)
+				strings.push_back(std::string {styleClass});
+			ss<<"\nStyle Classes: " << string::implode(strings);
+		}
 		auto debugInfo = el.GetDebugInfo();
 		if(debugInfo.empty() == false)
 			ss << "\nDebug Info: " << debugInfo;

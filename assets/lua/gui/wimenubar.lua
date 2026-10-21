@@ -10,8 +10,7 @@ function gui.WIMenuBar:OnRemove() end
 function gui.WIMenuBar:OnInitialize()
 	gui.Base.OnInitialize(self)
 
-	self:SetSize(128, 24)
-
+	self:SetAutoSizeToContents(false, true)
 	self.m_contents = gui.create("hbox", self)
 
 	self.m_menuItemContainer = gui.create("hbox", self.m_contents)
@@ -121,41 +120,6 @@ function gui.WIMenuBar:IsContextMenuOpen()
 	end
 	return false
 end
-function gui.WIMenuBar:UpdateItem(item)
-	item:SetHeight(self:GetHeight())
-
-	local elText = item:GetTextElement()
-	if util.is_valid(elText) then
-		item:SetWidth(elText:GetWidth() + 10)
-	end
-
-	item:Update()
-end
-function gui.WIMenuBar:OnSizeChanged(w, h)
-	if self.m_tItems == nil then
-		return
-	end
-	self:OnUpdate()
-end
-function gui.WIMenuBar:OnUpdate()
-	if self.m_tItems == nil then
-		return
-	end
-	local x = 0
-	for _, item in ipairs(self.m_tItems) do
-		if item:IsValid() then
-			item:ApplyX(x)
-			item:ApplyHeight(self:GetHeight())
-
-			local elText = item:GetTextElement()
-
-			item:ApplyWidth(elText:GetWidth() + 20)
-			item:Update()
-
-			x = x + item:GetWidth()
-		end
-	end
-end
 function gui.WIMenuBar:FindItemByIdentifier(identifier)
 	return self.m_idToItem[identifier]
 end
@@ -176,7 +140,6 @@ function gui.WIMenuBar:AddItem(name, fcContextCallback, identifier)
 		end
 	end)
 	table.insert(self.m_tItems, pItem)
-	self:UpdateItem(pItem)
 	if identifier ~= nil then
 		self.m_idToItem[identifier] = pItem
 	end

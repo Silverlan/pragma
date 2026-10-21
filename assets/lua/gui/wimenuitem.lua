@@ -5,18 +5,23 @@ util.register_class("gui.WIMenuItem", gui.Base)
 function gui.WIMenuItem:OnInitialize()
 	gui.Base.OnInitialize(self)
 
-	self:SetSize(128, 16)
-	--self:SetAutoFillContents(true)
 	self.m_enabled = true
+
+	self:SetAutoSizeToContents(true)
+	local contents = gui.create("hbox", self)
+	contents:AddStyleClass("menu-item__content-area")
+	self.m_contents = contents
 
 	self:SetMouseInputEnabled(true)
 
-	local pText = gui.create("WIText", self)
+	local pText = gui.create("WIText", contents)
 	self.m_pText = pText
 
 	self:SetSelected(false)
 	self:AddStyleClass("menu-item")
 end
+
+function gui.WIMenuItem:GetContents() return self.m_contents end
 
 function gui.WIMenuItem:SetRightText(text)
 	if text == nil or text == "" then

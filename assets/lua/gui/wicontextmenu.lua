@@ -23,12 +23,11 @@ function gui.WIContextMenu:OnInitialize()
 	gui.impl.contextMenu.activeMenuCount = gui.impl.contextMenu.activeMenuCount + 1
 	gui.Base.OnInitialize(self)
 
-	self:SetSize(64, 1)
-
 	self.m_tItems = {}
 	self.m_subMenues = {}
 	self.m_itemToSubMenu = {}
 
+	self:SetAutoSizeToContents(true)
 	self:SetKeyboardInputEnabled(true)
 
 	if util.is_valid(gui.impl.cbMouseInput) == false then
@@ -46,31 +45,21 @@ function gui.WIContextMenu:OnInitialize()
 		end)
 	end
 
-	local scrollContainer = gui.create("WIScrollContainer", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
-	scrollContainer:AddCallback("OnSizeChanged", function(el)
-		self.m_contents:SetWidth(el:GetWidth())
-	end)
+	local scrollContainer = gui.create("WIScrollContainer", self)
+	scrollContainer:AddStyleClass("testtt")
+	scrollContainer:SetContentsWidthFixed(true)
+	scrollContainer:SetAutoSizeToContents(false, true)
 	scrollContainer:GetVerticalScrollBar():SetScrollAmount(1)
 	self.m_scrollContainer = scrollContainer
 
-	local contents = gui.create("vbox", scrollContainer, 0, 0, self:GetWidth(), self:GetHeight())
-	contents:SetFixedWidth(true)
-	contents:SetAlignItems(gui.FlexBox.FLEX_ALIGN_STRETCH)
-	contents:AddCallback("OnSizeChanged", function(el)
-		if(self.m_updateHeightOnContainerChange) then
-			self:UpdateCompactHeight()
-		end
-	end)
-	contents:AddCallback("OnUpdated", function(el)
-		self.m_scrollContainer:ScheduleUpdate()
-	end)
+	local contents = gui.create("vbox", scrollContainer)
+	contents:AddStyleClass("context-emnu-vbox-test")
 	self.m_contents = contents
 
 	self:AddStyleClass("context-menu")
-	self:SetHeight(0) -- Hide the element initially to avoid flickering
 end
 function gui.WIContextMenu:UpdateCompactHeight(h, dontApply)
-	h = h or self.m_contents:GetHeight()
+	--[[h = h or self.m_contents:GetHeight()
 	if self.m_contents:GetHeight() >= MAX_HEIGHT then
 		if(dontApply ~= false) then
 			self:SetHeight(MAX_HEIGHT)
@@ -79,7 +68,7 @@ function gui.WIContextMenu:UpdateCompactHeight(h, dontApply)
 	elseif self.m_contents:GetHeight() <= MAX_HEIGHT and self.m_contents:GetHeight() ~= self:GetHeight() then
 		h = self.m_contents:GetHeight()
 		if(dontApply ~= false) then self:SetHeight(h) end
-	end
+	end]]
 	return h
 end
 function gui.WIContextMenu:IsPopulated()
@@ -128,7 +117,7 @@ function gui.WIContextMenu:AddLine()
 	-- TODO
 end
 function gui.WIContextMenu:OnUpdate()
-	local updateItems = {}
+	--[[local updateItems = {}
 	local function updateAutoSize(item)
 		for _, menu in ipairs(item.m_subMenues) do
 			updateAutoSize(menu)
@@ -163,7 +152,7 @@ function gui.WIContextMenu:OnUpdate()
 		item:Update()
 	end
 
-	self:UpdateFlipState()
+	self:UpdateFlipState()]]
 end
 function gui.WIContextMenu:SetOriginPos(origPos, y)
 	if(y ~= nil) then
@@ -274,7 +263,6 @@ function gui.WIContextMenu:AddItem(name, fcOnClick, keybind)
 		end
 		gui.close_context_menu(get_base_element(pItem))
 	end)
-	pItem:SizeToContents()
 	table.insert(self.m_tItems, pItem)
 	return pItem
 end
@@ -400,13 +388,7 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 	table.insert(self.m_subMenues, pSubMenu)
 	self.m_itemToSubMenu[pItem] = pSubMenu
 
-	local pIcon = gui.create("wiarrow", pItem)
-	pIcon:SetVerticalAlignment(gui.ALIGNMENT_CENTER)
-	local function updateIcon()
-		pIcon:SetX(pItem:GetWidth() - pIcon:GetWidth() - 5)
-	end
-	updateIcon()
-	pItem:AddCallback("OnSizeChanged", updateIcon)
+	local pIcon = gui.create("wiarrow", pItem:GetContents())
 	pIcon:SetDirection(gui.Arrow.DIRECTION_RIGHT)
 
 	return pItem, pSubMenu

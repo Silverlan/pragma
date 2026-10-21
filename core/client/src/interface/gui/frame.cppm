@@ -16,7 +16,7 @@ export namespace pragma::gui::types {
 		virtual ~WIFrame() override;
 		virtual void Initialize() override;
 		WIBase *GetContents();
-		VBox *GetInnerContents();
+		FlexBox *GetInnerContents();
 		void SetTitle(std::string title);
 		const string::Utf8String &GetTitle() const;
 		void SetCloseButtonEnabled(bool b);

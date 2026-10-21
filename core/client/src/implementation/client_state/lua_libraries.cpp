@@ -725,17 +725,13 @@ static void register_gui(Lua::Interface &lua)
 	flexBoxDef.def("SetAutoSizeActivated", &pragma::gui::types::FlexBox::SetAutoSizeActivated);
 	flexBoxDef.def("SetAutoSizeActivated", +[](pragma::gui::types::FlexBox &flexBox, bool activated) { flexBox.SetAutoSizeActivated(activated); });
 
+	flexBoxDef.def("SetFlexDirection", &pragma::gui::types::FlexBox::SetFlexDirection);
+	flexBoxDef.def("GetFlexDirection", &pragma::gui::types::FlexBox::GetFlexDirection);
 	flexBoxDef.def("IsHorizontalBox", &pragma::gui::types::FlexBox::IsHorizontalBox);
 	flexBoxDef.def("IsVerticalBox", &pragma::gui::types::FlexBox::IsVerticalBox);
 	flexBoxDef.def("HasAlignedAnchor", static_cast<bool(pragma::gui::types::FlexBox::*)(pragma::gui::types::WIBase *, pragma::gui::types::FlexDirection) const>(&pragma::gui::types::FlexBox::HasAlignedAnchor));
 	flexBoxDef.def("HasAlignedAnchor", static_cast<bool(pragma::gui::types::FlexBox::*)(pragma::gui::types::WIBase *) const>(&pragma::gui::types::FlexBox::HasAlignedAnchor));
 	guiMod[flexBoxDef];
-
-	auto vboxDef = luabind::class_<pragma::gui::types::VBox, luabind::bases<pragma::gui::types::FlexBox, pragma::gui::types::WIBase>>("VBox");
-	guiMod[vboxDef];
-
-	auto hboxDef = luabind::class_<pragma::gui::types::HBox, luabind::bases<pragma::gui::types::FlexBox, pragma::gui::types::WIBase>>("HBox");
-	guiMod[hboxDef];
 
 	guiMod[wiOutlinedRectClassDef];
 	guiMod[wiLineClassDef];

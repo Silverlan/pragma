@@ -133,9 +133,9 @@ void pragma::gui::types::WIScrollContainer::Initialize()
 {
 	WIBase::Initialize();
 
-	auto vcontents = CreateChild<VBox>();
+	auto vcontents = GetSystem().CreateVBox(this);
 	vcontents->AddStyleClass("sc_test_vbox");
-	auto hcontents = vcontents->CreateChild<HBox>();
+	auto hcontents = GetSystem().CreateHBox(vcontents);
 	hcontents->AddStyleClass("sc_test_hbox");
 
 	m_hWrapper = hcontents->CreateChild<WIBase>();

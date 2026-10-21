@@ -12,7 +12,7 @@ export namespace pragma::gui::types {
 		~WIDetachable() override;
 		void Initialize() override;
 		void OnRemove() override;
-		VBox *GetContents();
+		FlexBox *GetContents();
 		void Detach();
 		void Reattach();
 		bool IsDetached() const;

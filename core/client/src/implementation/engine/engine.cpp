@@ -1404,9 +1404,8 @@ void pragma::CEngine::RegisterUiElementTypes()
 	RegisterGuiLuaObjectFactory<gui::types::WINumericEntry>();
 	RegisterGuiLuaObjectFactory<gui::types::WIText>();
 	RegisterGuiLuaObjectFactory<gui::types::WITooltip>();
-	RegisterGuiLuaObjectFactory<gui::types::HBox>();
-	RegisterGuiLuaObjectFactory<gui::types::VBox>();
-	static_assert(gui::NUMBER_OF_CORE_UI_ELEMENT_TYPES == 26, "If core UI element types have been added, they have to be registered above.");
+	RegisterGuiLuaObjectFactory<gui::types::FlexBox>();
+	static_assert(gui::NUMBER_OF_CORE_UI_ELEMENT_TYPES == 25, "If core UI element types have been added, they have to be registered above.");
 
 	// Engine GUI types
 	RegisterGuiType<gui::types::WICheckbox>("WICheckbox");

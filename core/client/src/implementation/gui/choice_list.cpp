@@ -15,11 +15,11 @@ pragma::gui::types::WIChoiceList::~WIChoiceList() {}
 void pragma::gui::types::WIChoiceList::Initialize()
 {
 	WIBase::Initialize();
-	auto contents = CreateChild<HBox>();
+	auto contents = GetSystem().CreateHBox(this);
 	contents->AddStyleClass("choice-list__content-area");
-	static_cast<HBox*>(contents.get())->SetJustifyContent(FlexJustify::SpaceBetween);
+	contents->SetJustifyContent(FlexJustify::SpaceBetween);
 
-	auto prevContainer = contents->CreateChild<HBox>();
+	auto prevContainer = GetSystem().CreateHBox(contents);
 	prevContainer->AddStyleClass("choice-list__button-container");
 
 	m_buttonPrev = prevContainer->CreateChild<WIButton>();
@@ -35,7 +35,7 @@ void pragma::gui::types::WIChoiceList::Initialize()
 		return CallbackReturnType::HasReturnValue;
 	}));
 
-	auto nextContainer = contents->CreateChild<HBox>();
+	auto nextContainer = GetSystem().CreateHBox(contents);
 	nextContainer->AddStyleClass("choice-list__button-container");
 
 	m_buttonNext = nextContainer->CreateChild<WIButton>();

@@ -26,7 +26,7 @@ void pragma::gui::types::WIMainMenuBase::Initialize()
 {
 	WIBase::Initialize();
 	SetSize(1'024, 768);
-	m_menuElementsContainer = WGUI::GetInstance().Create<VBox>(this)->GetHandle();
+	m_menuElementsContainer = WGUI::GetInstance().CreateVBox(this)->GetHandle();
 	m_menuElementsContainer->AddStyleClass("main_menu__nav");
 	ScheduleUpdate();
 }

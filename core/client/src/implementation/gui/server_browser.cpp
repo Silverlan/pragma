@@ -250,7 +250,7 @@ void pragma::gui::types::WIServerBrowser::Initialize()
 		t->SetColumnWidth(0, 30);
 	}
 
-	auto *buttonBox = wgui.Create<HBox>(contents);
+	auto *buttonBox = wgui.CreateHBox(contents);
 	buttonBox->AddStyleClass("button-container");
 	m_hRefresh = wgui.Create<WIButton>(buttonBox)->GetHandle();
 	WIButton *buttonRefresh = m_hRefresh.get<WIButton>();

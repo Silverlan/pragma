@@ -20,7 +20,7 @@ pragma::gui::types::WIFrame::~WIFrame()
 
 pragma::gui::types::WIBase *pragma::gui::types::WIFrame::GetContents() { return m_hContents.get(); }
 
-pragma::gui::types::VBox *pragma::gui::types::WIFrame::GetInnerContents()
+pragma::gui::types::FlexBox *pragma::gui::types::WIFrame::GetInnerContents()
 {
 	if(!m_hContents.IsValid())
 		return nullptr;
@@ -36,10 +36,10 @@ void pragma::gui::types::WIFrame::Initialize()
 	SetSize(256, 256);
 	AddStyleClass("frame");
 
-	auto contents = CreateChild<VBox>();
+	auto contents = GetSystem().CreateVBox(this);
 	contents->SetAlignment(Alignment::Fill);
 
-	m_hTitleBar = contents->CreateChild<HBox>();
+	m_hTitleBar = GetSystem().CreateHBox(this);
 	m_hMoveRect = m_hTitleBar;
 	WIBase *pTitleBar = m_hTitleBar.get();
 	pTitleBar->AddStyleClass("frame__title-bar");
@@ -52,7 +52,7 @@ void pragma::gui::types::WIFrame::Initialize()
 	if(pTitle != nullptr)
 		pTitle->SetVisible(false);
 
-	auto buttonContainer = pTitleBar->CreateChild<HBox>();
+	auto buttonContainer = GetSystem().CreateHBox(pTitleBar);
 	{
 		m_hDetachButton = buttonContainer->CreateChild<WIButton>();
 		WIButton *pButton = static_cast<WIButton *>(m_hDetachButton.get());

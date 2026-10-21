@@ -31,12 +31,12 @@ pragma::gui::types::WIDetachable::~WIDetachable() {}
 void pragma::gui::types::WIDetachable::Initialize()
 {
 	WIBase::Initialize();
-	auto *vbox = WGUI::GetInstance().Create<VBox>(this);
+	auto *vbox = WGUI::GetInstance().CreateVBox(this);
 	vbox->AddStyleClass("detachable__contents");
 	m_contents = vbox->GetHandle();
 }
 
-pragma::gui::types::VBox *pragma::gui::types::WIDetachable::GetContents() { return static_cast<VBox*>(m_contents.get()); }
+pragma::gui::types::FlexBox *pragma::gui::types::WIDetachable::GetContents() { return static_cast<FlexBox*>(m_contents.get()); }
 
 void pragma::gui::types::WIDetachable::OnRemove()
 {

@@ -1,6 +1,6 @@
 {
 	"theme" {
-		inherits: "base"
+		inherits: "layout"
 		fonts: {
 			"MainMenu_Regular" {
 				fontSet: "default"

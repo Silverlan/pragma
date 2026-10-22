@@ -657,7 +657,7 @@ static void register_gui(Lua::Interface &lua)
 
 	auto wiRootDef = luabind::class_<pragma::gui::types::WIRoot, pragma::gui::types::WIBase>("Root");
 	wiRootDef.def("GetRootCursorPos", &pragma::gui::types::WIRoot::GetCursorPos);
-	wiRootDef.def("SetRootCursorPosOverride", &pragma::gui::types::WIRoot::SetCursorPosOverride);
+	wiRootDef.def("SetRootCursorPosOverride", &pragma::gui::types::WIRoot::SetCursorPosOverride, luabind::return_self {});
 	wiRootDef.def("GetRootCursorPosOverride", &pragma::gui::types::WIRoot::GetCursorPosOverride);
 	wiRootDef.def("ClearRootCursorPosOverride", &pragma::gui::types::WIRoot::ClearCursorPosOverride);
 	wiRootDef.def("GetAssociatedWindow", static_cast<prosper::Window *(pragma::gui::types::WIRoot::*)()>(&pragma::gui::types::WIRoot::GetWindow));
@@ -666,14 +666,14 @@ static void register_gui(Lua::Interface &lua)
 	auto wiConsoleClassDef = luabind::class_<pragma::gui::types::WIConsole, pragma::gui::types::WIBase>("Console");
 	wiConsoleClassDef.def("GetCommandLineEntryElement", &pragma::gui::types::WIConsole::GetCommandLineEntryElement);
 	wiConsoleClassDef.def("GetTextLogElement", &pragma::gui::types::WIConsole::GetTextLogElement);
-	wiConsoleClassDef.def("SetExternallyOwned", &pragma::gui::types::WIConsole::SetExternallyOwned);
+	wiConsoleClassDef.def("SetExternallyOwned", &pragma::gui::types::WIConsole::SetExternallyOwned, luabind::return_self {});
 	wiConsoleClassDef.def("IsExternallyOwned", &pragma::gui::types::WIConsole::IsExternallyOwned);
 	wiConsoleClassDef.def("GetFrame", &pragma::gui::types::WIConsole::GetFrame);
 	wiConsoleClassDef.def("GetText", +[](const pragma::gui::types::WIConsole &console) { return console.GetText().cpp_str(); });
-	wiConsoleClassDef.def("SetText", &pragma::gui::types::WIConsole::SetText);
+	wiConsoleClassDef.def("SetText", &pragma::gui::types::WIConsole::SetText, luabind::return_self {});
 	wiConsoleClassDef.def("AppendText", &pragma::gui::types::WIConsole::AppendText);
 	wiConsoleClassDef.def("Clear", &pragma::gui::types::WIConsole::Clear);
-	wiConsoleClassDef.def("SetMaxLogLineCount", &pragma::gui::types::WIConsole::SetMaxLogLineCount);
+	wiConsoleClassDef.def("SetMaxLogLineCount", &pragma::gui::types::WIConsole::SetMaxLogLineCount, luabind::return_self {});
 	wiConsoleClassDef.def("GetMaxLogLineCount", &pragma::gui::types::WIConsole::GetMaxLogLineCount);
 	guiMod[wiConsoleClassDef];
 
@@ -696,36 +696,36 @@ static void register_gui(Lua::Interface &lua)
 	flexBoxDef.add_static_constant("FLEX_JUSTIFY_SPACE_BETWEEN", pragma::math::to_integral(pragma::gui::types::FlexJustify::SpaceBetween));
 	flexBoxDef.add_static_constant("FLEX_JUSTIFY_SPACE_EVENLY", pragma::math::to_integral(pragma::gui::types::FlexJustify::SpaceEvenly));
 
-	flexBoxDef.def("SetAlignItems", &pragma::gui::types::FlexBox::SetAlignItems);
+	flexBoxDef.def("SetAlignItems", &pragma::gui::types::FlexBox::SetAlignItems, luabind::return_self {});
 	flexBoxDef.def("GetAlignItems", &pragma::gui::types::FlexBox::GetAlignItems);
-	flexBoxDef.def("SetJustifyContent", &pragma::gui::types::FlexBox::SetJustifyContent);
+	flexBoxDef.def("SetJustifyContent", &pragma::gui::types::FlexBox::SetJustifyContent, luabind::return_self {});
 	flexBoxDef.def("GetJustifyContent", &pragma::gui::types::FlexBox::GetJustifyContent);
-	flexBoxDef.def("SetSpacing", &pragma::gui::types::FlexBox::SetSpacing);
+	flexBoxDef.def("SetSpacing", &pragma::gui::types::FlexBox::SetSpacing, luabind::return_self {});
 	flexBoxDef.def("GetSpacing", &pragma::gui::types::FlexBox::GetSpacing);
-	flexBoxDef.def("SetPadding", &pragma::gui::types::FlexBox::SetPadding);
+	flexBoxDef.def("SetPadding", &pragma::gui::types::FlexBox::SetPadding, luabind::return_self {});
 	flexBoxDef.def(
 	  "GetPadding", +[](pragma::gui::types::FlexBox &flexBox) {
 		  auto padding = flexBox.GetPadding();
 		  return std::tuple<int32_t, int32_t, int32_t, int32_t> {padding.left, padding.top, padding.right, padding.bottom};
 	  });
 
-	flexBoxDef.def("SetChildMargin", &pragma::gui::types::FlexBox::SetChildMargin);
+	flexBoxDef.def("SetChildMargin", &pragma::gui::types::FlexBox::SetChildMargin, luabind::return_self {});
 	flexBoxDef.def(
 	  "GetChildMargin", +[](pragma::gui::types::FlexBox &flexBox, pragma::gui::types::WIBase &el) {
 		  auto margin = flexBox.GetChildMargin(el);
 		  return std::tuple<int32_t, int32_t, int32_t, int32_t> {margin.left, margin.top, margin.right, margin.bottom};
 	  });
 
-	flexBoxDef.def("SetChildFlex", &pragma::gui::types::FlexBox::SetChildFlex);
+	flexBoxDef.def("SetChildFlex", &pragma::gui::types::FlexBox::SetChildFlex, luabind::return_self {});
 	flexBoxDef.def("GetChildFlex", &pragma::gui::types::FlexBox::GetChildFlex);
 
-	flexBoxDef.def("SetFixedWidth", &pragma::gui::types::FlexBox::SetFixedWidth);
-	flexBoxDef.def("SetFixedHeight", &pragma::gui::types::FlexBox::SetFixedHeight);
-	flexBoxDef.def("SetFixedSize", &pragma::gui::types::FlexBox::SetFixedSize);
-	flexBoxDef.def("SetAutoSizeActivated", &pragma::gui::types::FlexBox::SetAutoSizeActivated);
-	flexBoxDef.def("SetAutoSizeActivated", +[](pragma::gui::types::FlexBox &flexBox, bool activated) { flexBox.SetAutoSizeActivated(activated); });
+	flexBoxDef.def("SetFixedWidth", &pragma::gui::types::FlexBox::SetFixedWidth, luabind::return_self {});
+	flexBoxDef.def("SetFixedHeight", &pragma::gui::types::FlexBox::SetFixedHeight, luabind::return_self {});
+	flexBoxDef.def("SetFixedSize", &pragma::gui::types::FlexBox::SetFixedSize, luabind::return_self {});
+	flexBoxDef.def("SetAutoSizeActivated", &pragma::gui::types::FlexBox::SetAutoSizeActivated, luabind::return_self {});
+	flexBoxDef.def("SetAutoSizeActivated", +[](pragma::gui::types::FlexBox &flexBox, bool activated) { flexBox.SetAutoSizeActivated(activated); }, luabind::return_self {});
 
-	flexBoxDef.def("SetFlexDirection", &pragma::gui::types::FlexBox::SetFlexDirection);
+	flexBoxDef.def("SetFlexDirection", &pragma::gui::types::FlexBox::SetFlexDirection, luabind::return_self {});
 	flexBoxDef.def("GetFlexDirection", &pragma::gui::types::FlexBox::GetFlexDirection);
 	flexBoxDef.def("IsHorizontalBox", &pragma::gui::types::FlexBox::IsHorizontalBox);
 	flexBoxDef.def("IsVerticalBox", &pragma::gui::types::FlexBox::IsVerticalBox);

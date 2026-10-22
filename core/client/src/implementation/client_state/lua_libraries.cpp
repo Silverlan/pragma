@@ -99,6 +99,15 @@ static std::shared_ptr<InputBindingLayer> create_input_binding_layer()
 	return layer;
 }
 
+static pragma::gui::types::WIBase *create_flexbox(pragma::CGame *game, pragma::gui::types::FlexDirection flexDir, pragma::gui::types::WIBase *parent = nullptr)
+{
+	auto *el = dynamic_cast<pragma::gui::types::FlexBox*>(Lua::gui::create(game, "flexbox", parent));
+	if (!el)
+		return nullptr;
+	el->SetFlexDirection(flexDir);
+	return el;
+}
+
 static void register_gui(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -106,6 +115,11 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[(luabind::def("create", static_cast<pragma::gui::types::WIBase *(*)(pragma::CGame *, const std::string &, pragma::gui::types::WIBase &, int32_t, int32_t, uint32_t, uint32_t, float, float, float, float)>(&Lua::gui::create)),
 	  luabind::def("create", static_cast<pragma::gui::types::WIBase *(*)(pragma::CGame *, const std::string &, pragma::gui::types::WIBase &, int32_t, int32_t, uint32_t, uint32_t)>(&Lua::gui::create)), luabind::def("create", static_cast<pragma::gui::types::WIBase *(*)(pragma::CGame *, const std::string &, pragma::gui::types::WIBase &, int32_t, int32_t)>(&Lua::gui::create)),
 	  luabind::def("create", static_cast<pragma::gui::types::WIBase *(*)(pragma::CGame *, const std::string &, pragma::gui::types::WIBase *)>(&Lua::gui::create)), luabind::def("create", static_cast<pragma::gui::types::WIBase *(*)(pragma::CGame *, const std::string &)>(&Lua::gui::create)),
+
+	  luabind::def("create_hbox", +[](pragma::CGame *game, pragma::gui::types::WIBase *parent) { return create_flexbox(game, pragma::gui::types::FlexDirection::Horizontal, parent); }),
+	  luabind::def("create_hbox", +[](pragma::CGame *game) { return create_flexbox(game, pragma::gui::types::FlexDirection::Horizontal); }),
+	  luabind::def("create_vbox", +[](pragma::CGame *game, pragma::gui::types::WIBase *parent) { return create_flexbox(game, pragma::gui::types::FlexDirection::Vertical, parent); }),
+	  luabind::def("create_vbox", +[](pragma::CGame *game) { return create_flexbox(game, pragma::gui::types::FlexDirection::Vertical); }),
 
 	  luabind::def("create_label", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, const std::string &, pragma::gui::types::WIBase &, int32_t, int32_t)>(&Lua::gui::create_label)), luabind::def("create_label", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, const std::string &, pragma::gui::types::WIBase &)>(&Lua::gui::create_label)),
 	  luabind::def("create_label", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, const std::string &)>(&Lua::gui::create_label)),

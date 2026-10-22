@@ -52,8 +52,8 @@ function gui.WIContextMenu:OnInitialize()
 	scrollContainer:GetVerticalScrollBar():SetScrollAmount(1)
 	self.m_scrollContainer = scrollContainer
 
-	local contents = gui.create("vbox", scrollContainer)
-	contents:AddStyleClass("context-emnu-vbox-test")
+	local contents = gui.create_vbox(scrollContainer)
+		:AddStyleClass("context-emnu-vbox-test")
 	self.m_contents = contents
 
 	self:AddStyleClass("context-menu")

@@ -29,8 +29,8 @@ function gui.WIBaseEditor:OnInitialize()
 	self:SetSize(1024, 768)
 	self:AddStyleClass("editor")
 
-	local root = gui.create("vbox", self)
-	root:AddStyleClass("fill")
+	local root = gui.create_vbox(self)
+		:AddStyleClass("fill")
 	self.m_root = root
 
 	self.m_windowToFrame = {}
@@ -113,10 +113,10 @@ function gui.WIBaseEditor:AddWindowsMenuBarItem(fcView)
 end
 
 function gui.WIBaseEditor:InitializeGenericLayout()
-	self.m_contents = gui.create("hbox")
-	self.m_contents:SetParent(self.m_root, self.m_infoBar:FindChildIndex())
-	self.m_contents:SetName("contents")
-	self.m_contents:AddStyleClass("editor__content-area")
+	self.m_contents = gui.create_hbox()
+		:SetParent(self.m_root, self.m_infoBar:FindChildIndex())
+		:SetName("contents")
+		:AddStyleClass("editor__content-area")
 end
 
 function gui.WIBaseEditor:GetContentsElement()

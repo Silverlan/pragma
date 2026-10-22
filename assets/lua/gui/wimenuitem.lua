@@ -8,8 +8,8 @@ function gui.WIMenuItem:OnInitialize()
 	self.m_enabled = true
 
 	self:SetAutoSizeToContents(true)
-	local contents = gui.create("hbox", self)
-	contents:AddStyleClass("menu-item__content-area")
+	local contents = gui.create_hbox(self)
+		:AddStyleClass("menu-item__content-area")
 	self.m_contents = contents
 
 	self:SetMouseInputEnabled(true)

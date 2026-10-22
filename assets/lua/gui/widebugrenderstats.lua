@@ -116,13 +116,15 @@ function gui.DebugRenderStats:InitializeUiElements()
 	self.m_bg = gui.create("WIRect", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
 	self.m_bg:SetColor(Color(54, 54, 54))
 
-	self.m_contents = gui.create("hbox", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
+	self.m_contents = gui.create_hbox(self)
+		:SetSize(self:GetWidth(), self:GetHeight())
+		:SetAnchor(0, 0, 1, 1)
 	-- self.m_contents:SetAutoFillContents(true)
 
-	local treeVBox = gui.create("vbox", self.m_contents)
+	local treeVBox = gui.create_vbox(self.m_contents)
 	-- treeVBox:SetAutoFillContents(true)
 	local resizer = gui.create("resizer", self.m_contents)
-	local dataVBox = gui.create("vbox", self.m_contents)
+	local dataVBox = gui.create_vbox(self.m_contents)
 	-- dataVBox:SetAutoFillContents(true)
 
 	local function create_header_text(text, parent)
@@ -172,7 +174,8 @@ function gui.DebugRenderStats:InitializeUiElements()
 		end
 	end)
 	self.m_data =
-		gui.create("vbox", dataScrollContainer, 0, 0, dataScrollContainer:GetWidth(), dataScrollContainer:GetHeight())
+		gui.create_vbox(dataScrollContainer)
+		:SetSize(dataScrollContainer:GetWidth(), dataScrollContainer:GetHeight())
 	-- self.m_data:SetAutoFillContentsToWidth(true)
 
 	local inCallback = false
@@ -387,7 +390,7 @@ function gui.DebugRenderStats:AddScene(statsData)
 end
 function gui.DebugRenderStats:AddLinkedItem(cat, nameL)
 	local l = cat[1]:AddItem(nameL)
-	local el = gui.create("vbox", cat[2])
+	local el = gui.create_vbox(cat[2])
 	-- el:SetAutoFillContentsToWidth(true)
 	el:GetVisibilityProperty():Link(cat[1]:GetChildContentsBox():GetVisibilityProperty())
 	return { l, el }

@@ -20,8 +20,8 @@ function InfoBox:OnInitialize()
 		self:SetVisible(false)
 	end)
 
-	local contents = gui.create("vbox", self)
-	contents:AddStyleClass("info-box")
+	local contents = gui.create_vbox(self)
+		:AddStyleClass("info-box")
 	self.m_contents = contents
 
 	local text = gui.create("WIText", contents)

@@ -11,9 +11,9 @@ function gui.WIMenuBar:OnInitialize()
 	gui.Base.OnInitialize(self)
 
 	self:SetAutoSizeToContents(false, true)
-	self.m_contents = gui.create("hbox", self)
+	self.m_contents = gui.create_hbox(self)
 
-	self.m_menuItemContainer = gui.create("hbox", self.m_contents)
+	self.m_menuItemContainer = gui.create_hbox(self.m_contents)
 
 	self:SetName("menu_bar")
 	--[[local pMain = gui.create("WIRect")

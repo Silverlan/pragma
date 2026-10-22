@@ -20,4 +20,45 @@
 	".choice-list__button-container" {
 		width: 24
 	}
+
+	// Scrollbar
+	".scrollbar" {}
+	".scrollbar--horizontal" {
+		width: "100%"
+		height: 10
+	}
+	".scrollbar--vertical" {
+		height: "100%"
+		width: 10
+	}
+	".scrollbar__content-area" {
+		width: "100%"
+		height: "100%"
+	}
+	".scrollbar__button" {
+		width: 10
+		height: 10
+	}
+	".scrollbar__button--start" {}
+	".scrollbar__button--end" {}
+	".scrollbar__slider-bar" {}
+	".scrollbar__slider" {
+		flex: 1
+	}
+
+	// Scroll-Container
+	".scroll-container__outer-flexbox" {
+		width: "100%"
+		height: "100%"
+	}
+	".scroll-container__inner-flexbox" {
+		width: "100%"
+		flex: 1
+		alignItems: "start"
+	}
+	".scroll-container__content-window" {
+		flex: 1
+		height: "100%"
+	}
+	".scroll-container__content-area" {}
 }

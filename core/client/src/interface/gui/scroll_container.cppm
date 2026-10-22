@@ -43,14 +43,14 @@ export namespace pragma::gui::types {
 		bool IsContentsWidthFixed() const;
 		bool IsContentsHeightFixed() const;
 	  protected:
-		virtual void DoUpdate() override;
-	    virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
+		void DoUpdate() override;
+	    void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
+		void UpdateScrollBars();
 		StateFlags m_scFlags = StateFlags::None;
 		WIHandle m_hScrollBarH = {};
 		WIHandle m_hScrollBarV = {};
-		WIHandle m_hWrapper = {};
-		CallbackHandle m_hChildAdded = {};
-		CallbackHandle m_hChildRemoved = {};
+		WIHandle m_contentsWindow = {};
+		WIHandle m_contentsWrapper = {};
 		Vector2i m_lastOffset = {};
 		int32_t m_scrollAmountX = 64;
 		int32_t m_scrollAmountY = 64;

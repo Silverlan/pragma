@@ -586,10 +586,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("SetVerticalAlignment", &pragma::gui::types::WIBase::SetVerticalAlignment, luabind::return_self {});
 	classDef.def("GetHorizontalAlignment", &pragma::gui::types::WIBase::GetHorizontalAlignment);
 	classDef.def("GetVerticalAlignment", &pragma::gui::types::WIBase::GetVerticalAlignment);
-	classDef.def("SetInputState", &pragma::gui::types::WIBase::SetInputState, luabind::return_self {});
-	classDef.def("GetInputState", &pragma::gui::types::WIBase::GetInputState);
-	classDef.def("SetLogicalState", &pragma::gui::types::WIBase::SetLogicalState, luabind::return_self {});
-	classDef.def("GetLogicalState", &pragma::gui::types::WIBase::GetLogicalState);
+	classDef.def("SetState", &pragma::gui::types::WIBase::SetElementState, luabind::return_self {});
+	classDef.def("IsStateEnabled", &pragma::gui::types::WIBase::IsElementStateEnabled);
 	classDef.def("SetDebugChangeTrackingEnabled", +[](const pragma::gui::types::WIBase &el, bool enabled) { pragma::gui::set_debug_tracking_enabled(el, enabled); });
 	classDef.def("PrintDebugChangeTrackingLog", +[](const pragma::gui::types::WIBase &el) { pragma::gui::print_debug_tracking_log(el); });
 

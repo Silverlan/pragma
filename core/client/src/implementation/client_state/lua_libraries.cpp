@@ -304,20 +304,16 @@ static void register_gui(Lua::Interface &lua)
 	luabind::globals(l)["gui"]["ALIGNMENT_FILL"] = pragma::gui::Alignment::Fill;
 	static_assert(pragma::math::to_integral(pragma::gui::Alignment::Count) == 5, "Update enum registration when new enum values are added!");
 
-	luabind::globals(l)["gui"]["INPUT_STATE_NONE"] = pragma::gui::InputState::None;
-	luabind::globals(l)["gui"]["INPUT_STATE_HOVER"] = pragma::gui::InputState::Hover;
-	luabind::globals(l)["gui"]["INPUT_STATE_PRESSED"] = pragma::gui::InputState::Pressed;
-	luabind::globals(l)["gui"]["INPUT_STATE_FOCUSED"] = pragma::gui::InputState::Focused;
-	luabind::globals(l)["gui"]["INPUT_STATE_COUNT"] = pragma::gui::InputState::Count;
-	static_assert(pragma::math::to_integral(pragma::gui::InputState::Count) == 4, "Update enum registration when new enum values are added!");
+	luabind::globals(l)["gui"]["STATE_NONE"] = pragma::gui::ElementStateFlags::None;
+	luabind::globals(l)["gui"]["STATE_HOVER"] = pragma::gui::ElementStateFlags::Hover;
+	luabind::globals(l)["gui"]["STATE_PRESSED"] = pragma::gui::ElementStateFlags::Pressed;
+	luabind::globals(l)["gui"]["STATE_FOCUSED"] = pragma::gui::ElementStateFlags::Focused;
 
-	luabind::globals(l)["gui"]["LOGICAL_STATE_NONE"] = pragma::gui::LogicalState::None;
-	luabind::globals(l)["gui"]["LOGICAL_STATE_SELECTED"] = pragma::gui::LogicalState::Selected;
-	luabind::globals(l)["gui"]["LOGICAL_STATE_CHECKED"] = pragma::gui::LogicalState::Checked;
-	luabind::globals(l)["gui"]["LOGICAL_STATE_DISABLED"] = pragma::gui::LogicalState::Disabled;
-	luabind::globals(l)["gui"]["LOGICAL_STATE_ERROR"] = pragma::gui::LogicalState::Error;
-	luabind::globals(l)["gui"]["LOGICAL_STATE_COUNT"] = pragma::gui::LogicalState::Count;
-	static_assert(pragma::math::to_integral(pragma::gui::LogicalState::Count) == 5, "Update enum registration when new enum values are added!");
+	luabind::globals(l)["gui"]["STATE_DISABLED"] = pragma::gui::ElementStateFlags::Disabled;
+	luabind::globals(l)["gui"]["STATE_SELECTED"] = pragma::gui::ElementStateFlags::Selected;
+	luabind::globals(l)["gui"]["STATE_CHECKED"] = pragma::gui::ElementStateFlags::Checked;
+	luabind::globals(l)["gui"]["STATE_ERROR"] = pragma::gui::ElementStateFlags::Error;
+	static_assert(pragma::math::to_integral(pragma::gui::ElementStateFlags::Last) == 64, "Update enum registration when new enum values are added!");
 
 	luabind::globals(l)["gui"]["CURSOR_SHAPE_DEFAULT"] = pragma::platform::Cursor::Shape::Default;
 	luabind::globals(l)["gui"]["CURSOR_SHAPE_HIDDEN"] = pragma::platform::Cursor::Shape::Hidden;

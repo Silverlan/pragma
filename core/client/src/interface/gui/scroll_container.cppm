@@ -55,8 +55,9 @@ export namespace pragma::gui::types {
 		int32_t m_scrollAmountX = 64;
 		int32_t m_scrollAmountY = 64;
 		std::unordered_map<WIBase *, std::vector<CallbackHandle>> m_childCallbackHandles;
-		virtual void OnChildAdded(WIBase *child) override;
-		virtual void OnChildRemoved(WIBase *child) override;
+		void OnChildAdded(WIBase *child) override;
+		void OnChildRemoved(WIBase *child) override;
+		void UpdateFixedSizeStyles();
 		void OnHScrollOffsetChanged(unsigned int offset);
 		void OnVScrollOffsetChanged(unsigned int offset);
 		void OnWrapperChildAdded(WIBase *child);

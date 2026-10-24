@@ -90,10 +90,35 @@ void pragma::gui::types::WIScrollContainer::ScrollToElementY(WIBase &el)
 void pragma::gui::types::WIScrollContainer::SetAutoStickToBottom(bool autoStick) { math::set_flag(m_scFlags, StateFlags::AutoStickToBottom, autoStick); }
 bool pragma::gui::types::WIScrollContainer::ShouldAutoStickToBottom() const { return math::is_flag_set(m_scFlags, StateFlags::AutoStickToBottom); }
 
-void pragma::gui::types::WIScrollContainer::SetContentsWidthFixed(bool fixed) { math::set_flag(m_scFlags, StateFlags::ContentsWidthFixed, fixed); }
-void pragma::gui::types::WIScrollContainer::SetContentsHeightFixed(bool fixed) { math::set_flag(m_scFlags, StateFlags::ContentsHeightFixed, fixed); }
+void pragma::gui::types::WIScrollContainer::SetContentsWidthFixed(bool fixed)
+{
+	math::set_flag(m_scFlags, StateFlags::ContentsWidthFixed, fixed);
+	UpdateFixedSizeStyles();
+}
+void pragma::gui::types::WIScrollContainer::SetContentsHeightFixed(bool fixed)
+{
+	math::set_flag(m_scFlags, StateFlags::ContentsHeightFixed, fixed);
+	UpdateFixedSizeStyles();
+}
 bool pragma::gui::types::WIScrollContainer::IsContentsWidthFixed() const { return math::is_flag_set(m_scFlags, StateFlags::ContentsWidthFixed); }
 bool pragma::gui::types::WIScrollContainer::IsContentsHeightFixed() const { return math::is_flag_set(m_scFlags, StateFlags::ContentsHeightFixed); }
+
+void pragma::gui::types::WIScrollContainer::UpdateFixedSizeStyles()
+{
+	if (!m_contentsWrapper.IsValid())
+		return;
+	constexpr std::string_view fixedWidth = "viewport__content-area--fixed-width";
+	if (IsContentsWidthFixed())
+		m_contentsWrapper->AddStyleClass(fixedWidth);
+	else
+		m_contentsWrapper->RemoveStyleClass(fixedWidth);
+
+	constexpr std::string_view fixedHeight = "viewport__content-area--fixed-height";
+	if (IsContentsHeightFixed())
+		m_contentsWrapper->AddStyleClass(fixedHeight);
+	else
+		m_contentsWrapper->RemoveStyleClass(fixedHeight);
+}
 
 int pragma::gui::types::WIScrollContainer::GetScrollBarWidthV()
 {

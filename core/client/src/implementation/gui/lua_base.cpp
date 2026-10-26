@@ -114,6 +114,12 @@ void pragma::gui::types::WILuaBase::OnVisibilityChanged(bool bVisible)
 	if(*GetVisibilityProperty() == bVisible) // See explanation in pragma::gui::types::WILuaBase::SetSize
 		CallLuaMember<void, bool>("OnVisibilityChanged", bVisible);
 }
+void pragma::gui::types::WILuaBase::ApplyStyle(Style &style)
+{
+	WIBase::ApplyStyle(style);
+	CallLuaMember<void, Style*>("ApplyStyle", &style);
+}
+
 void pragma::gui::types::WILuaBase::DoUpdate()
 {
 	WIBase::DoUpdate();

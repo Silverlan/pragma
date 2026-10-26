@@ -398,6 +398,25 @@ static void register_gui(Lua::Interface &lua)
 	defDrawToTex.def_readwrite("commandBuffer", &Lua::gui::DrawToTextureInfo::commandBuffer);
 	guiMod[defDrawToTex];
 
+	auto defStyle = luabind::class_<pragma::gui::Style>("Style");
+	defStyle.def("GetPropertyValue", +[](lua::State *l, const pragma::gui::Style &style, std::string_view name, udm::Type type) {
+		return udm::visit(type, [l, &style, &name](auto tag) -> luabind::object
+		{
+			using T = decltype(tag)::type;
+			if constexpr(pragma::gui::is_valid_style_property_type<T>)
+			{
+				auto val = style.GetPropertyValue<T>(name, false);
+				return luabind::object {l, val};
+			}
+			else
+				return Lua::nil;
+		});
+	});
+	defStyle.def("LogInvalidProperty", +[](lua::State *l, const pragma::gui::Style &style, std::string_view name) {
+		style.LogInvalidProperty(name);
+	});
+	guiMod[defStyle];
+
 	// Custom Classes
 	auto wiBaseWIElement = luabind::class_<pragma::gui::types::WILuaBase, luabind::bases<pragma::gui::types::WIBase>, pragma::LuaCore::WILuaBaseHolder>("Base");
 	wiBaseWIElement.def(luabind::constructor<>());

@@ -46,6 +46,7 @@ export namespace pragma::gui::types {
 		virtual void OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource) override;
 		virtual void OnPosChanged(const Vector2i &oldPos, ChangeSource changedSource);
 		virtual void OnVisibilityChanged(bool bVisible) override;
+		void ApplyStyle(Style &style) override;
 		virtual void SetColor(float r, float g, float b, float a = 1.f) override;
 		virtual void SetAlpha(float alpha) override;
 		virtual void Render(const DrawInfo &drawInfo, DrawState &drawState, const Mat4 &matDraw, const Vector2 &scale = {1.f, 1.f}, uint32_t testStencilLevel = 0u, StencilPipeline stencilPipeline = StencilPipeline::Test) override;

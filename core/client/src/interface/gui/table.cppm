@@ -20,9 +20,11 @@ export namespace pragma::gui::types {
 		void SetColSpan(int32_t span);
 		int32_t GetRowSpan() const;
 		int32_t GetColSpan() const;
+		void SetRow(WITableRow *row);
 	  private:
 		std::pair<int32_t, int32_t> m_span;
-		WITableRow *GetRow() const;
+		WIHandle m_row;
+		WITableRow *GetRow();
 	};
 
 	class DLLCLIENT WITable : public WIContainer {
@@ -78,6 +80,7 @@ export namespace pragma::gui::types {
 		std::vector<CallbackHandle> m_sortCallbacks;
 		WIHandle m_hRowHeader;
 		std::vector<WIHandle> m_rows;
+		void UpdateRowStyle(WITableRow &row);
 		void UpdateTableBounds();
 		void OnRowSelected(WITableRow *row);
 		std::vector<WIHandle> m_selectedRows;
@@ -103,6 +106,7 @@ export namespace pragma::gui::types {
 			auto *pRow = WGUI::GetInstance().Create<TRow>(parent);
 			auto hRow = pRow->GetHandle();
 			pRow->AddStyleClass("table__row");
+			hRow->AddStyleClass("table__row--body");
 			m_rows.push_back(hRow);
 			InitializeRow(pRow, false);
 			return pRow;
@@ -134,8 +138,10 @@ export namespace pragma::gui::types {
 		unsigned int GetCellCount() const;
 		WITableCell *GetCell(unsigned int id) const;
 		WITable *GetTable();
+		void SetTable(WITable *table);
 	  protected:
 		std::vector<WIHandle> m_cells;
+	    WIHandle m_table;
 		bool m_bSelected;
 		std::unordered_map<unsigned int, int> m_cellWidths;
 		void SetCellCount(unsigned int numCells);

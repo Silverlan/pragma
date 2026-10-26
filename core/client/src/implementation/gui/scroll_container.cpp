@@ -274,6 +274,8 @@ void pragma::gui::types::WIScrollContainer::OnChildSetSize(WIBase *child)
 }
 void pragma::gui::types::WIScrollContainer::OnWrapperChildAdded(WIBase *child)
 {
+	if(child->IsBackgroundElement())
+		return;
 	auto it = m_childCallbackHandles.insert(std::unordered_map<WIBase *, std::vector<CallbackHandle>>::value_type(child, std::vector<CallbackHandle>())).first;
 	CallbackHandle hCallbackOnRemove = child->AddCallback("OnRemove", FunctionCallback<>::Create(std::bind(&WIScrollContainer::OnChildReleased, child)));
 	it->second.push_back(hCallbackOnRemove);
@@ -298,7 +300,7 @@ void pragma::gui::types::WIScrollContainer::OnWrapperChildRemoved(WIBase *child)
 void pragma::gui::types::WIScrollContainer::OnChildAdded(WIBase *child)
 {
 	WIBase::OnChildAdded(child);
-	if(m_contentsWrapper.IsValid())
+	if(m_contentsWrapper.IsValid() && !child->IsBackgroundElement())
 		child->SetParent(m_contentsWrapper.get());
 }
 void pragma::gui::types::WIScrollContainer::OnChildRemoved(WIBase *child) { WIBase::OnChildRemoved(child); }

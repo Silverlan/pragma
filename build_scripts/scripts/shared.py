@@ -630,7 +630,7 @@ def copy_preserving_symlink(src: Path, dst_dir: Path):
             dst.unlink()
         shutil.copy2(src, dst)
 
-def copy_files(include_patterns, source_dir, dest_dir, exclude_terms=None):
+def copy_files(include_patterns, source_dir, dest_dir, exclude_terms=None, recursive=True):
     if exclude_terms is None:
         exclude_terms = []
 
@@ -641,34 +641,36 @@ def copy_files(include_patterns, source_dir, dest_dir, exclude_terms=None):
     def is_excluded(name):
         return any(term in name for term in exclude_terms)
 
-    entries = os.listdir(source_dir)
     copied_trees = set()
-    for name in entries:
-        if is_excluded(name):
-            continue
-        src_path = os.path.join(source_dir, name)
-        if not os.path.isdir(src_path) or os.path.islink(src_path):
-            continue
-        if any(fnmatch.fnmatch(name, pat) for pat in include_patterns):
-            dst_tree = os.path.join(dest_dir, name)
-            for root, dirs, files in os.walk(src_path, followlinks=False):
-                rel_root = os.path.relpath(root, source_dir)
-                dst_root = os.path.join(dest_dir, rel_root)
-                dirs[:] = [d for d in dirs if not is_excluded(d)]
-                os.makedirs(dst_root, exist_ok=True)
-                for fname in files:
-                    if is_excluded(fname):
-                        continue
-                    src_file = os.path.join(root, fname)
-                    rel_file = os.path.join(rel_root, fname)
-                    _copy_entry(src_file, os.path.join(dest_dir, rel_file), source_dir, dest_dir)
-            copied_trees.add(src_path)
+
+    if recursive:
+        for name in os.listdir(source_dir):
+            if is_excluded(name):
+                continue
+            src_path = os.path.join(source_dir, name)
+            if not os.path.isdir(src_path) or os.path.islink(src_path):
+                continue
+            if any(fnmatch.fnmatch(name, pat) for pat in include_patterns):
+                for root, dirs, files in os.walk(src_path, followlinks=False):
+                    rel_root = os.path.relpath(root, source_dir)
+                    dst_root = os.path.join(dest_dir, rel_root)
+                    dirs[:] = [d for d in dirs if not is_excluded(d)]
+                    os.makedirs(dst_root, exist_ok=True)
+                    for fname in files:
+                        if is_excluded(fname):
+                            continue
+                        src_file = os.path.join(root, fname)
+                        rel_file = os.path.join(rel_root, fname)
+                        _copy_entry(src_file, os.path.join(dest_dir, rel_file), source_dir, dest_dir)
+                copied_trees.add(src_path)
 
     for root, dirs, files in os.walk(source_dir, followlinks=False):
         if any(root.startswith(tree) for tree in copied_trees):
             dirs[:] = []
             continue
         dirs[:] = [d for d in dirs if not is_excluded(d)]
+        if not recursive:
+            dirs[:] = []
         rel_root = os.path.relpath(root, source_dir)
         for fname in files:
             if is_excluded(fname):
@@ -677,7 +679,6 @@ def copy_files(include_patterns, source_dir, dest_dir, exclude_terms=None):
                 src_file = os.path.join(root, fname)
                 dst_file = os.path.join(dest_dir, rel_root, fname)
                 _copy_entry(src_file, dst_file, source_dir, dest_dir)
-
 
 def _copy_entry(src_path, dst_path, source_dir, dest_dir):
     os.makedirs(os.path.dirname(dst_path), exist_ok=True)
@@ -714,7 +715,7 @@ def move_dll_files(src: str, dst: str) -> None:
                 print(f"Moving: {src_file_path} -> {dst_file_path}")
                 shutil.move(src_file_path, dst_file_path)
 
-def copy_prebuilt_binaries(source_dir, lib_name, exclude_terms=None):
+def copy_prebuilt_binaries(source_dir, lib_name, exclude_terms=None, recursive=True):
 	global config
 	if platform == "win32":
 		include_patterns = ["*.lib", "*.dll"]
@@ -722,14 +723,14 @@ def copy_prebuilt_binaries(source_dir, lib_name, exclude_terms=None):
 		include_patterns = ["*.a", "*.so*"]
 	lib_dir = config.prebuilt_bin_dir +"/" +lib_name +"/lib/"
 	dst_dir = config.prebuilt_bin_dir +"/" +lib_name +"/lib/"
-	copy_files(include_patterns, source_dir, dst_dir, exclude_terms)
+	copy_files(include_patterns, source_dir, dst_dir, exclude_terms, recursive)
 	move_dll_files(dst_dir, config.prebuilt_bin_dir +"/" +lib_name +"/bin/")
 	return lib_dir
 
-def copy_prebuilt_headers(source_dir, lib_name, exclude_terms=None):
+def copy_prebuilt_headers(source_dir, lib_name, exclude_terms=None, recursive=True):
 	global config
 	include_dir = config.prebuilt_bin_dir +"/" +lib_name +"/include/"
-	copy_files(["*.h", "*.hpp", "*.ipp", "*.inl"], source_dir, include_dir, exclude_terms)
+	copy_files(["*.h", "*.hpp", "*.ipp", "*.inl"], source_dir, include_dir, exclude_terms, recursive)
 	return include_dir
 
 def sync_dirs(src: str, dst: str) -> None:
@@ -865,6 +866,9 @@ def add_filepaths_to_content_version(base_path: str, filename: str, filepaths) -
 	data["filepaths"] = existing
 
 	target_file.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+def prefer_apt():
+	return shutil.which("apt") is not None
 
 def prefer_pacman():
 	return shutil.which("pacman") is not None

@@ -44,7 +44,7 @@ if(PRAGMA_WITH_PFM)
         pr_fetch_module("pr_xatlas"                "https://github.com/Silverlan/pr_xatlas.git"           "06013606c4efa7a9e7e96fc61af59d142c494daf")
         pr_fetch_module("pr_davinci"               "https://github.com/Silverlan/pr_davinci.git"          "8235a3e9159cb7fe7861da91dcc8f235af1a88a9")
         pr_fetch_module("pr_opencv"                "https://github.com/Silverlan/pr_opencv.git"           "d03fd8b40e81ec4874f28bc4d6471844b1f5681b")
-        pr_fetch_module("pr_servo"                 "https://github.com/Silverlan/pr_servo.git"            "380cf39e475309c867818384a96129db559fdfca")
+        pr_fetch_module("pr_servo"                 "https://github.com/Silverlan/pr_servo.git"            "a08ad7e668872a728989def2f1109277c9669252")
     endif()
 endif()
 

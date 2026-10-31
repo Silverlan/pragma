@@ -34,7 +34,7 @@ pr_fetch_external_lib("alsoundsystem"           "https://github.com/Silverlan/al
 pr_fetch_external_lib("datasystem"              "https://github.com/Silverlan/datasystem"             "e7c134bdecf8537ce873025ec68d53f4ca7d40ac")
 pr_fetch_external_lib("iglfw"                   "https://github.com/Silverlan/iglfw"                  "3440468abcd744a768a960d35b845a29c945e170")
 pr_fetch_external_lib("luasystem"               "https://github.com/Silverlan/luasystem"              "a2a64cc780a73bad377750c6873dab6dbfe4584f")
-pr_fetch_external_lib("materialsystem"          "https://github.com/Silverlan/materialsystem"         "a494305b543ebf9d26d653f2e17668d9c1659983")
+pr_fetch_external_lib("materialsystem"          "https://github.com/Silverlan/materialsystem"         "b1126b828a4ead76a8ee0ec96d109529dae06306")
 pr_fetch_external_lib("mathutil"                "https://github.com/Silverlan/mathutil"               "abe8a3244d689ad1372aec75f0d9f5e5e9d41d20")
 pr_fetch_external_lib("networkmanager"          "https://github.com/Silverlan/networkmanager"         "307e83426280669624ee25f8e3058af96e4e0db3")
 pr_fetch_external_lib("oskit"                   "https://github.com/Silverlan/oskit"                  "897e250eff19d640db31535758f8737a306056ac")

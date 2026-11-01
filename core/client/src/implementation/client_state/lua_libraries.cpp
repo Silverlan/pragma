@@ -731,7 +731,7 @@ static void register_gui(Lua::Interface &lua)
 	flexBoxDef.def("GetJustifyContent", &pragma::gui::types::FlexBox::GetJustifyContent);
 	flexBoxDef.def("SetSpacing", &pragma::gui::types::FlexBox::SetSpacing, luabind::return_self {});
 	flexBoxDef.def("GetSpacing", &pragma::gui::types::FlexBox::GetSpacing);
-	flexBoxDef.def("SetPadding", &pragma::gui::types::FlexBox::SetPadding, luabind::return_self {});
+	flexBoxDef.def("SetPadding", static_cast<void(pragma::gui::types::FlexBox::*)(int32_t, int32_t, int32_t, int32_t)>(&pragma::gui::types::FlexBox::SetPadding), luabind::return_self {});
 	flexBoxDef.def(
 	  "GetPadding", +[](pragma::gui::types::FlexBox &flexBox) {
 		  auto padding = flexBox.GetPadding();

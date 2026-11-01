@@ -521,6 +521,8 @@ void Lua::WIBase::register_class(luabind::class_<pragma::gui::types::WIBase> &cl
 	classDef.def("HasAnchor", &pragma::gui::types::WIBase::HasAnchor);
 	classDef.def("HasHorizontalAnchor", &pragma::gui::types::WIBase::HasHorizontalAnchor);
 	classDef.def("HasVerticalAnchor", &pragma::gui::types::WIBase::HasVerticalAnchor);
+	classDef.def("IsStretchedByAnchorX", &pragma::gui::types::WIBase::IsStretchedByAnchorX);
+	classDef.def("IsStretchedByAnchorY", &pragma::gui::types::WIBase::IsStretchedByAnchorY);
 	classDef.def("SetAnchorOffset", &pragma::gui::types::WIBase::SetAnchorOffset, luabind::return_self {});
 	classDef.def("UpdateAnchorTransform", &pragma::gui::types::WIBase::UpdateAnchorTransform);
 	classDef.def("UpdateAnchorTransform", +[](pragma::gui::types::WIBase &el) { el.UpdateAnchorTransform(); });

@@ -114,7 +114,6 @@ function gui.DebugRenderStats:InitializeUiElements()
 	self:SetSize(64, 128)
 
 	self.m_bg = gui.create("WIRect", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
-	self.m_bg:SetColor(Color(54, 54, 54))
 
 	self.m_contents = gui.create_hbox(self)
 		:SetSize(self:GetWidth(), self:GetHeight())
@@ -129,10 +128,7 @@ function gui.DebugRenderStats:InitializeUiElements()
 
 	local function create_header_text(text, parent)
 		local pHeader = gui.create("WIRect", parent, 0, 0, parent:GetWidth(), 21, 0, 0, 1, 0)
-		pHeader:SetColor(Color(35, 35, 35))
 		local pHeaderText = gui.create("WIText", pHeader)
-		pHeaderText:SetColor(Color(152, 152, 152))
-		pHeaderText:AddStyleClass("font_medium")
 		pHeaderText:SetText(text)
 		pHeader:AddCallback("OnSizeChanged", function()
 			if pHeaderText:IsValid() == false then

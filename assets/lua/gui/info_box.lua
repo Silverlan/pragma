@@ -11,7 +11,7 @@ function InfoBox:OnInitialize()
 	self:SetSize(128, 128)
 	self:SetAutoSizeToContents(true)
 
-	self.m_btClose = gui.PFMButton.create(self, "gui/pfm/icon_clear", "gui/pfm/icon_clear_activated", function()
+	self.m_btClose = gui.PFMButton.create(self, "clear", function()
 		self:CallCallbacks("OnClose")
 		if self.m_removeOnClose then
 			self:RemoveSafely()

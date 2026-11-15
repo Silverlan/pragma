@@ -7,7 +7,7 @@ function gui.WIMenuItem:OnInitialize()
 
 	self.m_enabled = true
 
-	self:SetAutoSizeToContents(true)
+	self:SetAutoSizeToContents(true, false)
 	local contents = gui.create_hbox(self)
 		:AddStyleClass("menu-item__content-area")
 	self.m_contents = contents
@@ -93,18 +93,8 @@ function gui.WIMenuItem:MouseCallback(mouseButton, keyState, modifier)
 end
 function gui.WIMenuItem:SetEnabled(enabled)
 	self.m_enabled = enabled
-	if enabled then
-		if util.is_valid(self.m_disabledOverlay) then
-			self.m_disabledOverlay:SetVisible(false)
-		end
-		return
-	end
-	if util.is_valid(self.m_disabledOverlay) == false then
-		local disabledOverlay = gui.create("WIRect", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
-		disabledOverlay:SetColor(Color(20, 20, 20, 200))
-		self.m_disabledOverlay = disabledOverlay
-	end
-	self.m_disabledOverlay:SetVisible(true)
+	self:SetState(gui.STATE_DISABLED, not enabled)
+	self:SetMouseInputEnabled(enabled)
 end
 function gui.WIMenuItem:IsEnabled()
 	return self.m_enabled or false

@@ -46,17 +46,27 @@ function gui.WIContextMenu:OnInitialize()
 	end
 
 	local scrollContainer = gui.create("WIScrollContainer", self)
-	scrollContainer:AddStyleClass("testtt")
+	scrollContainer:AddStyleClass("context-menu__scroll-container")
 	scrollContainer:SetContentsWidthFixed(true)
 	scrollContainer:SetAutoSizeToContents(false, true)
 	scrollContainer:GetVerticalScrollBar():SetScrollAmount(1)
 	self.m_scrollContainer = scrollContainer
 
 	local contents = gui.create_vbox(scrollContainer)
-		:AddStyleClass("context-emnu-vbox-test")
+		:AddStyleClass("context-menu__content-area")
 	self.m_contents = contents
 
 	self:AddStyleClass("context-menu")
+	self:SetSkinCallbacksEnabled(true)
+	self:SetVisibleItemCount(15)
+end
+function gui.WIContextMenu:SetVisibleItemCount(count) self.m_visibleItemCount = count end
+function gui.WIContextMenu:OnSkinApplied()
+	local item = self.m_tItems[1]
+	if(util.is_valid(item) == false) then return end
+	local numItems = #self.m_tItems
+	numItems = math.min(numItems, self.m_visibleItemCount)
+	self.m_scrollContainer:SetHeight(item:GetHeight() *numItems)
 end
 function gui.WIContextMenu:UpdateCompactHeight(h, dontApply)
 	--[[h = h or self.m_contents:GetHeight()
@@ -263,6 +273,12 @@ function gui.WIContextMenu:AddItem(name, fcOnClick, keybind)
 		end
 		gui.close_context_menu(get_base_element(pItem))
 	end)
+	pItem:AddCallback("OnCursorEntered", function()
+		if(self.m_hoverItem ~= nil) then
+			self.m_hoverItem.exitStartTime = time.real_time()
+			self.m_hoverItem.state = "exited"
+		end
+	end)
 	table.insert(self.m_tItems, pItem)
 	return pItem
 end
@@ -288,6 +304,7 @@ function gui.WIContextMenu:CloseActiveSubMenu()
 	pSubMenu:SetVisible(false)
 	self:RequestFocus()
 	self.m_activeSubMenu = nil
+	self.m_hoverItem = nil
 end
 function gui.WIContextMenu:RemoveItem(item)
 	for i, el in ipairs(self.m_tItems) do
@@ -326,18 +343,32 @@ function gui.WIContextMenu:FindSubMenuByName(name)
 	end
 	return item, subMenu
 end
-function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
-	local pSubMenu
-	local pItem = self:AddItem(name, onClick or function()
-		return false
-	end)
-	if pItem == nil then
+function gui.WIContextMenu:OnThink()
+	if(self.m_hoverItem == nil) then
+		self:DisableThinking()
 		return
 	end
+	local t = time.real_time()
+	local hoverItem = self.m_hoverItem
+	local fPopulate = hoverItem.populate
+	local pItem = hoverItem.item
+	local pSubMenu = hoverItem.menu
 	local isPopulated = (fPopulate == nil)
-	pItem:AddCallback("OnCursorEntered", function()
-		if util.is_valid(pSubMenu) then
+	local state = hoverItem.state
+	if(state == "exited") then
+		local exitStartTime = hoverItem.exitStartTime
+		local dt = t -exitStartTime
+		if(dt >= 0.5) then
 			self:CloseActiveSubMenu()
+		end
+	elseif(state == "hovered") then
+		local dt = t -hoverItem.startTime
+		if(dt >= 0.25) then
+			self:CloseActiveSubMenu()
+			-- CloseActiveSubMenu set m_hoverItem to nil,
+			-- so we'll restore it
+			self.m_hoverItem = hoverItem
+			hoverItem.state = "opened"
 			if isPopulated == false then
 				fPopulate(pItem, pSubMenu)
 				isPopulated = true
@@ -364,15 +395,34 @@ function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
 			pSubMenu:UpdateFlipState()
 			--pSubMenu:RequestFocus()
 		end
+	end
+end
+function gui.WIContextMenu:AddSubMenu(name, onClick, fPopulate)
+	local pSubMenu
+	local pItem = self:AddItem(name, onClick or function()
+		return false
+	end)
+	if pItem == nil then
+		return
+	end
+	pItem:AddCallback("OnCursorEntered", function()
+		if not util.is_valid(pSubMenu) then return end
+		self:EnableThinking()
+		self.m_hoverItem = {
+			item = pItem,
+			menu = pSubMenu,
+			startTime = time.real_time(),
+			populate = fPopulate,
+			state = "hovered"
+		}
 	end)
 	pItem:AddCallback("OnCursorExited", function()
-		if util.is_valid(pSubMenu) then
-			if pSubMenu:IsCursorInBounds() then
-				pItem:KillFocus()
-				pSubMenu:RequestFocus()
-			elseif pSubMenu == self.m_activeSubMenu then
-				self:CloseActiveSubMenu()
-			end
+		if not util.is_valid(pSubMenu) then return end
+		if pSubMenu:IsCursorInBounds() then
+			pItem:KillFocus()
+			pSubMenu:RequestFocus()
+		elseif pSubMenu == self.m_activeSubMenu then
+			-- self:CloseActiveSubMenu()
 		end
 	end)
 	pSubMenu = gui.create("context_menu", self:GetParent())

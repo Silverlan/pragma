@@ -99,16 +99,28 @@ endif()
 
 if(UNIX)
     # Compilers are still somewhat unreliable at finding the modules.json (which is required for import std), so
-    # we'll help them out for now. For newer distros (e.g. arch-based), it's typically available on the system,
-    # for other cases (e.g. for Ubuntu 24), we'll use our own shipped version of gcc.
-    if(EXISTS "/usr/lib/libstdc++.modules.json")
-        set(CMAKE_CXX_STDLIB_MODULES_JSON "/usr/lib/libstdc++.modules.json")
+    # we'll help them out for now. First, ask the compiler itself where its libstdc++.modules.json is. If that
+    # doesn't work (e.g. for Ubuntu 24), we fall back to our own shipped version of gcc.
+    set(PRAGMA_COMPILER_MODULES_JSON "")
+    execute_process(
+        COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libstdc++.modules.json
+        RESULT_VARIABLE PRAGMA_COMPILER_MODULES_JSON_RESULT
+        OUTPUT_VARIABLE PRAGMA_COMPILER_MODULES_JSON
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+
+    # If the file can't be found, the compiler just echoes back the bare file name, so also require an absolute path.
+    if(PRAGMA_COMPILER_MODULES_JSON_RESULT EQUAL 0
+       AND IS_ABSOLUTE "${PRAGMA_COMPILER_MODULES_JSON}"
+       AND EXISTS "${PRAGMA_COMPILER_MODULES_JSON}")
+        set(CMAKE_CXX_STDLIB_MODULES_JSON "${PRAGMA_COMPILER_MODULES_JSON}")
     else()
         if(NOT PRAGMA_DISABLE_BUILD_FETCH)
             include("cmake/fetch_gcc.cmake")
         endif()
         set(CMAKE_CXX_STDLIB_MODULES_JSON "${PRAGMA_BUILD_TOOLS_DIR}/gcc/lib64/libstdc++.modules.json")
-        
+
         add_compile_options(--gcc-toolchain=${PRAGMA_BUILD_TOOLS_DIR}/gcc)
         add_link_options(--gcc-toolchain=${PRAGMA_BUILD_TOOLS_DIR}/gcc)
     endif()

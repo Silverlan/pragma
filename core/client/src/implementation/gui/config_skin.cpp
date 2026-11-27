@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: (c) 2026 Silverlan <opensource@pragma-engine.com>
 // SPDX-License-Identifier: MIT
 
+module;
+
+#include "pragma/console/helper.hpp"
+
 module pragma.client;
 
 import :gui.config_skin;
@@ -203,9 +207,14 @@ static void debug_print_style(pragma::gui::types::WIBase &el)
 }
 
 static void debug_gui_style(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
+static void debug_gui_undefined_style_classes(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv);
 
 namespace {
 	auto UVN = pragma::console::client::register_command("debug_gui_style", &debug_gui_style, pragma::console::ConVarFlags::None, "Prints the effective style data for the specified GUI element.");
+}
+
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_gui_undefined_style_classes", &debug_gui_undefined_style_classes, pragma::console::ConVarFlags::None, "Prints all undefined style classes for the specified skin/theme.");
 }
 
 static void debug_gui_style(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
@@ -214,4 +223,8 @@ static void debug_gui_style(pragma::NetworkState *state, pragma::BasePlayerCompo
 	if(!el)
 		return;
 	debug_print_style(*el);
+}
+static void debug_gui_undefined_style_classes(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+{
+
 }

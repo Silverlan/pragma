@@ -803,7 +803,7 @@ pragma::gui::types::WITableCell::~WITableCell() {}
 void pragma::gui::types::WITableCell::Initialize()
 {
 	WIBase::Initialize();
-	AddStyleClass("table_cell");
+	AddStyleClass("table-cell");
 }
 void pragma::gui::types::WITableCell::OnChildAdded(WIBase *child)
 {

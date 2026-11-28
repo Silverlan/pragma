@@ -76,6 +76,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
 	  });
 
+#ifdef ENABLE_GUI_LUA_STATE
 	conVarMap.RegisterConCommand(
 	  "lua_run_gui",
 	  +[](NetworkState *state, BasePlayerComponent *pl, std::vector<std::string> &argv, float v) {
@@ -97,6 +98,32 @@ void pragma::CEngine::RegisterConsoleCommands()
 			  return;
 		  console::commands::lua_run_autocomplete(l, arg, autoCompleteOptions);
 	  });
+
+#if LUA_ENABLE_RUN_GUI == 1
+	conVarMap.RegisterConCommand(
+	  "lua_exec_gui",
+	  [](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
+		  if(argv.empty())
+			  return;
+		  Lua::set_ignore_include_cache(true);
+		  //client->LoadGUILuaFile(argv.front());
+		  Lua::set_ignore_include_cache(false);
+	  },
+	  pragma::console::ConVarFlags::None, "Opens and executes a lua-file on the GUI state.",
+	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
+		  std::vector<std::string> resFiles;
+		  auto path = Lua::SCRIPT_DIRECTORY_SLASH + arg;
+		  fs::find_files((path + "*." + Lua::FILE_EXTENSION), &resFiles, nullptr);
+		  fs::find_files((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED), &resFiles, nullptr);
+		  autoCompleteOptions.reserve(resFiles.size());
+		  for(auto &mapName : resFiles) {
+			  auto fullPath = path.substr(4) + mapName;
+			  pragma::string::replace(fullPath, "\\", "/");
+			  autoCompleteOptions.push_back(fullPath);
+		  }
+	  });
+#endif
+#endif
 
 	conVarMap.RegisterConVar<bool>("cl_downscale_imported_high_resolution_rma_textures", true, console::ConVarFlags::Archive, "If enabled, imported high-resolution RMA textures will be downscaled to a more memory-friendly size.");
 	conVarMap.RegisterConVarCallback("cl_downscale_imported_high_resolution_rma_textures", std::function<void(NetworkState *, const console::ConVar &, bool, bool)> {[](NetworkState *nw, const console::ConVar &cv, bool oldVal, bool newVal) -> void {
@@ -570,30 +597,7 @@ void pragma::CEngine::RegisterConsoleCommands()
 		  Con::COUT << "Total device image memory: " << util::get_pretty_bytes(totalSize) << Con::endl;
 	  },
 	  console::ConVarFlags::None, "Prints information about the currently loaded textures.");
-#if LUA_ENABLE_RUN_GUI == 1
-	conVarMap.RegisterConCommand(
-	  "lua_exec_gui",
-	  [](pragma::NetworkState *state, pragma::BasePlayerComponent *, std::vector<std::string> &argv, float) {
-		  if(argv.empty())
-			  return;
-		  Lua::set_ignore_include_cache(true);
-		  //client->LoadGUILuaFile(argv.front());
-		  Lua::set_ignore_include_cache(false);
-	  },
-	  pragma::console::ConVarFlags::None, "Opens and executes a lua-file on the GUI state.",
-	  [](const std::string &arg, std::vector<std::string> &autoCompleteOptions) {
-		  std::vector<std::string> resFiles;
-		  auto path = Lua::SCRIPT_DIRECTORY_SLASH + arg;
-		  fs::find_files((path + "*." + Lua::FILE_EXTENSION), &resFiles, nullptr);
-		  fs::find_files((path + "*." + Lua::FILE_EXTENSION_PRECOMPILED), &resFiles, nullptr);
-		  autoCompleteOptions.reserve(resFiles.size());
-		  for(auto &mapName : resFiles) {
-			  auto fullPath = path.substr(4) + mapName;
-			  pragma::string::replace(fullPath, "\\", "/");
-			  autoCompleteOptions.push_back(fullPath);
-		  }
-	  });
-#endif
+
 	conVarMap.RegisterConCommand("asset_clear_unused_textures", [this](NetworkState *state, BasePlayerComponent *, std::vector<std::string> &argv, float) { ClearUnusedAssets(asset::Type::Texture, true); }, console::ConVarFlags::None, "Clears all unused textures from memory.");
 	conVarMap.RegisterConCommand(
 	  "vr_preinitialize",

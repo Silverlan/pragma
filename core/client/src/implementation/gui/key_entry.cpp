@@ -109,7 +109,7 @@ void pragma::gui::types::WIKeyEntry::OnFocusGained()
 	SetText(locale::get_text("press_a_key"));
 	auto *pRect = WGUI::GetInstance().Create<WIBase>();
 	m_hMouseTrap = pRect->GetHandle();
-	pRect->SetAutoAlignToParent(true);
+	pRect->SetAlignment(Alignment::Fill);
 	pRect->SetZPos(10'000);
 	pRect->SetMouseInputEnabled(true);
 	pRect->SetScrollInputEnabled(true);

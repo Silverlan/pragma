@@ -197,11 +197,10 @@ pragma::gui::types::WITreeList::WITreeList() : WITable(), m_pRoot {} {}
 void pragma::gui::types::WITreeList::Initialize()
 {
 	WITable::Initialize();
-	SetRowHeight(18);
 	auto *pRoot = WGUI::GetInstance().Create<WITreeListElement>(this);
 	m_pRoot = pRoot->GetHandle();
 	pRoot->SetList(this);
-	pRoot->SetAutoAlignToParent(true);
+	pRoot->SetAlignment(Alignment::Fill);
 	auto hThis = GetHandle();
 	pRoot->AddCallback("OnTreeUpdate", FunctionCallback<>::Create([hThis, this]() {
 		if(hThis.IsValid() == false)

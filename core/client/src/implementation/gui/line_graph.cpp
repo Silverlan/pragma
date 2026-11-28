@@ -17,7 +17,7 @@ void pragma::gui::types::WILineGraph::Initialize()
 	m_hOutline = pOutline->GetHandle();
 	pOutline->SetColor(colors::White);
 	pOutline->SetHeight(1);
-	pOutline->SetAutoAlignToParent(true, false);
+	pOutline->SetHorizontalAlignment(Alignment::Fill);
 }
 
 void pragma::gui::types::WILineGraph::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)

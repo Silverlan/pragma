@@ -276,13 +276,6 @@ void pragma::CGame::RegisterLua()
 	    {"FrustumPoint_FAR_BOTTOM_RIGHT", pragma::math::to_integral(math::FrustumPoint::FarBottomRight)}, {"FrustumPoint_NearBottomLeft", pragma::math::to_integral(math::FrustumPoint::NearBottomLeft)},
 	    {"FrustumPoint_NearTopLeft", pragma::math::to_integral(math::FrustumPoint::NearTopLeft)}, {"FrustumPoint_NearTopRight", pragma::math::to_integral(math::FrustumPoint::NearTopRight)}, {"FrustumPoint_NearBottomRight", pragma::math::to_integral(math::FrustumPoint::NearBottomRight)}});
 
-	Lua::RegisterLibraryEnums(GetLuaState(), "gui",
-	  {{"CURSOR_SHAPE_DEFAULT", math::to_integral(platform::Cursor::Shape::Default)}, {"CURSOR_SHAPE_HIDDEN", math::to_integral(platform::Cursor::Shape::Hidden)}, {"CURSOR_SHAPE_ARROW", math::to_integral(platform::Cursor::Shape::Arrow)},
-	    {"CURSOR_SHAPE_IBEAM", math::to_integral(platform::Cursor::Shape::IBeam)}, {"CURSOR_SHAPE_CROSSHAIR", math::to_integral(platform::Cursor::Shape::Crosshair)}, {"CURSOR_SHAPE_HAND", math::to_integral(platform::Cursor::Shape::Hand)},
-	    {"CURSOR_SHAPE_HRESIZE", math::to_integral(platform::Cursor::Shape::HResize)}, {"CURSOR_SHAPE_VRESIZE", math::to_integral(platform::Cursor::Shape::VResize)},
-
-	    {"CURSOR_MODE_DISABLED", math::to_integral(platform::CursorMode::Disabled)}, {"CURSOR_MODE_HIDDEN", math::to_integral(platform::CursorMode::Hidden)}, {"CURSOR_MODE_NORMAL", math::to_integral(platform::CursorMode::Normal)}});
-
 	Lua::RegisterLibraryEnums(GetLuaState(), "game",
 	  {
 	    {"RENDER_FLAG_NONE", 0},

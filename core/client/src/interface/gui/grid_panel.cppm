@@ -18,7 +18,7 @@ export namespace pragma::gui::types {
 		ResizeMode m_resizeMode;
 		uint32_t m_numColumns;
 		void FillRows(uint32_t count);
-		virtual float UpdateRowHeights(float yOffset, float defHeight) override;
+		virtual float UpdateRows(float yOffset) override;
 		virtual void DoUpdate() override;
 	  private:
 		using WITable::AddHeaderRow;

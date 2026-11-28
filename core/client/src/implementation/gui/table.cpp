@@ -29,7 +29,7 @@ bool pragma::gui::types::WITable::SortData::operator()(const WIHandle &a, const 
 	return SortRows(ascending, column, a, b);
 }
 
-pragma::gui::types::WITable::WITable() : WIContainer(), m_bSortAsc(true), m_sortColumn(CUInt32(-1)), m_rowHeight(-1), m_bSortable(false), m_bScrollable(false) { RegisterCallback<void, WITableRow *>("OnRowCreated"); }
+pragma::gui::types::WITable::WITable() : WIContainer(), m_bSortAsc(true), m_sortColumn(CUInt32(-1)), m_bSortable(false), m_bScrollable(false) { RegisterCallback<void, WITableRow *>("OnRowCreated"); }
 
 pragma::gui::types::WITable::~WITable() { SetSortable(false); }
 
@@ -54,7 +54,7 @@ void pragma::gui::types::WITable::SizeToContents(bool x, bool y, ChangeSource ch
 	if(m_bScrollable == true && m_hScrollContainer.IsValid()) {
 		m_hScrollContainer->SizeToContents(x, y, changeSource);
 		//auto sz = m_hScrollContainer.get()->GetSize();
-		//SetSize(sz.x,sz.y);
+		//ApplySize(sz.x,sz.y);
 		//return;
 	}
 	WIBase::SizeToContents(x, y, changeSource);
@@ -131,12 +131,12 @@ void pragma::gui::types::WITable::OnHeaderCellPressed(WITableCell *cell)
 				if(pArrow != nullptr) {
 					pArrow->SetParent(cell);
 					pArrow->SetVisible(true);
-					pArrow->SetY(CInt32(cell->GetHeight() * 0.5f - pArrow->GetHeight() * 0.5f));
+					pArrow->ApplyY(CInt32(cell->GetHeight() * 0.5f - pArrow->GetHeight() * 0.5f));
 					int x = 0;
 					WIText *pText = dynamic_cast<WIText *>(cell->GetFirstElement());
 					if(pText != nullptr)
 						x = pText->GetX() + pText->GetWidth() + 5;
-					pArrow->SetX(x);
+					pArrow->ApplyX(x);
 					pArrow->ClearVertices();
 					if(t->m_bSortAsc == true) {
 						pArrow->AddVertex(Vector2(0.f, -1.f));
@@ -185,7 +185,7 @@ void pragma::gui::types::WITable::SetSortable(bool b)
 	if(!m_hSortArrow.IsValid()) {
 		WIShape *pArrow = WGUI::GetInstance().Create<WIShape>();
 		pArrow->AddStyleClass("table_sort_arrow");
-		pArrow->SetSize(10, 10);
+		pArrow->ApplySize(10, 10);
 		pArrow->SetColor(1.f, 1.f, 1.f, 1.f);
 		pArrow->SetMouseInputEnabled(true);
 		pArrow->Update();
@@ -304,6 +304,28 @@ void pragma::gui::types::WITable::SetSelectable(SelectableMode mode)
 			continue;
 		static_cast<WITableRow *>(hRow.get())->Deselect();
 	}
+
+	for (auto &row : m_rows) {
+		if (!row.IsValid())
+			continue;
+		UpdateRowStyle(*static_cast<WITableRow*>(row.get()));
+	}
+}
+void pragma::gui::types::WITable::UpdateRowStyle(WITableRow &row)
+{
+	if(m_hRowHeader.get() == &row) {
+		row.RemoveStyleClass("table__row--selectable");
+		return;
+	}
+	switch(m_selectableMode) {
+	case SelectableMode::None:
+		row.RemoveStyleClass("table__row--selectable");
+		break;
+	default:
+		row.AddStyleClass("table__row--selectable");
+		break;
+	}
+	row.RefreshSkin();
 }
 void pragma::gui::types::WITable::DeselectAllRows()
 {
@@ -331,17 +353,17 @@ void pragma::gui::types::WITable::SelectRow(WITableRow &row)
 void pragma::gui::types::WITable::OnRowSelected(WITableRow *row) { m_selectedRows.push_back(row->GetHandle()); }
 void pragma::gui::types::WITable::InitializeRow(WITableRow *row, bool bHeader)
 {
+	row->SetTable(this);
 	if(m_bSortable == true && bHeader == true) {
 		row->SetMouseInputEnabled(true);
 		m_sortCallbacks.push_back(row->AddCallback("OnCellCreated", FunctionCallback<void, WITableCell *>::Create(std::bind(&WITable::OnRowCellCreated, this, std::placeholders::_1))));
 	}
 	else
 		row->SetMouseInputEnabled(GetSelectableMode() != SelectableMode::None);
-	if(m_rowHeight != -1)
-		row->SetHeight(m_rowHeight);
 	std::unordered_map<unsigned int, int>::iterator itCol;
 	for(itCol = m_columnWidths.begin(); itCol != m_columnWidths.end(); itCol++)
 		row->SetCellWidth(itCol->first, itCol->second);
+	UpdateRowStyle(*row);
 	ScheduleUpdate();
 	CallCallbacks<void, WITableRow *>("OnRowCreated", row);
 }
@@ -364,7 +386,7 @@ pragma::gui::types::WITableRow *pragma::gui::types::WITable::AddHeaderRow()
 	}
 	else
 		hRow = CreateChild<WITableRow>();
-	hRow->AddStyleClass("table_row_header");
+	hRow->AddStyleClass("table__row--header");
 	if(m_hRowHeader.IsValid()) // Treat it as a regular row, but styled as a header
 	{
 		m_rows.push_back(hRow);
@@ -375,14 +397,6 @@ pragma::gui::types::WITableRow *pragma::gui::types::WITable::AddHeaderRow()
 	InitializeRow(hRow.get<WITableRow>(), true);
 	return hRow.get<WITableRow>();
 }
-void pragma::gui::types::WITable::SetRowHeight(int h)
-{
-	if(h < -1)
-		h = -1;
-	m_rowHeight = h;
-	ScheduleUpdate();
-}
-int pragma::gui::types::WITable::GetRowHeight() const { return m_rowHeight; }
 const std::vector<pragma::gui::WIHandle> &pragma::gui::types::WITable::GetSelectedRows() const { return m_selectedRows; }
 pragma::gui::WIHandle pragma::gui::types::WITable::GetFirstSelectedRow() const { return (m_selectedRows.empty() == false) ? m_selectedRows.front() : WIHandle {}; }
 pragma::gui::types::WITableRow *pragma::gui::types::WITable::GetRow(unsigned int id) const
@@ -463,25 +477,19 @@ void pragma::gui::types::WITable::UpdateTableBounds()
 		return;
 	auto x = GetWidth();
 	auto y = GetHeight();
-	float rowHeight;
-	if(m_rowHeight != -1)
-		rowHeight = CFloat(m_rowHeight);
-	else {
-		rowHeight = CFloat((y - GetPaddingTop() - GetPaddingBottom()) / (m_hRowHeader.IsValid() ? (numRows + 1) : numRows));
-	}
 	auto yRow = static_cast<float>(GetPaddingTop());
 	if(m_hRowHeader.IsValid()) {
-		UpdateHeaderRowHeight(static_cast<WITableRow *>(m_hRowHeader.get()), rowHeight);
+		UpdateHeaderRow(static_cast<WITableRow *>(m_hRowHeader.get()));
 		yRow += m_hRowHeader->GetHeight();
 	}
 	if(m_hScrollContainer.IsValid()) {
 		auto *sc = m_hScrollContainer.get<WIScrollContainer>();
-		sc->SetY(CInt32(yRow));
-		sc->SetSize(x, CInt32(y - yRow));
+		sc->ApplyY(CInt32(yRow));
+		sc->ApplySize(x, CInt32(y - yRow));
 		yRow = 0;
 	}
 	if(numRows > 0) {
-		yRow = UpdateRowHeights(yRow, rowHeight);
+		yRow = UpdateRows(yRow);
 		if(m_hScrollContainer.IsValid()) {
 			auto *sc = m_hScrollContainer.get<WIScrollContainer>();
 			sc->Update();
@@ -489,7 +497,7 @@ void pragma::gui::types::WITable::UpdateTableBounds()
 			for(size_t i = 0; i < numRows; i++) {
 				WIHandle &hRow = m_rows[i];
 				if(hRow.IsValid())
-					hRow->SetWidth(wRow);
+					hRow->ApplyWidth(wRow);
 			}
 		}
 	}
@@ -533,13 +541,13 @@ void pragma::gui::types::WITable::MoveRow(WITableRow *a, WITableRow *pos, bool b
 	m_rows.insert(m_rows.begin() + idxOther + 1, a->GetHandle());
 }
 
-void pragma::gui::types::WITable::UpdateHeaderRowHeight(WITableRow *pRow, float defHeight)
+void pragma::gui::types::WITable::UpdateHeaderRow(WITableRow *pRow)
 {
-	pRow->SetSize(GetWidth(), CInt32(defHeight));
-	pRow->SetY(CInt32(0));
+	pRow->ApplyWidth(GetWidth());
+	pRow->ApplyY(CInt32(0));
 }
 
-float pragma::gui::types::WITable::UpdateRowHeights(float yOffset, float defHeight)
+float pragma::gui::types::WITable::UpdateRows(float yOffset)
 {
 	auto w = GetWidth();
 	auto &padding = GetPadding();
@@ -548,10 +556,10 @@ float pragma::gui::types::WITable::UpdateRowHeights(float yOffset, float defHeig
 		auto &hRow = m_rows[i];
 		if(hRow.IsValid() && hRow->IsVisible()) {
 			auto *row = hRow.get<WITableRow>();
-			row->SetSize(w - padding[math::to_integral(Padding::Left)] - padding[math::to_integral(Padding::Right)], CInt32(defHeight));
-			row->SetX(padding[math::to_integral(Padding::Left)]);
-			row->SetY(CInt32(yOffset));
-			yOffset += defHeight;
+			row->ApplyWidth(w - padding[math::to_integral(Padding::Left)] - padding[math::to_integral(Padding::Right)]);
+			row->ApplyX(padding[math::to_integral(Padding::Left)]);
+			row->ApplyY(CInt32(yOffset));
+			yOffset += row->GetHeight();
 		}
 	}
 	return yOffset;
@@ -566,6 +574,8 @@ pragma::gui::types::WITableRow::WITableRow() : WIContainer(), m_bSelected(false)
 	RegisterCallback<void>("OnSelected");
 	RegisterCallback<void>("OnDeselected");
 	RegisterCallback<void, WITableCell *>("OnCellCreated");
+
+	AddStyleClass("table__row");
 }
 pragma::gui::types::WITableRow::~WITableRow() {}
 void pragma::gui::types::WITableRow::OnChildAdded(WIBase *child)
@@ -578,6 +588,8 @@ void pragma::gui::types::WITableRow::DetachCell(uint32_t colId)
 	auto numCells = m_cells.size();
 	if(colId >= numCells)
 		return;
+	if(m_cells[colId].IsValid())
+		static_cast<WITableCell*>(m_cells[colId].get())->SetRow(this);
 	if(colId == numCells - 1) {
 		m_cells.erase(m_cells.end() - 1);
 		return;
@@ -588,6 +600,7 @@ void pragma::gui::types::WITableRow::AttachCell(uint32_t colid, const WITableCel
 {
 	if(colid >= m_cells.size())
 		SetCellCount(colid + 1);
+	const_cast<WITableCell&>(cell).SetRow(this);
 	m_cells[colid] = cell.GetHandle();
 }
 void pragma::gui::types::WITableRow::SetCellWidth(unsigned int col, int width)
@@ -616,19 +629,9 @@ pragma::gui::types::WITableCell *pragma::gui::types::WITableRow::GetCell(unsigne
 		return nullptr;
 	return const_cast<WITableCell *>(static_cast<const WITableCell *>(hCell.get()));
 }
-pragma::gui::types::WITable *pragma::gui::types::WITableRow::GetTable()
-{
-	WIBase *parent = GetParent();
-	for(int i = 0; i < 3; i++) {
-		if(parent == nullptr)
-			return nullptr;
-		WITable *t = dynamic_cast<WITable *>(parent);
-		if(t != nullptr)
-			return t;
-		parent = parent->GetParent();
-	}
-	return nullptr;
-}
+void pragma::gui::types::WITableRow::SetTable(WITable *table) { m_table = table ? table->GetHandle() : WIHandle {}; }
+
+pragma::gui::types::WITable *pragma::gui::types::WITableRow::GetTable() { return static_cast<WITable*>(m_table.get()); }
 void pragma::gui::types::WITableRow::Select()
 {
 	if(m_bSelected == true)
@@ -637,6 +640,7 @@ void pragma::gui::types::WITableRow::Select()
 	if(t == nullptr || t->GetSelectableMode() == WITable::SelectableMode::None)
 		return;
 	m_bSelected = true;
+	SetElementState(ElementStateFlags::Selected, m_bSelected);
 	t->OnRowSelected(this);
 	CallCallbacks<void>("OnSelected");
 }
@@ -646,6 +650,7 @@ void pragma::gui::types::WITableRow::Deselect()
 		return;
 	CallCallbacks<void>("OnDeselected");
 	m_bSelected = false;
+	SetElementState(ElementStateFlags::Selected, m_bSelected);
 }
 bool pragma::gui::types::WITableRow::IsSelected() { return m_bSelected; }
 void pragma::gui::types::WITableRow::UpdateCell(const WITableCell &cell)
@@ -735,8 +740,8 @@ void pragma::gui::types::WITableRow::OnSizeChanged(const Vector2i &oldSize, Chan
 		for(auto j = decltype(colSpan) {0}; j < colSpan; ++j)
 			width += widths[i + j];
 
-		cell->SetSize(width, GetHeight());
-		cell->SetPos(math::round(offset.x), math::round(offset.y));
+		cell->ApplySize(width, GetHeight());
+		cell->ApplyPos(math::round(offset.x), math::round(offset.y));
 		offset.x += width;
 	}
 }
@@ -755,6 +760,7 @@ pragma::gui::WIHandle pragma::gui::types::WITableRow::SetValue(unsigned int col,
 	}
 	WIHandle hLabel = CreateChild<WIText>();
 	WIText *text = hLabel.get<WIText>();
+	text->AddStyleClass("table__label");
 	text->SetText(val);
 	text->SizeToContents();
 	InsertElement(col, hLabel);
@@ -797,7 +803,7 @@ pragma::gui::types::WITableCell::~WITableCell() {}
 void pragma::gui::types::WITableCell::Initialize()
 {
 	WIBase::Initialize();
-	AddStyleClass("table_cell");
+	AddStyleClass("table-cell");
 }
 void pragma::gui::types::WITableCell::OnChildAdded(WIBase *child)
 {
@@ -822,24 +828,13 @@ void pragma::gui::types::WITableCell::DoUpdate()
 	for(auto &hChild : m_children) {
 		if(!hChild.IsValid())
 			continue;
-		hChild->SetX(xOffset);
+		hChild->ApplyX(xOffset);
 		xOffset += hChild->GetWidth();
 	}
 	WIContainer::DoUpdate();
 }
-pragma::gui::types::WITableRow *pragma::gui::types::WITableCell::GetRow() const
-{
-	auto *parent = GetParent();
-	for(int32_t i = 0; i < 3; ++i) {
-		if(parent == nullptr)
-			return nullptr;
-		auto *t = dynamic_cast<WITableRow *>(parent);
-		if(t != nullptr)
-			return t;
-		parent = parent->GetParent();
-	}
-	return nullptr;
-}
+void pragma::gui::types::WITableCell::SetRow(WITableRow *row) { m_row = row ? row->GetHandle() : WIHandle {}; }
+pragma::gui::types::WITableRow *pragma::gui::types::WITableCell::GetRow() { return static_cast<WITableRow*>(m_row.get()); }
 
 void pragma::gui::types::WITableCell::SetRowSpan(int32_t span)
 {

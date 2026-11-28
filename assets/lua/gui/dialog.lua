@@ -17,7 +17,7 @@ gui.create_dialog = function(fCreateElement, parent, noFrame)
 
 	local pDialog = gui.create("WIRect", parent)
 	pDialog:SetColor(Color(0, 0, 0, 220))
-	pDialog:SetAutoAlignToParent(true)
+	pDialog:SetAlignment(gui.ALIGNMENT_FILL)
 	pDialog:Update()
 	gui.impl.activeDialog = pDialog
 
@@ -35,19 +35,19 @@ gui.create_dialog = function(fCreateElement, parent, noFrame)
 	frame:SetSize(512, 256)
 	frame:SetZPos(200000)
 
-	frame:SetAutoAlignToParent(true)
+	frame:SetAlignment(gui.ALIGNMENT_FILL)
 
 	local pDrag = frame:GetDragArea()
 	pDrag:SetHeight(31)
-	pDrag:SetAutoAlignToParent(true, false)
+	pDrag:SetHorizontalAlignment(gui.ALIGNMENT_FILL)
 
 	local el = fCreateElement()
 	el:SetParent(frame)
 	frame:SetSize(el:GetSize())
-	el:SetAutoAlignToParent(true)
+	el:SetAlignment(gui.ALIGNMENT_FILL)
 
 	local pMainOutline = gui.create("WIOutlinedRect", frame)
-	pMainOutline:SetAutoAlignToParent(true)
+	pMainOutline:SetAlignment(gui.ALIGNMENT_FILL)
 	pMainOutline:AddStyleClass("outline")
 
 	frame:CenterToParent()

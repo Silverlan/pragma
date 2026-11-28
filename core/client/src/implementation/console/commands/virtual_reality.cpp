@@ -37,7 +37,7 @@ static void show_hmd_message(bool bInit = false)
 		return;
 	auto &wgui = pragma::gui::WGUI::GetInstance();
 	auto *bg = wgui.Create<pragma::gui::types::WIRect>();
-	bg->SetAutoAlignToParent(true);
+	bg->SetAlignment(pragma::gui::Alignment::Fill);
 	bg->SetColor(colors::Black);
 	//bg->SetVisible(false);
 	hHmdViewMessage = bg->GetHandle();

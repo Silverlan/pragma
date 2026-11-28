@@ -225,8 +225,10 @@ void pragma::CEngine::DumpDebugInformation(uzip::ZIPFile &zip) const
 			return;
 		zip.AddFile("lua_traceback_" + identifier + ".txt", ss.str());
 	};
+#ifdef ENABLE_GUI_LUA_STATE
 	if(GetClientState())
 		fWriteLuaTraceback(static_cast<ClientState *>(GetClientState())->GetGUILuaState(), "gui");
+#endif
 
 	std::stringstream engineInfo;
 	engineInfo << "Render API: " << GetRenderAPI();
@@ -1125,6 +1127,14 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 
 	auto &fontSet = GetDefaultFontSet();
 	auto &gui = gui::WGUI::Open(GetRenderContext(), matManager);
+	static spdlog::logger &GUI_LOGGER = pragma::register_logger("gui");
+	gui.SetLogHandler([](std::string_view msg, util::LogSeverity severity) {
+		GUI_LOGGER.log(static_cast<spdlog::level::level_enum>(logging::severity_to_spdlog_level(severity)), msg);
+	});
+	gui.SetDefaultSkinFactory([]() -> gui::ConfigSkin* {
+		return new gui::ConfigSkinWithLua{};
+	});
+
 	RegisterUiElementTypes();
 	gui.SetLocaleResolver([](const std::string &key, const std::vector<string::Utf8String> &args) -> string::Utf8String {
 		// get_text currently doesn't support Utf8String args, so we'll convert to std::string for now
@@ -1197,6 +1207,13 @@ bool pragma::CEngine::Initialize(int argc, char *argv[])
 		}
 		RunConsoleCommand(cmd, args);
 	});
+
+	if (auto *skin = gui.LoadSkin("pragma"); !skin)
+	{
+		criticalFailure(std::format("Failed to load GUI theme 'pragma'!"));
+		return false;
+	}
+	gui.SetSkin("pragma");
 
 	m_speedCam = 1600.0f;
 	m_speedCamMouse = 0.2f;
@@ -1387,9 +1404,8 @@ void pragma::CEngine::RegisterUiElementTypes()
 	RegisterGuiLuaObjectFactory<gui::types::WINumericEntry>();
 	RegisterGuiLuaObjectFactory<gui::types::WIText>();
 	RegisterGuiLuaObjectFactory<gui::types::WITooltip>();
-	RegisterGuiLuaObjectFactory<gui::types::HBox>();
-	RegisterGuiLuaObjectFactory<gui::types::VBox>();
-	static_assert(gui::NUMBER_OF_CORE_UI_ELEMENT_TYPES == 26, "If core UI element types have been added, they have to be registered above.");
+	RegisterGuiLuaObjectFactory<gui::types::FlexBox>();
+	static_assert(gui::NUMBER_OF_CORE_UI_ELEMENT_TYPES == 25, "If core UI element types have been added, they have to be registered above.");
 
 	// Engine GUI types
 	RegisterGuiType<gui::types::WICheckbox>("WICheckbox");
@@ -1864,8 +1880,10 @@ Lua::Interface *pragma::CEngine::GetLuaInterface(lua::State *l)
 {
 	auto *cl = static_cast<ClientState *>(GetClientState());
 	if(cl != nullptr) {
+#ifdef ENABLE_GUI_LUA_STATE
 		if(cl->GetGUILuaState() == l)
 			return &cl->GetGUILuaInterface();
+#endif
 		auto *cg = cl->GetGameState();
 		if(cg != nullptr && cg->GetLuaState() == l)
 			return &cg->GetLuaInterface();
@@ -1887,8 +1905,12 @@ pragma::NetworkState *pragma::CEngine::GetNetworkState(lua::State *l)
 	auto *cl = static_cast<ClientState *>(GetClientState());
 	if(cl == nullptr)
 		return nullptr;
-	if(cl->GetLuaState() == l || cl->GetGUILuaState() == l)
+	if(cl->GetLuaState() == l)
 		return cl;
+#ifdef ENABLE_GUI_LUA_STATE
+	if(cl->GetGUILuaState() == l)
+		return cl;
+#endif
 	return Engine::GetNetworkState(l);
 }
 
@@ -2406,6 +2428,7 @@ namespace {
 	  });
 }
 
+#ifdef ENABLE_GUI_LUA_STATE
 static void dump_traceback_gui()
 {
 	auto *en = pragma::get_cengine();
@@ -2429,3 +2452,4 @@ namespace pragma::LuaCore::debug {
 	DLLCLIENT void dump_traceback_gui() { ::dump_traceback_gui(); }
 	DLLCLIENT void dump_stack_gui() { ::dump_stack_gui(); }
 };
+#endif

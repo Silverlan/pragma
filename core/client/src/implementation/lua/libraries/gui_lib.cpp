@@ -271,6 +271,7 @@ pragma::gui::types::WIBase *Lua::gui::get_focused_element(lua::State *l) { retur
 
 pragma::gui::types::WIBase *Lua::gui::get_focused_element(lua::State *l, prosper::Window &window) { return pragma::gui::WGUI::GetInstance().GetFocusedElement(&window); }
 
+#ifdef ENABLE_GUI_LUA_STATE
 static bool register_skin(lua::State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData, const std::string *baseName)
 {
 	if(l != pragma::get_client_state()->GetGUILuaState()) {
@@ -288,6 +289,13 @@ static bool register_skin(lua::State *l, const std::string &skin, const luabind:
 	pragma::gui::WGUI::GetInstance().RegisterSkin(skin, std::move(s));
 	return true;
 }
+#endif
+bool Lua::gui::register_json_skin(lua::State *l, const std::string &skin)
+{
+	auto *p = pragma::gui::WGUI::GetInstance().LoadSkin(skin);
+	return p != nullptr;
+}
+#ifdef ENABLE_GUI_LUA_STATE
 void Lua::gui::register_default_skin(const std::string &vars, const std::string &skinData)
 {
 	auto *skin = dynamic_cast<pragma::gui::WILuaSkin *>(pragma::gui::WGUI::GetInstance().GetSkin("default"));
@@ -319,6 +327,7 @@ void Lua::gui::register_default_skin(const std::string &vars, const std::string 
 }
 bool Lua::gui::register_skin(lua::State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData) { return ::register_skin(l, skin, vars, skinData, nullptr); }
 bool Lua::gui::register_skin(lua::State *l, const std::string &skin, const luabind::tableT<void> &vars, const luabind::tableT<void> &skinData, const std::string &baseName) { return ::register_skin(l, skin, vars, skinData, &baseName); }
+#endif
 
 void Lua::gui::set_skin(const std::string &skin) { pragma::gui::WGUI::GetInstance().SetSkin(skin); }
 

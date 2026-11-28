@@ -968,7 +968,7 @@ static void debug_pbr_ibl(NetworkState *state, BasePlayerComponent *pl, std::vec
 	auto &prefilterMap = iblData->prefilterMap;
 
 	auto *pElContainer = wgui.Create<gui::types::WIBase>();
-	pElContainer->SetAutoAlignToParent(true);
+	pElContainer->SetAlignment(gui::Alignment::Fill);
 	pElContainer->SetName(name);
 	pElContainer->TrapFocus(true);
 	pElContainer->RequestFocus();

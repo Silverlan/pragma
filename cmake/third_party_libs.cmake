@@ -119,7 +119,7 @@ set(LUA_INCLUDE_DIR ${luajit_INCLUDE_DIRS} CACHE STRING "" FORCE)
 set(LUA_LIBRARY ${luajit_LIBRARIES} CACHE STRING "" FORCE)
 set(LUA_FOUND ON CACHE BOOL ON FORCE)
 set(LUA_LIBRARIES ${LUA_LIBRARY} CACHE STRING "" FORCE)
-pr_fetch_third_party_lib("luabind" INC luabind "https://github.com/Silverlan/luabind-deboostified" "38b223d4a8538d08f7ddded7989f4297aa74ee6d")
+pr_fetch_third_party_lib("luabind" INC luabind "https://github.com/Silverlan/luabind-deboostified" "3d5864b482476b961680dfebb9ecdff33dc60867")
 pr_set_target_folder(luabind third_party_libs)
 target_include_directories(luabind PUBLIC ${LUA_INCLUDE_DIR})
 target_include_directories(luabind PUBLIC "${CMAKE_SOURCE_DIR}/third_party_libs/luabind")
@@ -420,3 +420,6 @@ set(BUILD_SHARED_LIBS
 if(PRAGMA_WITH_MIMALLOC)
     pr_fetch_third_party_lib("mimalloc" "https://github.com/microsoft/mimalloc.git" "75d69f4ab736ad9f56cdd76c7eb883f60ac48869")
 endif()
+
+# glaze
+pr_fetch_third_party_lib("glaze_glaze" "https://github.com/stephenberry/glaze.git" "2518e7570d95c88a8622ed48cd7f80ce7290ce5b")

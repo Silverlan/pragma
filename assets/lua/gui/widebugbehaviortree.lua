@@ -282,7 +282,7 @@ function gui.WIDebugBehaviorTreeNode:OnInitialize()
 	pMain:SetCornerSize(0.08)
 	pMain:SetRoundness(2)
 	pMain:Update()
-	pMain:SetAutoAlignToParent(true)
+	pMain:SetAlignment(gui.ALIGNMENT_FILL)
 	pMain:GetColorProperty():Link(self:GetColorProperty())
 
 	local pText = gui.create("WIText", self)

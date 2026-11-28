@@ -1,6 +1,7 @@
 include(${CMAKE_SOURCE_DIR}/cmake/pr_common.cmake)
 
 option(PRAGMA_ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER "Allow the use of vertex buffers as storage buffers?" OFF)
+option(PRAGMA_ENABLE_GUI_LUA_STATE "Build with GUI Lua state?" OFF)
 
 set(PROJ_NAME client)
 pr_add_library(${PROJ_NAME} SHARED)
@@ -46,6 +47,15 @@ pr_add_compile_definitions(
 
         PUBLIC
 )
+
+if(PRAGMA_ENABLE_GUI_LUA_STATE)
+    pr_add_compile_definitions(
+            ${PROJ_NAME}
+            -DENABLE_GUI_LUA_STATE
+
+            PUBLIC
+    )
+endif()
 
 if(PRAGMA_ENABLE_VERTEX_BUFFER_AS_STORAGE_BUFFER)
     pr_add_compile_definitions(

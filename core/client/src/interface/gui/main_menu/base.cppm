@@ -55,7 +55,6 @@ export namespace pragma::gui::types {
 		CallbackHandle onSelected;
 		CallbackHandle onDeselected;
 	  protected:
-		WIHandle m_hBackground;
 		WIHandle m_hText;
 		bool m_bSelected;
 	};

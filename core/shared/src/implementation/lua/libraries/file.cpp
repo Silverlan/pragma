@@ -339,6 +339,7 @@ static bool is_extension_blacklisted(const std::string &ext)
 }
 static const std::vector<std::string> pathBlacklist {
   "cache/chromium",
+  "cache/servo",
   "cache/shader.cache",
   "cache/shaders",
   "cfg/engine.cfg",

@@ -17,7 +17,7 @@ function gui.WIFileDialog:OnInitialize()
 
 	local pMain = gui.create("WIRect", self)
 	pMain:SetColor(Color.DimGray)
-	pMain:SetAutoAlignToParent(true)
+	pMain:SetAlignment(gui.ALIGNMENT_FILL)
 	pMain:AddStyleClass("background")
 	pMain:Update()
 	self.m_pMain = pMain
@@ -78,8 +78,8 @@ function gui.WIFileDialog:OnInitialize()
 	self.m_pFileList = t
 
 	local options = gui.create("pfm_controls_menu", self)
-	options:SetAutoFillContentsToWidth(true)
-	options:SetAutoFillContentsToHeight(false)
+	-- options:SetAutoFillContentsToWidth(true)
+	-- options:SetAutoFillContentsToHeight(false)
 	self.m_pOptions = options
 
 	self:SetType(gui.WIFileDialog.TYPE_OPEN)

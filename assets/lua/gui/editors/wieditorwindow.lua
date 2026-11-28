@@ -9,7 +9,7 @@ function gui.WIEditorWindow:OnInitialize()
 	gui.Base.OnInitialize(self)
 
 	local pTabbedPanel = gui.create("tabbed_panel", self)
-	pTabbedPanel:SetAutoAlignToParent(true)
+	pTabbedPanel:SetAlignment(gui.ALIGNMENT_FILL)
 	self.m_pTabbedPanel = pTabbedPanel
 end
 function gui.WIEditorWindow:SetFrame(frame)

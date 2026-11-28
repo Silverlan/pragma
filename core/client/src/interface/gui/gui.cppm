@@ -6,6 +6,7 @@ export import :gui.checkbox;
 export import :gui.choice_list;
 export import :gui.chromium_page;
 export import :gui.command_line_entry;
+export import :gui.config_skin;
 export import :gui.console;
 export import :gui.container;
 export import :gui.debug_depth_texture;
@@ -47,7 +48,3 @@ export import :gui.table;
 export import :gui.textured_cubemap;
 export import :gui.transformable;
 export import :gui.tree_list;
-
-export {
-	bool load_skin(const std::string &skinName);
-};

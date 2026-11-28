@@ -9,6 +9,45 @@ module pragma.client;
 
 import :console.commands;
 
+namespace pragma::debug {
+	std::string get_element_info(pragma::gui::types::WIBase &el)
+	{
+		std::stringstream ss;
+		auto pos = el.GetAbsolutePos();
+		auto size = el.GetSize();
+
+		ss << "Class: " << el.GetClass() << "\nName: " << el.GetName() << "\nIndex: " << el.GetIndex() << "\nSize: (" << size.x << "," << size.y << ")"
+		   << "\nPos: (" << pos.x << "," << pos.y << ")";
+		if(auto &styleClasses = el.GetStyleClasses(); !styleClasses.empty()) {
+			std::vector<std::string> strings;
+			strings.reserve(styleClasses.size());
+			for(auto &styleClass : styleClasses)
+				strings.push_back(std::string {styleClass});
+			ss<<"\nStyle Classes: " << string::implode(strings);
+		}
+		auto debugInfo = el.GetDebugInfo();
+		if(debugInfo.empty() == false)
+			ss << "\nDebug Info: " << debugInfo;
+		return ss.str();
+	}
+
+	gui::types::WIBase *find_gui_element(std::vector<std::string> &argv)
+	{
+		if(argv.empty())
+			return nullptr;
+		auto &elName = argv.front();
+		gui::types::WIBase *el = nullptr;
+		el = gui::WGUI::GetInstance().FindByFilter([&elName](gui::types::WIBase &el) -> bool { return string::compare(el.GetName(), elName, false); });
+		if(!el && util::is_integer(elName))
+			el = gui::WGUI::GetInstance().FindByIndex(util::to_int(elName));
+		if(!el) {
+			Con::CWAR << "Unable to find element by name or index '" << elName << "'!" << Con::endl;
+			return nullptr;
+		}
+		return el;
+	}
+}
+
 class GUIDebugCursorManager {
   public:
 	GUIDebugCursorManager();
@@ -201,19 +240,7 @@ void GUIDebugCursorManager::SetWindow(prosper::Window &window)
 	m_cursorElementList.clear();
 }
 
-std::string GUIDebugCursorManager::GetElementInfo(pragma::gui::types::WIBase &el)
-{
-	std::stringstream ss;
-	auto pos = el.GetAbsolutePos();
-	auto size = el.GetSize();
-
-	ss << "Class: " << el.GetClass() << "\nName: " << el.GetName() << "\nIndex: " << el.GetIndex() << "\nSize: (" << size.x << "," << size.y << ")"
-	   << "\nPos: (" << pos.x << "," << pos.y << ")";
-	auto debugInfo = el.GetDebugInfo();
-	if(debugInfo.empty() == false)
-		ss << "\nDebug Info: " << debugInfo;
-	return ss.str();
-}
+std::string GUIDebugCursorManager::GetElementInfo(pragma::gui::types::WIBase &el) { return pragma::debug::get_element_info(el); }
 
 void GUIDebugCursorManager::SelectNextParentInHierarchy()
 {
@@ -279,7 +306,8 @@ void GUIDebugCursorManager::SetTargetGUIElement(pragma::gui::types::WIBase *optE
 		Con::COUT << pText->GetText().cpp_str() << Con::endl;
 	}
 
-	auto *l = pragma::get_cgame()->GetLuaState();
+	auto *game = pragma::get_cgame();
+	auto *l = game ? game->GetLuaState() : nullptr;
 	if(l) {
 		// Assign element to global 'debug_ui_element' Lua variable
 		auto o = pragma::gui::WGUILuaInterface::GetLuaObject(l, el);
@@ -388,18 +416,9 @@ static void debug_gui_cursor(pragma::NetworkState *state, pragma::BasePlayerComp
 		if(s_dbgManager->Initialize() == false)
 			s_dbgManager = nullptr;
 	}
-	if(!argv.empty()) {
-		auto &elName = argv.front();
-		pragma::gui::types::WIBase *el = nullptr;
-		el = pragma::gui::WGUI::GetInstance().FindByFilter([&elName](pragma::gui::types::WIBase &el) -> bool { return pragma::string::compare(el.GetName(), elName, false); });
-		if (!el && pragma::util::is_integer(elName))
-			el = pragma::gui::WGUI::GetInstance().FindByIndex(pragma::util::to_int(elName));
-		if(!el) {
-			Con::CWAR << "Unable to find element by name or index '" << elName << "'!" << Con::endl;
-			return;
-		}
+	auto *el = pragma::debug::find_gui_element(argv);
+	if(el)
 		s_dbgManager->SetTargetGUIElementOverride(el);
-	}
 }
 namespace {
 	auto UVN = pragma::console::client::register_command("debug_gui_cursor", &debug_gui_cursor, pragma::console::ConVarFlags::None, "Prints information about the GUI element currently hovered over by the cursor.");
@@ -475,4 +494,87 @@ static void debug_font_glyph_map(pragma::NetworkState *state, pragma::BasePlayer
 }
 namespace {
 	auto UVN = pragma::console::client::register_command("debug_font_glyph_map", &debug_font_glyph_map, pragma::console::ConVarFlags::None, "Displays the glyph map for the specified font.");
+}
+
+static void debug_dump_gui_tree(pragma::NetworkState *state, pragma::BasePlayerComponent *pl, std::vector<std::string> &argv)
+{
+	auto &wgui = pragma::gui::WGUI::GetInstance();
+	auto *elRoot = pragma::debug::find_gui_element(argv);
+	if (!elRoot)
+		elRoot = wgui.GetBaseElement();
+	if(!elRoot)
+		return;
+
+	std::stringstream ss;
+	const std::string ANSI_RED = "\033[31m";
+	const std::string ANSI_RESET = "\033[0m";
+
+	std::function<void(pragma::gui::types::WIBase *, int, bool)> dumpGuiTree = [&](pragma::gui::types::WIBase *el, int depth, bool ancestorVisible) {
+		if(!el)
+			return;
+		std::string indent(depth * 2, ' ');
+
+		const auto &pos = el->GetPos();
+		const auto &size = el->GetSize();
+
+		Vector2i visPos {};
+		Vector2i visSize {};
+		el->GetVisibleBounds(visPos, visSize);
+
+		bool isVisible = el->IsVisible();
+
+		ss << indent << "[" << el->GetClass() << "]";
+		ss<< " Index: " << el->GetIndex();
+		if(!el->GetName().empty())
+			ss << " Name: \"" << el->GetName() << "\"";
+
+		ss << " Pos: (" << pos.x << ", " << pos.y << ")";
+		ss << " Size: (" << size.x << ", " << size.y << ")";
+
+		ss << " VisBounds: ";
+		ss << "Pos(" << visPos.x << ", " << visPos.y << ")";
+		bool isVisBoundsZero = (visSize.x * visSize.y == 0);
+		if(isVisBoundsZero)
+			ss << ANSI_RED;
+		ss << " Size(" << visSize.x << ", " << visSize.y << ")";
+		if(isVisBoundsZero)
+			ss << ANSI_RESET;
+
+		ss << " Visible: ";
+		if(ancestorVisible && !isVisible)
+			ss << ANSI_RED;
+		ss << (isVisible ? "true" : "false");
+		if(!isVisible)
+			ss << ANSI_RESET;
+
+		ss << " ZPos: " << el->GetZPos();
+
+		if(auto skinName = el->GetSkinName(); skinName.has_value() && !skinName->empty())
+			ss << " Skin: \"" << *skinName << "\"";
+
+		auto *textEl = dynamic_cast<pragma::gui::types::WIText *>(el);
+		if(textEl)
+			ss << " Text: \"" << textEl->GetText() << "\"";
+
+		ss << "\n";
+
+		auto *children = el->GetChildren();
+		if(children) {
+			for(size_t i = 0; i < children->size(); ++i) {
+				if(auto *child = el->GetChild(static_cast<unsigned int>(i)))
+					dumpGuiTree(child, depth + 1, ancestorVisible && isVisible);
+			}
+		}
+	};
+
+	dumpGuiTree(elRoot, 0, true);
+
+	std::string filename = (argv.size() > 1) ? argv[1] : "temp/gui_tree_dump.txt";
+	if (pragma::fs::write_file(filename, ss.str()))
+		Con::COUT<<std::format("Dumped GUI tree to {}", filename)<<Con::endl;
+	else
+		Con::CWAR<<std::format("Failed to dump GUI tree to {}", filename)<<Con::endl;
+}
+namespace {
+	auto UVN = pragma::console::client::register_command("debug_dump_gui_tree", &debug_dump_gui_tree, pragma::console::ConVarFlags::None, "Dumps the entire GUI tree to \"temp/gui_tree_dump.txt\".");
 }

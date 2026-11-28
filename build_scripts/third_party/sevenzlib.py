@@ -21,10 +21,19 @@ def main():
 		if not Path(sevenz_root).is_dir():
 			print_msg("7z-lib not found. Downloading...")
 			mkdir("7z-lib",cd=True)
-			http_extract("https://7-zip.org/a/7z2501-src.tar.xz",format="tar.xz")
+			http_extract("https://github.com/ip7z/7zip/releases/download/26.03/7z2603-src.tar.xz",format="tar.xz")
 		os.chdir(sevenz_root)
 		sevenz_so_path = sevenz_root +"/CPP/7zip/Bundles/Format7zF"
 		os.chdir(sevenz_so_path)
+
+		# Fix build error with newer gcc versions
+		mak_path = "../../7zip_gcc.mak"
+		if os.path.exists(mak_path):
+			with open(mak_path, "r") as f:
+				mak_content = f.read()
+			with open(mak_path, "w") as f:
+				f.write(mak_content.replace("-Werror", "-Wno-error"))
+
 		subprocess.run(["make","-j","-f","../../cmpl_gcc.mak"],check=True)
 		copy_prebuilt_binaries(sevenz_so_path +"/b/g/", "7z")
 

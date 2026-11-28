@@ -24,7 +24,7 @@ def main():
 
 	########## ISPCTextureCompressor ##########
 	os.chdir(deps_dir)
-	commit_sha = "3ddf95796a5bfea1789ee685fc432d5d4529acb7"
+	commit_sha = "e683f3a40dff06be9a1710121b0fbc0e5358fbf9"
 	ispctc_root = normalize_path(os.getcwd() +"/ISPCTextureCompressor")
 	if not check_repository_commit(ispctc_root, commit_sha, "ISPCTextureCompressor"): 
 		if not Path(ispctc_root).is_dir():

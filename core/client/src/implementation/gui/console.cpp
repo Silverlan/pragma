@@ -33,7 +33,7 @@ pragma::gui::types::WIConsole *pragma::gui::types::WIConsole::Open()
 	auto &wgui = WGUI::GetInstance();
 	auto *pFrame = wgui.Create<WIFrame>();
 	pFrame->SetSize(512, 256);
-	pFrame->SetMinSize(160, 100);
+	pFrame->SetMinSize(Vector2i {160, 100});
 	pFrame->SetZPos(10'000);
 	pFrame->SetTitle(locale::get_text("console"));
 	pFrame->SetPos(675, 86);
@@ -157,7 +157,7 @@ void pragma::gui::types::WIConsole::Initialize()
 
 	auto *pLogScrollContainer = wgui.Create<WIScrollContainer>(pLogBg);
 	pLogScrollContainer->SetAutoStickToBottom(true);
-	pLogScrollContainer->SetAutoAlignToParent(true);
+	pLogScrollContainer->SetAlignment(Alignment::Fill);
 
 	auto *pLog = wgui.Create<WITextEntry>(pLogScrollContainer);
 	pLog->SetMultiLine(true);

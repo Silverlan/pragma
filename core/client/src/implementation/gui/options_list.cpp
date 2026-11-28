@@ -21,7 +21,6 @@ void pragma::gui::types::WIOptionsList::Initialize()
 	m_hTable = CreateChild<WITable>();
 	auto *pTable = m_hTable.get<WITable>();
 	pTable->SetAnchor(0.f, 0.f, 1.f, 1.f);
-	pTable->SetRowHeight(32);
 	pTable->SetScrollable(true);
 	//pTable->SetAnchor(0.f,0.f,1.f,1.f);
 	auto *pRow = pTable->AddHeaderRow();
@@ -115,7 +114,7 @@ pragma::gui::types::WICheckbox *pragma::gui::types::WIOptionsList::AddToggleChoi
 			return;
 		hOptions.get<WIOptionsList>()->m_updateCvars[cvarName] = (translator == nullptr) ? util::to_string(bChecked) : translator(bChecked);
 	}));
-	pCheckbox->SetAutoCenterToParent(true);
+	pCheckbox->SetAlignment(Alignment::Center);
 	row->InsertElement(1, hCheckbox);
 	return pCheckbox;
 }
@@ -130,9 +129,7 @@ pragma::gui::types::WIChoiceList *pragma::gui::types::WIOptionsList::AddChoiceLi
 		return nullptr;
 	auto hChoiceList = CreateChild<WIChoiceList>();
 	auto *pChoiceList = hChoiceList.get<WIChoiceList>();
-	auto sz = GetSize();
-	pChoiceList->SetSize(sz.x, sz.y);
-	pChoiceList->SetAnchor(0.f, 0.f, 1.f, 1.f);
+	pChoiceList->AddStyleClass("options_list__control");
 	pChoiceList->SetChoices(list);
 	row->SetValue(0, name);
 	if(initializer != nullptr)
@@ -168,9 +165,7 @@ pragma::gui::types::WIDropDownMenu *pragma::gui::types::WIOptionsList::AddDropDo
 		return nullptr;
 	auto hDropDownMenu = CreateChild<WIDropDownMenu>();
 	auto *pDropDownMenu = hDropDownMenu.get<WIDropDownMenu>();
-	auto sz = GetSize();
-	pDropDownMenu->SetSize(sz.x, sz.y);
-	pDropDownMenu->SetAnchor(0.f, 0.f, 1.f, 1.f);
+	pDropDownMenu->AddStyleClass("options_list__control");
 	pDropDownMenu->SetOptions(list);
 	row->SetValue(0, name);
 	if(initializer != nullptr)
@@ -232,9 +227,7 @@ pragma::gui::types::WITextEntry *pragma::gui::types::WIOptionsList::AddTextEntry
 		return nullptr;
 	auto hTextEntry = CreateChild<WITextEntry>();
 	auto *pTextEntry = hTextEntry.get<WITextEntry>();
-	auto sz = GetSize();
-	pTextEntry->SetSize(sz.x, sz.y);
-	pTextEntry->SetAnchor(0.f, 0.f, 1.f, 1.f);
+	pTextEntry->AddStyleClass("options_list__control");
 	row->SetValue(0, name);
 	if(!cvarName.empty()) {
 		auto hOptions = GetHandle();
@@ -255,9 +248,7 @@ pragma::gui::types::WISlider *pragma::gui::types::WIOptionsList::AddSlider(const
 		return nullptr;
 	auto hSlider = CreateChild<WISlider>();
 	auto *pSlider = hSlider.get<WISlider>();
-	auto sz = GetSize();
-	pSlider->SetSize(sz.x, sz.y);
-	pSlider->SetAnchor(0.f, 0.f, 1.f, 1.f);
+	pSlider->AddStyleClass("options_list__control");
 	row->SetValue(0, name);
 	if(initializer != nullptr)
 		initializer(pSlider);
@@ -299,10 +290,10 @@ void pragma::gui::types::WIOptionsList::AddKeyBinding(const std::string &keyName
 	pKey1->SetKey(key1);
 	pKey2->SetKey(key2);
 	row->InsertElement(1, pKey1);
-	pKey1->SetAutoAlignToParent(true);
+	pKey1->SetAlignment(Alignment::Fill);
 	pKey1->AddCallback("OnKeyChanged", FunctionCallback<void, platform::Key, platform::Key>::Create(std::bind(callback, 0, pKey2->GetHandle(), std::placeholders::_1, std::placeholders::_2)));
 
 	row->InsertElement(2, pKey2);
-	pKey2->SetAutoAlignToParent(true);
+	pKey2->SetAlignment(Alignment::Fill);
 	pKey2->AddCallback("OnKeyChanged", FunctionCallback<void, platform::Key, platform::Key>::Create(std::bind(callback, 1, pKey1->GetHandle(), std::placeholders::_1, std::placeholders::_2)));
 }

@@ -9,7 +9,9 @@ export import pragma.gui;
 export namespace pragma::gui {
 	class DLLCLIENT WGUILuaInterface {
 	  private:
+#ifdef ENABLE_GUI_LUA_STATE
 		static lua::State *m_guiLuaState;
+#endif
 		static CallbackHandle m_cbGameStart;
 		static CallbackHandle m_cbLuaReleased;
 		static void OnGUIDestroy(Element &el);

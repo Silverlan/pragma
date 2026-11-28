@@ -33,13 +33,13 @@ function gui.WIViewport:OnInitialize()
 
 	local pBg = gui.create("WIRect", self)
 	pBg:SetColor(Color.Black)
-	pBg:SetAutoAlignToParent(true)
+	pBg:SetAlignment(gui.ALIGNMENT_FILL)
 
 	local pGrid = gui.create("grid_view", self)
-	pGrid:SetAutoAlignToParent(true)
+	pGrid:SetAlignment(gui.ALIGNMENT_FILL)
 
 	local pOrtho = gui.create("ortho_view", self)
-	pOrtho:SetAutoAlignToParent(true)
+	pOrtho:SetAlignment(gui.ALIGNMENT_FILL)
 	local pTex = pOrtho:GetTextureElement()
 	if util.is_valid(pTex) == true then
 		pTex.__lveInvertedX = false
@@ -56,7 +56,7 @@ function gui.WIViewport:OnInitialize()
 	self.m_pGrid = pGrid
 
 	local pTex = gui.create("WITexturedRect", self)
-	pTex:SetAutoAlignToParent(true)
+	pTex:SetAlignment(gui.ALIGNMENT_FILL)
 	pTex:SetVisible(false)
 	self.m_pTexture = pTex
 

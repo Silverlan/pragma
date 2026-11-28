@@ -5,32 +5,23 @@ util.register_class("gui.WIMenuItem", gui.Base)
 function gui.WIMenuItem:OnInitialize()
 	gui.Base.OnInitialize(self)
 
-	self:SetSize(128, 16)
-	--self:SetAutoFillContents(true)
 	self.m_enabled = true
 
+	self:SetAutoSizeToContents(true, false)
+	local contents = gui.create_hbox(self)
+		:AddStyleClass("menu-item__content-area")
+	self.m_contents = contents
+
 	self:SetMouseInputEnabled(true)
-	local pBg = gui.create("WIRect")
-	pBg:SetParent(self)
-	pBg:SetAutoAlignToParent(true)
-	pBg:SetColor(Color.SkyBlue)
-	pBg:AddStyleClass("menu_item_selected_background")
-	self.m_pBg = pBg
 
-	local pBgOutline = gui.create("WIOutlinedRect")
-	pBgOutline:SetParent(self)
-	pBgOutline:SetAutoAlignToParent(true)
-	pBgOutline:SetColor(Color.RoyalBlue)
-	pBgOutline:AddStyleClass("menu_item_selected_outline")
-	self.m_pBgOutline = pBgOutline
-
-	local pText = gui.create("WIText", self)
-	pText:SetColor(Color.Black)
+	local pText = gui.create("WIText", contents)
 	self.m_pText = pText
 
 	self:SetSelected(false)
-	self:AddStyleClass("menu_item")
+	self:AddStyleClass("menu-item")
 end
+
+function gui.WIMenuItem:GetContents() return self.m_contents end
 
 function gui.WIMenuItem:SetRightText(text)
 	if text == nil or text == "" then
@@ -63,12 +54,6 @@ function gui.WIMenuItem:IsContextMenuOpen()
 end
 function gui.WIMenuItem:SetSelected(b)
 	self.m_bSelected = b
-	if util.is_valid(self.m_pBg) == true then
-		self.m_pBg:SetVisible(b)
-	end
-	if util.is_valid(self.m_pBgOutline) == true then
-		self.m_pBgOutline:SetVisible(b)
-	end
 	self:CallCallbacks("OnSelectionChanged", b)
 end
 function gui.WIMenuItem:IsSelected()
@@ -108,18 +93,8 @@ function gui.WIMenuItem:MouseCallback(mouseButton, keyState, modifier)
 end
 function gui.WIMenuItem:SetEnabled(enabled)
 	self.m_enabled = enabled
-	if enabled then
-		if util.is_valid(self.m_disabledOverlay) then
-			self.m_disabledOverlay:SetVisible(false)
-		end
-		return
-	end
-	if util.is_valid(self.m_disabledOverlay) == false then
-		local disabledOverlay = gui.create("WIRect", self, 0, 0, self:GetWidth(), self:GetHeight(), 0, 0, 1, 1)
-		disabledOverlay:SetColor(Color(20, 20, 20, 200))
-		self.m_disabledOverlay = disabledOverlay
-	end
-	self.m_disabledOverlay:SetVisible(true)
+	self:SetState(gui.STATE_DISABLED, not enabled)
+	self:SetMouseInputEnabled(enabled)
 end
 function gui.WIMenuItem:IsEnabled()
 	return self.m_enabled or false
@@ -152,11 +127,11 @@ function gui.WIMenuItem:SizeToContents()
 	if util.is_valid(self) == false or util.is_valid(self.m_pText) == false then
 		return
 	end
-	local sz = self.m_pText:GetSize()
+	--[[local sz = self.m_pText:GetSize()
 	sz.x = sz.x + border * 2
 	sz.y = sz.y + 2
 	self:SetSize(sz)
 	self.m_pText:SetX(border)
-	self.m_pText:SetY(self:GetHeight() * 0.5 - self.m_pText:GetHeight() * 0.5)
+	self.m_pText:SetY(self:GetHeight() * 0.5 - self.m_pText:GetHeight() * 0.5)]]
 end
 gui.register("menu_item", gui.WIMenuItem)

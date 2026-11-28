@@ -27,11 +27,11 @@ void pragma::gui::types::WILoadScreen::Initialize()
 	pText->SetText("LOADING...");
 	pText->SetColor(1.f, 1.f, 1.f, 1.f);
 	pText->SizeToContents();
-	pText->SetAutoCenterToParentX(true);
+	pText->SetHorizontalAlignment(Alignment::Center);
 
 	m_hProgress = CreateChild<WIProgressBar>();
 	auto *pProgressBar = static_cast<WIProgressBar *>(m_hProgress.get());
-	pProgressBar->SetAutoCenterToParentX(true);
+	pProgressBar->SetHorizontalAlignment(Alignment::Center);
 }
 
 void pragma::gui::types::WILoadScreen::OnSizeChanged(const Vector2i &oldSize, ChangeSource changeSource)

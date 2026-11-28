@@ -105,10 +105,11 @@ void pragma::util::CResourceWatcherManager::OnMaterialReloaded(const std::string
 void pragma::util::CResourceWatcherManager::GetWatchPaths(std::vector<std::string> &paths)
 {
 	ResourceWatcherManager::GetWatchPaths(paths);
-	paths.reserve(paths.size() + 2);
+	paths.reserve(paths.size() + 4);
 	paths.push_back("shaders");
 	paths.push_back("particles");
 	paths.push_back("scripts/shader_data");
+	paths.push_back("scripts/ui/skins");
 }
 
 void pragma::util::CResourceWatcherManager::OnResourceChanged(const Path &rootPath, const Path &path, const std::string &ext)
@@ -173,5 +174,10 @@ void pragma::util::CResourceWatcherManager::OnResourceChanged(const Path &rootPa
 #endif
 			return;
 		}
+	}
+	else if(rootPath == "scripts/ui/skins/") {
+		std::string skinName {path.GetFileName()};
+		ufile::remove_extension_from_filename(skinName, std::vector<std::string>{"udm", "udm_b"});
+		Lua::gui::register_json_skin(get_client_state()->GetLuaState(), skinName);
 	}
 }

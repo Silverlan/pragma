@@ -28,20 +28,6 @@ export namespace pragma::gui::types {
 		virtual void Think(const std::shared_ptr<prosper::IPrimaryCommandBuffer> &drawCmd) override;
 		virtual util::EventReply MouseCallback(platform::MouseButton button, platform::KeyState state, platform::Modifier mods) override;
 		virtual void OnCursorMoved(int x, int y) override;
-		void SetMinWidth(int w);
-		void SetMinHeight(int h);
-		void SetMinSize(int w, int h);
-		void SetMinSize(Vector2i size);
-		int GetMinWidth();
-		int GetMinHeight();
-		const Vector2i &GetMinSize() const;
-		void SetMaxWidth(int w);
-		void SetMaxHeight(int h);
-		void SetMaxSize(int w, int h);
-		void SetMaxSize(Vector2i size);
-		int GetMaxWidth();
-		int GetMaxHeight();
-		const Vector2i &GetMaxSize() const;
 		void Close();
 		void SnapToTarget(WIBase &el);
 
@@ -81,8 +67,6 @@ export namespace pragma::gui::types {
 		void StartResizing();
 		void EndResizing();
 		ResizeMode InvertResizeAxis(ResizeMode mode, bool bXAxis, bool bYAxis) const;
-		Vector2i m_minSize = {};
-		Vector2i m_maxSize = {-1, -1};
 		float m_resizeRatio = 0.f;
 		int32_t m_movementPadding = 40;
 

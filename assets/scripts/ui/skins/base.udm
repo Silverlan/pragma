@@ -1,0 +1,23 @@
+{
+	".options_list__control" {
+		width: "100%"
+		height: "100%"
+	}
+	"witablecell" {
+		height: 32
+	}
+
+	// Choice List
+	".choice-list__content-area" {
+		width: "100%"
+	}
+	".choice-list__button-prev" {
+		text: "<"
+	}
+	".choice-list__button-next" {
+		text: ">"
+	}
+	".choice-list__button-container" {
+		width: 24
+	}
+}

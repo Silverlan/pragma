@@ -15,7 +15,7 @@ pragma::gui::types::WILuaBase::~WILuaBase() {}
 
 void pragma::gui::types::WILuaBase::SetupLua(const luabind::object &o, std::string &className)
 {
-	m_class = className;
+	m_class = util::register_global_string(string::get_lower(className));
 	SetLuaObject(o);
 	SetUserData2(m_baseLuaObj);
 }
@@ -114,6 +114,12 @@ void pragma::gui::types::WILuaBase::OnVisibilityChanged(bool bVisible)
 	if(*GetVisibilityProperty() == bVisible) // See explanation in pragma::gui::types::WILuaBase::SetSize
 		CallLuaMember<void, bool>("OnVisibilityChanged", bVisible);
 }
+void pragma::gui::types::WILuaBase::ApplyStyle(Style &style)
+{
+	WIBase::ApplyStyle(style);
+	CallLuaMember<void, Style*>("ApplyStyle", &style);
+}
+
 void pragma::gui::types::WILuaBase::DoUpdate()
 {
 	WIBase::DoUpdate();

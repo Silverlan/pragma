@@ -862,6 +862,7 @@ void Lua::udm::register_library(Interface &lua)
 	    {"ASCII_SAVE_FLAG_NONE", pragma::math::to_integral(::udm::AsciiSaveFlags::None)},
 	    {"ASCII_SAVE_FLAG_BIT_INCLUDE_HEADER", pragma::math::to_integral(::udm::AsciiSaveFlags::IncludeHeader)},
 	    {"ASCII_SAVE_FLAG_BIT_DONT_COMPRESS_LZ4_ARRAYS", pragma::math::to_integral(::udm::AsciiSaveFlags::DontCompressLz4Arrays)},
+	    {"ASCII_SAVE_FLAG_BIT_USE_INFERRED_TYPES", pragma::math::to_integral(::udm::AsciiSaveFlags::UseInferredTypes)},
 	    {"ASCII_SAVE_FLAG_DEFAULT", pragma::math::to_integral(::udm::AsciiSaveFlags::Default)},
 
 	    {"FORMAT_TYPE_BINARY", pragma::math::to_integral(::udm::FormatType::Binary)},

@@ -203,7 +203,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeOptionsList(WIOptionsList 
 	auto *buttonReset = gui.Create<WIButton>();
 	buttonReset->SetText(locale::get_text("reset_defaults"));
 	buttonReset->SizeToContents();
-	buttonReset->SetAutoCenterToParent(true);
+	buttonReset->SetAlignment(Alignment::Center);
 	buttonReset->AddCallback("OnMouseEvent",
 	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
 	    [this](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
@@ -217,7 +217,7 @@ void pragma::gui::types::WIMainMenuOptions::InitializeOptionsList(WIOptionsList 
 	auto *buttonApply = gui.Create<WIButton>();
 	buttonApply->SetText(locale::get_text("apply"));
 	buttonApply->SizeToContents();
-	buttonApply->SetAutoCenterToParent(true);
+	buttonApply->SetAlignment(Alignment::Center);
 	buttonApply->AddCallback("OnMouseEvent",
 	  FunctionCallback<util::EventReply, platform::MouseButton, platform::KeyState, platform::Modifier>::CreateWithOptionalReturn(
 	    [this](util::EventReply *reply, platform::MouseButton button, platform::KeyState state, platform::Modifier mods) -> CallbackReturnType {
@@ -239,7 +239,6 @@ void pragma::gui::types::WIMainMenuOptions::InitializeGeneralSettings()
 	pList->SetTitle(title);
 	// Player Name
 	auto *teName = pList->AddTextEntry(locale::get_text("player_name"), "playername");
-	teName->SizeToContents();
 	//
 	// Language
 	std::unordered_map<std::string, std::string> lanOptions {};
@@ -344,7 +343,14 @@ void pragma::gui::types::WIMainMenuOptions::UpdateMemoryUsage()
 	std::array<WIHandle, 3> luaMemUsageSliders = {m_hLuaMemoryUsageGUI, m_hLuaMemoryUsageClient, m_hLuaMemoryUsageServer};
 	auto *svState = get_cengine()->GetServerNetworkState();
 	auto *client = get_client_state();
-	std::array<lua::State *, 3> luaMemUsageStates = {client->GetGUILuaState(), client->GetLuaState(), (svState != nullptr) ? svState->GetLuaState() : nullptr};
+	std::array<lua::State *, 3> luaMemUsageStates = {
+#ifdef ENABLE_GUI_LUA_STATE
+	    client->GetGUILuaState(),
+#else
+	    nullptr,
+#endif
+	    client->GetLuaState(), (svState != nullptr) ? svState->GetLuaState() : nullptr
+	};
 	for(auto i = decltype(luaMemUsageSliders.size()) {0}; i < luaMemUsageSliders.size(); ++i) {
 		auto &hSlider = luaMemUsageSliders.at(i);
 		if(hSlider.IsValid() == false)

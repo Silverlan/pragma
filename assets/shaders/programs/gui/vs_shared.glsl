@@ -7,7 +7,7 @@ uint get_viewport_height() { return (u_pushConstants.viewportSize << 16) >> 16; 
 
 vec4 get_vertex_position(vec2 vertPos)
 {
-	vec4 pos = u_pushConstants.modelMatrix * vec4(vertPos.x + 1.0, vertPos.y + 1.0, 0.0, 1.0);
+	vec4 pos = u_pushConstants.modelMatrix * vec3(vertPos.x + 1.0, vertPos.y + 1.0, 1.0);
 	pos.x /= float(get_viewport_width());
 	pos.y /= float(get_viewport_height());
 	pos.x -= 1;

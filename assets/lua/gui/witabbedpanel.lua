@@ -11,7 +11,7 @@ function TabbedPanelTab:OnInitialize()
 	self.m_bSelected = false
 	local pTab = gui.create("WIRect", self)
 	pTab:SetMouseInputEnabled(true)
-	pTab:SetAutoAlignToParent(true)
+	pTab:SetAlignment(gui.ALIGNMENT_FILL)
 	pTab:AddStyleClass("tab_button_background_unpressed")
 	pTab:AddCallback("OnMousePressed", function(el)
 		if self:IsValid() == false then
@@ -27,7 +27,7 @@ function TabbedPanelTab:OnInitialize()
 
 	local pText = gui.create("WIText", pTab)
 	pText:AddStyleClass("tab_title")
-	pText:SetAutoCenterToParent(true)
+	pText:SetAlignment(gui.ALIGNMENT_CENTER)
 	self.m_pText = pText
 
 	self:UpdateStyles()

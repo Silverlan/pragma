@@ -24,7 +24,7 @@ namespace luabind {
 
 			static int match(...) { return 0; }
 			template<typename U>
-			void converter_postcall(lua::State *, by_reference<U>, int)
+			void converter_postcall(lua::State *, U, int)
 			{
 			}
 		};

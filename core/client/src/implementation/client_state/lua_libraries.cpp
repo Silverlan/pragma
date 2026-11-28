@@ -99,6 +99,15 @@ static std::shared_ptr<InputBindingLayer> create_input_binding_layer()
 	return layer;
 }
 
+static pragma::gui::types::WIBase *create_flexbox(pragma::CGame *game, pragma::gui::types::FlexDirection flexDir, pragma::gui::types::WIBase *parent = nullptr)
+{
+	auto *el = dynamic_cast<pragma::gui::types::FlexBox*>(Lua::gui::create(game, "flexbox", parent));
+	if (!el)
+		return nullptr;
+	el->SetFlexDirection(flexDir);
+	return el;
+}
+
 static void register_gui(Lua::Interface &lua)
 {
 	auto *l = lua.GetState();
@@ -106,6 +115,11 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[(luabind::def("create", static_cast<pragma::gui::types::WIBase *(*)(pragma::CGame *, const std::string &, pragma::gui::types::WIBase &, int32_t, int32_t, uint32_t, uint32_t, float, float, float, float)>(&Lua::gui::create)),
 	  luabind::def("create", static_cast<pragma::gui::types::WIBase *(*)(pragma::CGame *, const std::string &, pragma::gui::types::WIBase &, int32_t, int32_t, uint32_t, uint32_t)>(&Lua::gui::create)), luabind::def("create", static_cast<pragma::gui::types::WIBase *(*)(pragma::CGame *, const std::string &, pragma::gui::types::WIBase &, int32_t, int32_t)>(&Lua::gui::create)),
 	  luabind::def("create", static_cast<pragma::gui::types::WIBase *(*)(pragma::CGame *, const std::string &, pragma::gui::types::WIBase *)>(&Lua::gui::create)), luabind::def("create", static_cast<pragma::gui::types::WIBase *(*)(pragma::CGame *, const std::string &)>(&Lua::gui::create)),
+
+	  luabind::def("create_hbox", +[](pragma::CGame *game, pragma::gui::types::WIBase *parent) { return create_flexbox(game, pragma::gui::types::FlexDirection::Horizontal, parent); }),
+	  luabind::def("create_hbox", +[](pragma::CGame *game) { return create_flexbox(game, pragma::gui::types::FlexDirection::Horizontal); }),
+	  luabind::def("create_vbox", +[](pragma::CGame *game, pragma::gui::types::WIBase *parent) { return create_flexbox(game, pragma::gui::types::FlexDirection::Vertical, parent); }),
+	  luabind::def("create_vbox", +[](pragma::CGame *game) { return create_flexbox(game, pragma::gui::types::FlexDirection::Vertical); }),
 
 	  luabind::def("create_label", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, const std::string &, pragma::gui::types::WIBase &, int32_t, int32_t)>(&Lua::gui::create_label)), luabind::def("create_label", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, const std::string &, pragma::gui::types::WIBase &)>(&Lua::gui::create_label)),
 	  luabind::def("create_label", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, const std::string &)>(&Lua::gui::create_label)),
@@ -152,14 +166,20 @@ static void register_gui(Lua::Interface &lua)
 	  luabind::def("find_window_under_cursor", static_cast<prosper::Window *(*)()>([]() -> prosper::Window * { return pragma::gui::WGUI::GetInstance().FindWindowUnderCursor(); }), luabind::pointer_policy<0> {}),
 
 	  luabind::def("get_focused_element", static_cast<pragma::gui::types::WIBase *(*)(lua::State *)>(&Lua::gui::get_focused_element)), luabind::def("get_focused_element", static_cast<pragma::gui::types::WIBase *(*)(lua::State *, prosper::Window &)>(&Lua::gui::get_focused_element)),
+#ifdef ENABLE_GUI_LUA_STATE
 	  luabind::def("register_skin", static_cast<bool (*)(lua::State *, const std::string &, const luabind::tableT<void> &, const luabind::tableT<void> &)>(&Lua::gui::register_skin)),
 	  luabind::def("register_skin", static_cast<bool (*)(lua::State *, const std::string &, const luabind::tableT<void> &, const luabind::tableT<void> &, const std::string &)>(&Lua::gui::register_skin)), luabind::def("register_default_skin", &Lua::gui::register_default_skin),
+#endif
+	  luabind::def("register_json_skin", &Lua::gui::register_json_skin),
 	  luabind::def(
 	    "set_focus_enabled", +[](const prosper::Window &window, bool focusEnabled) { pragma::gui::WGUI::GetInstance().SetFocusEnabled(window, focusEnabled); }),
 	  luabind::def(
 	    "is_focus_enabled", +[](const prosper::Window &window) { return pragma::gui::WGUI::GetInstance().IsFocusEnabled(window); }),
-
-	  luabind::def("load_skin", &load_skin), luabind::def("set_skin", Lua::gui::set_skin), luabind::def("skin_exists", Lua::gui::skin_exists), luabind::def("get_cursor", Lua::gui::get_cursor), luabind::def("set_cursor", Lua::gui::set_cursor),
+	    luabind::def("load_skin", +[](const std::string &name) -> bool {
+		    auto *skin = pragma::gui::WGUI::GetInstance().LoadSkin(name);
+	    	return (skin != nullptr);
+	    }),
+	  luabind::def("set_skin", Lua::gui::set_skin), luabind::def("skin_exists", Lua::gui::skin_exists), luabind::def("get_cursor", Lua::gui::get_cursor), luabind::def("set_cursor", Lua::gui::set_cursor),
 	  luabind::def("get_cursor_input_mode", Lua::gui::get_cursor_input_mode), luabind::def("set_cursor_input_mode", Lua::gui::set_cursor_input_mode), luabind::def("get_window_size", Lua::gui::get_window_size),
 	  luabind::def("inject_mouse_input", static_cast<bool (*)(pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier, const Vector2i &)>(&Lua::gui::inject_mouse_input)),
 	  luabind::def("inject_mouse_input", static_cast<bool (*)(pragma::platform::MouseButton, pragma::platform::KeyState, pragma::platform::Modifier)>(&Lua::gui::inject_mouse_input)), luabind::def("inject_keyboard_input", Lua::gui::inject_keyboard_input), luabind::def("inject_char_input", Lua::gui::inject_char_input),
@@ -277,7 +297,37 @@ static void register_gui(Lua::Interface &lua)
 	luabind::globals(l)["gui"]["CHANGE_SOURCE_CONTENT"] = pragma::gui::ChangeSource::Content;
 	static_assert(pragma::math::to_integral(pragma::gui::ChangeSource::Count) == 3, "Update enum registration when new enum values are added!");
 
-	//
+	luabind::globals(l)["gui"]["ALIGNMENT_NONE"] = pragma::gui::Alignment::None;
+	luabind::globals(l)["gui"]["ALIGNMENT_START"] = pragma::gui::Alignment::Start;
+	luabind::globals(l)["gui"]["ALIGNMENT_CENTER"] = pragma::gui::Alignment::Center;
+	luabind::globals(l)["gui"]["ALIGNMENT_END"] = pragma::gui::Alignment::End;
+	luabind::globals(l)["gui"]["ALIGNMENT_FILL"] = pragma::gui::Alignment::Fill;
+	static_assert(pragma::math::to_integral(pragma::gui::Alignment::Count) == 5, "Update enum registration when new enum values are added!");
+
+	luabind::globals(l)["gui"]["STATE_NONE"] = pragma::gui::ElementStateFlags::None;
+	luabind::globals(l)["gui"]["STATE_HOVER"] = pragma::gui::ElementStateFlags::Hover;
+	luabind::globals(l)["gui"]["STATE_PRESSED"] = pragma::gui::ElementStateFlags::Pressed;
+	luabind::globals(l)["gui"]["STATE_FOCUSED"] = pragma::gui::ElementStateFlags::Focused;
+
+	luabind::globals(l)["gui"]["STATE_DISABLED"] = pragma::gui::ElementStateFlags::Disabled;
+	luabind::globals(l)["gui"]["STATE_SELECTED"] = pragma::gui::ElementStateFlags::Selected;
+	luabind::globals(l)["gui"]["STATE_CHECKED"] = pragma::gui::ElementStateFlags::Checked;
+	luabind::globals(l)["gui"]["STATE_ERROR"] = pragma::gui::ElementStateFlags::Error;
+	static_assert(pragma::math::to_integral(pragma::gui::ElementStateFlags::Last) == 64, "Update enum registration when new enum values are added!");
+
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_DEFAULT"] = pragma::platform::Cursor::Shape::Default;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_HIDDEN"] = pragma::platform::Cursor::Shape::Hidden;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_ARROW"] = pragma::platform::Cursor::Shape::Arrow;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_IBEAM"] = pragma::platform::Cursor::Shape::IBeam;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_CROSSHAIR"] = pragma::platform::Cursor::Shape::Crosshair;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_HAND"] = pragma::platform::Cursor::Shape::Hand;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_HRESIZE"] = pragma::platform::Cursor::Shape::HResize;
+	luabind::globals(l)["gui"]["CURSOR_SHAPE_VRESIZE"] = pragma::platform::Cursor::Shape::VResize;
+
+	luabind::globals(l)["gui"]["CURSOR_MODE_DISABLED"] = pragma::platform::CursorMode::Disabled;
+	luabind::globals(l)["gui"]["CURSOR_MODE_HIDDEN"] = pragma::platform::CursorMode::Hidden;
+	luabind::globals(l)["gui"]["CURSOR_MODE_NORMAL"] = pragma::platform::CursorMode::Normal;
+
 	auto videoModeDef = luabind::class_<pragma::platform::Monitor::VideoMode>("VideoMode");
 	videoModeDef.def(
 	  "__tostring", +[](const pragma::platform::Monitor::VideoMode &videoMode) -> std::string {
@@ -347,6 +397,25 @@ static void register_gui(Lua::Interface &lua)
 	defDrawToTex.def_readwrite("resolvedImage", &Lua::gui::DrawToTextureInfo::resolvedImage);
 	defDrawToTex.def_readwrite("commandBuffer", &Lua::gui::DrawToTextureInfo::commandBuffer);
 	guiMod[defDrawToTex];
+
+	auto defStyle = luabind::class_<pragma::gui::Style>("Style");
+	defStyle.def("GetPropertyValue", +[](lua::State *l, const pragma::gui::Style &style, std::string_view name, udm::Type type) {
+		return udm::visit(type, [l, &style, &name](auto tag) -> luabind::object
+		{
+			using T = decltype(tag)::type;
+			if constexpr(pragma::gui::is_valid_style_property_type<T>)
+			{
+				auto val = style.GetPropertyValue<T>(name, false);
+				return luabind::object {l, val};
+			}
+			else
+				return Lua::nil;
+		});
+	});
+	defStyle.def("LogInvalidProperty", +[](lua::State *l, const pragma::gui::Style &style, std::string_view name) {
+		style.LogInvalidProperty(name);
+	});
+	guiMod[defStyle];
 
 	// Custom Classes
 	auto wiBaseWIElement = luabind::class_<pragma::gui::types::WILuaBase, luabind::bases<pragma::gui::types::WIBase>, pragma::LuaCore::WILuaBaseHolder>("Base");
@@ -572,6 +641,34 @@ static void register_gui(Lua::Interface &lua)
 	wiNineSliceRect.add_static_constant("SEGMENT_COUNT", pragma::math::to_integral(pragma::gui::types::WI9SliceRect::Segment::Count));
 	guiMod[wiNineSliceRect];
 
+	auto styledRect = luabind::class_<pragma::gui::types::StyledRect, pragma::gui::types::WIBase>("StyledRect");
+	styledRect.add_static_constant("GRADIENT_TYPE_LINEAR", pragma::math::to_integral(pragma::gui::shaders::StyledRect::Style::GradientType::Linear));
+	styledRect.add_static_constant("GRADIENT_TYPE_RADIAL", pragma::math::to_integral(pragma::gui::shaders::StyledRect::Style::GradientType::Radial));
+	styledRect.def("ClearGradient", &pragma::gui::types::StyledRect::ClearGradient);
+	styledRect.def("SetLinearGradient", &pragma::gui::types::StyledRect::SetLinearGradient);
+	styledRect.def("SetGradientStops", +[](pragma::gui::types::StyledRect &rect, std::vector<float> positions, std::vector<Color> colors) {
+		std::vector<pragma::gui::types::StyledRect::ColorStop> stops;
+		auto n = pragma::math::min(positions.size(), colors.size());
+		stops.reserve(n);
+		for(size_t i = 0; i < n; ++i)
+			stops.push_back({colors[i], positions[i]});
+		rect.SetGradientStops(stops);
+	});
+	styledRect.def("SetGradientType", &pragma::gui::types::StyledRect::SetGradientType);
+	styledRect.def("SetBorderColor", &pragma::gui::types::StyledRect::SetBorderColor);
+	styledRect.def("SetCornerRadii", &pragma::gui::types::StyledRect::SetCornerRadii);
+	styledRect.def("SetGradientStart", &pragma::gui::types::StyledRect::SetGradientStart);
+	styledRect.def("SetGradientEnd", &pragma::gui::types::StyledRect::SetGradientEnd);
+	styledRect.def("SetBorderThickness", &pragma::gui::types::StyledRect::SetBorderThickness);
+	styledRect.def("GetGradientType", &pragma::gui::types::StyledRect::GetGradientType);
+	styledRect.def("GetGradientStops", &pragma::gui::types::StyledRect::GetGradientStops, luabind::copy_policy<0> {});
+	styledRect.def("GetBorderColor", &pragma::gui::types::StyledRect::GetBorderColor, luabind::copy_policy<0> {});
+	styledRect.def("GetCornerRadii", &pragma::gui::types::StyledRect::GetCornerRadii, luabind::copy_policy<0> {});
+	styledRect.def("GetGradientStart", &pragma::gui::types::StyledRect::GetGradientStart, luabind::copy_policy<0> {});
+	styledRect.def("GetGradientEnd", &pragma::gui::types::StyledRect::GetGradientEnd, luabind::copy_policy<0> {});
+	styledRect.def("GetBorderThickness", &pragma::gui::types::StyledRect::GetBorderThickness);
+	guiMod[styledRect];
+
 	auto wiRoundedTexturedRect = luabind::class_<pragma::gui::types::WIRoundedTexturedRect, luabind::bases<pragma::gui::types::WITexturedShape, pragma::gui::types::WIShape, pragma::gui::types::WIBase>>("RoundedTexturedRect");
 	Lua::WIRoundedTexturedRect::register_class(wiRoundedTexturedRect);
 	guiMod[wiRoundedTexturedRect];
@@ -589,7 +686,7 @@ static void register_gui(Lua::Interface &lua)
 
 	auto wiRootDef = luabind::class_<pragma::gui::types::WIRoot, pragma::gui::types::WIBase>("Root");
 	wiRootDef.def("GetRootCursorPos", &pragma::gui::types::WIRoot::GetCursorPos);
-	wiRootDef.def("SetRootCursorPosOverride", &pragma::gui::types::WIRoot::SetCursorPosOverride);
+	wiRootDef.def("SetRootCursorPosOverride", &pragma::gui::types::WIRoot::SetCursorPosOverride, luabind::return_self {});
 	wiRootDef.def("GetRootCursorPosOverride", &pragma::gui::types::WIRoot::GetCursorPosOverride);
 	wiRootDef.def("ClearRootCursorPosOverride", &pragma::gui::types::WIRoot::ClearCursorPosOverride);
 	wiRootDef.def("GetAssociatedWindow", static_cast<prosper::Window *(pragma::gui::types::WIRoot::*)()>(&pragma::gui::types::WIRoot::GetWindow));
@@ -598,14 +695,14 @@ static void register_gui(Lua::Interface &lua)
 	auto wiConsoleClassDef = luabind::class_<pragma::gui::types::WIConsole, pragma::gui::types::WIBase>("Console");
 	wiConsoleClassDef.def("GetCommandLineEntryElement", &pragma::gui::types::WIConsole::GetCommandLineEntryElement);
 	wiConsoleClassDef.def("GetTextLogElement", &pragma::gui::types::WIConsole::GetTextLogElement);
-	wiConsoleClassDef.def("SetExternallyOwned", &pragma::gui::types::WIConsole::SetExternallyOwned);
+	wiConsoleClassDef.def("SetExternallyOwned", &pragma::gui::types::WIConsole::SetExternallyOwned, luabind::return_self {});
 	wiConsoleClassDef.def("IsExternallyOwned", &pragma::gui::types::WIConsole::IsExternallyOwned);
 	wiConsoleClassDef.def("GetFrame", &pragma::gui::types::WIConsole::GetFrame);
 	wiConsoleClassDef.def("GetText", +[](const pragma::gui::types::WIConsole &console) { return console.GetText().cpp_str(); });
-	wiConsoleClassDef.def("SetText", &pragma::gui::types::WIConsole::SetText);
+	wiConsoleClassDef.def("SetText", &pragma::gui::types::WIConsole::SetText, luabind::return_self {});
 	wiConsoleClassDef.def("AppendText", &pragma::gui::types::WIConsole::AppendText);
 	wiConsoleClassDef.def("Clear", &pragma::gui::types::WIConsole::Clear);
-	wiConsoleClassDef.def("SetMaxLogLineCount", &pragma::gui::types::WIConsole::SetMaxLogLineCount);
+	wiConsoleClassDef.def("SetMaxLogLineCount", &pragma::gui::types::WIConsole::SetMaxLogLineCount, luabind::return_self {});
 	wiConsoleClassDef.def("GetMaxLogLineCount", &pragma::gui::types::WIConsole::GetMaxLogLineCount);
 	guiMod[wiConsoleClassDef];
 
@@ -614,43 +711,56 @@ static void register_gui(Lua::Interface &lua)
 	guiMod[wiRoundedRectClassDef];
 
 	auto flexBoxDef = luabind::class_<pragma::gui::types::FlexBox, pragma::gui::types::WIBase>("FlexBox");
-	flexBoxDef.def("SetSpacing", &pragma::gui::types::FlexBox::SetSpacing);
+	flexBoxDef.add_static_constant("FLEX_DIRECTION_HORIZONTAL", pragma::math::to_integral(pragma::gui::types::FlexDirection::Horizontal));
+	flexBoxDef.add_static_constant("FLEX_DIRECTION_VERTICAL", pragma::math::to_integral(pragma::gui::types::FlexDirection::Vertical));
+
+	flexBoxDef.add_static_constant("FLEX_ALIGN_START", pragma::math::to_integral(pragma::gui::types::FlexAlign::Start));
+	flexBoxDef.add_static_constant("FLEX_ALIGN_CENTER", pragma::math::to_integral(pragma::gui::types::FlexAlign::Center));
+	flexBoxDef.add_static_constant("FLEX_ALIGN_END", pragma::math::to_integral(pragma::gui::types::FlexAlign::End));
+	flexBoxDef.add_static_constant("FLEX_ALIGN_STRETCH", pragma::math::to_integral(pragma::gui::types::FlexAlign::Stretch));
+
+	flexBoxDef.add_static_constant("FLEX_JUSTIFY_START", pragma::math::to_integral(pragma::gui::types::FlexJustify::Start));
+	flexBoxDef.add_static_constant("FLEX_JUSTIFY_CENTER", pragma::math::to_integral(pragma::gui::types::FlexJustify::Center));
+	flexBoxDef.add_static_constant("FLEX_JUSTIFY_END", pragma::math::to_integral(pragma::gui::types::FlexJustify::End));
+	flexBoxDef.add_static_constant("FLEX_JUSTIFY_SPACE_BETWEEN", pragma::math::to_integral(pragma::gui::types::FlexJustify::SpaceBetween));
+	flexBoxDef.add_static_constant("FLEX_JUSTIFY_SPACE_EVENLY", pragma::math::to_integral(pragma::gui::types::FlexJustify::SpaceEvenly));
+
+	flexBoxDef.def("SetAlignItems", &pragma::gui::types::FlexBox::SetAlignItems, luabind::return_self {});
+	flexBoxDef.def("GetAlignItems", &pragma::gui::types::FlexBox::GetAlignItems);
+	flexBoxDef.def("SetJustifyContent", &pragma::gui::types::FlexBox::SetJustifyContent, luabind::return_self {});
+	flexBoxDef.def("GetJustifyContent", &pragma::gui::types::FlexBox::GetJustifyContent);
+	flexBoxDef.def("SetSpacing", &pragma::gui::types::FlexBox::SetSpacing, luabind::return_self {});
 	flexBoxDef.def("GetSpacing", &pragma::gui::types::FlexBox::GetSpacing);
-	flexBoxDef.def("SetPadding", &pragma::gui::types::FlexBox::SetPadding);
-	flexBoxDef.def("GetPadding", +[](pragma::gui::types::FlexBox &flexBox) {
-		auto padding = flexBox.GetPadding();
-		return std::tuple<int32_t, int32_t, int32_t, int32_t> {padding.left, padding.top, padding.right, padding.bottom};
-	});
+	flexBoxDef.def("SetPadding", static_cast<void(pragma::gui::types::FlexBox::*)(int32_t, int32_t, int32_t, int32_t)>(&pragma::gui::types::FlexBox::SetPadding), luabind::return_self {});
+	flexBoxDef.def(
+	  "GetPadding", +[](pragma::gui::types::FlexBox &flexBox) {
+		  auto padding = flexBox.GetPadding();
+		  return std::tuple<int32_t, int32_t, int32_t, int32_t> {padding.left, padding.top, padding.right, padding.bottom};
+	  });
 
-	flexBoxDef.def("SetChildMargin", &pragma::gui::types::FlexBox::SetChildMargin);
-	flexBoxDef.def("GetChildMargin", +[](pragma::gui::types::FlexBox &flexBox, pragma::gui::types::WIBase &el) {
-		auto margin = flexBox.GetChildMargin(el);
-		return std::tuple<int32_t, int32_t, int32_t, int32_t> {margin.left, margin.top, margin.right, margin.bottom};
-	});
+	flexBoxDef.def("SetChildMargin", &pragma::gui::types::FlexBox::SetChildMargin, luabind::return_self {});
+	flexBoxDef.def(
+	  "GetChildMargin", +[](pragma::gui::types::FlexBox &flexBox, pragma::gui::types::WIBase &el) {
+		  auto margin = flexBox.GetChildMargin(el);
+		  return std::tuple<int32_t, int32_t, int32_t, int32_t> {margin.left, margin.top, margin.right, margin.bottom};
+	  });
 
-	flexBoxDef.def("SetFixedWidth", &pragma::gui::types::FlexBox::SetFixedWidth);
-	flexBoxDef.def("SetFixedHeight", &pragma::gui::types::FlexBox::SetFixedHeight);
-	flexBoxDef.def("SetFixedSize", &pragma::gui::types::FlexBox::SetFixedSize);
-	flexBoxDef.def("SetAutoSizeActivated", &pragma::gui::types::FlexBox::SetAutoSizeActivated);
-	flexBoxDef.def("SetAutoSizeActivated", +[](pragma::gui::types::FlexBox &flexBox, bool activated) {
-		flexBox.SetAutoSizeActivated(activated);
-	});
+	flexBoxDef.def("SetChildFlex", &pragma::gui::types::FlexBox::SetChildFlex, luabind::return_self {});
+	flexBoxDef.def("GetChildFlex", &pragma::gui::types::FlexBox::GetChildFlex);
 
-	flexBoxDef.def("SetAutoFillContentsToWidth", &pragma::gui::types::FlexBox::SetAutoFillContentsToWidth);
-	flexBoxDef.def("SetAutoFillContentsToHeight", &pragma::gui::types::FlexBox::SetAutoFillContentsToHeight);
-	flexBoxDef.def("SetAutoFillContents", &pragma::gui::types::FlexBox::SetAutoFillContents);
-	flexBoxDef.def("SetAutoFillTarget", &pragma::gui::types::FlexBox::SetAutoFillTarget);
+	flexBoxDef.def("SetFixedWidth", &pragma::gui::types::FlexBox::SetFixedWidth, luabind::return_self {});
+	flexBoxDef.def("SetFixedHeight", &pragma::gui::types::FlexBox::SetFixedHeight, luabind::return_self {});
+	flexBoxDef.def("SetFixedSize", &pragma::gui::types::FlexBox::SetFixedSize, luabind::return_self {});
+	flexBoxDef.def("SetAutoSizeActivated", &pragma::gui::types::FlexBox::SetAutoSizeActivated, luabind::return_self {});
+	flexBoxDef.def("SetAutoSizeActivated", +[](pragma::gui::types::FlexBox &flexBox, bool activated) { flexBox.SetAutoSizeActivated(activated); }, luabind::return_self {});
 
+	flexBoxDef.def("SetFlexDirection", &pragma::gui::types::FlexBox::SetFlexDirection, luabind::return_self {});
+	flexBoxDef.def("GetFlexDirection", &pragma::gui::types::FlexBox::GetFlexDirection);
 	flexBoxDef.def("IsHorizontalBox", &pragma::gui::types::FlexBox::IsHorizontalBox);
 	flexBoxDef.def("IsVerticalBox", &pragma::gui::types::FlexBox::IsVerticalBox);
-	flexBoxDef.def("HasBoxAlignedAnchor", &pragma::gui::types::FlexBox::HasBoxAlignedAnchor);
+	flexBoxDef.def("HasAlignedAnchor", static_cast<bool(pragma::gui::types::FlexBox::*)(pragma::gui::types::WIBase *, pragma::gui::types::FlexDirection) const>(&pragma::gui::types::FlexBox::HasAlignedAnchor));
+	flexBoxDef.def("HasAlignedAnchor", static_cast<bool(pragma::gui::types::FlexBox::*)(pragma::gui::types::WIBase *) const>(&pragma::gui::types::FlexBox::HasAlignedAnchor));
 	guiMod[flexBoxDef];
-
-	auto vboxDef = luabind::class_<pragma::gui::types::VBox, luabind::bases<pragma::gui::types::FlexBox, pragma::gui::types::WIBase>>("VBox");
-	guiMod[vboxDef];
-
-	auto hboxDef = luabind::class_<pragma::gui::types::HBox, luabind::bases<pragma::gui::types::FlexBox, pragma::gui::types::WIBase>>("HBox");
-	guiMod[hboxDef];
 
 	guiMod[wiOutlinedRectClassDef];
 	guiMod[wiLineClassDef];

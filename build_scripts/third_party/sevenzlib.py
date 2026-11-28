@@ -22,6 +22,7 @@ def main():
 			print_msg("7z-lib not found. Downloading...")
 			mkdir("7z-lib",cd=True)
 			http_extract("https://github.com/ip7z/7zip/releases/download/26.03/7z2603-src.tar.xz",format="tar.xz")
+			subprocess.run(["chmod", "-R", "u+w", sevenz_root], check=True)
 		os.chdir(sevenz_root)
 		sevenz_so_path = sevenz_root +"/CPP/7zip/Bundles/Format7zF"
 		os.chdir(sevenz_so_path)
